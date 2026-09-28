@@ -1,0 +1,264 @@
+# Per-PR previews and production deploys. See docs/ops/deploy.md.
+#
+# Every job is gated on four repo secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+# NEON_API_KEY, NEON_PROJECT_ID). Without them the workflow skips with a notice, so it
+# is safe to merge before the accounts exist (issue #40) and on PRs from forks.
+name: Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  # Production deploys after CI passes on main.
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per PR (a close cancels a deploy still in flight); production runs in order.
+  group: deploy-${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PR: ${{ github.event.pull_request.number }}
+  WORKER_PREVIEW: umbel-pr-${{ github.event.pull_request.number }}
+  NEON_BRANCH_PREVIEW: preview/pr-${{ github.event.pull_request.number }}
+
+jobs:
+  gate:
+    name: Secrets present?
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          missing=()
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID NEON_API_KEY NEON_PROJECT_ID; do
+            [ -n "${!name}" ] || missing+=("$name")
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::notice title=Deploys skipped::Missing repo secrets: ${missing[*]}. Previews and production deploys activate once they exist (see docs/ops/deploy.md, issue #40)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  preview:
+    name: Deploy preview
+    needs: gate
+    if: >-
+      needs.gate.outputs.enabled == 'true' &&
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Build web
+        run: pnpm --filter web build
+
+      - name: Create (or reuse) the Neon branch
+        id: neon
+        uses: neondatabase/create-branch-action@v6
+        with:
+          api_key: ${{ secrets.NEON_API_KEY }}
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: ${{ env.NEON_BRANCH_PREVIEW }}
+
+      # Migrations go here once there is a schema (WP-1.1): run them against
+      # steps.neon.outputs.db_url before deploying.
+
+      - name: Point a Hyperdrive config at the branch
+        working-directory: apps/worker
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: node scripts/ci.mjs hyperdrive-upsert "$WORKER_PREVIEW"
+
+      - name: Deploy the preview Worker
+        id: deploy
+        working-directory: apps/worker
+        run: |
+          pnpm exec wrangler deploy --config wrangler.ci.json \
+            --name "$WORKER_PREVIEW" \
+            --var "DB_BRANCH:$NEON_BRANCH_PREVIEW" | tee deploy.log
+          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
+          if [ -z "$url" ]; then
+            echo "::error::No workers.dev URL in the wrangler output. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Check /api/health
+        id: health
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          # A fresh workers.dev hostname can take a moment to resolve.
+          for _ in $(seq 1 12); do
+            if body=$(curl -fsS "$URL/api/health"); then
+              echo "$body"
+              echo "body=$body" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::$URL/api/health did not answer"
+          exit 1
+
+      - name: Comment the preview URL
+        uses: actions/github-script@v9
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          HEALTH: ${{ steps.health.outputs.body }}
+        with:
+          script: |
+            const marker = "<!-- umbel-preview -->"
+            const body = [
+              marker,
+              `**Preview:** ${process.env.URL}`,
+              "",
+              `- Worker: \`${process.env.WORKER_PREVIEW}\``,
+              `- Neon branch: \`${process.env.NEON_BRANCH_PREVIEW}\``,
+              `- \`/api/health\`: \`${process.env.HEALTH}\``,
+              `- Commit: ${context.payload.pull_request.head.sha}`,
+            ].join("\n")
+            await upsertComment(body)
+
+            async function upsertComment(body) {
+              const { owner, repo } = context.repo
+              const issue_number = context.payload.pull_request.number
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+              const mine = comments.find((c) => c.body?.includes(marker))
+              if (mine) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body })
+              else await github.rest.issues.createComment({ owner, repo, issue_number, body })
+            }
+
+  teardown:
+    name: Tear down preview
+    needs: gate
+    if: >-
+      needs.gate.outputs.enabled == 'true' &&
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: apps/worker/scripts
+      - uses: jdx/mise-action@v4
+
+      # Order matters: the Worker binds the Hyperdrive config, which points at the branch.
+      # Each step is a no-op when its resource is already gone.
+      - name: Delete the preview Worker
+        run: node apps/worker/scripts/ci.mjs worker-delete "$WORKER_PREVIEW"
+
+      - name: Delete the Hyperdrive config
+        run: node apps/worker/scripts/ci.mjs hyperdrive-delete "$WORKER_PREVIEW"
+
+      - name: Delete the Neon branch
+        run: node apps/worker/scripts/ci.mjs neon-branch-delete "$NEON_BRANCH_PREVIEW"
+
+      - name: Mark the preview comment as torn down
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const marker = "<!-- umbel-preview -->"
+            const { owner, repo } = context.repo
+            const issue_number = context.payload.pull_request.number
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+            const mine = comments.find((c) => c.body?.includes(marker))
+            if (mine) {
+              const body = `${marker}\n**Preview torn down** (PR closed): Worker \`${process.env.WORKER_PREVIEW}\`, its Hyperdrive config and Neon branch \`${process.env.NEON_BRANCH_PREVIEW}\` were deleted.`
+              await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body })
+            }
+
+  production:
+    name: Deploy production
+    needs: gate
+    if: >-
+      needs.gate.outputs.enabled == 'true' &&
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The commit CI just passed, not whatever main is now.
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: ./.github/actions/setup
+
+      - name: Build web
+        run: pnpm --filter web build
+
+      - name: Look up the Neon default branch
+        id: neon
+        working-directory: apps/worker
+        run: node scripts/ci.mjs neon-default-branch
+
+      # Migrations go here once there is a schema (WP-1.1).
+
+      - name: Point the production Hyperdrive config at it
+        working-directory: apps/worker
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: node scripts/ci.mjs hyperdrive-upsert umbel-production
+
+      - name: Deploy
+        id: deploy
+        working-directory: apps/worker
+        env:
+          BRANCH: ${{ steps.neon.outputs.name }}
+        run: |
+          pnpm exec wrangler deploy --config wrangler.ci.json --var "DB_BRANCH:$BRANCH" | tee deploy.log
+          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Check /api/health
+        if: steps.deploy.outputs.url != ''
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          for _ in $(seq 1 12); do
+            curl -fsS "$URL/api/health" && exit 0
+            sleep 10
+          done
+          echo "::error::$URL/api/health did not answer"
+          exit 1

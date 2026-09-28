@@ -1,0 +1,85 @@
+# Deploying: CI, per-PR previews and production
+
+Spec: [02-architecture.md §2.10](../spec/v1/02-architecture.md#210-deployment). Work package: WP-0.2 (#2).
+
+Two workflows:
+
+| Workflow   | File                            | Runs on                                        | Needs secrets?    |
+| ---------- | ------------------------------- | ---------------------------------------------- | ----------------- |
+| **CI**     | `.github/workflows/ci.yml`      | every PR, pushes to `main`                     | No                |
+| **Deploy** | `.github/workflows/preview.yml` | PR opened/updated/closed; CI passing on `main` | Yes (four, below) |
+
+**CI** runs `pnpm check` (dependency rule, typecheck, lint, Vitest), `pnpm check:private`, `pnpm --filter web build`, a dry-run bundle of the Worker, and the Playwright smoke test (light and dark). The Playwright report is uploaded as an artifact when it fails.
+
+**Deploy** starts with a `gate` job. If any of the four secrets is missing, it logs a notice (_"Deploys skipped: missing repo secrets …"_) and every other job is skipped, so the workflow passes. Fork PRs never get secrets, so they skip too.
+
+## Owner checklist (issue #40)
+
+Add these under **Settings → Secrets and variables → Actions → Repository secrets**.
+
+- [ ] **Cloudflare account on Workers Paid** ($5/month; the free plan's 10 ms CPU limit is too tight, see §2.2).
+- [ ] **A workers.dev subdomain.** Open _Workers & Pages_ once in the dashboard and pick one. Preview URLs are `https://umbel-pr-<n>.<subdomain>.workers.dev`.
+- [ ] **`CLOUDFLARE_ACCOUNT_ID`:** from the dashboard's account home, or `wrangler whoami`.
+- [ ] **`CLOUDFLARE_API_TOKEN`:** _My Profile → API Tokens → Create Token → Custom token_, scoped to this account, with these **Account** permissions:
+  - Workers Scripts: Edit
+  - Hyperdrive: Edit
+  - Account Settings: Read
+  - Workers R2 Storage, Durable Objects and Workflows are not used yet. Add _Workers R2 Storage: Edit_ now so the token doesn't need re-issuing when WP-1.x adds buckets (DOs and Workflows deploy under Workers Scripts).
+  - Also add **User → Memberships: Read** and **User → User Details: Read**. Wrangler reads them on deploy.
+- [ ] **Neon project.** Create it in the region closest to your Cloudflare users. Its default branch (usually `main`) is **production**. Keep the default database `neondb` and role `neondb_owner`, or set the `NEON_DATABASE` / `NEON_ROLE` env in the workflow.
+- [ ] **`NEON_PROJECT_ID`:** _Project settings → General_, e.g. `cool-name-123456`.
+- [ ] **`NEON_API_KEY`:** _Account settings → API keys_. A project-scoped key is enough.
+
+When all four exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
+
+## How a preview works
+
+On every PR push (`opened`, `synchronize`, `reopened`):
+
+1. Build the SPA (`apps/web/dist`).
+2. **Neon branch** `preview/pr-<n>`, created from the default branch by `neondatabase/create-branch-action` (reused if it exists). Each PR gets its own copy of the data, so parallel agents never share a database.
+3. **Hyperdrive config** `umbel-pr-<n>`, created or updated to point at that branch's direct (non-pooled) connection string, with caching off. `apps/worker/scripts/ci.mjs hyperdrive-upsert` does this through the Cloudflare API, then writes `apps/worker/wrangler.ci.json`: `wrangler.jsonc` with the real Hyperdrive id in place of the placeholder.
+4. **Deploy** `wrangler deploy --config wrangler.ci.json --name umbel-pr-<n> --var DB_BRANCH:preview/pr-<n>`. This is a separate Worker per PR, with its own bindings.
+5. **Check** `GET /api/health` until it answers. It returns `{"ok":true,"db":"neondb","branch":"preview/pr-<n>"}`: `db` comes from `select current_database()` through Hyperdrive, and `branch` names the Neon branch.
+6. **Comment** the URL and the health response on the PR. It's one comment, updated on every push.
+
+On **close** (merged or not), the teardown job deletes, in order, the Worker, the Hyperdrive config and the Neon branch. It then edits the comment to say so. Each delete is a no-op if the resource is already gone, so closing a PR opened before the secrets existed is safe.
+
+**Production:** when CI passes on a push to `main`, the `production` job checks out that exact commit. It looks up the Neon default branch and its connection string (Neon API), upserts the Hyperdrive config `umbel-production`, runs `wrangler deploy` (Worker name `umbel-learn`, from `wrangler.jsonc`), and checks `/api/health`. It runs in the `production` GitHub environment, so you can add required reviewers there.
+
+**Migrations** (WP-1.1 onward) slot in before the Hyperdrive step in both jobs. They run against the branch's `db_url`.
+
+### Why Hyperdrive per preview, not a connection-string secret
+
+The alternative was one shared Hyperdrive config, or none, with each preview getting its branch's URL as a Worker secret (`DATABASE_URL`). We chose a Hyperdrive config per PR because:
+
+- **Previews run the production code path.** Production reads Postgres through Hyperdrive (§2.2), and so does every preview. Hyperdrive-only limits, like no `LISTEN/NOTIFY`, no advisory locks and no session state, show up in the PR, not after merge.
+- **The Worker code has one database path:** `env.HYPERDRIVE.connectionString`. There's no second "direct connection" branch to keep working.
+- **It's cheap.** Hyperdrive has no charge. Workers Paid allows 25 configs, and each PR holds one only while it's open.
+
+The cost is `ci.mjs`, a small script that calls the Hyperdrive API and patches the id into a generated deploy config. `wrangler.jsonc` can't hold a per-PR id.
+
+### Why a Worker per PR, not `wrangler versions upload` with preview aliases
+
+A preview alias shares the production Worker's bindings, so every PR would share one Hyperdrive config and one database. A separate `umbel-pr-<n>` Worker has its own Hyperdrive binding, and later its own Durable Object namespace, so PRs stay isolated. Tearing it down is one API call.
+
+## Running it locally
+
+```sh
+mise exec -- pnpm --filter web build
+cd apps/worker
+# Any Postgres works. Wrangler points the HYPERDRIVE binding straight at it in dev.
+CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE=postgres://user:pass@localhost:5432/db \
+  mise exec -- pnpm dev
+curl localhost:8787/api/health   # {"ok":true,"db":"db","branch":"local"}
+```
+
+- Other checks: `mise exec -- pnpm --filter web test:e2e` runs the Playwright smoke test (install Chromium once with `pnpm --filter web exec playwright install chromium`), and `mise exec -- pnpm --filter @umbel/worker bundle` does the same dry-run bundle as CI.
+- The Worker's `typecheck` script runs `wrangler types` first. `worker-configuration.d.ts` is generated, not committed.
+
+## Troubleshooting
+
+- **"No workers.dev URL in the wrangler output":** the account has no workers.dev subdomain yet (see the checklist).
+- **Hyperdrive API 403:** the token is missing _Hyperdrive: Edit_.
+- **`/api/health` returns `{"ok":false,"db":"error"}`:** Hyperdrive can't reach the Neon branch. Check the Worker logs (observability is on) and the branch's compute status in Neon.
+- **Leftovers after a failed teardown:** re-run the job, or delete `umbel-pr-<n>` (Worker and Hyperdrive config) and the Neon branch `preview/pr-<n>` by hand.
