@@ -27,3 +27,11 @@ prototypes/sample-graphs/src/graphs/printer.json
 prototypes/sample-graphs/src/graphs/vacation.json
 prototypes/sample-graphs/src/graphs/gen-printer-chat.json
 prototypes/sample-graphs/src/graphs/gen-agent-printer-chat.json
+
+# Scaffold defaults
+dist-ssr/
+*.local
+*.tsbuildinfo
+.vscode/*
+!.vscode/extensions.json
+.idea
