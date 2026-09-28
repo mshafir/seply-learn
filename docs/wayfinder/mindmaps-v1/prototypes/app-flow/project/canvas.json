@@ -1,0 +1,158 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Building.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "02c · Building: first View streams in",
+      "w": 1440,
+      "x": 1520,
+      "y": 2520
+    },
+    "BuildingReady.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "02d · First View ready, others still building",
+      "w": 1440,
+      "x": 3040,
+      "y": 2520
+    },
+    "Graph.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "03 · Graph home",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Grow.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "05 · Grow the graph",
+      "w": 1440,
+      "x": 4560,
+      "y": 1260
+    },
+    "Library.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "01 · Library",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "00 · Page flow",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Panel.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "04 · Side panel states",
+      "w": 1440,
+      "x": 3040,
+      "y": 1260
+    },
+    "Seed.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "02b · Choose Views",
+      "w": 1440,
+      "x": 1520,
+      "y": 1260
+    },
+    "Skeletons.dc.html": {
+      "h": 760,
+      "title": "02e · View skeletons & failure",
+      "w": 1200,
+      "x": 4560,
+      "y": 2520
+    },
+    "Source.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "02a · Start from anything",
+      "w": 1440,
+      "x": 0,
+      "y": 1260
+    },
+    "Thumb.dc.html": {
+      "h": 110,
+      "title": "Thumb (component)",
+      "w": 220,
+      "x": 5840,
+      "y": 0
+    },
+    "Thumbnails.dc.html": {
+      "h": 860,
+      "title": "01a · Graph thumbnails",
+      "w": 1200,
+      "x": 4560,
+      "y": 0
+    },
+    "Versions.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "06 · Versions & sharing",
+      "w": 1440,
+      "x": 6080,
+      "y": 1260
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-25T13:38:46Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t1": {
+      "kind": "title1",
+      "maxW": 6060,
+      "text": "Find a graph, open it, read it",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 7520,
+      "text": "Seed it, read deeper, grow it, share it",
+      "w": 240,
+      "x": 0,
+      "y": 960
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 4240,
+      "text": "While it builds: use each View as soon as it's ready",
+      "w": 240,
+      "x": 1520,
+      "y": 2220
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Library.dc.html",
+    "Graph.dc.html",
+    "Thumbnails.dc.html",
+    "Thumb.dc.html",
+    "Source.dc.html",
+    "Seed.dc.html",
+    "Building.dc.html",
+    "BuildingReady.dc.html",
+    "Skeletons.dc.html",
+    "Panel.dc.html",
+    "Grow.dc.html",
+    "Versions.dc.html"
+  ],
+  "pages": [],
+  "title": "Mindmaps app flow"
+}

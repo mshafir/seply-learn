@@ -1,0 +1,39 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.react-flow__node {
+  cursor: pointer;
+}
+
+/* Timeline View Type (vis-timeline) */
+.mm-timeline .vis-timeline { border: 0; font-family: inherit; }
+.mm-timeline .vis-labelset .vis-label { font-size: 12px; font-weight: 600; color: #57534e; background: #fafaf9; }
+.mm-timeline .vis-labelset .vis-label .vis-inner { padding: 8px 12px; }
+.mm-timeline .vis-time-axis .vis-text { font-size: 11px; color: #78716c; }
+.mm-timeline .vis-item {
+  border-color: var(--mm-color);
+  background: color-mix(in srgb, var(--mm-color) 14%, white);
+  color: #1c1917;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.mm-timeline .vis-item.vis-range { border-width: 1.5px; }
+.mm-timeline .vis-item.vis-point { background: transparent; border-color: transparent; }
+.mm-timeline .vis-item.vis-point .vis-dot { border-color: var(--mm-color); border-width: 5px; border-radius: 6px; }
+.mm-timeline .vis-item.mm-fuzzy { border-style: dashed; background: color-mix(in srgb, var(--mm-color) 6%, white); }
+.mm-timeline .vis-item.mm-ongoing {
+  background: linear-gradient(to right, color-mix(in srgb, var(--mm-color) 22%, white) 60%, transparent);
+  border-right-color: transparent;
+}
+.mm-timeline .vis-item.mm-dim { opacity: 0.18; }
+.mm-timeline .vis-item.vis-selected { box-shadow: 0 0 0 2px #1c1917; z-index: 2; }
+.mm-timeline .vis-item .vis-item-content { padding: 3px 7px; }
+.mm-timeline .mm-title { font-weight: 600; }
+.mm-timeline .mm-date { margin-left: 6px; color: #78716c; font-size: 11px; }
+.mm-timeline .vis-current-time { background: #ef4444; width: 2px; }
+.mm-timeline .vis-item.vis-range .vis-item-overflow { overflow: visible; }
+.mm-timeline .mm-lane-count { margin-left: 6px; font-weight: 400; color: #a8a29e; }

@@ -1,0 +1,788 @@
+[
+ {
+  "id": "t-inside",
+  "title": "Inside a transformer",
+  "kind": "idea",
+  "summary": "Tokens, attention, heads, layers, the KV-cache and position",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "A decoder-only transformer [transformer] part-of this",
+   "Multi-head attention [mha] part-of this",
+   "Multi-Query Attention (MQA) [mqa] part-of this",
+   "Grouped-Query Attention (GQA) [gqa] part-of this",
+   "Multi-head Latent Attention (MLA) [mla] part-of this",
+   "DeepSeek Sparse Attention (DSA) [dsa] part-of this",
+   "FlashAttention [flash-attn] part-of this",
+   "PagedAttention [paged-attn] part-of this",
+   "KV-cache quantization [kv-quant] part-of this",
+   "Prefix / prompt caching [prefix-cache] part-of this",
+   "RoPE [rope] part-of this",
+   "Position Interpolation [pi] part-of this",
+   "YaRN [yarn] part-of this",
+   "NoPE [nope] part-of this",
+   "Multi-Token Prediction [mtp] part-of this",
+   "Cross-layer parameter sharing [layer-sharing] part-of this",
+   "Cross-layer KV-cache sharing [kv-sharing] part-of this",
+   "Layer pruning [layer-pruning] part-of this",
+   "Each layer predicts a token, and the guesses get blended [m-layers] part-of this",
+   "Layers refine one vector in sequence; only the last one predicts [r-layers] part-of this"
+  ]
+ },
+ {
+  "id": "transformer",
+  "title": "A decoder-only transformer",
+  "kind": "idea",
+  "summary": "The architecture every current frontier LLM is built on (shape shown: DeepSeek-V3)",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "standard"
+  },
+  "date": "2017-06",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "led-to → Multi-head attention [mha]",
+   "led-to → Mamba–Transformer hybrids [hybrids]",
+   "Tokenizer [tokenizer] part-of this",
+   "Embedding [embedding] part-of this",
+   "Layer stack × 61 [layer-stack] part-of this",
+   "Output head (unembedding) [output-head] part-of this",
+   "Serving system [serving] part-of this"
+  ]
+ },
+ {
+  "id": "tokenizer",
+  "title": "Tokenizer",
+  "kind": "idea",
+  "summary": "Chops text into tokens (vocab 129,280 in DeepSeek-V3)",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → A decoder-only transformer [transformer]",
+   "prerequisite → Embedding [embedding]",
+   "Byte Latent Transformer [blt] modifies this"
+  ]
+ },
+ {
+  "id": "embedding",
+  "title": "Embedding",
+  "kind": "idea",
+  "summary": "Turns each token into a 7,168-wide vector",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → A decoder-only transformer [transformer]",
+   "prerequisite → Attention [attention]",
+   "Tokenizer [tokenizer] prerequisite this"
+  ]
+ },
+ {
+  "id": "layer-stack",
+  "title": "Layer stack × 61",
+  "kind": "idea",
+  "summary": "3 dense + 58 MoE layers, each refining the same vector; only the last predicts",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → A decoder-only transformer [transformer]",
+   "prerequisite → Residual stream [residual]",
+   "prerequisite → Output head (unembedding) [output-head]",
+   "prerequisite → Mamba–Transformer hybrids [hybrids]",
+   "Attention [attention] part-of this",
+   "Feed-forward network [ffn] part-of this",
+   "Residual stream [residual] part-of this",
+   "Cross-layer parameter sharing [layer-sharing] modifies this",
+   "Layer pruning [layer-pruning] modifies this",
+   "Mamba–Transformer hybrids [hybrids] modifies this",
+   "Latent / recurrent-depth reasoning [latent-reasoning] modifies this",
+   "Attention [attention] prerequisite this",
+   "Feed-forward network [ffn] prerequisite this"
+  ]
+ },
+ {
+  "id": "attention",
+  "title": "Attention",
+  "kind": "idea",
+  "summary": "The only place tokens exchange information",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Layer stack × 61 [layer-stack]",
+   "prerequisite → Query, key, value [qkv]",
+   "prerequisite → KV-cache [kv-cache]",
+   "prerequisite → Positional encoding [position]",
+   "prerequisite → Layer stack × 61 [layer-stack]",
+   "prerequisite → State-space models [ssm]",
+   "Heads (Q · K · V) [heads] part-of this",
+   "KV-cache [kv-cache] part-of this",
+   "Positional encoding [position] part-of this",
+   "Attention kernel [attn-kernel] part-of this",
+   "DeepSeek Sparse Attention (DSA) [dsa] modifies this",
+   "Linear / hybrid attention [linear-attn] modifies this",
+   "State-space models [ssm] modifies this",
+   "Mamba [mamba] modifies this",
+   "Embedding [embedding] prerequisite this"
+  ]
+ },
+ {
+  "id": "heads",
+  "title": "Heads (Q · K · V)",
+  "kind": "idea",
+  "summary": "128 heads per layer, each its own query/key/value lookup",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Attention [attention]",
+   "prerequisite → Multi-head attention [mha]",
+   "Query, key, value [qkv] part-of this",
+   "Multi-head attention [mha] modifies this",
+   "Multi-Query Attention (MQA) [mqa] modifies this",
+   "Grouped-Query Attention (GQA) [gqa] modifies this",
+   "Query, key, value [qkv] prerequisite this"
+  ]
+ },
+ {
+  "id": "kv-cache",
+  "title": "KV-cache",
+  "kind": "idea",
+  "summary": "Past keys and values kept per layer; the biggest memory consumer in inference",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Attention [attention]",
+   "prerequisite → Multi-Query Attention (MQA) [mqa]",
+   "prerequisite → Multi-head Latent Attention (MLA) [mla]",
+   "prerequisite → PagedAttention [paged-attn]",
+   "prerequisite → KV-cache quantization [kv-quant]",
+   "prerequisite → Prefix / prompt caching [prefix-cache]",
+   "Multi-head Latent Attention (MLA) [mla] modifies this",
+   "PagedAttention [paged-attn] modifies this",
+   "KV-cache quantization [kv-quant] modifies this",
+   "Prefix / prompt caching [prefix-cache] modifies this",
+   "Cross-layer KV-cache sharing [kv-sharing] modifies this",
+   "Attention [attention] prerequisite this",
+   "Inference is memory-bound [memory-bound] prerequisite this"
+  ]
+ },
+ {
+  "id": "position",
+  "title": "Positional encoding",
+  "kind": "idea",
+  "summary": "Attention is order-blind; position has to be injected",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Attention [attention]",
+   "prerequisite → RoPE [rope]",
+   "RoPE [rope] modifies this",
+   "Position Interpolation [pi] modifies this",
+   "YaRN [yarn] modifies this",
+   "NoPE [nope] modifies this",
+   "Attention [attention] prerequisite this"
+  ]
+ },
+ {
+  "id": "attn-kernel",
+  "title": "Attention kernel",
+  "kind": "idea",
+  "summary": "How the attention math is actually executed on the GPU",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Attention [attention]",
+   "prerequisite → FlashAttention [flash-attn]",
+   "FlashAttention [flash-attn] modifies this"
+  ]
+ },
+ {
+  "id": "ffn",
+  "title": "Feed-forward network",
+  "kind": "idea",
+  "summary": "Processes each token alone; where much stored knowledge lives",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Layer stack × 61 [layer-stack]",
+   "prerequisite → Layer stack × 61 [layer-stack]",
+   "prerequisite → Mixture of Experts [moe]",
+   "Router (gate) [router] part-of this",
+   "Routed experts × 256 [experts] part-of this",
+   "Shared expert [shared-expert-c] part-of this",
+   "Mixture of Experts [moe] modifies this",
+   "Sparsely-gated MoE layer [sparse-moe] modifies this",
+   "GShard [gshard] modifies this"
+  ]
+ },
+ {
+  "id": "router",
+  "title": "Router (gate)",
+  "kind": "idea",
+  "summary": "A small linear layer scoring every expert for every token",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Feed-forward network [ffn]",
+   "prerequisite → Auxiliary load-balancing loss [lb-loss]",
+   "Switch Transformer [switch] modifies this",
+   "Auxiliary load-balancing loss [lb-loss] modifies this",
+   "Auxiliary-loss-free balancing [aux-free] modifies this",
+   "Mixture of Experts [moe] prerequisite this"
+  ]
+ },
+ {
+  "id": "experts",
+  "title": "Routed experts × 256",
+  "kind": "idea",
+  "summary": "8 chosen per token per layer; each 7168 → 2048 → 7168",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Feed-forward network [ffn]",
+   "prerequisite → Fine-grained + shared experts [fine-grained]",
+   "Fine-grained + shared experts [fine-grained] modifies this",
+   "Mixture of Experts [moe] prerequisite this"
+  ]
+ },
+ {
+  "id": "shared-expert-c",
+  "title": "Shared expert",
+  "kind": "idea",
+  "summary": "Always on, handles common processing",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Feed-forward network [ffn]",
+   "prerequisite → Fine-grained + shared experts [fine-grained]",
+   "Dropping the shared expert [no-shared] modifies this"
+  ]
+ },
+ {
+  "id": "residual",
+  "title": "Residual stream",
+  "kind": "idea",
+  "summary": "Each layer adds an adjustment rather than replacing the vector",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Layer stack × 61 [layer-stack]",
+   "Layer stack × 61 [layer-stack] prerequisite this"
+  ]
+ },
+ {
+  "id": "output-head",
+  "title": "Output head (unembedding)",
+  "kind": "idea",
+  "summary": "Projects the final vector to next-token probabilities",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → A decoder-only transformer [transformer]",
+   "prerequisite → Multi-Token Prediction [mtp]",
+   "Multi-Token Prediction [mtp] modifies this",
+   "Large Concept Model [lcm] modifies this",
+   "Layer stack × 61 [layer-stack] prerequisite this"
+  ]
+ },
+ {
+  "id": "serving",
+  "title": "Serving system",
+  "kind": "idea",
+  "summary": "What runs the model for many users at once",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → A decoder-only transformer [transformer]",
+   "Batching [batching] part-of this",
+   "Numeric precision [weights-precision] part-of this",
+   "Decoding loop [decoding] part-of this"
+  ]
+ },
+ {
+  "id": "batching",
+  "title": "Batching",
+  "kind": "idea",
+  "summary": "Keeping accelerators saturated with many requests",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Serving system [serving]",
+   "Continuous batching [cont-batching] modifies this"
+  ]
+ },
+ {
+  "id": "weights-precision",
+  "title": "Numeric precision",
+  "kind": "idea",
+  "summary": "FP8 / INT8 / INT4 instead of 16-bit",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Serving system [serving]",
+   "Weight quantization [quantization] modifies this"
+  ]
+ },
+ {
+  "id": "decoding",
+  "title": "Decoding loop",
+  "kind": "idea",
+  "summary": "Generating one token at a time, autoregressively",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Serving system [serving]",
+   "prerequisite → Diffusion language models [diffusion-lm]",
+   "prerequisite → Speculative decoding [spec-decoding]",
+   "Speculative decoding [spec-decoding] modifies this",
+   "Diffusion language models [diffusion-lm] modifies this",
+   "Block diffusion [block-diffusion] modifies this"
+  ]
+ },
+ {
+  "id": "qkv",
+  "title": "Query, key, value",
+  "kind": "idea",
+  "summary": "Query = what I'm looking for, key = what I advertise, value = what I hand over",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Heads (Q · K · V) [heads]",
+   "prerequisite → Heads (Q · K · V) [heads]",
+   "Attention [attention] prerequisite this"
+  ]
+ },
+ {
+  "id": "mha",
+  "title": "Multi-head attention",
+  "kind": "idea",
+  "summary": "Many parallel Q/K/V heads per layer, each learning a different relationship",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "standard"
+  },
+  "date": "2017-06",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Heads (Q · K · V) [heads]",
+   "led-to → Multi-Query Attention (MQA) [mqa] (one shared K/V head)",
+   "led-to → Multi-head Latent Attention (MLA) [mla] (compress K/V instead of sharing)",
+   "prerequisite → Multi-Query Attention (MQA) [mqa]",
+   "A decoder-only transformer [transformer] led-to this",
+   "Heads (Q · K · V) [heads] prerequisite this"
+  ]
+ },
+ {
+  "id": "mqa",
+  "title": "Multi-Query Attention (MQA)",
+  "kind": "idea",
+  "summary": "All query heads share one K/V head: cache shrinks ~N×, quality can dent",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "KV-cache size"
+  },
+  "date": "2019",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Heads (Q · K · V) [heads]",
+   "led-to → Grouped-Query Attention (GQA) [gqa] (a middle ground)",
+   "prerequisite → Grouped-Query Attention (GQA) [gqa]",
+   "Multi-head attention [mha] led-to this (one shared K/V head)",
+   "KV-cache [kv-cache] prerequisite this",
+   "Multi-head attention [mha] prerequisite this"
+  ]
+ },
+ {
+  "id": "gqa",
+  "title": "Grouped-Query Attention (GQA)",
+  "kind": "idea",
+  "summary": "Query heads in groups, one K/V head per group: most of MQA's savings, little loss",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "KV-cache size"
+  },
+  "date": "2023",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Heads (Q · K · V) [heads]",
+   "prerequisite → Multi-head Latent Attention (MLA) [mla]",
+   "Llama 4 Maverick [llama4] uses this",
+   "Llama 4 Scout [llama4-scout] uses this",
+   "Qwen3 [qwen3] uses this",
+   "SmolLM3 [smollm3] uses this",
+   "Multi-Query Attention (MQA) [mqa] led-to this (a middle ground)",
+   "Multi-Query Attention (MQA) [mqa] prerequisite this"
+  ]
+ },
+ {
+  "id": "mla",
+  "title": "Multi-head Latent Attention (MLA)",
+  "kind": "idea",
+  "summary": "Cache a compressed 512-dim latent instead of full K/V (~32× smaller)",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "KV-cache size"
+  },
+  "date": "2024-05",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → KV-cache [kv-cache]",
+   "led-to → DeepSeek Sparse Attention (DSA) [dsa] (sparse attention on top)",
+   "prerequisite → DeepSeek Sparse Attention (DSA) [dsa]",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "DeepSeek-R1 [deepseek-r1] uses this",
+   "DeepSeek-V3.2 [deepseek-v32] uses this",
+   "Kimi K2 [kimi-k2] uses this",
+   "Kimi Linear [kimi-linear] uses this",
+   "Multi-head attention [mha] led-to this (compress K/V instead of sharing)",
+   "Grouped-Query Attention (GQA) [gqa] prerequisite this",
+   "KV-cache [kv-cache] prerequisite this"
+  ]
+ },
+ {
+  "id": "dsa",
+  "title": "DeepSeek Sparse Attention (DSA)",
+  "kind": "idea",
+  "summary": "A light indexer picks the most relevant past tokens; attend only to those",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "long-context attention cost"
+  },
+  "date": "2025-09",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Attention [attention]",
+   "DeepSeek-V3.2 [deepseek-v32] uses this",
+   "GLM-5 [glm-5] uses this",
+   "GLM-5.1 [glm-51] uses this",
+   "Multi-head Latent Attention (MLA) [mla] led-to this (sparse attention on top)",
+   "Multi-head Latent Attention (MLA) [mla] prerequisite this"
+  ]
+ },
+ {
+  "id": "flash-attn",
+  "title": "FlashAttention",
+  "kind": "idea",
+  "summary": "Tile attention into SRAM and fuse it into one pass: identical output, far less memory traffic",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "HBM ↔ SRAM traffic"
+  },
+  "date": "2022",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Attention kernel [attn-kernel]",
+   "Inference is memory-bound [memory-bound] prerequisite this",
+   "Attention kernel [attn-kernel] prerequisite this"
+  ]
+ },
+ {
+  "id": "paged-attn",
+  "title": "PagedAttention",
+  "kind": "idea",
+  "summary": "KV-cache in OS-style pages: no wasted reservations, cheap prefix sharing (vLLM)",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "KV-cache fragmentation"
+  },
+  "date": "2023",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → KV-cache [kv-cache]",
+   "KV-cache [kv-cache] prerequisite this"
+  ]
+ },
+ {
+  "id": "kv-quant",
+  "title": "KV-cache quantization",
+  "kind": "idea",
+  "summary": "Store keys and values in 8-bit or lower; keys are more sensitive than values",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "KV-cache precision"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → KV-cache [kv-cache]",
+   "KV-cache [kv-cache] prerequisite this"
+  ]
+ },
+ {
+  "id": "prefix-cache",
+  "title": "Prefix / prompt caching",
+  "kind": "idea",
+  "summary": "Compute a shared prefix's KV-cache once and reuse it — the source of cached-input discounts",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "redundant recomputation"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → KV-cache [kv-cache]",
+   "KV-cache [kv-cache] prerequisite this"
+  ]
+ },
+ {
+  "id": "rope",
+  "title": "RoPE",
+  "kind": "idea",
+  "summary": "Rotate Q/K pairs by position; dot products then depend on relative distance",
+  "existingBody": "",
+  "attributes": {
+   "area": "position",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "architecture"
+  },
+  "date": "2021",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Positional encoding [position]",
+   "led-to → Position Interpolation [pi] (squeeze positions)",
+   "led-to → NoPE [nope] (drop it entirely)",
+   "prerequisite → Position Interpolation [pi]",
+   "prerequisite → NoPE [nope]",
+   "Positional encoding [position] prerequisite this"
+  ]
+ },
+ {
+  "id": "pi",
+  "title": "Position Interpolation",
+  "kind": "idea",
+  "summary": "Squeeze positions back into the trained range; blurs local precision",
+  "existingBody": "",
+  "attributes": {
+   "area": "position",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "post-training",
+   "bottleneck": "context length"
+  },
+  "date": "2023",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Positional encoding [position]",
+   "led-to → YaRN [yarn] (frequency-aware squeeze)",
+   "prerequisite → YaRN [yarn]",
+   "RoPE [rope] led-to this (squeeze positions)",
+   "RoPE [rope] prerequisite this"
+  ]
+ },
+ {
+  "id": "yarn",
+  "title": "YaRN",
+  "kind": "idea",
+  "summary": "Frequency-aware interpolation: keep fast (local) rotations, squeeze slow (long-range) ones",
+  "existingBody": "",
+  "attributes": {
+   "area": "position",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "post-training",
+   "bottleneck": "context length"
+  },
+  "date": "2023",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Positional encoding [position]",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "Position Interpolation [pi] led-to this (frequency-aware squeeze)",
+   "Position Interpolation [pi] prerequisite this"
+  ]
+ },
+ {
+  "id": "nope",
+  "title": "NoPE",
+  "kind": "idea",
+  "summary": "No positional encoding at all in some layers; the causal mask carries order",
+  "existingBody": "",
+  "attributes": {
+   "area": "position",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "long-context extrapolation"
+  },
+  "date": "2022",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Positional encoding [position]",
+   "Kimi Linear [kimi-linear] uses this",
+   "SmolLM3 [smollm3] uses this",
+   "RoPE [rope] led-to this (drop it entirely)",
+   "RoPE [rope] prerequisite this"
+  ]
+ },
+ {
+  "id": "mtp",
+  "title": "Multi-Token Prediction",
+  "kind": "idea",
+  "summary": "Predict several future tokens in a causal chain; extra heads double as a speculative decoder",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "shipped",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "training signal / decode speed"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Output head (unembedding) [output-head]",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "Output head (unembedding) [output-head] prerequisite this"
+  ]
+ },
+ {
+  "id": "layer-sharing",
+  "title": "Cross-layer parameter sharing",
+  "kind": "idea",
+  "summary": "Reuse one layer's weights across the stack (ALBERT): saves memory, not compute",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "small-scale",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "parameter memory"
+  },
+  "date": "2019",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Layer stack × 61 [layer-stack]",
+   "led-to → Cross-layer KV-cache sharing [kv-sharing] (share the cache, not the weights)"
+  ]
+ },
+ {
+  "id": "kv-sharing",
+  "title": "Cross-layer KV-cache sharing",
+  "kind": "idea",
+  "summary": "Adjacent layers share one K/V cache",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "research",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "KV-cache size"
+  },
+  "date": "2024",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → KV-cache [kv-cache]",
+   "Cross-layer parameter sharing [layer-sharing] led-to this (share the cache, not the weights)"
+  ]
+ },
+ {
+  "id": "layer-pruning",
+  "title": "Layer pruning",
+  "kind": "idea",
+  "summary": "Many middle/late layers do little; prune or merge them with modest loss",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "research",
+   "effect": "efficiency",
+   "applies": "post-training",
+   "bottleneck": "redundant depth"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "modifies → Layer stack × 61 [layer-stack]"
+  ]
+ }
+]

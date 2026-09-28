@@ -1,0 +1,4845 @@
+{
+ "id": "gen-agent-compute-chat",
+ "title": "AI compute economics & model internals (agent)",
+ "summary": "From the token cost of Claude Code sessions through AI compute supply and prices, open models, transformer internals, training and post-training, to the architectures that might follow.",
+ "source": {
+  "kind": "claude-chat"
+ },
+ "kinds": [
+  {
+   "id": "idea",
+   "label": "Idea",
+   "color": "#2563eb",
+   "icon": "idea"
+  },
+  {
+   "id": "topic",
+   "label": "Topic",
+   "color": "#475569",
+   "icon": "topic"
+  },
+  {
+   "id": "question",
+   "label": "Question",
+   "color": "#7c3aed",
+   "icon": "question"
+  },
+  {
+   "id": "thing",
+   "label": "Thing",
+   "color": "#ea580c",
+   "icon": "thing"
+  },
+  {
+   "id": "claim",
+   "label": "Claim",
+   "color": "#4f46e5",
+   "icon": "claim"
+  },
+  {
+   "id": "action",
+   "label": "Action",
+   "color": "#65a30d",
+   "icon": "action"
+  },
+  {
+   "id": "event",
+   "label": "Event",
+   "color": "#d97706",
+   "icon": "event"
+  },
+  {
+   "id": "source",
+   "label": "Source",
+   "color": "#92400e",
+   "icon": "source"
+  },
+  {
+   "id": "measurement",
+   "label": "Measurement",
+   "color": "#0f766e",
+   "icon": "measurement"
+  }
+ ],
+ "relationshipTypes": [
+  {
+   "id": "part-of",
+   "label": "is part of",
+   "color": "#7c3aed",
+   "dashed": true
+  },
+  {
+   "id": "prerequisite",
+   "label": "is needed to understand",
+   "color": "#2563eb",
+   "dashed": false
+  },
+  {
+   "id": "example",
+   "label": "is an example of",
+   "color": "#0f766e",
+   "dashed": true
+  },
+  {
+   "id": "led-to",
+   "label": "led to",
+   "color": "#d97706",
+   "dashed": false
+  },
+  {
+   "id": "uses",
+   "label": "uses",
+   "color": "#475569",
+   "dashed": false
+  },
+  {
+   "id": "modifies",
+   "label": "changes",
+   "color": "#ea580c",
+   "dashed": false
+  },
+  {
+   "id": "raises",
+   "label": "raises",
+   "color": "#dc2626",
+   "dashed": false
+  },
+  {
+   "id": "lowers",
+   "label": "lowers",
+   "color": "#059669",
+   "dashed": false
+  },
+  {
+   "id": "supports",
+   "label": "supports",
+   "color": "#059669",
+   "dashed": false
+  },
+  {
+   "id": "corrects",
+   "label": "corrects",
+   "color": "#d97706",
+   "dashed": true
+  },
+  {
+   "id": "alternative-to",
+   "label": "is an alternative to",
+   "color": "#475569",
+   "dashed": true
+  },
+  {
+   "id": "reported-by",
+   "label": "is reported by",
+   "color": "#92400e",
+   "dashed": true
+  }
+ ],
+ "attributes": [
+  {
+   "id": "maturity",
+   "label": "Maturity",
+   "type": "enum",
+   "values": [
+    "research",
+    "emerging",
+    "adopted",
+    "standard"
+   ]
+  },
+  {
+   "id": "total_params",
+   "label": "Total params",
+   "type": "number",
+   "unit": "B"
+  },
+  {
+   "id": "active_params",
+   "label": "Active params",
+   "type": "number",
+   "unit": "B"
+  },
+  {
+   "id": "experts",
+   "label": "Experts",
+   "type": "text"
+  },
+  {
+   "id": "attention",
+   "label": "Attention",
+   "type": "text"
+  },
+  {
+   "id": "layers",
+   "label": "Layers",
+   "type": "number"
+  },
+  {
+   "id": "context",
+   "label": "Context",
+   "type": "number",
+   "unit": "K tokens"
+  },
+  {
+   "id": "standout",
+   "label": "Stand-out ideas",
+   "type": "text"
+  },
+  {
+   "id": "specs_from",
+   "label": "Specs from",
+   "type": "text"
+  },
+  {
+   "id": "rate_quantity",
+   "label": "Quantity",
+   "type": "text"
+  },
+  {
+   "id": "rate_low",
+   "label": "Low (× per year)",
+   "type": "number",
+   "unit": "×/yr"
+  },
+  {
+   "id": "rate_high",
+   "label": "High (× per year)",
+   "type": "number",
+   "unit": "×/yr"
+  },
+  {
+   "id": "rate_direction",
+   "label": "Direction",
+   "type": "enum",
+   "values": [
+    "fall",
+    "rise"
+   ]
+  },
+  {
+   "id": "rate_method",
+   "label": "Method",
+   "type": "text"
+  },
+  {
+   "id": "independence",
+   "label": "Independence",
+   "type": "enum",
+   "values": [
+    "interested",
+    "self-reported",
+    "analyst",
+    "academic",
+    "independent"
+   ]
+  }
+ ],
+ "concepts": [
+  {
+   "id": "c-paying-for-tokens",
+   "title": "Paying for tokens",
+   "kind": "topic",
+   "summary": "What a Claude Code session costs, how to track it, and why premium models get metered.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 1,
+   "order": 1,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-track-token-cost",
+   "title": "How do I track Claude Code token cost?",
+   "kind": "question",
+   "summary": "Use ccusage, /cost or the status line; token counts are exact, only claude-carbon's CO2 estimate is lossy.",
+   "order": 1,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fable-5",
+   "title": "Claude Fable 5",
+   "kind": "thing",
+   "summary": "Anthropic's top model; from June 23, 2026 it needs usage credits ($10/$50 per M tokens) until capacity allows.",
+   "date": "2026-06-23",
+   "order": 3,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-price-vs-cost",
+   "title": "Price isn't cost to serve",
+   "kind": "claim",
+   "summary": "Per-token prices are business decisions: they hold flat, then drop in steps when a successor launches.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-compute-squeeze",
+   "title": "The compute squeeze",
+   "kind": "topic",
+   "summary": "Why AI capacity is scarce: demand compounding faster than chips, memory, power and grid gear can be added.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 2,
+   "order": 5,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-compute-demand",
+   "title": "Compute demand",
+   "kind": "measurement",
+   "summary": "How much AI compute the world wants; bending upward as reasoning and agents multiply compute per request.",
+   "weight": "core",
+   "order": 7,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-usage-growth",
+   "title": "Usage growth",
+   "kind": "measurement",
+   "summary": "More people and apps using AI: Nvidia puts it at roughly 100× over two years.",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-inference-overtakes",
+   "title": "Inference overtakes training",
+   "kind": "claim",
+   "summary": "Inference becomes the main data-center load around 2027 (JLL); it compounds with usage, so demand is stickier.",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-available-compute",
+   "title": "Available AI compute",
+   "kind": "measurement",
+   "summary": "Serving capacity actually online, gated in turn by chips, HBM, power and electrical gear.",
+   "weight": "core",
+   "order": 5,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-bottleneck-moves",
+   "title": "The bottleneck keeps moving",
+   "kind": "claim",
+   "summary": "Power-bound through early 2025, chip-bound by late 2025, transformer- and switchgear-bound by mid-2026.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-accelerators",
+   "title": "AI accelerators",
+   "kind": "thing",
+   "summary": "GPUs and TPUs; Nvidia takes most of the spend, and Blackwell is sold out.",
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-hbm",
+   "title": "HBM memory",
+   "kind": "thing",
+   "summary": "Fast stacked memory beside the chip; sold out for 2026 and rising from ~8% to ~30% of AI spend.",
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-power-grid",
+   "title": "Power & grid connections",
+   "kind": "thing",
+   "summary": "Energizing sites: 30–50% of planned 2026 data-center capacity is expected to slip to 2028.",
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-electrical-gear",
+   "title": "Electrical gear",
+   "kind": "thing",
+   "summary": "High-voltage transformers and switchgear; lead times grew from 12–18 to 36–48 months, the newest chokepoint.",
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-capex-buildout",
+   "title": "Data-center buildout",
+   "kind": "action",
+   "summary": "Over $600B of 2026 cloud capex (~$450B for AI); delayed projects land in 2027–28.",
+   "tags": [
+    "lever"
+   ],
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-newer-chips",
+   "title": "Newer chip generations",
+   "kind": "thing",
+   "summary": "Each generation serves the same model cheaper, mostly through more memory bandwidth and HBM, not raw FLOPs.",
+   "tags": [
+    "lever"
+   ],
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-frontier-price",
+   "title": "Frontier model price",
+   "kind": "measurement",
+   "summary": "What the newest, most capable models cost you per token, and whether you can get them at all.",
+   "weight": "core",
+   "order": 3,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-jevons",
+   "title": "Jevons paradox",
+   "kind": "idea",
+   "summary": "Cheaper tokens raise total token use, so efficiency gains get consumed instead of cutting spend.",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-frontier-vs-commodity",
+   "title": "Frontier stays pricey, old tiers collapse",
+   "kind": "claim",
+   "summary": "Scarce premium capacity gets priced up or rationed while each fixed capability bar keeps getting cheaper.",
+   "tags": [
+    "takeaway"
+   ],
+   "weight": "core",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-squeeze-ease",
+   "title": "When will the squeeze ease?",
+   "kind": "question",
+   "summary": "Probably 2027–28 as delayed capacity lands, and only if frontier demand growth slows; nobody really knows.",
+   "order": 7,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-getting-cheaper",
+   "title": "Why AI keeps getting cheaper",
+   "kind": "topic",
+   "summary": "What 'inference is getting cheaper' measures, how fast, and why parameter count stopped tracking capability.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 3,
+   "order": 9,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fixed-capability-cost",
+   "title": "Cost of a fixed capability",
+   "kind": "measurement",
+   "summary": "What the cheapest model reaching a given benchmark bar costs: the number behind 'inference is getting cheaper'.",
+   "weight": "core",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-hyp-model-cheaper",
+   "title": "A given model gets 100× cheaper yearly",
+   "kind": "claim",
+   "summary": "The reader's first reading of Epoch's trend (t9). Wrong: frozen weights get cheaper only in steps.",
+   "tags": [
+    "hypothesis"
+   ],
+   "order": 9,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fixed-bar-not-model",
+   "title": "Fixed capability, not fixed model",
+   "kind": "claim",
+   "summary": "Epoch's decline tracks smaller new models re-reaching old benchmark bars, not one shipped model getting cheaper.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-serving-cost",
+   "title": "Serving cost per token",
+   "kind": "measurement",
+   "summary": "What it costs a provider to generate a token; set mostly by memory traffic, batching and hardware.",
+   "weight": "core",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-hyp-top-slower",
+   "title": "Harder bars should cheapen slower",
+   "kind": "claim",
+   "summary": "The reader's hypothesis (t11) that cheap models take longer to catch top benchmarks. The data shows the opposite.",
+   "tags": [
+    "hypothesis"
+   ],
+   "order": 11,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fastest-at-top",
+   "title": "Decline is fastest at the top",
+   "kind": "claim",
+   "summary": "Top GPQA bin fell 31×/yr, bottom 1.7×/yr: new bars have the most room for cheaper catch-up.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-method-matters",
+   "title": "The rate depends on how you measure",
+   "kind": "claim",
+   "summary": "From ~3×/yr (algorithms alone) to 900×/yr (all models at frozen list prices): one trend, different methods.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-algorithmic-efficiency",
+   "title": "Algorithmic efficiency",
+   "kind": "measurement",
+   "summary": "Capability per unit of compute from better methods: about 3×/yr, in pre-training and in inference.",
+   "attributes": {
+    "rate_quantity": "Algorithmic efficiency (pre-training)",
+    "rate_low": 3,
+    "rate_high": 3,
+    "rate_direction": "rise",
+    "rate_method": "Compute needed for the same pre-training performance (Epoch)"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-incremental-wins",
+   "title": "Incremental work drives the decline",
+   "kind": "claim",
+   "summary": "The smooth ~3×/yr curve is many small wins; breakthroughs like MoE reset the ceiling years earlier.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 17,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-param-count",
+   "title": "Frontier parameter count",
+   "kind": "measurement",
+   "summary": "Total weights in the biggest models: rose 1000× by GPT-4, then shrank, and is mostly undisclosed.",
+   "order": 13,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-models-got-smaller",
+   "title": "Frontier models got smaller",
+   "kind": "claim",
+   "summary": "After GPT-4 (~1.8T), GPT-4o (~200B) and Claude 3.5 Sonnet (~400B) were ~10× smaller (Epoch estimates).",
+   "date": "2023",
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-chinchilla",
+   "title": "Chinchilla scaling",
+   "kind": "idea",
+   "summary": "2022 finding that models were too big for their data; ~20 training tokens per parameter is compute-optimal.",
+   "date": "2022",
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-training-compute",
+   "title": "Frontier training compute",
+   "kind": "measurement",
+   "summary": "Compute spent training frontier models, growing ~5×/yr since 2020: the 'scale' behind two-thirds of gains.",
+   "attributes": {
+    "rate_quantity": "Frontier training compute",
+    "rate_low": 5,
+    "rate_high": 5,
+    "rate_direction": "rise",
+    "rate_method": "Doubling every ~5.2 months since 2020 (Epoch)"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-params-decoupled",
+   "title": "Parameters decoupled from capability",
+   "kind": "claim",
+   "summary": "Since ~2023 capability rides on training compute, data, algorithms and test-time compute, not size.",
+   "tags": [
+    "takeaway"
+   ],
+   "weight": "core",
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-whose-numbers",
+   "title": "Measured rates beat forecasts",
+   "kind": "claim",
+   "summary": "Trust measured rates (Epoch, academics) over dollar forecasts and timing calls from chipmakers and analysts.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-epoch",
+   "title": "Epoch AI",
+   "kind": "source",
+   "summary": "Independent research group tracking compute, prices and model size; the chat's most-trusted source.",
+   "attributes": {
+    "independence": "independent"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-price-paper",
+   "title": "Inference price-trend paper",
+   "kind": "source",
+   "summary": "2025 arXiv study splitting price declines by capability level and removing list-price and hardware effects.",
+   "attributes": {
+    "independence": "academic"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-lesswrong",
+   "title": "LessWrong inference-progress analysis",
+   "kind": "source",
+   "summary": "Write-up on algorithmic progress in inference; treats open-weight prices as the cleanest signal.",
+   "attributes": {
+    "independence": "independent"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-analysts",
+   "title": "Analyst shops",
+   "kind": "source",
+   "summary": "SemiAnalysis, McKinsey, Bloomberg Intelligence: supply and spend figures re-reported everywhere; directional only.",
+   "attributes": {
+    "independence": "analyst"
+   },
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-jll",
+   "title": "JLL",
+   "kind": "source",
+   "summary": "Real-estate firm forecasting data-center capacity and the inference–training crossover; has a stake in the buildout.",
+   "attributes": {
+    "independence": "analyst"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-src-nvidia",
+   "title": "Nvidia (Jensen Huang)",
+   "kind": "source",
+   "summary": "Sells the chips: its 1,000,000× demand framing and $1T forecast are the most interest-conflicted numbers.",
+   "attributes": {
+    "independence": "interested"
+   },
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-chip-stock",
+   "title": "Chip compute stock: 3.4×/yr",
+   "kind": "measurement",
+   "summary": "Total computing power of installed AI chips, doubling about every 7 months since 2022.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "AI compute growth",
+    "rate_low": 3.4,
+    "rate_high": 3.4,
+    "rate_direction": "rise",
+    "rate_method": "Installed AI-chip compute from revenue, disclosures and analyst reports, since 2022"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-nvidia-demand",
+   "title": "Nvidia: 1,000,000× in two years",
+   "kind": "measurement",
+   "summary": "Nvidia's GTC framing: ~10,000× more compute per session times ~100× more usage, over two years.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "AI compute growth",
+    "rate_low": 1000,
+    "rate_high": 1000,
+    "rate_direction": "rise",
+    "rate_method": "Compute per session ~10,000× × usage ~100× over two years, as a yearly rate"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-capex",
+   "title": "Cloud capex: +36% in 2026",
+   "kind": "measurement",
+   "summary": "Major clouds expected to spend over $600B in 2026, up 36% on 2025, ~$450B of it on AI.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "AI infrastructure spend",
+    "rate_low": 1.36,
+    "rate_high": 1.36,
+    "rate_direction": "rise",
+    "rate_method": "Big-cloud capex 2026 vs 2025"
+   },
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-dc-mckinsey",
+   "title": "Data centers: 70 → 220 GW in five years",
+   "kind": "measurement",
+   "summary": "McKinsey: global data-center supply roughly triples in five years, ~75% of the growth from AI.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Data-center capacity",
+    "rate_low": 1.26,
+    "rate_high": 1.26,
+    "rate_direction": "rise",
+    "rate_method": "Global supply 70 GW to ~220 GW over five years (McKinsey)"
+   },
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-dc-jll",
+   "title": "Data centers: ~14% a year to 2030",
+   "kind": "measurement",
+   "summary": "JLL: nearly 100 GW of new capacity 2026–2030, the sector growing ~14% a year, up to $3T by 2030.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Data-center capacity",
+    "rate_low": 1.14,
+    "rate_high": 1.14,
+    "rate_direction": "rise",
+    "rate_method": "Sector CAGR to 2030 (JLL)"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-memory-share",
+   "title": "Memory's share of AI spend: 8% → 30%",
+   "kind": "measurement",
+   "summary": "SemiAnalysis: memory went from ~8% of hyperscaler AI spend (2023–24) to ~30% (2026).",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Memory's share of AI spend",
+    "rate_low": 1.7,
+    "rate_high": 1.9,
+    "rate_direction": "rise",
+    "rate_method": "8% in 2023–24 to ~30% in 2026, over 2–2.5 years"
+   },
+   "order": 6,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-epoch-headline",
+   "title": "Epoch headline: ~100×/yr",
+   "kind": "measurement",
+   "summary": "Cost at a fixed performance level halving about every two months: roughly two orders of magnitude a year.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 64,
+    "rate_high": 100,
+    "rate_direction": "fall",
+    "rate_method": "Halving ~every 2 months; cheapest model reaching a fixed benchmark score"
+   },
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-epoch-range",
+   "title": "By milestone: 9–900×/yr",
+   "kind": "measurement",
+   "summary": "Epoch's decline varies by capability bar; the fastest drops are all within the past year.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 9,
+    "rate_high": 900,
+    "rate_direction": "fall",
+    "rate_method": "Across capability milestones; all models at current list prices, so frozen old prices inflate it"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-top-bin",
+   "title": "Top GPQA bin: 31×/yr",
+   "kind": "measurement",
+   "summary": "Models in the highest GPQA-Diamond bin fell in price 31× a year: the fastest band.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 31,
+    "rate_high": 31,
+    "rate_direction": "fall",
+    "rate_method": "Highest GPQA-Diamond capability bin"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-low-bin",
+   "title": "Lowest GPQA bin: 1.7×/yr",
+   "kind": "measurement",
+   "summary": "Models in the lowest GPQA-Diamond bin fell only 1.7× a year: old bars have little left to squeeze.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 1.7,
+    "rate_high": 1.7,
+    "rate_direction": "fall",
+    "rate_method": "Lowest GPQA-Diamond capability bin"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-frontier-controlled",
+   "title": "Frontier, confound removed: 5–10×/yr",
+   "kind": "measurement",
+   "summary": "Frontier price for a given benchmark score once frozen list prices are controlled for.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 5,
+    "rate_high": 10,
+    "rate_direction": "fall",
+    "rate_method": "Frontier models, controlling for frozen proprietary list prices"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-open-models",
+   "title": "Open-weight models: 7–28×/yr",
+   "kind": "measurement",
+   "summary": "Open models avoid list-price games: 7–28× a year, geometric mean ~11.8×, similar at every quality level.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 7,
+    "rate_high": 28,
+    "rate_direction": "fall",
+    "rate_method": "Open-weight models only; geometric mean ~11.8×"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-algorithms-only",
+   "title": "Algorithms alone: ~3×/yr",
+   "kind": "measurement",
+   "summary": "What's left after dividing out hardware price declines and competition: pure algorithmic progress.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Price of a fixed capability",
+    "rate_low": 3,
+    "rate_high": 3,
+    "rate_direction": "fall",
+    "rate_method": "Hardware price declines divided out, competition controlled via open models"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-gpt1-gpt3",
+   "title": "GPT-1 → GPT-3: 1000× in two years",
+   "kind": "measurement",
+   "summary": "117M to 175B parameters between GPT-1 and GPT-3: the dense-scaling era.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Frontier parameter count",
+    "rate_low": 31.6,
+    "rate_high": 31.6,
+    "rate_direction": "rise",
+    "rate_method": "117M → 175B over two years"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-gpt3-gpt4",
+   "title": "GPT-3 → GPT-4: ~10× in 2.75 years",
+   "kind": "measurement",
+   "summary": "175B to roughly 1.8T parameters: growth already slowing before the reversal.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Frontier parameter count",
+    "rate_low": 2.3,
+    "rate_high": 2.3,
+    "rate_direction": "rise",
+    "rate_method": "175B → ~1.8T over 2 years 9 months"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-post-gpt4",
+   "title": "After GPT-4: ~10× smaller",
+   "kind": "measurement",
+   "summary": "GPT-4o (~200B) and Claude 3.5 Sonnet (~400B) were about an order of magnitude smaller than GPT-4.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Frontier parameter count",
+    "rate_low": 10,
+    "rate_high": 10,
+    "rate_direction": "fall",
+    "rate_method": "One-off step in 2023–24, shown as if over ~1 year; sizes are Epoch estimates, not disclosed"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r-epoch-forecast",
+   "title": "Epoch forecast: under 10× in three years",
+   "kind": "measurement",
+   "summary": "Late-2024 forecast: ~60% chance frontier sizes grow less than 10× over three years.",
+   "tags": [
+    "estimate"
+   ],
+   "attributes": {
+    "rate_quantity": "Frontier parameter count",
+    "rate_low": 1,
+    "rate_high": 2.15,
+    "rate_direction": "rise",
+    "rate_method": "Under 10× over three years (60% chance), from late 2024"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-how-transformers-work",
+   "title": "How a transformer works",
+   "kind": "topic",
+   "summary": "The decoder-only transformer piece by piece, in DeepSeek-V3's published shape.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 4,
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-next-token",
+   "title": "Next-token prediction",
+   "kind": "idea",
+   "summary": "LLMs generate one token at a time, each predicted from everything before it.",
+   "weight": "aux",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-transformer",
+   "title": "Decoder-only transformer",
+   "kind": "thing",
+   "summary": "The architecture under every frontier LLM: embed tokens, refine them through a layer stack, predict the next.",
+   "weight": "core",
+   "date": "2017",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-tokenizer",
+   "title": "Tokenizer",
+   "kind": "thing",
+   "summary": "Chops text into tokens from a fixed vocabulary (129,280 in DeepSeek-V3) before the model sees it.",
+   "weight": "aux",
+   "order": 30,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-embedding",
+   "title": "Embedding",
+   "kind": "thing",
+   "summary": "Turns each token into a vector of the model's hidden size (7,168 numbers in DeepSeek-V3).",
+   "weight": "aux",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-layer-stack",
+   "title": "Layer stack",
+   "kind": "thing",
+   "summary": "61 layers in DeepSeek-V3 (3 dense, 58 MoE), each with its own weights, applied in sequence.",
+   "weight": "core",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-residual-stream",
+   "title": "Residual stream",
+   "kind": "thing",
+   "summary": "The running 7,168-wide vector per token; each layer adds an adjustment rather than replacing it.",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-transformer-block",
+   "title": "Transformer block",
+   "kind": "thing",
+   "summary": "One layer: attention (tokens mix) then a feed-forward network (per token), each with residual and norm.",
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-attention",
+   "title": "Attention",
+   "kind": "thing",
+   "summary": "Where tokens exchange information: each token looks up relevant earlier tokens and pulls in their content.",
+   "weight": "core",
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-attention-heads",
+   "title": "Attention heads",
+   "kind": "thing",
+   "summary": "Parallel query-key-value lookups in every layer (128 in DeepSeek-V3), each learning a different relationship.",
+   "weight": "core",
+   "order": 22,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-qkv",
+   "title": "Query, key, value",
+   "kind": "idea",
+   "summary": "Query: what a token looks for. Key: what it advertises. Value: what it hands over if matched.",
+   "weight": "core",
+   "order": 22,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-kv-cache",
+   "title": "KV-cache",
+   "kind": "thing",
+   "summary": "Past tokens' keys and values kept per layer so they aren't recomputed: inference's biggest memory cost.",
+   "weight": "core",
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-positional-encoding",
+   "title": "Positional encoding (RoPE)",
+   "kind": "thing",
+   "summary": "Rotates queries and keys by position so attention sees relative distance; DeepSeek-V3 trained it at 4K.",
+   "order": 32,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-attention-kernel",
+   "title": "Attention kernel",
+   "kind": "thing",
+   "summary": "The GPU code that computes attention; its speed depends on traffic between HBM and on-chip SRAM.",
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-ffn",
+   "title": "Feed-forward network (FFN)",
+   "kind": "thing",
+   "summary": "Per-token expand-then-contract network (7,168 → 18,432 → 7,168 in dense layers); where MoE plugs in.",
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-router",
+   "title": "Router",
+   "kind": "thing",
+   "summary": "A single linear layer scoring every expert for each token; the top-k (8 in DeepSeek-V3) get it.",
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-routed-experts",
+   "title": "Routed experts",
+   "kind": "thing",
+   "summary": "256 small FFNs per MoE layer in DeepSeek-V3, each 7,168 → 2,048 → 7,168.",
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-shared-expert",
+   "title": "Shared expert",
+   "kind": "thing",
+   "summary": "An always-on expert every token uses (one in DeepSeek-V3), so routed experts needn't relearn basics.",
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-output-head",
+   "title": "Output head",
+   "kind": "thing",
+   "summary": "Projects the final vector to vocabulary logits: the model's single next-token prediction.",
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-quadratic-attention",
+   "title": "Attention's quadratic cost",
+   "kind": "idea",
+   "summary": "Every token attends to every earlier one, so attention cost grows with sequence length squared.",
+   "weight": "core",
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-hyp-layers-predict",
+   "title": "Each layer predicts a token",
+   "kind": "claim",
+   "summary": "The reader's guess (t23) that layers each make a prediction and the guesses get blended.",
+   "tags": [
+    "hypothesis"
+   ],
+   "order": 23,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-last-layer-predicts",
+   "title": "Only the last layer predicts",
+   "kind": "claim",
+   "summary": "Layers form a refinement pipeline; intermediate outputs are representations, not guesses (the logit lens can peek).",
+   "tags": [
+    "takeaway",
+    "learning-goal"
+   ],
+   "order": 24,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-depth-width",
+   "title": "Depth, width & expert count",
+   "kind": "idea",
+   "summary": "Architects trade layers against vector width and experts; big open models run about 30–80+ layers.",
+   "order": 26,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-cheaper-to-run",
+   "title": "Making models cheaper to run",
+   "kind": "topic",
+   "summary": "The techniques that cut memory, compute and cost, and which part of the model each one changes.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 5,
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-memory-bound",
+   "title": "Inference is memory-bound",
+   "kind": "claim",
+   "summary": "GPUs mostly wait on data moving from HBM, so most optimizations move less data, less often.",
+   "tags": [
+    "takeaway"
+   ],
+   "weight": "core",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-efficiency-not-quality",
+   "title": "Architecture buys efficiency; RL buys quality",
+   "kind": "claim",
+   "summary": "Most architecture changes are quality-neutral cost cuts; 2025's quality jumps came from post-training RL.",
+   "tags": [
+    "takeaway"
+   ],
+   "weight": "core",
+   "order": 34,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-serving-stack",
+   "title": "Serving stack",
+   "kind": "thing",
+   "summary": "The software that runs a trained model for many users: batching, number precision and the decoding loop.",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-batching",
+   "title": "Request batching",
+   "kind": "thing",
+   "summary": "Running many users' requests through the model together to keep the accelerator busy.",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-numeric-precision",
+   "title": "Numeric precision",
+   "kind": "thing",
+   "summary": "Bits per weight and activation (BF16, FP8, INT4); DeepSeek-V3 ships natively in FP8.",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-decoding-loop",
+   "title": "Decoding loop",
+   "kind": "thing",
+   "summary": "Generating output one token per forward pass, strictly left to right.",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-serving-optimizations",
+   "title": "Serving optimizations",
+   "kind": "idea",
+   "summary": "Tricks that make frozen weights cheaper to serve without retraining: why a deployed model gets cheaper.",
+   "tags": [
+    "lever"
+   ],
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-flashattention",
+   "title": "FlashAttention",
+   "kind": "idea",
+   "summary": "Computes attention in SRAM-sized tiles in one fused pass, never writing the full score matrix to HBM.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-pagedattention",
+   "title": "PagedAttention",
+   "kind": "idea",
+   "summary": "Stores the KV-cache in small pages, like OS virtual memory, so no memory sits reserved but empty.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-prefix-caching",
+   "title": "Prefix caching",
+   "kind": "idea",
+   "summary": "Computes a shared prompt prefix's KV-cache once and reuses it: why cached input is ~90% off.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-kv-quantization",
+   "title": "KV-cache quantization",
+   "kind": "idea",
+   "summary": "Stores keys and values in 8 bits or fewer, halving cache memory; keys are more sensitive than values.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-quantization",
+   "title": "Weight quantization",
+   "kind": "idea",
+   "summary": "Runs weights at lower precision (FP8, INT8, INT4), often with negligible quality loss.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-continuous-batching",
+   "title": "Continuous batching",
+   "kind": "idea",
+   "summary": "Swaps requests in and out of a running batch so the accelerator stays saturated.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-speculative-decoding",
+   "title": "Speculative decoding",
+   "kind": "idea",
+   "summary": "A small draft model proposes several tokens; the big model checks them all in one parallel pass.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-trained-in",
+   "title": "Trained-in efficiency",
+   "kind": "idea",
+   "summary": "Efficiency built in at training time: shrinks the KV-cache or attention cost at the source.",
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-mqa",
+   "title": "Multi-query attention (MQA)",
+   "kind": "idea",
+   "summary": "All query heads share one key/value head, shrinking the cache ~N× but denting quality.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-gqa",
+   "title": "Grouped-query attention (GQA)",
+   "kind": "idea",
+   "summary": "Query heads share K/V heads in groups (e.g. 32 → 8): most of MQA's savings, little quality loss.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "weight": "core",
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-mla",
+   "title": "Multi-head latent attention (MLA)",
+   "kind": "idea",
+   "summary": "Caches a 512-wide latent instead of 16,384 K/V numbers per token-layer and rebuilds heads on the fly.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "weight": "core",
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 20,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-dsa",
+   "title": "DeepSeek Sparse Attention (DSA)",
+   "kind": "idea",
+   "summary": "A cheap 'lightning indexer' picks relevant earlier tokens and attention runs only on them: O(L·k), not O(L²).",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "date": "2025",
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-linear-attention",
+   "title": "Linear attention",
+   "kind": "idea",
+   "summary": "Cheap attention in most layers, full attention in a few (Kimi Linear: 1 in 4), for higher throughput.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-position-interpolation",
+   "title": "Position interpolation",
+   "kind": "idea",
+   "summary": "Extends context by squeezing all positions into the trained range; blurs nearby-token distinctions.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 32,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-yarn",
+   "title": "YaRN",
+   "kind": "idea",
+   "summary": "Frequency-aware context extension: stretches long-range RoPE frequencies, keeps local ones (4K → 160K in DeepSeek-V3).",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 30,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-nope",
+   "title": "NoPE",
+   "kind": "idea",
+   "summary": "Drops positional encoding in some layers and relies on the causal mask for order (SmolLM3, Kimi Linear).",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-mtp",
+   "title": "Multi-token prediction (MTP)",
+   "kind": "idea",
+   "summary": "Extra heads trained to predict several tokens ahead; in DeepSeek-V3 they double as speculative drafts.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-kv-sharing",
+   "title": "KV-cache sharing across layers",
+   "kind": "idea",
+   "summary": "Adjacent layers reuse one key/value cache instead of each storing its own.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 26,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-param-sharing",
+   "title": "Cross-layer parameter sharing",
+   "kind": "idea",
+   "summary": "Layers reuse the same weights (ALBERT): far fewer parameters, but just as much compute.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 26,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-layer-pruning",
+   "title": "Layer pruning",
+   "kind": "idea",
+   "summary": "Removing near-redundant middle and late layers from a trained model, with modest quality loss.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 26,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-moe",
+   "title": "Mixture of experts (MoE)",
+   "kind": "idea",
+   "summary": "Replaces each FFN with many experts and a router: the capacity of all parameters, the cost of a few.",
+   "tags": [
+    "technique",
+    "lever"
+   ],
+   "weight": "core",
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 12,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-total-vs-active",
+   "title": "Total vs active parameters",
+   "kind": "idea",
+   "summary": "MoE splits size in two: total (memory, capacity) vs active per token (compute, cost), e.g. 671B vs 37B.",
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-experts-not-topics",
+   "title": "Experts aren't topic specialists",
+   "kind": "claim",
+   "summary": "Routing changes every token at every layer; experts learn low-level patterns, not 'chemistry' or 'law'.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-load-balancing",
+   "title": "Load balancing",
+   "kind": "idea",
+   "summary": "An auxiliary loss and capacity caps stop the router overusing a few experts and leaving the rest dead.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-aux-free-balancing",
+   "title": "Aux-loss-free balancing",
+   "kind": "idea",
+   "summary": "DeepSeek's per-expert bias terms balance load without an auxiliary loss's quality penalty.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fine-grained-experts",
+   "title": "Fine-grained experts",
+   "kind": "idea",
+   "summary": "Many small experts (DeepSeek: 256, each 2,048 wide) instead of a few large ones (Llama 4: 8,192 wide).",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "adopted"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-drop-shared-expert",
+   "title": "Dropping the shared expert",
+   "kind": "idea",
+   "summary": "Qwen3 has no always-on expert while DeepSeek, Kimi K2 and GLM-4.5 keep one: still unsettled.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-expert-parallelism",
+   "title": "Expert parallelism",
+   "kind": "idea",
+   "summary": "Spreading experts across GPUs and shipping tokens to them; the traffic shapes designs (GLM-5's 80 layers).",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "standard"
+   },
+   "order": 16,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-moe-history",
+   "title": "History of MoE",
+   "kind": "event",
+   "summary": "1991 idea (Jacobs, Hinton et al.), 2017 sparse gating (Shazeer), GShard 2020, Switch 2021, open default by 2025.",
+   "date": "1991",
+   "dateEnd": "2025",
+   "order": 18,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-open-models",
+   "title": "The open models",
+   "kind": "topic",
+   "summary": "The open-weight flagships' shapes and signature ideas, from DeepSeek-V3 to GLM-5.2.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 6,
+   "order": 27,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-deepseek-v3",
+   "title": "DeepSeek-V3",
+   "kind": "thing",
+   "summary": "DeepSeek's 671B MoE (37B active): the best-documented open model, with its full config public.",
+   "tags": [
+    "open-model"
+   ],
+   "weight": "core",
+   "attributes": {
+    "total_params": 671,
+    "active_params": 37,
+    "experts": "256 routed, 8 active + 1 shared",
+    "attention": "MLA (DSA added in V3.2)",
+    "layers": 61,
+    "context": 160,
+    "standout": "MLA, aux-loss-free balancing, multi-token prediction, native FP8",
+    "specs_from": "config.json + tech report"
+   },
+   "order": 14,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-deepseek-v32",
+   "title": "DeepSeek-V3.2",
+   "kind": "thing",
+   "summary": "V3.1-Terminus plus DSA, nothing else architectural; scaled RL gave self-reported GPT-5-level results; API prices fell 50%+.",
+   "date": "2025",
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-deepseek-r1",
+   "title": "DeepSeek-R1",
+   "kind": "thing",
+   "summary": "DeepSeek's reasoning model: RLVR alone brought out long chains of thought and self-reflection (the 'aha moment').",
+   "date": "2025",
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-llama-4",
+   "title": "Llama 4 Maverick",
+   "kind": "thing",
+   "summary": "Meta's first MoE: 400B total, 17B active, 1M context, ~22T training tokens; the conservative reference design.",
+   "tags": [
+    "open-model"
+   ],
+   "attributes": {
+    "total_params": 400,
+    "active_params": 17,
+    "experts": "128, 2 active (large, 8,192 wide)",
+    "attention": "GQA",
+    "context": 1000,
+    "standout": "Alternates MoE and dense layers; sibling Scout: 109B, 10M context",
+    "specs_from": "Tech report"
+   },
+   "date": "2025-04",
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-qwen3",
+   "title": "Qwen3",
+   "kind": "thing",
+   "summary": "The Qwen team's open family, rated top of its size classes; uses GQA and drops the shared expert.",
+   "tags": [
+    "open-model"
+   ],
+   "attributes": {
+    "experts": "No shared expert",
+    "attention": "GQA",
+    "standout": "Dropped the shared expert; tops its size classes",
+    "specs_from": "Third-party write-ups"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-kimi-k2",
+   "title": "Kimi K2",
+   "kind": "thing",
+   "summary": "Moonshot AI's 1T-parameter MoE with 32B active and 384 experts; borrows MLA from DeepSeek.",
+   "tags": [
+    "open-model"
+   ],
+   "attributes": {
+    "total_params": 1000,
+    "active_params": 32,
+    "experts": "384, with a shared expert",
+    "attention": "MLA",
+    "standout": "Most extreme sparsity: 1T total, 32B active",
+    "specs_from": "Third-party roundups"
+   },
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-glm-5",
+   "title": "GLM-5",
+   "kind": "thing",
+   "summary": "Zhipu's 744B MoE (40B active), MIT-licensed; its novelty is the slime async-RL pipeline, not the backbone.",
+   "tags": [
+    "open-model"
+   ],
+   "attributes": {
+    "total_params": 744,
+    "active_params": 40,
+    "experts": "256, 8 active",
+    "attention": "DSA (from DeepSeek)",
+    "layers": 80,
+    "context": 200,
+    "standout": "Imported DSA; 80 layers to cut expert-parallel traffic; slime async RL; 28.5T tokens; reportedly trained on Huawei Ascend",
+    "specs_from": "arXiv tech report"
+   },
+   "date": "2026-02",
+   "order": 57,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-glm-52",
+   "title": "GLM-5.2",
+   "kind": "thing",
+   "summary": "June 2026 update: 1M-token context and High/Max reasoning modes; benchmark claims unverified, no tech report yet.",
+   "date": "2026-06-13",
+   "order": 59,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-open-weights-not-data",
+   "title": "Open weights, not open data",
+   "kind": "claim",
+   "summary": "Open models share weights and inference code, some training code (DeepSeek most), never the data.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 29,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-techniques-spread",
+   "title": "Techniques spread within months",
+   "kind": "claim",
+   "summary": "DSA went from DeepSeek-V3.2 into GLM-5's backbone within months; MLA reached Kimi K2.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 28,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-training",
+   "title": "Training & post-training",
+   "kind": "topic",
+   "summary": "How models are trained: pre-training on data, then post-training (SFT, preferences, RL) that shapes behaviour.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 7,
+   "order": 35,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-pretraining",
+   "title": "Pre-training",
+   "kind": "idea",
+   "summary": "Next-token prediction over trillions of tokens: the expensive phase that builds knowledge and capability.",
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-base-model",
+   "title": "Base model",
+   "kind": "idea",
+   "summary": "What pre-training produces: a raw next-token predictor with latent skills but no urge to help.",
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-post-training",
+   "title": "Post-training",
+   "kind": "idea",
+   "summary": "Everything after pre-training that turns a base model into an assistant; cheap, but shapes most behaviour.",
+   "weight": "core",
+   "order": 37,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-sft",
+   "title": "Supervised fine-tuning (SFT)",
+   "kind": "idea",
+   "summary": "Training on curated prompt → ideal-response pairs; teaches the assistant format, but only imitates.",
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-preference-learning",
+   "title": "Preference learning",
+   "kind": "idea",
+   "summary": "Collecting 'A is better than B' judgments, usually to train a reward model that scores responses.",
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-rl-finetuning",
+   "title": "RL fine-tuning",
+   "kind": "idea",
+   "summary": "The model generates, a reward scores it, and training favours high scorers, so it can exceed its demonstrations.",
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-rlhf",
+   "title": "RLHF",
+   "kind": "idea",
+   "summary": "RL against a reward model of human preferences: good for tone and helpfulness, but a gameable proxy.",
+   "tags": [
+    "technique"
+   ],
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-dpo",
+   "title": "DPO",
+   "kind": "idea",
+   "summary": "Optimizes directly on preference pairs, skipping the separate reward model; popular in open models.",
+   "tags": [
+    "technique"
+   ],
+   "order": 38,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-rlvr",
+   "title": "RLVR",
+   "kind": "idea",
+   "summary": "RL where a checker (tests, known answers) gives the reward: now the main way to train reasoning.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "weight": "core",
+   "order": 34,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-grpo",
+   "title": "GRPO",
+   "kind": "idea",
+   "summary": "Drops PPO's critic network and scores each attempt against its group's average, making reasoning RL affordable.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-rl-failure-modes",
+   "title": "RLVR failure modes",
+   "kind": "idea",
+   "summary": "Length bias, exploration collapse and reward hacking, each patched by a GRPO variant (DAPO, GSPO, …).",
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-rlvr-sharpens",
+   "title": "RLVR sharpens, may not expand",
+   "kind": "claim",
+   "summary": "One study: RLVR makes right answers likelier but solves fewer distinct problems than the base model; contested.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-soft-rewards",
+   "title": "Rewards beyond math and code",
+   "kind": "idea",
+   "summary": "The open problem: learned verifiers, rubrics and step-level rewards to bring RLVR to fuzzy domains.",
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-agentic-rl",
+   "title": "Agentic RL",
+   "kind": "idea",
+   "summary": "RL for tool use and long multi-step tasks: the current frontier (GLM-5's slime pipeline).",
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-test-time-compute",
+   "title": "Test-time compute",
+   "kind": "idea",
+   "summary": "Capability from thinking longer at inference; multiplies compute per request (~10,000× in two years, per Nvidia).",
+   "weight": "core",
+   "order": 8,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-distillation",
+   "title": "Distillation",
+   "kind": "idea",
+   "summary": "Training a smaller student on a stronger model's outputs; cuts serving cost and spreads capabilities.",
+   "tags": [
+    "technique",
+    "lever"
+   ],
+   "weight": "core",
+   "order": 10,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-distill-built-open-chat",
+   "title": "Distillation built open chat models",
+   "kind": "claim",
+   "summary": "2023–24 open models learned to chat from GPT outputs: Alpaca (52K instructions), Open Orca, ShareGPT.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 44,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-distill-overreach",
+   "title": "Distillation drives open reasoning gains",
+   "kind": "claim",
+   "summary": "The assistant's own line (t36b), retracted in t44 as overreach: no data pins that share down.",
+   "tags": [
+    "hypothesis"
+   ],
+   "order": 36,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-r1-rl-first",
+   "title": "R1's reasoning came from RL",
+   "kind": "claim",
+   "summary": "In the best-documented case RL created the reasoning; distillation then spread it to smaller models.",
+   "tags": [
+    "takeaway",
+    "learning-goal"
+   ],
+   "order": 44,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-full-finetuning",
+   "title": "Full fine-tuning",
+   "kind": "idea",
+   "summary": "Updating every weight at a low learning rate; frontier labs use it for RL, and it risks catastrophic forgetting.",
+   "order": 39,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-lora",
+   "title": "LoRA",
+   "kind": "idea",
+   "summary": "Freezes the model and trains small low-rank adapters (e.g. 7,168×16): cheap, swappable, no forgetting.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "order": 40,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-specialists-question",
+   "title": "Specialists or one generalist?",
+   "kind": "question",
+   "summary": "Both kinds of transfer are real and uneven, so labs blend: data mixing, staged training, merging.",
+   "order": 41,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-negative-transfer",
+   "title": "Negative transfer",
+   "kind": "idea",
+   "summary": "Training on one task hurts another; in one study specialists beat the all-data model on 5 of 7 tasks.",
+   "order": 42,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-positive-transfer",
+   "title": "Positive transfer",
+   "kind": "idea",
+   "summary": "Training on one task helps another (math improves code); data-rich tasks carry data-poor ones.",
+   "order": 42,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-asymmetric-transfer",
+   "title": "Transfer is asymmetric",
+   "kind": "claim",
+   "summary": "Code and math are safe donors; factuality and fairness help themselves but harm others (one 2025 study).",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 42,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-model-merging",
+   "title": "Model merging",
+   "kind": "idea",
+   "summary": "Train specialists on shared plus domain data, then average their weights into one model.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "order": 42,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-training-data",
+   "title": "Training data",
+   "kind": "idea",
+   "summary": "What goes into pre- and post-training corpora, and how much of the work building them is.",
+   "order": 45,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-open-corpora",
+   "title": "Open-data corpora",
+   "kind": "thing",
+   "summary": "Fully open pre-training sets built on filtered Common Crawl plus code, papers, books and Wikipedia.",
+   "order": 46,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-corpus-refinement",
+   "title": "Corpus refinement",
+   "kind": "idea",
+   "summary": "Extract clean text, deduplicate by document and paragraph, then keep the top ~10% by a quality classifier.",
+   "order": 46,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-dclm",
+   "title": "DCLM",
+   "kind": "thing",
+   "summary": "Benchmark fixing the model and varying only the data; its filtered set beat the open-data best at half the compute.",
+   "order": 46,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-data-main-lever",
+   "title": "Data is the main lever",
+   "kind": "claim",
+   "summary": "Curation buys what would otherwise take double the compute; data work likely rivals architecture work.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 46,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-post-training-data",
+   "title": "Post-training data",
+   "kind": "idea",
+   "summary": "Demonstrations and preference pairs from annotators, real users and synthetic personas, cleaned of benchmark leaks.",
+   "order": 48,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-tulu-3",
+   "title": "Tülu 3",
+   "kind": "thing",
+   "summary": "Ai2's fully open post-training recipe; its new synthetic SFT answers came from GPT-4o and Claude 3.5 Sonnet.",
+   "order": 48,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-llm-judge",
+   "title": "LLM-as-a-judge",
+   "kind": "idea",
+   "summary": "Models, not humans, now rank most preference pairs; humans stay where judgment is hardest.",
+   "order": 48,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-beyond-transformer",
+   "title": "Beyond the transformer",
+   "kind": "topic",
+   "summary": "Attempts to replace parts of the recipe: state-space models, hybrids, bytes, diffusion and latent reasoning.",
+   "tags": [
+    "topic"
+   ],
+   "weight": "aux",
+   "seq": 8,
+   "order": 49,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-simpler-question",
+   "title": "Can simpler wiring match transformers?",
+   "kind": "question",
+   "summary": "At up to 1.3B parameters, yes (Mamba); at frontier scale, hybrids that keep some attention win.",
+   "order": 49,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-attention-free",
+   "title": "Attention-free models",
+   "kind": "idea",
+   "summary": "Replace attention with a fixed-size recurrent state: constant memory per token, no growing KV-cache.",
+   "order": 50,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-mamba",
+   "title": "Mamba",
+   "kind": "idea",
+   "summary": "Selective state-space model with one repeated block, no attention or MLP; matched transformers up to 1.3B.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 50,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-fixed-state-forgets",
+   "title": "A fixed state forgets details",
+   "kind": "claim",
+   "summary": "A fixed-size state is a lossy summary, so SSMs are weaker at precise recall, reasoning and code.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 50,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-ssm-hybrids",
+   "title": "Mamba–attention hybrids",
+   "kind": "idea",
+   "summary": "Mostly Mamba layers with ~1 attention layer per 5–7: comparable quality, more throughput, less memory.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "weight": "core",
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 50,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-jamba",
+   "title": "Jamba",
+   "kind": "thing",
+   "summary": "AI21's hybrid, up to 398B parameters with 7 of 8 blocks Mamba; matched Mixtral and Llama-2 70B.",
+   "order": 52,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-nemotron-h",
+   "title": "Nemotron-H",
+   "kind": "thing",
+   "summary": "NVIDIA's 8B and 56B hybrids that swapped most attention for Mamba and were fully post-trained.",
+   "order": 52,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-granite-4",
+   "title": "Granite 4.0",
+   "kind": "thing",
+   "summary": "IBM's late-2025 hybrid; its Small model beat every open model on IFEval but one 12× its size.",
+   "date": "2025",
+   "order": 52,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-blt",
+   "title": "Byte Latent Transformer (BLT)",
+   "kind": "idea",
+   "summary": "Meta's tokenizer-free model: groups raw bytes into entropy-sized patches; matched Llama 3 up to 8B.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 54,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-diffusion-lm",
+   "title": "Diffusion language models",
+   "kind": "idea",
+   "summary": "Generate a whole block in parallel by iterative denoising; shipped by Inception and Google at 5–10× speed.",
+   "tags": [
+    "technique",
+    "learning-goal"
+   ],
+   "weight": "core",
+   "attributes": {
+    "maturity": "emerging"
+   },
+   "order": 54,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-block-diffusion",
+   "title": "Block diffusion",
+   "kind": "idea",
+   "summary": "Autoregressive across ~32-token blocks, diffusion within each: the standard production design.",
+   "tags": [
+    "technique"
+   ],
+   "order": 56,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-mercury",
+   "title": "Mercury",
+   "kind": "thing",
+   "summary": "Inception Labs' dLLMs: Mercury Coder (Feb 2025) was first to market; Mercury 2 reasons at ~1,000 tokens/s.",
+   "date": "2025-02",
+   "order": 56,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-gemini-diffusion",
+   "title": "Gemini Diffusion",
+   "kind": "thing",
+   "summary": "Google's dLLM (May 2025): ~1,479 tokens/s, with coding scores matching its autoregressive sibling.",
+   "date": "2025-05",
+   "order": 56,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-cheap-reasoning",
+   "title": "Diffusion makes reasoning cheaper",
+   "kind": "claim",
+   "summary": "Long chains of thought, slow token by token, can be filled in parallel; vendor-reported, and contested.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 56,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-lcm",
+   "title": "Large Concept Model",
+   "kind": "idea",
+   "summary": "Meta's model that reasons over sentence-level concept embeddings instead of tokens; speculative.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 54,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-latent-reasoning",
+   "title": "Latent reasoning",
+   "kind": "idea",
+   "summary": "Thinking in hidden state by looping layers, instead of writing chain-of-thought tokens; early research.",
+   "tags": [
+    "technique"
+   ],
+   "attributes": {
+    "maturity": "research"
+   },
+   "order": 54,
+   "overview": null,
+   "article": null
+  },
+  {
+   "id": "c-absorbed",
+   "title": "Alternatives get absorbed, not replace",
+   "kind": "claim",
+   "summary": "New ideas get folded into the transformer (hybrids, block diffusion, MoE) rather than replacing it.",
+   "tags": [
+    "takeaway"
+   ],
+   "order": 54,
+   "overview": null,
+   "article": null
+  }
+ ],
+ "relationships": [
+  {
+   "from": "c-track-token-cost",
+   "type": "part-of",
+   "to": "c-paying-for-tokens"
+  },
+  {
+   "from": "c-fable-5",
+   "type": "part-of",
+   "to": "c-paying-for-tokens"
+  },
+  {
+   "from": "c-price-vs-cost",
+   "type": "part-of",
+   "to": "c-paying-for-tokens"
+  },
+  {
+   "from": "c-compute-demand",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-usage-growth",
+   "type": "part-of",
+   "to": "c-compute-demand"
+  },
+  {
+   "from": "c-inference-overtakes",
+   "type": "part-of",
+   "to": "c-compute-demand"
+  },
+  {
+   "from": "c-available-compute",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-bottleneck-moves",
+   "type": "part-of",
+   "to": "c-available-compute"
+  },
+  {
+   "from": "c-accelerators",
+   "type": "part-of",
+   "to": "c-available-compute"
+  },
+  {
+   "from": "c-hbm",
+   "type": "part-of",
+   "to": "c-available-compute"
+  },
+  {
+   "from": "c-power-grid",
+   "type": "part-of",
+   "to": "c-available-compute"
+  },
+  {
+   "from": "c-electrical-gear",
+   "type": "part-of",
+   "to": "c-available-compute"
+  },
+  {
+   "from": "c-capex-buildout",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-newer-chips",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-frontier-price",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-jevons",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-frontier-vs-commodity",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-squeeze-ease",
+   "type": "part-of",
+   "to": "c-compute-squeeze"
+  },
+  {
+   "from": "c-fixed-capability-cost",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-hyp-model-cheaper",
+   "type": "part-of",
+   "to": "c-fixed-bar-not-model"
+  },
+  {
+   "from": "c-fixed-bar-not-model",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-hyp-top-slower",
+   "type": "part-of",
+   "to": "c-fastest-at-top"
+  },
+  {
+   "from": "c-fastest-at-top",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-method-matters",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-algorithmic-efficiency",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-incremental-wins",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-param-count",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-models-got-smaller",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-chinchilla",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-training-compute",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-params-decoupled",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-whose-numbers",
+   "type": "part-of",
+   "to": "c-getting-cheaper"
+  },
+  {
+   "from": "c-src-epoch",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-src-price-paper",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-src-lesswrong",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-src-analysts",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-src-jll",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-src-nvidia",
+   "type": "part-of",
+   "to": "c-whose-numbers"
+  },
+  {
+   "from": "c-r-chip-stock",
+   "type": "part-of",
+   "to": "c-compute-demand"
+  },
+  {
+   "from": "c-r-nvidia-demand",
+   "type": "part-of",
+   "to": "c-compute-demand"
+  },
+  {
+   "from": "c-r-capex",
+   "type": "part-of",
+   "to": "c-capex-buildout"
+  },
+  {
+   "from": "c-r-dc-mckinsey",
+   "type": "part-of",
+   "to": "c-capex-buildout"
+  },
+  {
+   "from": "c-r-dc-jll",
+   "type": "part-of",
+   "to": "c-capex-buildout"
+  },
+  {
+   "from": "c-r-memory-share",
+   "type": "part-of",
+   "to": "c-hbm"
+  },
+  {
+   "from": "c-r-epoch-headline",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-epoch-range",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-top-bin",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-low-bin",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-frontier-controlled",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-open-models",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-algorithms-only",
+   "type": "part-of",
+   "to": "c-fixed-capability-cost"
+  },
+  {
+   "from": "c-r-gpt1-gpt3",
+   "type": "part-of",
+   "to": "c-param-count"
+  },
+  {
+   "from": "c-r-gpt3-gpt4",
+   "type": "part-of",
+   "to": "c-param-count"
+  },
+  {
+   "from": "c-r-post-gpt4",
+   "type": "part-of",
+   "to": "c-param-count"
+  },
+  {
+   "from": "c-r-epoch-forecast",
+   "type": "part-of",
+   "to": "c-param-count"
+  },
+  {
+   "from": "c-next-token",
+   "type": "part-of",
+   "to": "c-how-transformers-work"
+  },
+  {
+   "from": "c-transformer",
+   "type": "part-of",
+   "to": "c-how-transformers-work"
+  },
+  {
+   "from": "c-tokenizer",
+   "type": "part-of",
+   "to": "c-transformer"
+  },
+  {
+   "from": "c-embedding",
+   "type": "part-of",
+   "to": "c-transformer"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "part-of",
+   "to": "c-transformer"
+  },
+  {
+   "from": "c-residual-stream",
+   "type": "part-of",
+   "to": "c-layer-stack"
+  },
+  {
+   "from": "c-transformer-block",
+   "type": "part-of",
+   "to": "c-layer-stack"
+  },
+  {
+   "from": "c-attention",
+   "type": "part-of",
+   "to": "c-transformer-block"
+  },
+  {
+   "from": "c-attention-heads",
+   "type": "part-of",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-qkv",
+   "type": "part-of",
+   "to": "c-attention-heads"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "part-of",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-positional-encoding",
+   "type": "part-of",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-attention-kernel",
+   "type": "part-of",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-ffn",
+   "type": "part-of",
+   "to": "c-transformer-block"
+  },
+  {
+   "from": "c-router",
+   "type": "part-of",
+   "to": "c-ffn"
+  },
+  {
+   "from": "c-routed-experts",
+   "type": "part-of",
+   "to": "c-ffn"
+  },
+  {
+   "from": "c-shared-expert",
+   "type": "part-of",
+   "to": "c-ffn"
+  },
+  {
+   "from": "c-output-head",
+   "type": "part-of",
+   "to": "c-transformer"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-hyp-layers-predict",
+   "type": "part-of",
+   "to": "c-last-layer-predicts"
+  },
+  {
+   "from": "c-last-layer-predicts",
+   "type": "part-of",
+   "to": "c-how-transformers-work"
+  },
+  {
+   "from": "c-depth-width",
+   "type": "part-of",
+   "to": "c-how-transformers-work"
+  },
+  {
+   "from": "c-memory-bound",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-efficiency-not-quality",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-serving-stack",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-batching",
+   "type": "part-of",
+   "to": "c-serving-stack"
+  },
+  {
+   "from": "c-numeric-precision",
+   "type": "part-of",
+   "to": "c-serving-stack"
+  },
+  {
+   "from": "c-decoding-loop",
+   "type": "part-of",
+   "to": "c-serving-stack"
+  },
+  {
+   "from": "c-serving-optimizations",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-flashattention",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-pagedattention",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-prefix-caching",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-kv-quantization",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-quantization",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-continuous-batching",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-speculative-decoding",
+   "type": "part-of",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-trained-in",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-mqa",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-gqa",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-mla",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-dsa",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-linear-attention",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-position-interpolation",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-yarn",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-nope",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-mtp",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-kv-sharing",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-param-sharing",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-layer-pruning",
+   "type": "part-of",
+   "to": "c-trained-in"
+  },
+  {
+   "from": "c-moe",
+   "type": "part-of",
+   "to": "c-cheaper-to-run"
+  },
+  {
+   "from": "c-total-vs-active",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-experts-not-topics",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-load-balancing",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-aux-free-balancing",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-fine-grained-experts",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-drop-shared-expert",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-expert-parallelism",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-moe-history",
+   "type": "part-of",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-deepseek-v32",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-deepseek-r1",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-llama-4",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-qwen3",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-kimi-k2",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-glm-52",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-open-weights-not-data",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-techniques-spread",
+   "type": "part-of",
+   "to": "c-open-models"
+  },
+  {
+   "from": "c-pretraining",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-base-model",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-post-training",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-sft",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-preference-learning",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-rl-finetuning",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-rlhf",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-dpo",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-grpo",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-rl-failure-modes",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-rlvr-sharpens",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-soft-rewards",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-agentic-rl",
+   "type": "part-of",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-distillation",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-distill-built-open-chat",
+   "type": "part-of",
+   "to": "c-distillation"
+  },
+  {
+   "from": "c-distill-overreach",
+   "type": "part-of",
+   "to": "c-r1-rl-first"
+  },
+  {
+   "from": "c-r1-rl-first",
+   "type": "part-of",
+   "to": "c-distillation"
+  },
+  {
+   "from": "c-full-finetuning",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-lora",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-specialists-question",
+   "type": "part-of",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-negative-transfer",
+   "type": "part-of",
+   "to": "c-specialists-question"
+  },
+  {
+   "from": "c-positive-transfer",
+   "type": "part-of",
+   "to": "c-specialists-question"
+  },
+  {
+   "from": "c-asymmetric-transfer",
+   "type": "part-of",
+   "to": "c-specialists-question"
+  },
+  {
+   "from": "c-model-merging",
+   "type": "part-of",
+   "to": "c-specialists-question"
+  },
+  {
+   "from": "c-training-data",
+   "type": "part-of",
+   "to": "c-training"
+  },
+  {
+   "from": "c-open-corpora",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-corpus-refinement",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-dclm",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-data-main-lever",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-post-training-data",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-tulu-3",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-llm-judge",
+   "type": "part-of",
+   "to": "c-training-data"
+  },
+  {
+   "from": "c-simpler-question",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-attention-free",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-mamba",
+   "type": "part-of",
+   "to": "c-attention-free"
+  },
+  {
+   "from": "c-fixed-state-forgets",
+   "type": "part-of",
+   "to": "c-attention-free"
+  },
+  {
+   "from": "c-ssm-hybrids",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-jamba",
+   "type": "part-of",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-nemotron-h",
+   "type": "part-of",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-granite-4",
+   "type": "part-of",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-blt",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-diffusion-lm",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-block-diffusion",
+   "type": "part-of",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-mercury",
+   "type": "part-of",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-gemini-diffusion",
+   "type": "part-of",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-cheap-reasoning",
+   "type": "part-of",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-lcm",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-latent-reasoning",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-absorbed",
+   "type": "part-of",
+   "to": "c-beyond-transformer"
+  },
+  {
+   "from": "c-tokenizer",
+   "type": "prerequisite",
+   "to": "c-embedding"
+  },
+  {
+   "from": "c-embedding",
+   "type": "prerequisite",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-attention",
+   "type": "prerequisite",
+   "to": "c-qkv"
+  },
+  {
+   "from": "c-qkv",
+   "type": "prerequisite",
+   "to": "c-attention-heads"
+  },
+  {
+   "from": "c-attention-heads",
+   "type": "prerequisite",
+   "to": "c-mqa"
+  },
+  {
+   "from": "c-mqa",
+   "type": "prerequisite",
+   "to": "c-gqa"
+  },
+  {
+   "from": "c-gqa",
+   "type": "prerequisite",
+   "to": "c-mla"
+  },
+  {
+   "from": "c-embedding",
+   "type": "prerequisite",
+   "to": "c-residual-stream"
+  },
+  {
+   "from": "c-qkv",
+   "type": "prerequisite",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-mqa"
+  },
+  {
+   "from": "c-next-token",
+   "type": "prerequisite",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-attention",
+   "type": "prerequisite",
+   "to": "c-positional-encoding"
+  },
+  {
+   "from": "c-positional-encoding",
+   "type": "prerequisite",
+   "to": "c-mla"
+  },
+  {
+   "from": "c-positional-encoding",
+   "type": "prerequisite",
+   "to": "c-position-interpolation"
+  },
+  {
+   "from": "c-position-interpolation",
+   "type": "prerequisite",
+   "to": "c-yarn"
+  },
+  {
+   "from": "c-positional-encoding",
+   "type": "prerequisite",
+   "to": "c-nope"
+  },
+  {
+   "from": "c-hbm",
+   "type": "prerequisite",
+   "to": "c-memory-bound"
+  },
+  {
+   "from": "c-memory-bound",
+   "type": "prerequisite",
+   "to": "c-flashattention"
+  },
+  {
+   "from": "c-qkv",
+   "type": "prerequisite",
+   "to": "c-quadratic-attention"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "prerequisite",
+   "to": "c-flashattention"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-pagedattention"
+  },
+  {
+   "from": "c-pagedattention",
+   "type": "prerequisite",
+   "to": "c-prefix-caching"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-kv-quantization"
+  },
+  {
+   "from": "c-memory-bound",
+   "type": "prerequisite",
+   "to": "c-quantization"
+  },
+  {
+   "from": "c-quantization",
+   "type": "prerequisite",
+   "to": "c-kv-quantization"
+  },
+  {
+   "from": "c-next-token",
+   "type": "prerequisite",
+   "to": "c-speculative-decoding"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "prerequisite",
+   "to": "c-dsa"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "prerequisite",
+   "to": "c-linear-attention"
+  },
+  {
+   "from": "c-residual-stream",
+   "type": "prerequisite",
+   "to": "c-ffn"
+  },
+  {
+   "from": "c-ffn",
+   "type": "prerequisite",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-router"
+  },
+  {
+   "from": "c-router",
+   "type": "prerequisite",
+   "to": "c-load-balancing"
+  },
+  {
+   "from": "c-load-balancing",
+   "type": "prerequisite",
+   "to": "c-aux-free-balancing"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-fine-grained-experts"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-shared-expert"
+  },
+  {
+   "from": "c-shared-expert",
+   "type": "prerequisite",
+   "to": "c-drop-shared-expert"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-expert-parallelism"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-total-vs-active"
+  },
+  {
+   "from": "c-total-vs-active",
+   "type": "prerequisite",
+   "to": "c-params-decoupled"
+  },
+  {
+   "from": "c-router",
+   "type": "prerequisite",
+   "to": "c-experts-not-topics"
+  },
+  {
+   "from": "c-attention",
+   "type": "prerequisite",
+   "to": "c-transformer-block"
+  },
+  {
+   "from": "c-ffn",
+   "type": "prerequisite",
+   "to": "c-transformer-block"
+  },
+  {
+   "from": "c-transformer-block",
+   "type": "prerequisite",
+   "to": "c-layer-stack"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "prerequisite",
+   "to": "c-last-layer-predicts"
+  },
+  {
+   "from": "c-residual-stream",
+   "type": "prerequisite",
+   "to": "c-transformer-block"
+  },
+  {
+   "from": "c-next-token",
+   "type": "prerequisite",
+   "to": "c-output-head"
+  },
+  {
+   "from": "c-output-head",
+   "type": "prerequisite",
+   "to": "c-last-layer-predicts"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "prerequisite",
+   "to": "c-param-sharing"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "prerequisite",
+   "to": "c-layer-pruning"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-kv-sharing"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "prerequisite",
+   "to": "c-kv-sharing"
+  },
+  {
+   "from": "c-output-head",
+   "type": "prerequisite",
+   "to": "c-mtp"
+  },
+  {
+   "from": "c-layer-stack",
+   "type": "prerequisite",
+   "to": "c-depth-width"
+  },
+  {
+   "from": "c-moe",
+   "type": "prerequisite",
+   "to": "c-depth-width"
+  },
+  {
+   "from": "c-fixed-capability-cost",
+   "type": "prerequisite",
+   "to": "c-fixed-bar-not-model"
+  },
+  {
+   "from": "c-fixed-bar-not-model",
+   "type": "prerequisite",
+   "to": "c-fastest-at-top"
+  },
+  {
+   "from": "c-fixed-bar-not-model",
+   "type": "prerequisite",
+   "to": "c-method-matters"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-fixed-bar-not-model"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "prerequisite",
+   "to": "c-price-vs-cost"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "prerequisite",
+   "to": "c-jevons"
+  },
+  {
+   "from": "c-jevons",
+   "type": "prerequisite",
+   "to": "c-frontier-vs-commodity"
+  },
+  {
+   "from": "c-compute-demand",
+   "type": "prerequisite",
+   "to": "c-frontier-vs-commodity"
+  },
+  {
+   "from": "c-available-compute",
+   "type": "prerequisite",
+   "to": "c-frontier-vs-commodity"
+  },
+  {
+   "from": "c-fixed-capability-cost",
+   "type": "prerequisite",
+   "to": "c-frontier-vs-commodity"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "prerequisite",
+   "to": "c-compute-demand"
+  },
+  {
+   "from": "c-compute-demand",
+   "type": "prerequisite",
+   "to": "c-inference-overtakes"
+  },
+  {
+   "from": "c-available-compute",
+   "type": "prerequisite",
+   "to": "c-bottleneck-moves"
+  },
+  {
+   "from": "c-available-compute",
+   "type": "prerequisite",
+   "to": "c-squeeze-ease"
+  },
+  {
+   "from": "c-compute-demand",
+   "type": "prerequisite",
+   "to": "c-squeeze-ease"
+  },
+  {
+   "from": "c-param-count",
+   "type": "prerequisite",
+   "to": "c-models-got-smaller"
+  },
+  {
+   "from": "c-models-got-smaller",
+   "type": "prerequisite",
+   "to": "c-params-decoupled"
+  },
+  {
+   "from": "c-chinchilla",
+   "type": "prerequisite",
+   "to": "c-params-decoupled"
+  },
+  {
+   "from": "c-training-compute",
+   "type": "prerequisite",
+   "to": "c-params-decoupled"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "prerequisite",
+   "to": "c-params-decoupled"
+  },
+  {
+   "from": "c-algorithmic-efficiency",
+   "type": "prerequisite",
+   "to": "c-incremental-wins"
+  },
+  {
+   "from": "c-moe-history",
+   "type": "prerequisite",
+   "to": "c-incremental-wins"
+  },
+  {
+   "from": "c-memory-bound",
+   "type": "prerequisite",
+   "to": "c-serving-optimizations"
+  },
+  {
+   "from": "c-next-token",
+   "type": "prerequisite",
+   "to": "c-pretraining"
+  },
+  {
+   "from": "c-pretraining",
+   "type": "prerequisite",
+   "to": "c-base-model"
+  },
+  {
+   "from": "c-base-model",
+   "type": "prerequisite",
+   "to": "c-post-training"
+  },
+  {
+   "from": "c-post-training",
+   "type": "prerequisite",
+   "to": "c-sft"
+  },
+  {
+   "from": "c-post-training",
+   "type": "prerequisite",
+   "to": "c-preference-learning"
+  },
+  {
+   "from": "c-preference-learning",
+   "type": "prerequisite",
+   "to": "c-rl-finetuning"
+  },
+  {
+   "from": "c-rl-finetuning",
+   "type": "prerequisite",
+   "to": "c-rlhf"
+  },
+  {
+   "from": "c-rlhf",
+   "type": "prerequisite",
+   "to": "c-dpo"
+  },
+  {
+   "from": "c-preference-learning",
+   "type": "prerequisite",
+   "to": "c-dpo"
+  },
+  {
+   "from": "c-rl-finetuning",
+   "type": "prerequisite",
+   "to": "c-rlvr"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "prerequisite",
+   "to": "c-grpo"
+  },
+  {
+   "from": "c-grpo",
+   "type": "prerequisite",
+   "to": "c-rl-failure-modes"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "prerequisite",
+   "to": "c-rlvr"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "prerequisite",
+   "to": "c-rlvr-sharpens"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-rlvr-sharpens"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "prerequisite",
+   "to": "c-soft-rewards"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "prerequisite",
+   "to": "c-agentic-rl"
+  },
+  {
+   "from": "c-sft",
+   "type": "prerequisite",
+   "to": "c-distillation"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-distill-built-open-chat"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-r1-rl-first"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "prerequisite",
+   "to": "c-r1-rl-first"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-distill-overreach"
+  },
+  {
+   "from": "c-post-training",
+   "type": "prerequisite",
+   "to": "c-full-finetuning"
+  },
+  {
+   "from": "c-full-finetuning",
+   "type": "prerequisite",
+   "to": "c-lora"
+  },
+  {
+   "from": "c-post-training",
+   "type": "prerequisite",
+   "to": "c-negative-transfer"
+  },
+  {
+   "from": "c-negative-transfer",
+   "type": "prerequisite",
+   "to": "c-asymmetric-transfer"
+  },
+  {
+   "from": "c-post-training",
+   "type": "prerequisite",
+   "to": "c-positive-transfer"
+  },
+  {
+   "from": "c-positive-transfer",
+   "type": "prerequisite",
+   "to": "c-asymmetric-transfer"
+  },
+  {
+   "from": "c-negative-transfer",
+   "type": "prerequisite",
+   "to": "c-model-merging"
+  },
+  {
+   "from": "c-pretraining",
+   "type": "prerequisite",
+   "to": "c-open-corpora"
+  },
+  {
+   "from": "c-open-corpora",
+   "type": "prerequisite",
+   "to": "c-corpus-refinement"
+  },
+  {
+   "from": "c-corpus-refinement",
+   "type": "prerequisite",
+   "to": "c-dclm"
+  },
+  {
+   "from": "c-dclm",
+   "type": "prerequisite",
+   "to": "c-data-main-lever"
+  },
+  {
+   "from": "c-sft",
+   "type": "prerequisite",
+   "to": "c-post-training-data"
+  },
+  {
+   "from": "c-post-training-data",
+   "type": "prerequisite",
+   "to": "c-tulu-3"
+  },
+  {
+   "from": "c-preference-learning",
+   "type": "prerequisite",
+   "to": "c-post-training-data"
+  },
+  {
+   "from": "c-preference-learning",
+   "type": "prerequisite",
+   "to": "c-llm-judge"
+  },
+  {
+   "from": "c-distillation",
+   "type": "prerequisite",
+   "to": "c-tulu-3"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "prerequisite",
+   "to": "c-attention-free"
+  },
+  {
+   "from": "c-attention-free",
+   "type": "prerequisite",
+   "to": "c-mamba"
+  },
+  {
+   "from": "c-mamba",
+   "type": "prerequisite",
+   "to": "c-fixed-state-forgets"
+  },
+  {
+   "from": "c-fixed-state-forgets",
+   "type": "prerequisite",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-attention-free"
+  },
+  {
+   "from": "c-mamba",
+   "type": "prerequisite",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-tokenizer",
+   "type": "prerequisite",
+   "to": "c-blt"
+  },
+  {
+   "from": "c-quadratic-attention",
+   "type": "prerequisite",
+   "to": "c-blt"
+  },
+  {
+   "from": "c-next-token",
+   "type": "prerequisite",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-diffusion-lm",
+   "type": "prerequisite",
+   "to": "c-block-diffusion"
+  },
+  {
+   "from": "c-attention",
+   "type": "prerequisite",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-kv-cache",
+   "type": "prerequisite",
+   "to": "c-block-diffusion"
+  },
+  {
+   "from": "c-diffusion-lm",
+   "type": "prerequisite",
+   "to": "c-cheap-reasoning"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "prerequisite",
+   "to": "c-cheap-reasoning"
+  },
+  {
+   "from": "c-param-sharing",
+   "type": "prerequisite",
+   "to": "c-latent-reasoning"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "prerequisite",
+   "to": "c-latent-reasoning"
+  },
+  {
+   "from": "c-tokenizer",
+   "type": "prerequisite",
+   "to": "c-lcm"
+  },
+  {
+   "from": "c-flashattention",
+   "type": "modifies",
+   "to": "c-attention-kernel"
+  },
+  {
+   "from": "c-pagedattention",
+   "type": "modifies",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-prefix-caching",
+   "type": "modifies",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-kv-quantization",
+   "type": "modifies",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-quantization",
+   "type": "modifies",
+   "to": "c-numeric-precision"
+  },
+  {
+   "from": "c-continuous-batching",
+   "type": "modifies",
+   "to": "c-batching"
+  },
+  {
+   "from": "c-speculative-decoding",
+   "type": "modifies",
+   "to": "c-decoding-loop"
+  },
+  {
+   "from": "c-mqa",
+   "type": "modifies",
+   "to": "c-attention-heads"
+  },
+  {
+   "from": "c-mqa",
+   "type": "modifies",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-gqa",
+   "type": "modifies",
+   "to": "c-attention-heads"
+  },
+  {
+   "from": "c-gqa",
+   "type": "modifies",
+   "to": "c-kv-cache",
+   "note": "fewer K/V heads to cache"
+  },
+  {
+   "from": "c-mla",
+   "type": "modifies",
+   "to": "c-attention-heads"
+  },
+  {
+   "from": "c-mla",
+   "type": "modifies",
+   "to": "c-kv-cache",
+   "note": "caches a 512-wide latent, ~32× smaller"
+  },
+  {
+   "from": "c-dsa",
+   "type": "modifies",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-linear-attention",
+   "type": "modifies",
+   "to": "c-attention"
+  },
+  {
+   "from": "c-position-interpolation",
+   "type": "modifies",
+   "to": "c-positional-encoding"
+  },
+  {
+   "from": "c-yarn",
+   "type": "modifies",
+   "to": "c-positional-encoding"
+  },
+  {
+   "from": "c-nope",
+   "type": "modifies",
+   "to": "c-positional-encoding"
+  },
+  {
+   "from": "c-mtp",
+   "type": "modifies",
+   "to": "c-output-head"
+  },
+  {
+   "from": "c-kv-sharing",
+   "type": "modifies",
+   "to": "c-kv-cache"
+  },
+  {
+   "from": "c-param-sharing",
+   "type": "modifies",
+   "to": "c-layer-stack"
+  },
+  {
+   "from": "c-layer-pruning",
+   "type": "modifies",
+   "to": "c-layer-stack"
+  },
+  {
+   "from": "c-moe",
+   "type": "modifies",
+   "to": "c-ffn"
+  },
+  {
+   "from": "c-load-balancing",
+   "type": "modifies",
+   "to": "c-router"
+  },
+  {
+   "from": "c-aux-free-balancing",
+   "type": "modifies",
+   "to": "c-router"
+  },
+  {
+   "from": "c-fine-grained-experts",
+   "type": "modifies",
+   "to": "c-routed-experts"
+  },
+  {
+   "from": "c-drop-shared-expert",
+   "type": "modifies",
+   "to": "c-shared-expert"
+  },
+  {
+   "from": "c-expert-parallelism",
+   "type": "modifies",
+   "to": "c-routed-experts"
+  },
+  {
+   "from": "c-ssm-hybrids",
+   "type": "modifies",
+   "to": "c-layer-stack",
+   "note": "most layers become Mamba"
+  },
+  {
+   "from": "c-mamba",
+   "type": "modifies",
+   "to": "c-transformer-block",
+   "note": "replaces attention and MLP with one SSM block"
+  },
+  {
+   "from": "c-blt",
+   "type": "modifies",
+   "to": "c-tokenizer"
+  },
+  {
+   "from": "c-lcm",
+   "type": "modifies",
+   "to": "c-tokenizer"
+  },
+  {
+   "from": "c-diffusion-lm",
+   "type": "modifies",
+   "to": "c-decoding-loop",
+   "note": "fills a block in parallel instead of token by token"
+  },
+  {
+   "from": "c-latent-reasoning",
+   "type": "modifies",
+   "to": "c-layer-stack",
+   "note": "loops layers to think longer"
+  },
+  {
+   "from": "c-compute-demand",
+   "type": "raises",
+   "to": "c-frontier-price",
+   "note": "scarce frontier capacity gets priced up or rationed"
+  },
+  {
+   "from": "c-available-compute",
+   "type": "lowers",
+   "to": "c-frontier-price",
+   "note": "more capacity online eases the squeeze (2027–28?)"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "raises",
+   "to": "c-frontier-price",
+   "note": "loosely: prices move in steps, set by business decisions"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "raises",
+   "to": "c-fixed-capability-cost",
+   "note": "the cheapest model's serving cost sets the price"
+  },
+  {
+   "from": "c-test-time-compute",
+   "type": "raises",
+   "to": "c-compute-demand",
+   "note": "~10,000× compute per session in two years (Nvidia)"
+  },
+  {
+   "from": "c-usage-growth",
+   "type": "raises",
+   "to": "c-compute-demand",
+   "note": "~100× in two years (Nvidia)"
+  },
+  {
+   "from": "c-serving-cost",
+   "type": "lowers",
+   "to": "c-compute-demand",
+   "note": "Jevons: cheaper tokens, more tokens used"
+  },
+  {
+   "from": "c-accelerators",
+   "type": "raises",
+   "to": "c-available-compute",
+   "note": "capped: Blackwell sold out"
+  },
+  {
+   "from": "c-hbm",
+   "type": "raises",
+   "to": "c-available-compute",
+   "note": "capped: sold out for 2026"
+  },
+  {
+   "from": "c-power-grid",
+   "type": "raises",
+   "to": "c-available-compute",
+   "note": "capped: 30–50% of 2026 capacity slips to 2028"
+  },
+  {
+   "from": "c-electrical-gear",
+   "type": "raises",
+   "to": "c-available-compute",
+   "note": "capped: transformer lead times 36–48 months"
+  },
+  {
+   "from": "c-capex-buildout",
+   "type": "raises",
+   "to": "c-available-compute",
+   "note": "$600B+ capex in 2026"
+  },
+  {
+   "from": "c-newer-chips",
+   "type": "lowers",
+   "to": "c-serving-cost",
+   "note": "more bandwidth and HBM per chip; capped while sold out"
+  },
+  {
+   "from": "c-serving-optimizations",
+   "type": "lowers",
+   "to": "c-serving-cost",
+   "note": "biggest lever for a frozen model"
+  },
+  {
+   "from": "c-moe",
+   "type": "lowers",
+   "to": "c-serving-cost",
+   "note": "cost set by active parameters: 37B of 671B"
+  },
+  {
+   "from": "c-distillation",
+   "type": "lowers",
+   "to": "c-fixed-capability-cost",
+   "note": "small students re-reach old bars"
+  },
+  {
+   "from": "c-algorithmic-efficiency",
+   "type": "lowers",
+   "to": "c-fixed-capability-cost",
+   "note": "~3×/yr"
+  },
+  {
+   "from": "c-fixed-bar-not-model",
+   "type": "corrects",
+   "to": "c-hyp-model-cheaper",
+   "note": "it tracks a capability bar, not one model"
+  },
+  {
+   "from": "c-fastest-at-top",
+   "type": "corrects",
+   "to": "c-hyp-top-slower",
+   "note": "31×/yr at the top vs 1.7×/yr at the bottom"
+  },
+  {
+   "from": "c-last-layer-predicts",
+   "type": "corrects",
+   "to": "c-hyp-layers-predict",
+   "note": "one prediction, from the final layer"
+  },
+  {
+   "from": "c-r1-rl-first",
+   "type": "corrects",
+   "to": "c-distill-overreach",
+   "note": "the assistant retracted its own claim when the reader asked for evidence"
+  },
+  {
+   "from": "c-dclm",
+   "type": "supports",
+   "to": "c-data-main-lever",
+   "note": "+6 MMLU points at half the compute"
+  },
+  {
+   "from": "c-tulu-3",
+   "type": "supports",
+   "to": "c-distill-built-open-chat",
+   "note": "SFT responses from GPT-4o and Claude 3.5 Sonnet"
+  },
+  {
+   "from": "c-deepseek-r1",
+   "type": "supports",
+   "to": "c-r1-rl-first"
+  },
+  {
+   "from": "c-deepseek-v32",
+   "type": "supports",
+   "to": "c-efficiency-not-quality",
+   "note": "DSA held quality level; RL moved it"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "supports",
+   "to": "c-techniques-spread",
+   "note": "architecture listed as glm_moe_dsa"
+  },
+  {
+   "from": "c-granite-4",
+   "type": "supports",
+   "to": "c-ssm-hybrids",
+   "note": "beat models 12× its size on IFEval"
+  },
+  {
+   "from": "c-fastest-at-top",
+   "type": "supports",
+   "to": "c-method-matters"
+  },
+  {
+   "from": "c-fable-5",
+   "type": "example",
+   "to": "c-frontier-price",
+   "note": "$10/$50 per M tokens, double Opus"
+  },
+  {
+   "from": "c-jamba",
+   "type": "example",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-nemotron-h",
+   "type": "example",
+   "to": "c-ssm-hybrids"
+  },
+  {
+   "from": "c-mercury",
+   "type": "example",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-gemini-diffusion",
+   "type": "example",
+   "to": "c-diffusion-lm"
+  },
+  {
+   "from": "c-block-diffusion",
+   "type": "example",
+   "to": "c-absorbed"
+  },
+  {
+   "from": "c-ssm-hybrids",
+   "type": "example",
+   "to": "c-absorbed"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "led-to",
+   "to": "c-deepseek-v32",
+   "note": "V3 → V3.1 → Terminus → V3.2-Exp → V3.2"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "led-to",
+   "to": "c-glm-52",
+   "note": "5.1, then 5.2 (June 2026)"
+  },
+  {
+   "from": "c-chinchilla",
+   "type": "led-to",
+   "to": "c-models-got-smaller",
+   "note": "train smaller models on more data"
+  },
+  {
+   "from": "c-position-interpolation",
+   "type": "led-to",
+   "to": "c-yarn"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-mla"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-aux-free-balancing"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-mtp"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-yarn"
+  },
+  {
+   "from": "c-deepseek-v3",
+   "type": "uses",
+   "to": "c-fine-grained-experts"
+  },
+  {
+   "from": "c-deepseek-v32",
+   "type": "uses",
+   "to": "c-dsa"
+  },
+  {
+   "from": "c-deepseek-r1",
+   "type": "uses",
+   "to": "c-rlvr"
+  },
+  {
+   "from": "c-llama-4",
+   "type": "uses",
+   "to": "c-gqa"
+  },
+  {
+   "from": "c-llama-4",
+   "type": "uses",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-qwen3",
+   "type": "uses",
+   "to": "c-gqa"
+  },
+  {
+   "from": "c-qwen3",
+   "type": "uses",
+   "to": "c-drop-shared-expert"
+  },
+  {
+   "from": "c-kimi-k2",
+   "type": "uses",
+   "to": "c-mla"
+  },
+  {
+   "from": "c-kimi-k2",
+   "type": "uses",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "uses",
+   "to": "c-dsa"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "uses",
+   "to": "c-moe"
+  },
+  {
+   "from": "c-glm-5",
+   "type": "uses",
+   "to": "c-agentic-rl"
+  },
+  {
+   "from": "c-tulu-3",
+   "type": "uses",
+   "to": "c-llm-judge"
+  },
+  {
+   "from": "c-tulu-3",
+   "type": "uses",
+   "to": "c-dpo"
+  },
+  {
+   "from": "c-jamba",
+   "type": "uses",
+   "to": "c-mamba"
+  },
+  {
+   "from": "c-mercury",
+   "type": "uses",
+   "to": "c-block-diffusion"
+  },
+  {
+   "from": "c-dpo",
+   "type": "alternative-to",
+   "to": "c-rlhf"
+  },
+  {
+   "from": "c-lora",
+   "type": "alternative-to",
+   "to": "c-full-finetuning"
+  },
+  {
+   "from": "c-mla",
+   "type": "alternative-to",
+   "to": "c-gqa",
+   "note": "more compression, more complexity"
+  },
+  {
+   "from": "c-diffusion-lm",
+   "type": "alternative-to",
+   "to": "c-next-token"
+  },
+  {
+   "from": "c-rlvr",
+   "type": "alternative-to",
+   "to": "c-rlhf",
+   "note": "a checker instead of a learned reward"
+  },
+  {
+   "from": "c-r-chip-stock",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-nvidia-demand",
+   "type": "reported-by",
+   "to": "c-src-nvidia"
+  },
+  {
+   "from": "c-r-capex",
+   "type": "reported-by",
+   "to": "c-src-analysts"
+  },
+  {
+   "from": "c-r-dc-mckinsey",
+   "type": "reported-by",
+   "to": "c-src-analysts"
+  },
+  {
+   "from": "c-r-dc-jll",
+   "type": "reported-by",
+   "to": "c-src-jll"
+  },
+  {
+   "from": "c-r-memory-share",
+   "type": "reported-by",
+   "to": "c-src-analysts"
+  },
+  {
+   "from": "c-r-epoch-headline",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-epoch-range",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-top-bin",
+   "type": "reported-by",
+   "to": "c-src-price-paper"
+  },
+  {
+   "from": "c-r-low-bin",
+   "type": "reported-by",
+   "to": "c-src-price-paper"
+  },
+  {
+   "from": "c-r-frontier-controlled",
+   "type": "reported-by",
+   "to": "c-src-price-paper"
+  },
+  {
+   "from": "c-r-open-models",
+   "type": "reported-by",
+   "to": "c-src-lesswrong"
+  },
+  {
+   "from": "c-r-algorithms-only",
+   "type": "reported-by",
+   "to": "c-src-price-paper"
+  },
+  {
+   "from": "c-r-gpt1-gpt3",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-gpt3-gpt4",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-post-gpt4",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-r-epoch-forecast",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-algorithmic-efficiency",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  },
+  {
+   "from": "c-training-compute",
+   "type": "reported-by",
+   "to": "c-src-epoch"
+  }
+ ],
+ "views": [
+  {
+   "id": "v-anatomy",
+   "label": "Anatomy",
+   "description": "Where in a transformer does each efficiency trick plug in, and how settled is it?",
+   "viewType": "anatomy",
+   "settings": {
+    "roots": [
+     "c-transformer",
+     "c-serving-stack"
+    ],
+    "containment": [
+     "part-of"
+    ],
+    "pins": [
+     "modifies"
+    ],
+    "colorBy": "maturity"
+   }
+  },
+  {
+   "id": "v-compute-economics",
+   "label": "Compute economics",
+   "description": "Why is frontier AI still expensive when inference keeps getting cheaper?",
+   "viewType": "cause-and-effect",
+   "settings": {
+    "mode": "mechanism",
+    "positive": [
+     "raises"
+    ],
+    "negative": [
+     "lowers"
+    ],
+    "outcomes": [
+     "c-frontier-price",
+     "c-fixed-capability-cost"
+    ],
+    "levers": {
+     "tags": [
+      "lever"
+     ]
+    }
+   }
+  },
+  {
+   "id": "v-learning-path",
+   "label": "Learning path",
+   "description": "What do I need to understand first to follow each technique the chat covered?",
+   "viewType": "learning-path",
+   "settings": {
+    "relationshipTypes": [
+     "prerequisite"
+    ],
+    "targets": {
+     "tags": [
+      "learning-goal"
+     ]
+    },
+    "minSteps": 4
+   }
+  },
+  {
+   "id": "v-open-models",
+   "label": "Open models",
+   "description": "How do the open-weight MoE flagships compare in size and design?",
+   "viewType": "comparison-table",
+   "settings": {
+    "rows": {
+     "tags": [
+      "open-model"
+     ]
+    },
+    "columns": [
+     {
+      "attribute": "total_params"
+     },
+     {
+      "attribute": "active_params"
+     },
+     {
+      "attribute": "experts"
+     },
+     {
+      "attribute": "attention"
+     },
+     {
+      "attribute": "layers"
+     },
+     {
+      "attribute": "context"
+     },
+     {
+      "attribute": "standout"
+     },
+     {
+      "attribute": "specs_from"
+     }
+    ],
+    "sortBy": "total_params"
+   }
+  },
+  {
+   "id": "v-outline",
+   "label": "Outline",
+   "description": "What did this chat cover, organised by subject rather than by turn?",
+   "viewType": "outline",
+   "settings": {
+    "relationshipTypes": [
+     "part-of"
+    ],
+    "rootTag": "topic",
+    "openDepth": 1
+   }
+  },
+  {
+   "id": "v-rates",
+   "label": "Rates & estimates",
+   "description": "How fast are compute, prices and model size changing, and whose number is it?",
+   "viewType": "rates",
+   "settings": {
+    "group": "rate_quantity",
+    "low": "rate_low",
+    "high": "rate_high",
+    "direction": "rate_direction",
+    "method": "rate_method",
+    "sourceRelationship": "reported-by",
+    "independence": "independence"
+   }
+  }
+ ]
+}

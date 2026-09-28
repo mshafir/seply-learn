@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Side panel states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; padding: 36px 48px; display: flex; gap: 32px; background: #EFEDE7; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+
+  <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F3C37">1 · Overview: the first thing you read</div>
+    <aside style="flex-grow: 1; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 22px; border-bottom: 1px solid #EDEAE3; display: flex; flex-direction: column; gap: 6px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #2563eb">IDEA <span style="color: #5F5B54">· 2023</span></div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 500; line-height: 1.2">Grouped-Query Attention (GQA)</div>
+        <div style="display: flex; gap: 6px"><span style="padding: 2px 9px; border-radius: 999px; background: #EDEAE3; font-size: 12.5px">#technique</span></div>
+      </div>
+      <div style="padding: 16px 22px; display: flex; flex-direction: column; gap: 14px">
+        <div style="font-size: 15px; font-weight: 500; color: #3F3C37; line-height: 1.45">Query heads in groups, one K/V head per group: most of MQA's savings, little loss</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 16px; padding: 10px 12px; background: #FBFAF7; border-radius: 8px; font-size: 13px">
+          <span style="color: #5F5B54">Maturity</span><span style="font-weight: 500">standard</span>
+          <span style="color: #5F5B54">Buys</span><span style="font-weight: 500">efficiency</span>
+          <span style="color: #5F5B54">Attacks</span><span style="font-weight: 500">KV-cache size</span>
+        </div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 16px; line-height: 1.6">
+          <b>GQA</b> is the compromise between <a href="#">multi-head attention</a> and <a href="#">MQA</a>. Query heads are split into groups, and each group shares one key/value head. With <b>32 query heads in 8 groups of 4</b>, you store 8 K/V sets instead of 32, a <b>4× smaller</b> <a href="#">KV-cache</a>. It is now the near-universal default: <a href="#">Llama 4</a>, <a href="#">Qwen3</a> and <a href="#">SmolLM3</a> all use it.
+        </div>
+        <a href="#article" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #E4E1DA; border-radius: 10px; background: #FBFAF7; color: #1D1C1A; text-decoration: none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A45B5" stroke-width="2"><path d="M2 5h7a3 3 0 013 3v12a2 2 0 00-2-2H2zM22 5h-7a3 3 0 00-3 3v12a2 2 0 012-2h8z"></path></svg>
+          <span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Read the full article</span><span style="font-size: 12.5px; color: #5F5B54">~3 min</span></span>
+        </a>
+        <div style="display: flex; flex-direction: column; gap: 5px; font-size: 13.5px">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; color: #5F5B54">LINKS TO</div>
+          <div><span style="color: #0f766e">led to</span> <a href="#" style="color: #1D1C1A; text-decoration: underline">Multi-head Latent Attention</a></div>
+          <div><span style="color: #2563eb">is needed to understand</span> <a href="#" style="color: #1D1C1A; text-decoration: underline">MLA</a></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.06em; color: #5F5B54; margin-top: 8px">LINKED FROM</div>
+          <div><span style="color: #ea580c">← used by</span> <a href="#" style="color: #1D1C1A; text-decoration: underline">Llama 4</a>, <a href="#" style="color: #1D1C1A; text-decoration: underline">Qwen3</a>, <a href="#" style="color: #1D1C1A; text-decoration: underline">SmolLM3</a></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+    <div id="article" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F3C37">2 · Article: the full read, still in the panel</div>
+    <aside style="flex-grow: 1; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column">
+      <a href="#" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-bottom: 1px solid #EDEAE3; font-size: 13px; color: #5F5B54; text-decoration: none">← Back to overview</a>
+      <div style="padding: 16px 26px 0; display: flex; flex-direction: column; gap: 4px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #2563eb">ARTICLE · 3 MIN</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 500; line-height: 1.2">Grouped-Query Attention (GQA)</div>
+        <div style="display: flex; gap: 12px; font-size: 12.5px; color: #5F5B54; padding: 6px 0 10px; border-bottom: 1px solid #EDEAE3"><span>How it works</span><span>The numbers</span><span>Trade-offs</span><span>From the chat</span></div>
+      </div>
+      <div style="padding: 14px 26px; display: flex; flex-direction: column; gap: 12px; font-family: Newsreader, Georgia, serif; font-size: 16px; line-height: 1.62; overflow: hidden">
+        <p style="margin: 0">GQA sits between two extremes. <a href="#">Multi-head attention</a> gives every query head its own keys and values; <a href="#">MQA</a> makes every head share one. GQA picks a middle number of K/V heads and assigns each to a group of query heads.</p>
+        <h2 style="margin: 4px 0 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600">The numbers</h2>
+        <div style="border: 1px solid #E4E1DA; border-radius: 8px; overflow: hidden; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 7px 10px; background: #FBFAF7; font-weight: 600"><span>Design</span><span>K/V heads</span><span>Cache</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 7px 10px; border-top: 1px solid #EDEAE3"><span>MHA</span><span>32</span><span>1×</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 7px 10px; border-top: 1px solid #EDEAE3; background: #ECEDFA"><span>GQA</span><span>8</span><span>¼×</span></div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 7px 10px; border-top: 1px solid #EDEAE3"><span>MQA</span><span>1</span><span>¹⁄₃₂×</span></div>
+        </div>
+        <h2 style="margin: 4px 0 0; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600">From the chat</h2>
+        <div style="padding: 10px 14px; border-left: 3px solid #B45309; background: #FFFBEB; border-radius: 0 8px 8px 0; font-size: 15.5px">“Most of MQA's memory savings, little of its quality loss.”
+          <div style="margin-top: 6px; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; color: #5F5B54">Source: the chat · <a href="#">open at this turn</a></div>
+        </div>
+        <div style="display: flex; gap: 8px; font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; color: #5F5B54"><span style="padding: 2px 8px; border-radius: 6px; background: #FFFBEB; color: #92400E">from the chat</span><span style="padding: 2px 8px; border-radius: 6px; background: #EDEAE3">background knowledge</span><span>· provenance per section</span></div>
+      </div>
+    </aside>
+  </div>
+
+  <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #3F3C37">3 · Editing: same panel, fields in place</div>
+    <aside style="flex-grow: 1; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-bottom: 1px solid #EDEAE3; background: #FBFAF7">
+        <span style="width: 22px; height: 22px; border-radius: 11px; background: #D8F0E4; color: #1F6B45; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center">JL</span>
+        <span style="font-size: 12.5px; color: #3F3C37">JL is editing the article</span>
+        <div style="flex-grow: 1"></div>
+        <span style="font-size: 12px; color: #5F5B54">Saved to draft</span>
+      </div>
+      <form style="padding: 16px 22px; display: flex; flex-direction: column; gap: 14px; font-size: 13.5px">
+        <label style="display: flex; flex-direction: column; gap: 5px"><span style="font-weight: 600">Title</span><input value="Grouped-Query Attention (GQA)" style="height: 36px; box-sizing: border-box; padding: 0 10px; border: 1px solid #D6D2C9; border-radius: 8px; font: 14px 'IBM Plex Sans', sans-serif"></label>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <label style="display: flex; flex-direction: column; gap: 5px"><span style="font-weight: 600">Kind</span><select style="height: 36px; border: 1px solid #D6D2C9; border-radius: 8px; padding: 0 8px; font: 14px 'IBM Plex Sans', sans-serif; background: #FFFFFF"><option>Idea</option></select></label>
+          <label style="display: flex; flex-direction: column; gap: 5px"><span style="font-weight: 600">Date</span><input value="2023" style="height: 36px; box-sizing: border-box; padding: 0 10px; border: 1px solid #D6D2C9; border-radius: 8px; font: 14px 'IBM Plex Sans', sans-serif"></label>
+        </div>
+        <label style="display: flex; flex-direction: column; gap: 5px"><span style="font-weight: 600">Summary <span style="font-weight: 400; color: #5F5B54">· one line</span></span><input value="Query heads in groups, one K/V head per group" style="height: 36px; box-sizing: border-box; padding: 0 10px; border: 1px solid #D6D2C9; border-radius: 8px; font: 14px 'IBM Plex Sans', sans-serif"></label>
+        <label style="display: flex; flex-direction: column; gap: 5px"><span style="font-weight: 600">Overview <span style="font-weight: 400; color: #5F5B54">· markdown, one deep paragraph</span></span><textarea rows="5" style="box-sizing: border-box; padding: 8px 10px; border: 1px solid #D6D2C9; border-radius: 8px; font: 13px/1.5 'IBM Plex Mono', monospace; resize: none">**GQA** is the compromise between [multi-head attention](#c/mha) and [MQA](#c/mqa). Query heads are split into groups…</textarea></label>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #E4E1DA; border-radius: 8px">
+          <span style="flex-grow: 1"><b>Article</b> <span style="color: #5F5B54">· 640 words, 4 sections</span></span>
+          <button type="button" style="height: 30px; padding: 0 10px; border: 1px solid #D6D2C9; border-radius: 7px; background: #FFFFFF; font: 13px 'IBM Plex Sans', sans-serif">Edit</button>
+          <button type="button" style="height: 30px; padding: 0 10px; border: 1px solid #C7CAF0; border-radius: 7px; background: #ECEDFA; color: #27308A; font: 13px 'IBM Plex Sans', sans-serif">Redraft with AI</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span style="font-weight: 600">Relationships</span>
+          <div style="display: flex; gap: 6px; align-items: center"><select style="height: 32px; border: 1px solid #D6D2C9; border-radius: 7px; font: 13px 'IBM Plex Sans', sans-serif; background: #FFFFFF"><option>led to</option></select><span style="flex-grow: 1; padding: 6px 10px; background: #FBFAF7; border-radius: 7px">Multi-head Latent Attention</span><button type="button" aria-label="Remove" style="border: none; background: none; color: #5F5B54">×</button></div>
+          <div style="display: flex; gap: 6px; align-items: center"><select style="height: 32px; border: 1px solid #D6D2C9; border-radius: 7px; font: 13px 'IBM Plex Sans', sans-serif; background: #FFFFFF"><option>is needed to understand</option></select><span style="flex-grow: 1; padding: 6px 10px; background: #FBFAF7; border-radius: 7px">MLA</span><button type="button" aria-label="Remove" style="border: none; background: none; color: #5F5B54">×</button></div>
+          <a href="#" style="font-size: 13px; font-weight: 500">+ Link to a Concept</a>
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: flex-end">
+          <button type="button" style="height: 36px; padding: 0 14px; border: 1px solid #D6D2C9; border-radius: 8px; background: #FFFFFF; font: 14px 'IBM Plex Sans', sans-serif">Done</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

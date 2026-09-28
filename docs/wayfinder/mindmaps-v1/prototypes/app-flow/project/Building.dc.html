@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Building the graph</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+@keyframes mmPulse{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes mmIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <header style="height: 56px; flex-shrink: 0; box-sizing: border-box; padding: 0 20px; display: flex; align-items: center; gap: 16px; background: #FFFFFF; border-bottom: 1px solid #E4E1DA">
+    <a href="Library.dc.html" style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: #1D1C1A; text-decoration: none">Mindmaps</a>
+    <span style="color: #B8B3A9">/</span>
+    <span style="font-size: 15px; font-weight: 600">AI compute &amp; model internals</span>
+    <span style="font-size: 12px; padding: 2px 8px; border-radius: 6px; background: #ECEDFA; color: #27308A">Building · you can start reading as Views finish</span>
+    <div style="flex-grow: 1"></div>
+    <a href="Library.dc.html" style="font-size: 13.5px; color: #5F5B54">Leave it building; we'll notify you</a>
+  </header>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0">
+    <nav style="width: 272px; flex-shrink: 0; box-sizing: border-box; padding: 20px 14px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid #E4E1DA; background: #FBFAF7">
+      <div style="padding: 0 10px 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; color: #5F5B54">VIEWS</div>
+      <sc-for list="{{views}}" as="v" hint-placeholder-count="4">
+        <div style="{{v.style}}">
+          <span style="display: flex; align-items: center; gap: 8px">
+            <span style="{{v.dot}}"></span>
+            <span style="font-size: 14px; font-weight: 600; flex-grow: 1">{{v.label}}</span>
+            <span style="font-size: 12px; color: #5F5B54">{{v.status}}</span>
+          </span>
+          <span style="font-size: 12.5px; color: #5F5B54; padding-left: 18px">{{v.step}}</span>
+          <span style="margin-left: 18px; height: 4px; border-radius: 2px; background: #EDEAE3; overflow: hidden"><span style="{{v.bar}}"></span></span>
+        </div>
+      </sc-for>
+    </nav>
+
+    <section style="flex-grow: 1; min-width: 0; position: relative; overflow: hidden; background-color: #F6F5F1; background-image: radial-gradient(#DAD6CD 1px, transparent 1px); background-size: 22px 22px">
+      <div style="position: absolute; left: 16px; top: 16px; display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; background: #FFFFFF; border: 1px solid #D6D2C9; border-radius: 12px; box-shadow: 0 4px 14px rgba(29,28,26,0.08)">
+        <span style="width: 34px; height: 34px; border-radius: 9px; background: #ECEDFA; color: #3A45B5; display: flex; align-items: center; justify-content: center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="2.2"></circle><circle cx="5" cy="18" r="2.2"></circle><circle cx="12" cy="12" r="2.2"></circle><circle cx="19" cy="12" r="2.6"></circle><path d="M7 7l3 3.5M7 17l3-3.5M14.2 12h2.2"></path></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 1px">
+          <span style="font-size: 14.5px; font-weight: 600">Learning path <span style="font-weight: 400; color: #5F5B54">· building</span></span>
+          <span style="font-family: Newsreader, Georgia, serif; font-size: 14.5px; color: #3F3C37">What do I need to understand first?</span>
+        </span>
+      </div>
+
+      <svg width="728" height="760" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+        <path d="{{edges}}" stroke="#3A45B5" stroke-width="1.6" fill="none" opacity="0.7"></path>
+        <path d="{{ghostEdges}}" stroke="#C9C5BC" stroke-width="1.4" stroke-dasharray="4 5" fill="none"></path>
+      </svg>
+      <sc-for list="{{nodes}}" as="n" hint-placeholder-count="14">
+        <div style="{{n.style}}">{{n.t}}</div>
+      </sc-for>
+
+      <div style="position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #1D1C1A; color: #FFFFFF; border-radius: 999px; font-size: 13.5px; white-space: nowrap">
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: #F59E0B; animation: mmPulse 1.2s ease-in-out infinite"></span>
+        Linking prerequisites · 9 of the 16 targets placed
+      </div>
+    </section>
+
+    <aside style="width: 440px; flex-shrink: 0; box-sizing: border-box; background: #FFFFFF; border-left: 1px solid #E4E1DA; display: flex; flex-direction: column">
+      <div style="padding: 18px 22px; border-bottom: 1px solid #EDEAE3; display: flex; flex-direction: column; gap: 4px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #3A45B5; letter-spacing: 0.04em">BUILDING</div>
+        <div style="font-family: Newsreader, Georgia, serif; font-size: 25px; font-weight: 500">Your graph is taking shape</div>
+      </div>
+      <ol style="margin: 0; padding: 18px 22px; list-style: none; display: flex; flex-direction: column; gap: 16px; font-size: 14px">
+        <li style="display: flex; gap: 12px"><span style="width: 22px; height: 22px; border-radius: 11px; background: #D8F0E4; color: #1F6B45; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0">✓</span><span style="display: flex; flex-direction: column; gap: 2px"><b>Read 3 sources</b><span style="color: #5F5B54">The chat, the PDF and your prompt</span></span></li>
+        <li style="display: flex; gap: 12px"><span style="width: 22px; height: 22px; border-radius: 11px; background: #FEF3C7; border: 2px solid #F59E0B; box-sizing: border-box; flex-shrink: 0; animation: mmPulse 1.2s ease-in-out infinite"></span><span style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1"><b>Finding Concepts · [N] so far</b>
+          <span style="display: flex; flex-direction: column; gap: 4px">
+            <sc-for list="{{found}}" as="f" hint-placeholder-count="5">
+              <span style="{{f.style}}"><span style="width: 6px; height: 6px; border-radius: 3px; background: #2563eb"></span>{{f.t}}<span style="margin-left: auto; font-size: 12px; color: #5F5B54">{{f.src}}</span></span>
+            </sc-for>
+          </span></span></li>
+        <li style="display: flex; gap: 12px"><span style="width: 22px; height: 22px; border-radius: 11px; border: 2px solid #C9C5BC; box-sizing: border-box; flex-shrink: 0"></span><span style="display: flex; flex-direction: column; gap: 2px"><b>Building 4 Views</b><span style="color: #5F5B54">Each one opens as soon as it's ready. Articles are written last, in the background.</span></span></li>
+      </ol>
+      <div style="flex-grow: 1"></div>
+      <div style="margin: 0 22px 20px; padding: 12px 14px; background: #FBFAF7; border-radius: 10px; font-size: 13px; color: #3F3C37; line-height: 1.5">Click any Concept that's appeared to start reading it. Its overview is ready; its full article follows.</div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const row = (sel) => 'display: flex; flex-direction: column; gap: 5px; padding: 10px; border-radius: 9px; ' + (sel ? 'background: #FFFFFF; box-shadow: 0 0 0 1px #D6D2C9;' : '');
+    const dot = (c, pulse) => `width: 10px; height: 10px; border-radius: 5px; flex-shrink: 0; background: ${c};${pulse ? ' animation: mmPulse 1.2s ease-in-out infinite;' : ''}`;
+    const bar = (pct, c) => `display: block; height: 4px; width: ${pct}%; background: ${c}`;
+    const views = [
+      { label: 'Learning path', status: 'building', step: 'Linking prerequisites', dot: dot('#F59E0B', true), bar: bar(55, '#F59E0B'), style: row(true) },
+      { label: 'Anatomy', status: 'building', step: 'Finding the parts', dot: dot('#F59E0B', true), bar: bar(25, '#F59E0B'), style: row(false) },
+      { label: 'Open models', status: 'queued', step: 'Waits for Concepts', dot: dot('#C9C5BC'), bar: bar(0, '#C9C5BC'), style: row(false) },
+      { label: 'Rates & estimates', status: 'queued', step: 'Waits for Concepts', dot: dot('#C9C5BC'), bar: bar(0, '#C9C5BC'), style: row(false) },
+    ];
+    const X = [16, 156, 296, 436, 576], W = 120, H = 44;
+    const spec = {
+      tok: ['Tokenizer', 0, 200, 'in'], emb: ['Embedding', 1, 200, 'in'], att: ['Attention', 2, 200, 'in'],
+      kv: ['KV-cache', 3, 110, 'in'], qkv: ['Query, key, value', 1, 310, 'in'], heads: ['Heads (Q · K · V)', 2, 310, 'new'],
+      mha: ['', 3, 310, 'ghost'], mqa: ['', 2, 420, 'ghost'], gqa: ['Grouped-Query Attention', 3, 420, 'new'], mla: ['', 4, 420, 'ghost'],
+      hbm: ['', 0, 110, 'ghost'], mb: ['', 1, 110, 'ghost'], dsa: ['', 4, 540, 'ghost'],
+    };
+    const nodes = Object.values(spec).map(([t, col, y, k]) => ({
+      t,
+      style: `position: absolute; left: ${X[col]}px; top: ${y}px; width: ${W}px; height: ${H}px; box-sizing: border-box; padding: 6px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 500; line-height: 1.25; display: flex; align-items: center; ` +
+        (k === 'ghost' ? 'background: #EDEAE3; border: 1px dashed #C9C5BC; animation: mmPulse 1.6s ease-in-out infinite;'
+          : k === 'new' ? 'background: #FFFFFF; border: 1px solid #F3D48A; border-left: 4px solid #2563eb; box-shadow: 0 0 0 4px rgba(245,158,11,0.18); animation: mmIn .6s ease-out;'
+          : 'background: #FFFFFF; border: 1px solid #E4E1DA; border-left: 4px solid #2563eb;'),
+    }));
+    const c = (id) => [X[spec[id][1]] + W / 2, spec[id][2] + H / 2];
+    const path = (pairs) => pairs.map(([a, b]) => { const [x1, y1] = c(a), [x2, y2] = c(b); return `M${x1} ${y1} L${x2} ${y2}`; }).join(' ');
+    const found = [
+      ['Grouped-Query Attention', 'chat', true], ['Heads (Q · K · V)', 'chat', true], ['Expert routing', 'prompt'], ['Auxiliary-loss-free balancing', 'PDF'], ['Multi-Token Prediction', 'PDF'],
+    ].map(([t, src, fresh]) => ({ t, src, style: `display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 7px; font-size: 13.5px; ${fresh ? 'background: #FFFBEB;' : ''}` }));
+    return {
+      views, nodes, found,
+      edges: path([['tok', 'emb'], ['emb', 'att'], ['att', 'kv'], ['att', 'qkv'], ['qkv', 'heads']]),
+      ghostEdges: path([['heads', 'mha'], ['mha', 'mqa'], ['mqa', 'gqa'], ['gqa', 'mla'], ['kv', 'mla'], ['hbm', 'mb'], ['mb', 'kv'], ['mla', 'dsa']]),
+    };
+  }
+}
+</script>
+</body>
+</html>

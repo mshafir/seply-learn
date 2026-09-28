@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Graph thumbnails</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+</style>
+</helmet>
+<div style="width: 1200px; height: 860px; box-sizing: border-box; padding: 44px 48px; display: flex; flex-direction: column; gap: 26px; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #5F5B54">Graph thumbnails</div>
+    <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 32px">A graph's card shows a miniature of its best View</h1>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+    <sc-for list="{{tiles}}" as="t" hint-placeholder-count="11">
+      <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column">
+        <div style="height: 130px; background: #FBFAF7; border-bottom: 1px solid #EDEAE3; display: flex; align-items: center; justify-content: center">
+          <dc-import name="Thumb" kind="{{t.kind}}" color="{{t.color}}" hint-size="220px,110px"></dc-import>
+        </div>
+        <div style="padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 14.5px; font-weight: 600">{{t.name}}</span>
+          <span style="font-size: 12.5px; color: #5F5B54; line-height: 1.35">{{t.q}}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tiles = [
+      ['learning', 'Learning path', 'What do I need to understand first?', '#2563eb'],
+      ['table', 'Comparison Table', 'How do the options stack up?', '#ea580c'],
+      ['map', 'Map', 'Where is everything, relative to what matters?', '#059669'],
+      ['outline', 'Outline', "What's in here, top to bottom?", '#2563eb'],
+      ['anatomy', 'Anatomy', 'What is this made of?', '#2563eb'],
+      ['lineage', 'Lineage', 'Where did this come from, and what did it lead to?', '#2563eb'],
+      ['quadrant', 'Quadrant', 'Where does each idea sit on two dimensions?', '#9333ea'],
+      ['evidence', 'Evidence', 'What do we believe, and on what basis?', '#4f46e5'],
+      ['rates', 'Rates & estimates', 'How fast is it changing, and how sure are we?', '#2563eb'],
+      ['cause', 'Cause & Effect', 'What drives what, and what can I pull on?', '#2563eb'],
+      ['timeline', 'Timeline', 'When did things happen, and what overlaps?', '#2563eb'],
+    ].map(([kind, name, q, color]) => ({ kind, name, q, color }));
+    return { tiles };
+  }
+}
+</script>
+</body>
+</html>

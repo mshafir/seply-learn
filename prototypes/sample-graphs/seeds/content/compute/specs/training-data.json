@@ -1,0 +1,420 @@
+[
+ {
+  "id": "t-train",
+  "title": "Training",
+  "kind": "idea",
+  "summary": "Pre-training, post-training, RL and fine-tuning",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "LoRA [lora] part-of this",
+   "QLoRA [qlora] part-of this",
+   "Specialize, then merge [merging] part-of this",
+   "Chinchilla scaling [chinchilla] part-of this",
+   "Pre-training [pretraining] part-of this",
+   "Post-training [post-training] part-of this",
+   "RLVR creates genuinely new reasoning ability [c-rlvr-new] part-of this",
+   "Distillation from closed models drives open reasoning gains [c-distill-open] part-of this",
+   "Specialists beat a generalist on their own turf [c-specialists] part-of this",
+   "A chunk of open reasoning gains is distillation doing the heavy lifting [m-distill] part-of this",
+   "Distillation can transfer reasoning, but there's no good evidence it drives the headline gains [r-distill] part-of this"
+  ]
+ },
+ {
+  "id": "t-data",
+  "title": "Data",
+  "kind": "idea",
+  "summary": "What goes into training corpora and how they're refined",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Filtered web crawl [web-crawl] part-of this",
+   "Extraction & cleaning [extraction] part-of this",
+   "Deduplication [dedup] part-of this",
+   "Model-based quality filtering [quality-filter] part-of this",
+   "Decontamination [decontamination] part-of this",
+   "Synthetic SFT responses [synthetic-sft] part-of this",
+   "LLM-as-a-judge preferences [llm-judge] part-of this",
+   "Verifiable problems [verifiable-problems] part-of this",
+   "Data curation is the biggest lever [c-data-lever] part-of this"
+  ]
+ },
+ {
+  "id": "pretraining",
+  "title": "Pre-training",
+  "kind": "idea",
+  "summary": "Next-token prediction over trillions of tokens: the expensive phase",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "prerequisite → Post-training [post-training]"
+  ]
+ },
+ {
+  "id": "sft",
+  "title": "Supervised fine-tuning (SFT)",
+  "kind": "idea",
+  "summary": "Keep predicting tokens, but on curated examples of the behaviour you want",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "prerequisite → Reward modeling [reward-model]",
+   "prerequisite → Distillation [distillation]",
+   "Post-training [post-training] prerequisite this"
+  ]
+ },
+ {
+  "id": "reward-model",
+  "title": "Reward modeling",
+  "kind": "idea",
+  "summary": "Learn from comparisons which response is better",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "prerequisite → RLHF [rlhf]",
+   "Supervised fine-tuning (SFT) [sft] prerequisite this"
+  ]
+ },
+ {
+  "id": "rlhf",
+  "title": "RLHF",
+  "kind": "idea",
+  "summary": "Optimize against a learned reward model of human preference",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training"
+  },
+  "date": "2022",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "led-to → RLVR [rlvr] (a checker instead of a learned judge)",
+   "led-to → DPO [dpo] (skip the reward model)",
+   "prerequisite → RLVR [rlvr]",
+   "Reward modeling [reward-model] prerequisite this"
+  ]
+ },
+ {
+  "id": "dpo",
+  "title": "DPO",
+  "kind": "idea",
+  "summary": "Optimize directly on preference pairs, no separate reward model",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training"
+  },
+  "date": "2023",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "RLHF [rlhf] led-to this (skip the reward model)"
+  ]
+ },
+ {
+  "id": "rlvr",
+  "title": "RLVR",
+  "kind": "idea",
+  "summary": "Reinforcement learning from verifiable rewards: a checker, not a learned judge",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training",
+   "bottleneck": "reward hacking"
+  },
+  "date": "2025-01",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "prerequisite → GRPO [grpo]",
+   "DeepSeek-R1 [deepseek-r1] uses this",
+   "RLHF [rlhf] led-to this (a checker instead of a learned judge)",
+   "GRPO [grpo] led-to this (made RLVR affordable)",
+   "RLHF [rlhf] prerequisite this"
+  ]
+ },
+ {
+  "id": "grpo",
+  "title": "GRPO",
+  "kind": "idea",
+  "summary": "Score a group of attempts and reinforce the above-average ones; no critic model",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "quality",
+   "applies": "post-training",
+   "bottleneck": "RL cost"
+  },
+  "date": "2024-02",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "led-to → GRPO variants (DAPO, Dr. GRPO, VAPO…) [grpo-variants] (patching failure modes)",
+   "led-to → RLVR [rlvr] (made RLVR affordable)",
+   "prerequisite → GRPO variants (DAPO, Dr. GRPO, VAPO…) [grpo-variants]",
+   "DeepSeek-R1 [deepseek-r1] uses this",
+   "RLVR [rlvr] prerequisite this"
+  ]
+ },
+ {
+  "id": "grpo-variants",
+  "title": "GRPO variants (DAPO, Dr. GRPO, VAPO…)",
+  "kind": "idea",
+  "summary": "Fixes for length bias, exploration collapse and instability",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "shipped",
+   "effect": "quality",
+   "applies": "post-training",
+   "bottleneck": "RL failure modes"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Post-training [post-training]",
+   "GRPO [grpo] led-to this (patching failure modes)",
+   "GRPO [grpo] prerequisite this"
+  ]
+ },
+ {
+  "id": "lora",
+  "title": "LoRA",
+  "kind": "idea",
+  "summary": "Freeze the model, train tiny low-rank adapters: cheap, modular, no forgetting",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "post-training",
+   "bottleneck": "fine-tuning cost"
+  },
+  "date": "2021",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "led-to → QLoRA [qlora] (quantized base)",
+   "prerequisite → QLoRA [qlora]",
+   "Post-training [post-training] prerequisite this"
+  ]
+ },
+ {
+  "id": "qlora",
+  "title": "QLoRA",
+  "kind": "idea",
+  "summary": "LoRA over a 4-bit quantized base: fine-tune large models on one GPU",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "post-training",
+   "bottleneck": "fine-tuning memory"
+  },
+  "date": "2023",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "LoRA [lora] led-to this (quantized base)",
+   "LoRA [lora] prerequisite this"
+  ]
+ },
+ {
+  "id": "merging",
+  "title": "Specialize, then merge",
+  "kind": "idea",
+  "summary": "Train specialist models and weight-average them into one",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "shipped",
+   "effect": "quality",
+   "applies": "post-training",
+   "bottleneck": "task interference"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "supports → Specialists beat a generalist on their own turf [c-specialists] (labs specialize, then merge)"
+  ]
+ },
+ {
+  "id": "chinchilla",
+  "title": "Chinchilla scaling",
+  "kind": "idea",
+  "summary": "For a fixed compute budget, train smaller models on more data (~20 tokens per parameter)",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "compute allocation"
+  },
+  "date": "2022",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Training [t-train]"
+  ]
+ },
+ {
+  "id": "post-training",
+  "title": "Post-training",
+  "kind": "idea",
+  "summary": "Everything after pre-training that turns a base model into an assistant: cheap, but where behaviour is shaped",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "prerequisite → Supervised fine-tuning (SFT) [sft]",
+   "prerequisite → LoRA [lora]",
+   "Supervised fine-tuning (SFT) [sft] part-of this",
+   "Reward modeling [reward-model] part-of this",
+   "RLHF [rlhf] part-of this",
+   "DPO [dpo] part-of this",
+   "RLVR [rlvr] part-of this",
+   "GRPO [grpo] part-of this",
+   "GRPO variants (DAPO, Dr. GRPO, VAPO…) [grpo-variants] part-of this",
+   "Pre-training [pretraining] prerequisite this"
+  ]
+ },
+ {
+  "id": "web-crawl",
+  "title": "Filtered web crawl",
+  "kind": "idea",
+  "summary": "The backbone of every open pretraining corpus (Common Crawl → C4, FineWeb, DCLM…)",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "extraction",
+  "title": "Extraction & cleaning",
+  "kind": "idea",
+  "summary": "Pull clean text out of HTML; most raw crawl is junk",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "dedup",
+  "title": "Deduplication",
+  "kind": "idea",
+  "summary": "At document, paragraph and fuzzy levels",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "quality-filter",
+  "title": "Model-based quality filtering",
+  "kind": "idea",
+  "summary": "Classifiers keep the best few percent — the real leverage",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "decontamination",
+  "title": "Decontamination",
+  "kind": "idea",
+  "summary": "Remove benchmark leakage from training data",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "synthetic-sft",
+  "title": "Synthetic SFT responses",
+  "kind": "idea",
+  "summary": "Tülu 3's new SFT responses were written by GPT-4o or Claude 3.5 Sonnet",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "llm-judge",
+  "title": "LLM-as-a-judge preferences",
+  "kind": "idea",
+  "summary": "Preference pairs increasingly labelled by a model, not a human",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ },
+ {
+  "id": "verifiable-problems",
+  "title": "Verifiable problems",
+  "kind": "idea",
+  "summary": "Math and code with checkable answers: small data, high leverage for RLVR",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]"
+  ]
+ }
+]

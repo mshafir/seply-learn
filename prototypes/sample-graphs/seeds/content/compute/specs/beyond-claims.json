@@ -1,0 +1,784 @@
+[
+ {
+  "id": "t-beyond",
+  "title": "Beyond the transformer",
+  "kind": "idea",
+  "summary": "Hybrids, state-space models, byte-level, diffusion and concept models",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Linear / hybrid attention [linear-attn] part-of this",
+   "State-space models [ssm] part-of this",
+   "Mamba [mamba] part-of this",
+   "Mamba–Transformer hybrids [hybrids] part-of this",
+   "Byte Latent Transformer [blt] part-of this",
+   "Diffusion language models [diffusion-lm] part-of this",
+   "Block diffusion [block-diffusion] part-of this",
+   "Large Concept Model [lcm] part-of this",
+   "Latent / recurrent-depth reasoning [latent-reasoning] part-of this",
+   "Jamba [jamba] part-of this",
+   "Nemotron-H [nemotron-h] part-of this",
+   "Granite 4.0 [granite-4] part-of this",
+   "Mercury Coder [mercury] part-of this",
+   "Gemini Diffusion [gemini-diffusion] part-of this",
+   "Hybrids match transformers at large scale [c-hybrid-parity] part-of this",
+   "Diffusion LMs match autoregressive quality at 5–10× speed [c-diffusion-parity] part-of this"
+  ]
+ },
+ {
+  "id": "linear-attn",
+  "title": "Linear / hybrid attention",
+  "kind": "idea",
+  "summary": "Full attention in only some layers (Kimi Linear: 1 in 4), cheap linear attention elsewhere",
+  "existingBody": "",
+  "attributes": {
+   "area": "attention",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "quadratic attention"
+  },
+  "date": "2025",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Attention [attention]",
+   "led-to → Mamba–Transformer hybrids [hybrids]",
+   "Kimi Linear [kimi-linear] uses this"
+  ]
+ },
+ {
+  "id": "ssm",
+  "title": "State-space models",
+  "kind": "idea",
+  "summary": "Replace attention with a fixed-size recurrent state: linear cost, lossy memory",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "small-scale",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "quadratic attention"
+  },
+  "date": "2021",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Attention [attention]",
+   "led-to → Mamba [mamba] (selective state)",
+   "prerequisite → Mamba [mamba]",
+   "Attention [attention] prerequisite this"
+  ]
+ },
+ {
+  "id": "mamba",
+  "title": "Mamba",
+  "kind": "idea",
+  "summary": "Selective state-space layers in one repeated block; matched Transformer++ up to ~1.3B",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "small-scale",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "quadratic attention"
+  },
+  "date": "2023-12",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Attention [attention]",
+   "led-to → Mamba–Transformer hybrids [hybrids] (keep a little attention)",
+   "prerequisite → Mamba–Transformer hybrids [hybrids]",
+   "Jamba [jamba] uses this",
+   "Nemotron-H [nemotron-h] uses this",
+   "Granite 4.0 [granite-4] uses this",
+   "State-space models [ssm] led-to this (selective state)",
+   "State-space models [ssm] prerequisite this"
+  ]
+ },
+ {
+  "id": "hybrids",
+  "title": "Mamba–Transformer hybrids",
+  "kind": "idea",
+  "summary": "Mostly Mamba layers with a few attention layers kept for recall",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "throughput"
+  },
+  "date": "2024-03",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Layer stack × 61 [layer-stack]",
+   "Jamba [jamba] uses this",
+   "Nemotron-H [nemotron-h] uses this",
+   "Granite 4.0 [granite-4] uses this",
+   "Mamba [mamba] led-to this (keep a little attention)",
+   "A decoder-only transformer [transformer] led-to this",
+   "Linear / hybrid attention [linear-attn] led-to this",
+   "Mamba [mamba] prerequisite this",
+   "Layer stack × 61 [layer-stack] prerequisite this"
+  ]
+ },
+ {
+  "id": "blt",
+  "title": "Byte Latent Transformer",
+  "kind": "idea",
+  "summary": "No tokenizer: bytes grouped into dynamic patches; on par with Llama 3 from 1B to 8B",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "small-scale",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "tokenization"
+  },
+  "date": "2024-12",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Tokenizer [tokenizer]"
+  ]
+ },
+ {
+  "id": "diffusion-lm",
+  "title": "Diffusion language models",
+  "kind": "idea",
+  "summary": "Generate a whole block in parallel by iterative denoising; 5–10× faster",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "sequential decoding"
+  },
+  "date": "2025-02",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Decoding loop [decoding]",
+   "led-to → Block diffusion [block-diffusion] (blocks, left to right)",
+   "Mercury Coder [mercury] uses this",
+   "Gemini Diffusion [gemini-diffusion] uses this",
+   "Decoding loop [decoding] prerequisite this"
+  ]
+ },
+ {
+  "id": "block-diffusion",
+  "title": "Block diffusion",
+  "kind": "idea",
+  "summary": "Diffuse ~32-token blocks left to right: the production standard for dLLMs",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "variable-length output"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Decoding loop [decoding]",
+   "Diffusion language models [diffusion-lm] led-to this (blocks, left to right)"
+  ]
+ },
+ {
+  "id": "lcm",
+  "title": "Large Concept Model",
+  "kind": "idea",
+  "summary": "Reason and generate in a semantic concept space instead of tokens",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "research",
+   "effect": "quality",
+   "applies": "architecture"
+  },
+  "date": "2024-12",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Output head (unembedding) [output-head]"
+  ]
+ },
+ {
+  "id": "latent-reasoning",
+  "title": "Latent / recurrent-depth reasoning",
+  "kind": "idea",
+  "summary": "Think in hidden state rather than emitted chain-of-thought tokens",
+  "existingBody": "",
+  "attributes": {
+   "area": "architecture",
+   "stage": "research",
+   "effect": "quality",
+   "applies": "architecture"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "modifies → Layer stack × 61 [layer-stack]"
+  ]
+ },
+ {
+  "id": "jamba",
+  "title": "Jamba",
+  "kind": "thing",
+  "summary": "Largest Mamba hybrid family",
+  "existingBody": "",
+  "attributes": {
+   "developer": "AI21",
+   "total": 398,
+   "attention": "Mamba + attention",
+   "notes": "Largest Mamba hybrid family"
+  },
+  "date": "2024-03",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "uses → Mamba–Transformer hybrids [hybrids]",
+   "uses → Mamba [mamba]",
+   "uses → Mixture of Experts [moe]",
+   "supports → Hybrids match transformers at large scale [c-hybrid-parity] (competitive up to 398B)"
+  ]
+ },
+ {
+  "id": "nemotron-h",
+  "title": "Nemotron-H",
+  "kind": "thing",
+  "summary": "Swapped most attention for Mamba for throughput",
+  "existingBody": "",
+  "attributes": {
+   "developer": "NVIDIA",
+   "attention": "Mamba + few attention",
+   "notes": "Swapped most attention for Mamba for throughput"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "uses → Mamba–Transformer hybrids [hybrids]",
+   "uses → Mamba [mamba]"
+  ]
+ },
+ {
+  "id": "granite-4",
+  "title": "Granite 4.0",
+  "kind": "thing",
+  "summary": "H-Small beat open models 12× its size on IFEval",
+  "existingBody": "",
+  "attributes": {
+   "developer": "IBM",
+   "attention": "Mamba + attention",
+   "notes": "H-Small beat open models 12× its size on IFEval"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "uses → Mamba–Transformer hybrids [hybrids]",
+   "uses → Mamba [mamba]",
+   "supports → Hybrids match transformers at large scale [c-hybrid-parity] (beat models 12× its size (vendor))"
+  ]
+ },
+ {
+  "id": "mercury",
+  "title": "Mercury Coder",
+  "kind": "thing",
+  "summary": "First commercial dLLM: ~1,100 tokens/s on H100",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Inception Labs",
+   "attention": "Diffusion",
+   "notes": "First commercial dLLM: ~1,100 tokens/s on H100"
+  },
+  "date": "2025-02",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "uses → Diffusion language models [diffusion-lm]",
+   "supports → Diffusion LMs match autoregressive quality at 5–10× speed [c-diffusion-parity] (coding parity (vendor))"
+  ]
+ },
+ {
+  "id": "gemini-diffusion",
+  "title": "Gemini Diffusion",
+  "kind": "thing",
+  "summary": "~1,479 tokens/s, coding parity with 2.0 Flash Lite",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Google",
+   "attention": "Diffusion",
+   "notes": "~1,479 tokens/s, coding parity with 2.0 Flash Lite"
+  },
+  "date": "2025-05",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "uses → Diffusion language models [diffusion-lm]",
+   "supports → Diffusion LMs match autoregressive quality at 5–10× speed [c-diffusion-parity] (matches 2.0 Flash Lite on code (vendor))"
+  ]
+ },
+ {
+  "id": "c-100x",
+  "title": "Inference cost at fixed capability falls ~100×/year",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Epoch AI [epoch] supports this (all models at current list prices)",
+   "Inference price-trend paper (arXiv 2511.23455) [price-paper] challenges this (controlled: 5–10×; algorithmic alone ~3×)",
+   "Open-model price analysis (LessWrong) [open-price] challenges this (frozen proprietary list prices inflate it; open models 7–28×)"
+  ]
+ },
+ {
+  "id": "c-frontier-fastest",
+  "title": "Price declines are fastest at the capability frontier",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "emerging"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "corrects → Higher capability bars take cheap models longer to catch [m-harder] (the frontier is where catch-up still has room — 31×/yr at the top, 1.7× at the bottom)",
+   "Inference price-trend paper (arXiv 2511.23455) [price-paper] supports this (top GPQA bin 31×/yr, bottom 1.7×/yr)",
+   "Open-model price analysis (LessWrong) [open-price] challenges this (open models fall fairly uniformly across quality)"
+  ]
+ },
+ {
+  "id": "c-squeeze",
+  "title": "Frontier capacity stays scarce until ~2027–28",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "Nvidia / Jensen Huang [nvidia] supports this ('we are going to be short')",
+   "Accuris / Tech Insider [accuris] supports this (HBM sold out, 36–48 month transformer lead times)",
+   "Stanford teaching model [stanford-toy] challenges this (if demand growth slows to ~100%/yr, supply catches up)"
+  ]
+ },
+ {
+  "id": "c-incremental",
+  "title": "Sustained cost declines come mostly from incremental work",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "emerging"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Mixture of Experts [moe] supports this (idea in 1991/2017, value from a decade of fixes)",
+   "Algorithmic efficiency [algorithmic-progress] supports this (a smooth curve, not a staircase)"
+  ]
+ },
+ {
+  "id": "c-arch-efficiency",
+  "title": "Recent architecture wins are efficiency; quality came from post-training",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "emerging"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "DeepSeek-V3.2 [deepseek-v32] supports this (DSA aimed to lose nothing, not gain; RL drove capability)"
+  ]
+ },
+ {
+  "id": "c-rlvr-new",
+  "title": "RLVR creates genuinely new reasoning ability",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "DeepSeek-R1 [deepseek-r1] supports this (emergent self-reflection)",
+   "RLVR coverage study [rlvr-study] challenges this (sharpens sampling, narrows coverage)"
+  ]
+ },
+ {
+  "id": "c-distill-open",
+  "title": "Distillation from closed models drives open reasoning gains",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "Tülu 3 (Ai2) [tulu3] supports this (SFT responses written by GPT-4o / Claude)",
+   "DeepSeek-R1 [deepseek-r1] challenges this (RLVR reasoning without a frontier teacher)"
+  ]
+ },
+ {
+  "id": "c-specialists",
+  "title": "Specialists beat a generalist on their own turf",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "Vision-language specialist study [vl-study] supports this (5 of 7 tasks)",
+   "Specialize, then merge [merging] supports this (labs specialize, then merge)"
+  ]
+ },
+ {
+  "id": "c-data-lever",
+  "title": "Data curation is the biggest lever",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "emerging"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Data [t-data]",
+   "DCLM benchmark [dclm] supports this (+6 MMLU at half the compute)"
+  ]
+ },
+ {
+  "id": "c-hybrid-parity",
+  "title": "Hybrids match transformers at large scale",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "emerging"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "Jamba [jamba] supports this (competitive up to 398B)",
+   "Granite 4.0 [granite-4] supports this (beat models 12× its size (vendor))",
+   "Hybrid robustness paper (2026) [robustness-paper] challenges this (robustness collapse from Mamba parts)",
+   "Vendor announcements [vendor-claims] supports this (self-reported)"
+  ]
+ },
+ {
+  "id": "c-diffusion-parity",
+  "title": "Diffusion LMs match autoregressive quality at 5–10× speed",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Beyond the transformer [t-beyond]",
+   "Mercury Coder [mercury] supports this (coding parity (vendor))",
+   "Gemini Diffusion [gemini-diffusion] supports this (matches 2.0 Flash Lite on code (vendor))",
+   "'No Free Lunch' dLLM survey (2026) [no-free-lunch] challenges this (speedups shrink under fair comparison)"
+  ]
+ },
+ {
+  "id": "c-glm52",
+  "title": "GLM-5.2 beats GPT-5.5 on long-horizon coding",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "consensus": "contested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "GLM-5.2 later coverage (June 16–17) [glm52-late] supports this (unclear sourcing)",
+   "GLM-5.2 launch coverage (June 13–15) [glm52-early] challenges this (no benchmarks published at launch)"
+  ]
+ },
+ {
+  "id": "m-layers",
+  "title": "Each layer predicts a token, and the guesses get blended",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "you"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "Layers refine one vector in sequence; only the last one predicts [r-layers] corrects this (an assembly line, not a panel of voters)"
+  ]
+ },
+ {
+  "id": "r-layers",
+  "title": "Layers refine one vector in sequence; only the last one predicts",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Inside a transformer [t-inside]",
+   "corrects → Each layer predicts a token, and the guesses get blended [m-layers] (an assembly line, not a panel of voters)"
+  ]
+ },
+ {
+  "id": "m-sonnet",
+  "title": "The 100×/year means a given Sonnet gets 100× cheaper",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "you"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Cost at a fixed capability [fixed-capability] corrects this (it's the cheapest model that clears a fixed bar)"
+  ]
+ },
+ {
+  "id": "m-harder",
+  "title": "Higher capability bars take cheap models longer to catch",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "you"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Price declines are fastest at the capability frontier [c-frontier-fastest] corrects this (the frontier is where catch-up still has room — 31×/yr at the top, 1.7× at the bottom)"
+  ]
+ },
+ {
+  "id": "m-carbon",
+  "title": "claude-carbon's token cost is lossy",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "you"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Token cost is exact; only the CO₂ estimate is lossy [r-carbon] corrects this (cost comes straight from transcripts)"
+  ]
+ },
+ {
+  "id": "r-carbon",
+  "title": "Token cost is exact; only the CO₂ estimate is lossy",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "corrects → claude-carbon's token cost is lossy [m-carbon] (cost comes straight from transcripts)"
+  ]
+ },
+ {
+  "id": "m-experts",
+  "title": "Experts are topic specialists (a 'chemistry expert')",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "common"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "Experts specialize in low-level token patterns, re-chosen every token at every layer [r-experts] corrects this (routing is a dot product, not a topic dispatch)"
+  ]
+ },
+ {
+  "id": "r-experts",
+  "title": "Experts specialize in low-level token patterns, re-chosen every token at every layer",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "corrects → Experts are topic specialists (a 'chemistry expert') [m-experts] (routing is a dot product, not a topic dispatch)"
+  ]
+ },
+ {
+  "id": "m-gpu",
+  "title": "Capacity is all about GPUs",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "common"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "Capacity constraint [capacity] corrects this (power, HBM and electrical gear each bind in turn)"
+  ]
+ },
+ {
+  "id": "m-bigger",
+  "title": "Frontier models keep getting bigger",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "common"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "Frontier models shrank after GPT-4; MoE split total from active parameters [r-smaller] corrects this (GPT-4o ~200B and 3.5 Sonnet ~400B (estimates) vs GPT-4 ~1.8T)"
+  ]
+ },
+ {
+  "id": "r-smaller",
+  "title": "Frontier models shrank after GPT-4; MoE split total from active parameters",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "corrects → Frontier models keep getting bigger [m-bigger] (GPT-4o ~200B and 3.5 Sonnet ~400B (estimates) vs GPT-4 ~1.8T)"
+  ]
+ },
+ {
+  "id": "m-moe-new",
+  "title": "MoE is a recent breakthrough",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "common"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "The idea dates to 1991; sparse gating to 2017 [r-moe-old] corrects this (its value came from years of incremental fixes)"
+  ]
+ },
+ {
+  "id": "r-moe-old",
+  "title": "The idea dates to 1991; sparse gating to 2017",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "corrects → MoE is a recent breakthrough [m-moe-new] (its value came from years of incremental fixes)"
+  ]
+ },
+ {
+  "id": "m-price",
+  "title": "The price you pay tracks the cost to serve",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "common"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Price ≠ serving cost [price-vs-cost] corrects this (prices step down at successor launches)"
+  ]
+ },
+ {
+  "id": "m-distill",
+  "title": "A chunk of open reasoning gains is distillation doing the heavy lifting",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "held-by": "Claude"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "Distillation can transfer reasoning, but there's no good evidence it drives the headline gains [r-distill] corrects this (Claude retracted its own overreach)"
+  ]
+ },
+ {
+  "id": "r-distill",
+  "title": "Distillation can transfer reasoning, but there's no good evidence it drives the headline gains",
+  "kind": "claim",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Training [t-train]",
+   "corrects → A chunk of open reasoning gains is distillation doing the heavy lifting [m-distill] (Claude retracted its own overreach)"
+  ]
+ }
+]

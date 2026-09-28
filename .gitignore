@@ -1,0 +1,29 @@
+# Dependencies and build output
+node_modules/
+dist/
+.metrics/
+.wrangler/
+.turbo/
+*.log
+.DS_Store
+.env
+.env.*
+
+# Private: the statins chat and everything derived from it holds personal health data.
+# Never commit, fixture, or publish it.
+prototypes/sample-graphs/seeds/statins.py
+prototypes/sample-graphs/src/graphs/statins.json
+prototypes/sample-graphs/src/graphs/gen-statins*.json
+prototypes/seeding/sources/statins*
+prototypes/seeding/runs/statins-chat/
+__pycache__/
+
+# Personal (repo is public): raw chats, seeding runs, and the family/printer graphs.
+prototypes/seeding/sources/
+prototypes/seeding/runs/
+prototypes/sample-graphs/seeds/printer.py
+prototypes/sample-graphs/seeds/vacation.py
+prototypes/sample-graphs/src/graphs/printer.json
+prototypes/sample-graphs/src/graphs/vacation.json
+prototypes/sample-graphs/src/graphs/gen-printer-chat.json
+prototypes/sample-graphs/src/graphs/gen-agent-printer-chat.json

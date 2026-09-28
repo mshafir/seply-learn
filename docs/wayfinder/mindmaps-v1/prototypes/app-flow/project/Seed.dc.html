@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Choose the Views</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <header style="height: 60px; flex-shrink: 0; box-sizing: border-box; padding: 0 28px; display: flex; align-items: center; gap: 24px; background: #FFFFFF; border-bottom: 1px solid #E4E1DA">
+    <a href="Source.dc.html" style="font-size: 14px; color: #5F5B54; text-decoration: none">← Sources</a>
+    <span style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 500">New graph</span>
+    <div style="flex-grow: 1"></div>
+    <ol style="margin: 0; padding: 0; list-style: none; display: flex; align-items: center; gap: 8px; font-size: 13.5px">
+      <li style="display: flex; align-items: center; gap: 6px; color: #1F6B45"><span style="width: 22px; height: 22px; border-radius: 11px; background: #D8F0E4; display: flex; align-items: center; justify-content: center; font-size: 12px">✓</span>Sources</li>
+      <li style="width: 28px; height: 1px; background: #C9C5BC"></li>
+      <li style="display: flex; align-items: center; gap: 6px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 11px; background: #1D1C1A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px">2</span>Choose Views</li>
+      <li style="width: 28px; height: 1px; background: #C9C5BC"></li>
+      <li style="display: flex; align-items: center; gap: 6px; color: #5F5B54"><span style="width: 22px; height: 22px; border-radius: 11px; border: 1px solid #C9C5BC; display: flex; align-items: center; justify-content: center; font-size: 12px">3</span>Open</li>
+    </ol>
+  </header>
+
+  <main style="flex-grow: 1; min-height: 0; box-sizing: border-box; padding: 28px 56px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; align-items: flex-end; gap: 24px">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 34px">Here are the questions your sources raise</h1>
+        <p style="margin: 0; font-size: 15px; color: #5F5B54">Each View answers one. Pick the ones to start with; you can refine the Concepts inside any View once the graph exists.</p>
+      </div>
+      <span style="font-size: 14px; color: #3F3C37; white-space: nowrap">[N] Concepts found across 3 sources</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px">
+      <sc-for list="{{views}}" as="v" hint-placeholder-count="6">
+        <button onClick="{{v.toggle}}" aria-pressed="{{v.on}}" style="{{v.style}}">
+          <span style="position: relative; height: 136px; background: #FBFAF7; border-bottom: 1px solid #EDEAE3; display: flex; align-items: center; justify-content: center">
+            <dc-import name="Thumb" kind="{{v.kind}}" color="{{v.color}}" hint-size="220px,110px"></dc-import>
+            <span style="{{v.checkStyle}}">{{v.check}}</span>
+          </span>
+          <span style="padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; text-align: left">
+            <span style="font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #5F5B54">{{v.type}}</span>
+            <span style="font-family: Newsreader, Georgia, serif; font-size: 17px; line-height: 1.3; color: #1D1C1A">{{v.q}}</span>
+            <span style="font-size: 12.5px; color: #5F5B54; line-height: 1.4">{{v.why}}</span>
+          </span>
+        </button>
+      </sc-for>
+
+      <button style="height: 290px; box-sizing: border-box; border: 1.5px dashed #B8B3A9; border-radius: 14px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px; font-family: inherit; color: #1D1C1A; cursor: pointer">
+        <span style="width: 44px; height: 44px; border-radius: 22px; background: #ECEDFA; color: #3A45B5; display: flex; align-items: center; justify-content: center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.9L19 9.7l-4.2 3.1L16.2 18 12 15l-4.2 3 1.4-5.2L5 9.7l5.2-1.8z"></path></svg>
+        </span>
+        <span style="font-size: 16px; font-weight: 600">Suggest more Views</span>
+        <span style="font-size: 13px; color: #5F5B54; line-height: 1.45; text-align: center">Other questions these sources could answer</span>
+      </button>
+
+      <form style="height: 290px; box-sizing: border-box; border: 1px solid #E4E1DA; border-radius: 14px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px; padding: 18px">
+        <label style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1">
+          <span style="font-size: 16px; font-weight: 600">Ask for a specific View</span>
+          <textarea placeholder="e.g. a timeline of open model releases, or the open models compared on serving cost" style="flex-grow: 1; box-sizing: border-box; padding: 10px 12px; border: 1px solid #D6D2C9; border-radius: 10px; font: 400 15px/1.45 Newsreader, Georgia, serif; resize: none"></textarea>
+        </label>
+        <button type="button" style="height: 38px; border: none; border-radius: 9px; background: #1D1C1A; color: #FFFFFF; font: 600 14px 'IBM Plex Sans', sans-serif">Propose it</button>
+      </form>
+    </div>
+  </main>
+
+  <footer style="height: 68px; flex-shrink: 0; box-sizing: border-box; padding: 0 56px; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-top: 1px solid #E4E1DA">
+    <span style="font-size: 14px; color: #3F3C37">You can add, change or remove Views any time after the graph is built.</span>
+    <div style="flex-grow: 1"></div>
+    <button style="height: 40px; padding: 0 16px; border: 1px solid #D6D2C9; border-radius: 10px; background: #FFFFFF; font: 500 14px 'IBM Plex Sans', sans-serif">Save draft</button>
+    <a href="Building.dc.html" style="height: 40px; box-sizing: border-box; padding: 0 18px; display: flex; align-items: center; background: #3A45B5; color: #FFFFFF; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none">{{cta}}</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { on: { learning: true, anatomy: true, table: true, rates: true, timeline: false, evidence: false } };
+  }
+  renderVals() {
+    const on = this.state.on;
+    const list = [
+      ['learning', 'LEARNING PATH', 'What do I need to understand first?', 'You kept asking “what is…” and “back up”', '#2563eb'],
+      ['anatomy', 'ANATOMY', 'What is a transformer made of?', 'Parts, and the techniques that change each one', '#2563eb'],
+      ['table', 'COMPARISON TABLE', 'How do the open models stack up?', 'Models compared on shared Attributes', '#ea580c'],
+      ['rates', 'RATES & ESTIMATES', 'How fast are costs falling, and how sure are we?', 'Several estimates of the same trends', '#2563eb'],
+      ['timeline', 'TIMELINE', 'When did each idea land?', 'Most Concepts carry a date', '#2563eb'],
+      ['evidence', 'EVIDENCE', 'Which claims hold up, and on what?', 'The sources disagree on a few numbers', '#4f46e5'],
+    ];
+    const views = list.map(([kind, type, q, why, color]) => {
+      const sel = !!on[kind];
+      return {
+        kind, type, q, why, color, on: sel,
+        toggle: () => this.setState({ on: { ...on, [kind]: !sel } }),
+        check: sel ? '✓' : '',
+        checkStyle: `position: absolute; right: 10px; top: 10px; width: 26px; height: 26px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; ${sel ? 'background: #3A45B5; color: #FFFFFF;' : 'background: #FFFFFF; border: 1.5px solid #C9C5BC;'}`,
+        style: `height: 290px; box-sizing: border-box; padding: 0; border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF; cursor: pointer; font-family: inherit; ${sel ? 'border: 2px solid #3A45B5; box-shadow: 0 4px 14px rgba(58,69,181,0.12);' : 'border: 1px solid #E4E1DA; opacity: 0.8;'}`,
+      };
+    });
+    const n = views.filter((v) => v.on).length;
+    return { views, cta: `Create graph with ${n} View${n === 1 ? '' : 's'}` };
+  }
+}
+</script>
+</body>
+</html>

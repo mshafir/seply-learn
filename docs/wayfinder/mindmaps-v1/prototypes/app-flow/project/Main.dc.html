@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Page flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; position: relative; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A; overflow: hidden">
+  <div style="position: absolute; left: 60px; top: 48px; display: flex; flex-direction: column; gap: 8px; width: 900px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #5F5B54">Mindmaps · page flow</div>
+    <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 44px; line-height: 1.1">From anything to a graph you can read, grow and share</h1>
+  </div>
+
+  <svg width="1440" height="900" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3A45B5"></path></marker>
+      <marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8A857C"></path></marker>
+    </defs>
+    <path d="M320 420 L776 420" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M190 360 L190 240 L416 240" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M680 240 L910 240 L910 356" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M1040 390 L1080 390 L1080 240 L1116 240" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M1040 450 L1080 450 L1080 620 L1116 620" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M910 480 L910 656" stroke="#3A45B5" stroke-width="2" fill="none" marker-end="url(#ar)"></path>
+    <path d="M680 740 L730 740 L730 464 L776 464" stroke="#8A857C" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arg)"></path>
+    <path d="M1250 750 L1250 684" stroke="#8A857C" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arg)"></path>
+  </svg>
+
+  <div style="position: absolute; left: 400px; top: 396px; font-size: 13px; color: #3A45B5; font-weight: 500">open a graph</div>
+  <div style="position: absolute; left: 204px; top: 272px; font-size: 13px; color: #3A45B5; font-weight: 500; width: 140px">new, from any source</div>
+  <div style="position: absolute; left: 700px; top: 212px; font-size: 13px; color: #3A45B5; font-weight: 500">accept the proposal</div>
+  <div style="position: absolute; left: 1094px; top: 300px; font-size: 13px; color: #3A45B5; font-weight: 500; width: 80px">select a Concept</div>
+  <div style="position: absolute; left: 1094px; top: 500px; font-size: 13px; color: #3A45B5; font-weight: 500; width: 80px">ask for more</div>
+  <div style="position: absolute; left: 924px; top: 560px; font-size: 13px; color: #3A45B5; font-weight: 500">snapshot · share</div>
+  <div style="position: absolute; left: 744px; top: 600px; font-size: 13px; color: #5F5B54; width: 90px">opens read-only</div>
+  <div style="position: absolute; left: 1264px; top: 700px; font-size: 13px; color: #5F5B54; width: 160px">edits land as suggestions</div>
+
+  <a href="Library.dc.html" style="position: absolute; left: 60px; top: 360px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #1D1C1A; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">01</span>
+    <span style="font-size: 18px; font-weight: 600">Library</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Your graphs, shared graphs, search by text and #tag.</span>
+  </a>
+  <a href="Source.dc.html" style="position: absolute; left: 420px; top: 180px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #1D1C1A; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">02</span>
+    <span style="font-size: 18px; font-weight: 600">Start from anything</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Chat, files or a prompt → proposed graph → curate.</span>
+  </a>
+  <a href="Graph.dc.html" style="position: absolute; left: 780px; top: 360px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #1D1C1A; border: 1px solid #1D1C1A; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #FFFFFF; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #C9C5BC">03 · the hub</span>
+    <span style="font-size: 18px; font-weight: 600">Graph home</span>
+    <span style="font-size: 14px; color: #DEDAD2; line-height: 1.4">Pick a View; every View answers one question.</span>
+  </a>
+  <a href="Panel.dc.html" style="position: absolute; left: 1120px; top: 180px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #1D1C1A; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">04</span>
+    <span style="font-size: 18px; font-weight: 600">Side panel</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Overview → full article → back. Edit in place.</span>
+  </a>
+  <a href="Grow.dc.html" style="position: absolute; left: 1120px; top: 560px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #1D1C1A; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">05</span>
+    <span style="font-size: 18px; font-weight: 600">Grow the graph</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Ask for more; accept suggestions; see who's here.</span>
+  </a>
+  <a href="Versions.dc.html" style="position: absolute; left: 780px; top: 660px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; display: flex; flex-direction: column; gap: 6px; color: #1D1C1A; text-decoration: none">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">06</span>
+    <span style="font-size: 18px; font-weight: 600">Versions &amp; sharing</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Snapshots, what changed, who can see it.</span>
+  </a>
+  <div style="position: absolute; left: 420px; top: 680px; width: 260px; height: 120px; box-sizing: border-box; padding: 18px 20px; background: transparent; border: 1.5px dashed #B8B3A9; border-radius: 14px; display: flex; flex-direction: column; gap: 6px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">entry</span>
+    <span style="font-size: 18px; font-weight: 600">A shared link</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">Lands on the graph's best View, read-only.</span>
+  </div>
+  <div style="position: absolute; left: 1120px; top: 752px; width: 260px; height: 110px; box-sizing: border-box; padding: 16px 20px; background: transparent; border: 1.5px dashed #B8B3A9; border-radius: 14px; display: flex; flex-direction: column; gap: 6px">
+    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5F5B54">entry</span>
+    <span style="font-size: 18px; font-weight: 600">Claude, via MCP</span>
+    <span style="font-size: 14px; color: #5F5B54; line-height: 1.4">An agent reads and proposes edits.</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

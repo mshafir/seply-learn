@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grow the graph</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <header style="height: 56px; flex-shrink: 0; box-sizing: border-box; padding: 0 20px; display: flex; align-items: center; gap: 16px; background: #FFFFFF; border-bottom: 1px solid #E4E1DA">
+    <a href="Library.dc.html" style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: #1D1C1A; text-decoration: none">Mindmaps</a>
+    <span style="color: #B8B3A9">/</span>
+    <a href="Graph.dc.html" style="font-size: 15px; font-weight: 600; color: #1D1C1A; text-decoration: none">AI compute &amp; model internals</a>
+    <span style="color: #B8B3A9">/</span>
+    <span style="font-size: 15px; color: #3F3C37">Learning path</span>
+    <div style="flex-grow: 1"></div>
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3F3C37">
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #E7E2F7; color: #4B3A8F; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">MS</span>
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #D8F0E4; color: #1F6B45; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">JL</span>
+      <span style="width: 30px; height: 30px; border-radius: 15px; background: #FDE8D7; color: #9A3412; display: flex; align-items: center; justify-content: center" aria-label="Claude via MCP">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.9L19 9.7l-4.2 3.1L16.2 18 12 15l-4.2 3 1.4-5.2L5 9.7l5.2-1.8z"></path></svg>
+      </span>
+      <span>3 here</span>
+    </div>
+    <a href="Versions.dc.html" style="height: 36px; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; background: #1D1C1A; color: #FFFFFF; border-radius: 9px; font-size: 14px; font-weight: 600; text-decoration: none">Share</a>
+  </header>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0">
+    <section style="flex-grow: 1; min-width: 0; position: relative; overflow: hidden; background-color: #F6F5F1; background-image: radial-gradient(#DAD6CD 1px, transparent 1px); background-size: 22px 22px">
+      <svg width="960" height="844" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+        <path d="{{edges}}" stroke="#3A45B5" stroke-width="1.6" fill="none"></path>
+        <path d="{{ghostEdges}}" stroke="#B45309" stroke-width="1.6" stroke-dasharray="6 5" fill="none"></path>
+      </svg>
+      <sc-for list="{{nodes}}" as="n" hint-placeholder-count="9">
+        <div style="{{n.style}}">
+          <span style="{{n.badge}}">{{n.tag}}</span>
+          <span>{{n.t}}</span>
+        </div>
+      </sc-for>
+
+      <div style="position: absolute; left: 610px; top: 318px; display: flex; align-items: flex-start; gap: 2px; pointer-events: none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#1F6B45"><path d="M4 2l16 9-7 2-3 7z"></path></svg>
+        <span style="margin-top: 12px; padding: 2px 8px; border-radius: 6px; background: #1F6B45; color: #FFFFFF; font-size: 12px; font-weight: 600">JL</span>
+      </div>
+
+      <div style="position: absolute; left: 24px; bottom: 24px; width: 420px; display: flex; gap: 12px; padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; box-shadow: 0 8px 24px rgba(29,28,26,0.08)">
+        <span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: #FDE8D7; color: #9A3412; display: flex; align-items: center; justify-content: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.9L19 9.7l-4.2 3.1L16.2 18 12 15l-4.2 3 1.4-5.2L5 9.7l5.2-1.8z"></path></svg>
+        </span>
+        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 13.5px">
+          <span><b>Claude (via MCP)</b> proposed 2 Concepts from a coding session: <i>Speculative decoding</i>, <i>Draft model</i>.</span>
+          <span style="display: flex; gap: 12px"><a href="#" style="font-weight: 600">Review</a><a href="#" style="color: #5F5B54">Later</a></span>
+        </div>
+      </div>
+    </section>
+
+    <aside style="width: 440px; flex-shrink: 0; box-sizing: border-box; background: #FFFFFF; border-left: 1px solid #E4E1DA; display: flex; flex-direction: column">
+      <div role="tablist" style="display: flex; gap: 4px; padding: 10px 14px 0; border-bottom: 1px solid #EDEAE3">
+        <button role="tab" aria-selected="true" style="padding: 8px 12px; border: none; border-bottom: 2px solid #1D1C1A; background: none; font: 600 14px 'IBM Plex Sans', sans-serif; color: #1D1C1A">Ask</button>
+        <button role="tab" aria-selected="false" style="padding: 8px 12px; border: none; background: none; font: 14px 'IBM Plex Sans', sans-serif; color: #5F5B54">Suggestions · 6</button>
+        <button role="tab" aria-selected="false" style="padding: 8px 12px; border: none; background: none; font: 14px 'IBM Plex Sans', sans-serif; color: #5F5B54">Activity</button>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+        <div style="align-self: flex-end; max-width: 320px; padding: 10px 12px; border-radius: 12px; background: #EDEAE3; font-size: 14px; line-height: 1.5">What would I need to understand QLoRA? Add what's missing.</div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="font-family: Newsreader, Georgia, serif; font-size: 15.5px; line-height: 1.55">QLoRA already links to <a href="#">LoRA</a>. Two ideas it relies on aren't in the graph yet, plus one example:</div>
+          <sc-for list="{{suggestions}}" as="s" hint-placeholder-count="4">
+            <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px dashed #D9A45B; border-radius: 10px; background: #FFFBEB">
+              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 12px; font-family: 'IBM Plex Mono', monospace; color: #92400E">{{s.what}}</span>
+                <span style="font-size: 14px; font-weight: 600">{{s.title}}</span>
+                <span style="font-size: 13px; color: #3F3C37">{{s.note}}</span>
+              </div>
+              <button aria-label="Accept" style="width: 30px; height: 30px; border-radius: 7px; border: 1px solid #1F6B45; background: #FFFFFF; color: #1F6B45; font-size: 14px">✓</button>
+              <button aria-label="Dismiss" style="width: 30px; height: 30px; border-radius: 7px; border: 1px solid #D6D2C9; background: #FFFFFF; color: #5F5B54; font-size: 14px">×</button>
+            </div>
+          </sc-for>
+          <div style="display: flex; gap: 8px">
+            <button style="height: 34px; padding: 0 12px; border: none; border-radius: 8px; background: #1D1C1A; color: #FFFFFF; font: 600 13.5px 'IBM Plex Sans', sans-serif">Accept all 4</button>
+            <button style="height: 34px; padding: 0 12px; border: 1px solid #D6D2C9; border-radius: 8px; background: #FFFFFF; font: 13.5px 'IBM Plex Sans', sans-serif">Write overviews too</button>
+          </div>
+        </div>
+      </div>
+      <form style="padding: 12px 14px; border-top: 1px solid #EDEAE3; display: flex; gap: 8px">
+        <label style="flex-grow: 1; display: flex"><span style="position: absolute; left: -9999px">Ask about this graph</span><input placeholder="Ask for Concepts, examples, prerequisites…" style="flex-grow: 1; height: 40px; box-sizing: border-box; padding: 0 12px; border: 1px solid #D6D2C9; border-radius: 10px; font: 14px 'IBM Plex Sans', sans-serif"></label>
+        <button type="button" style="height: 40px; padding: 0 14px; border: none; border-radius: 10px; background: #3A45B5; color: #FFFFFF; font: 600 14px 'IBM Plex Sans', sans-serif">Ask</button>
+      </form>
+      <div style="padding: 0 16px 10px; font-size: 12px; color: #5F5B54">Uses your API key · Suggestions stay dashed until someone accepts them.</div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const W = 150, H = 46;
+    const spec = {
+      post: ['Post-training', 80, 120, ''], sft: ['SFT', 300, 120, ''], lora: ['LoRA', 300, 260, ''],
+      qlora: ['QLoRA', 560, 260, 'selected', 'sel'], merge: ['Specialize, then merge', 560, 120, ''],
+      quant: ['Quantization', 300, 420, 'suggested', 'ghost'], nf4: ['NormalFloat (NF4)', 560, 420, 'suggested', 'ghost'],
+      guanaco: ['Guanaco', 800, 260, 'example', 'ghost'], paged: ['Paged optimizers', 800, 420, 'suggested', 'ghost'],
+      kvq: ['KV-cache quantization', 80, 420, '', 'faded'],
+    };
+    const node = ([t, x, y, tag, kind]) => ({
+      t, tag,
+      style: `position: absolute; left: ${x}px; top: ${y}px; width: ${W}px; min-height: ${H}px; box-sizing: border-box; padding: 7px 11px; border-radius: 9px; font-size: 13.5px; font-weight: 500; display: flex; flex-direction: column; gap: 3px; ` +
+        (kind === 'ghost' ? 'background: #FFFBEB; border: 1.5px dashed #D9A45B;' : kind === 'sel' ? 'background: #FFFFFF; border: 1.5px solid #1D1C1A; border-left: 4px solid #2563eb; box-shadow: 0 0 0 4px rgba(29,28,26,0.1);' : 'background: #FFFFFF; border: 1px solid #E4E1DA; border-left: 4px solid #2563eb;') +
+        (kind === 'faded' ? ' opacity: 0.35;' : ''),
+      badge: tag ? `align-self: flex-start; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; padding: 0 6px; border-radius: 999px; ${kind === 'ghost' ? 'background: #FEF3C7; color: #92400E' : 'background: #1D1C1A; color: #FFFFFF'}` : 'display: none',
+    });
+    const c = (id) => [spec[id][1] + W / 2, spec[id][2] + H / 2];
+    const path = (pairs) => pairs.map(([a, b]) => { const [x1, y1] = c(a), [x2, y2] = c(b); return `M${x1} ${y1} L${x2} ${y2}`; }).join(' ');
+    return {
+      nodes: Object.values(spec).map(node),
+      edges: path([['post', 'sft'], ['sft', 'lora'], ['lora', 'qlora'], ['post', 'merge'], ['sft', 'merge']]),
+      ghostEdges: path([['quant', 'qlora'], ['nf4', 'qlora'], ['qlora', 'guanaco'], ['paged', 'qlora'], ['quant', 'kvq']]),
+      suggestions: [
+        { what: 'NEW CONCEPT · is needed to understand QLoRA', title: 'Quantization', note: 'Storing weights in fewer bits; QLoRA keeps the frozen base in 4-bit.' },
+        { what: 'NEW CONCEPT · part of QLoRA', title: 'NormalFloat (NF4)', note: 'The 4-bit data type the QLoRA paper introduced.' },
+        { what: 'NEW CONCEPT · part of QLoRA', title: 'Paged optimizers', note: 'Optimizer state paged to CPU memory to survive spikes.' },
+        { what: 'NEW EXAMPLE · is an example of QLoRA', title: 'Guanaco', note: 'The model family the QLoRA paper fine-tuned to show the method.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

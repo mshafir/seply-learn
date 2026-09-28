@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Versions and sharing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A; overflow: hidden">
+  <header style="height: 56px; flex-shrink: 0; box-sizing: border-box; padding: 0 20px; display: flex; align-items: center; gap: 16px; background: #FFFFFF; border-bottom: 1px solid #E4E1DA">
+    <a href="Library.dc.html" style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 600; color: #1D1C1A; text-decoration: none">Mindmaps</a>
+    <span style="color: #B8B3A9">/</span>
+    <a href="Graph.dc.html" style="font-size: 15px; font-weight: 600; color: #1D1C1A; text-decoration: none">AI compute &amp; model internals</a>
+    <span style="color: #B8B3A9">/</span>
+    <span style="font-size: 15px; color: #3F3C37">History</span>
+  </header>
+
+  <div style="flex-grow: 1; display: flex; min-height: 0">
+    <nav style="width: 360px; flex-shrink: 0; box-sizing: border-box; padding: 20px 16px; border-right: 1px solid #E4E1DA; background: #FBFAF7; display: flex; flex-direction: column; gap: 4px">
+      <button style="height: 40px; margin-bottom: 12px; border: none; border-radius: 10px; background: #1D1C1A; color: #FFFFFF; font: 600 14px 'IBM Plex Sans', sans-serif">Snapshot the draft as v6</button>
+      <sc-for list="{{versions}}" as="v" hint-placeholder-count="5">
+        <a href="#" style="{{v.style}}">
+          <span style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #5F5B54">{{v.id}}</span><span style="font-size: 14.5px; font-weight: 600">{{v.name}}</span></span>
+          <span style="font-size: 13px; color: #5F5B54">{{v.meta}}</span>
+        </a>
+      </sc-for>
+    </nav>
+    <main style="flex-grow: 1; box-sizing: border-box; padding: 28px 36px; display: flex; flex-direction: column; gap: 18px">
+      <div style="font-family: Newsreader, Georgia, serif; font-size: 30px; font-weight: 500">v5 · Content pass</div>
+      <div style="font-size: 14px; color: #5F5B54">Compared with v4</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+        <div style="padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px"><div style="font-size: 26px; font-weight: 600">201</div><div style="font-size: 13px; color: #5F5B54">overviews added</div></div>
+        <div style="padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px"><div style="font-size: 26px; font-weight: 600">68</div><div style="font-size: 13px; color: #5F5B54">articles added</div></div>
+        <div style="padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px"><div style="font-size: 26px; font-weight: 600">1</div><div style="font-size: 13px; color: #5F5B54">View changed</div></div>
+        <div style="padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px"><div style="font-size: 26px; font-weight: 600">0</div><div style="font-size: 13px; color: #5F5B54">Concepts removed</div></div>
+      </div>
+    </main>
+  </div>
+
+  <div style="position: absolute; left: 0; top: 0; width: 1440px; height: 900px; background: rgba(29,28,26,0.38)"></div>
+  <div role="dialog" aria-label="Share" style="position: absolute; left: 460px; top: 150px; width: 520px; box-sizing: border-box; background: #FFFFFF; border-radius: 16px; box-shadow: 0 24px 60px rgba(29,28,26,0.25); display: flex; flex-direction: column">
+    <div style="padding: 20px 24px 12px; display: flex; align-items: center">
+      <span style="flex-grow: 1; font-family: Newsreader, Georgia, serif; font-size: 23px; font-weight: 500">Share “AI compute &amp; model internals”</span>
+      <button aria-label="Close" style="border: none; background: none; font-size: 20px; color: #5F5B54">×</button>
+    </div>
+    <div style="padding: 4px 24px 18px; display: flex; flex-direction: column; gap: 16px; font-size: 14px">
+      <div style="display: flex; gap: 8px">
+        <label style="flex-grow: 1; display: flex"><span style="position: absolute; left: -9999px">Invite by email</span><input placeholder="Add people by email" style="flex-grow: 1; height: 40px; box-sizing: border-box; padding: 0 12px; border: 1px solid #D6D2C9; border-radius: 9px; font: 14px 'IBM Plex Sans', sans-serif"></label>
+        <select aria-label="Role" style="height: 40px; border: 1px solid #D6D2C9; border-radius: 9px; padding: 0 8px; font: 14px 'IBM Plex Sans', sans-serif; background: #FFFFFF"><option>Can edit</option><option>Can suggest</option><option>Can view</option></select>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 10px"><span style="width: 30px; height: 30px; border-radius: 15px; background: #E7E2F7; color: #4B3A8F; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">MS</span><span style="flex-grow: 1">You</span><span style="color: #5F5B54">Owner</span></div>
+        <div style="display: flex; align-items: center; gap: 10px"><span style="width: 30px; height: 30px; border-radius: 15px; background: #D8F0E4; color: #1F6B45; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">JL</span><span style="flex-grow: 1">[Collaborator]</span><span style="color: #5F5B54">Can edit</span></div>
+        <div style="display: flex; align-items: center; gap: 10px"><span style="width: 30px; height: 30px; border-radius: 15px; background: #FDE8D7; color: #9A3412; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center">AI</span><span style="flex-grow: 1">Claude via MCP <span style="color: #5F5B54">· your token</span></span><span style="color: #5F5B54">Can suggest</span></div>
+      </div>
+      <div style="padding: 14px 16px; border: 1px solid #E4E1DA; border-radius: 12px; display: flex; flex-direction: column; gap: 10px">
+        <div style="font-weight: 600">Public link</div>
+        <label style="display: flex; align-items: center; gap: 10px"><input type="checkbox" checked>Anyone with the link can read <b>v5</b> (a frozen snapshot)</label>
+        <label style="display: flex; align-items: center; gap: 10px"><input type="checkbox">Include the source chat</label>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <span style="flex-grow: 1; padding: 9px 12px; background: #FBFAF7; border-radius: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: #3F3C37">[your-host]/g/ai-compute/v5</span>
+          <button style="height: 36px; padding: 0 12px; border: none; border-radius: 8px; background: #3A45B5; color: #FFFFFF; font: 600 13.5px 'IBM Plex Sans', sans-serif">Copy link</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = 'display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 9px; text-decoration: none; color: #1D1C1A; ';
+    const versions = [
+      ['draft', 'Unsaved changes', '3 Concepts edited by you and JL'],
+      ['v5', 'Content pass', 'Overviews and articles for every Concept'],
+      ['v4', 'Learning path, Quadrant', 'Maturity folded into Quadrant'],
+      ['v3', 'Anatomy, Lineage, Rates', 'Five experimental Views'],
+      ['v2', 'Seeded from chat', 'Accepted from the proposal'],
+    ].map(([id, name, meta], i) => ({ id, name, meta, style: base + (i === 1 ? 'background: #FFFFFF; box-shadow: 0 0 0 1px #D6D2C9;' : '') }));
+    return { versions };
+  }
+}
+</script>
+</body>
+</html>

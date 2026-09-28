@@ -1,0 +1,1251 @@
+[
+ {
+  "id": "t-econ",
+  "title": "Compute economics",
+  "kind": "idea",
+  "summary": "Why capacity is scarce, how fast demand grows, and when it might ease",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Fable 5 gated behind usage credits [fable-gating] part-of this",
+   "Capacity constraint [capacity] part-of this",
+   "Available AI compute [compute-supply] part-of this",
+   "Compute demand [compute-demand] part-of this",
+   "Reasoning & agentic workloads [reasoning-load] part-of this",
+   "Usage growth [usage-growth] part-of this",
+   "Frontier inference price & scarcity [frontier-price] part-of this",
+   "Hyperscaler capex [capex] part-of this",
+   "Construction & interconnection delays [slip] part-of this",
+   "Jevons' paradox [jevons] part-of this",
+   "Inference overtakes training [inference-shift] part-of this",
+   "Delayed capacity comes online [capacity-relief] part-of this",
+   "Data centers: ~70 GW → ~220 GW [dc-growth] part-of this",
+   "New nuclear power at scale [nuclear] part-of this",
+   "Blackwell sold out [blackwell] part-of this",
+   "Claude Fable 5 released [fable-release] part-of this",
+   "Frontier capacity stays scarce until ~2027–28 [c-squeeze] part-of this",
+   "Capacity is all about GPUs [m-gpu] part-of this"
+  ]
+ },
+ {
+  "id": "t-cost",
+  "title": "Why inference gets cheaper",
+  "kind": "idea",
+  "summary": "What the famous cost-decline numbers measure, and what drives them",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Cost at a fixed capability [fixed-capability] part-of this",
+   "Serving cost per token [cost-per-token] part-of this",
+   "Price ≠ serving cost [price-vs-cost] part-of this",
+   "Serving optimizations [serving-opts] part-of this",
+   "Hardware generations [hardware-gens] part-of this",
+   "Distillation [distillation] part-of this",
+   "Inference is memory-bound [memory-bound] part-of this",
+   "Algorithmic efficiency [algorithmic-progress] part-of this",
+   "Measured rates [rates] part-of this",
+   "Weight quantization [quantization] part-of this",
+   "Speculative decoding [spec-decoding] part-of this",
+   "Continuous batching [cont-batching] part-of this",
+   "Inference cost at fixed capability falls ~100×/year [c-100x] part-of this",
+   "Price declines are fastest at the capability frontier [c-frontier-fastest] part-of this",
+   "Sustained cost declines come mostly from incremental work [c-incremental] part-of this",
+   "The 100×/year means a given Sonnet gets 100× cheaper [m-sonnet] part-of this",
+   "Higher capability bars take cheap models longer to catch [m-harder] part-of this",
+   "claude-carbon's token cost is lossy [m-carbon] part-of this",
+   "Token cost is exact; only the CO₂ estimate is lossy [r-carbon] part-of this",
+   "The price you pay tracks the cost to serve [m-price] part-of this"
+  ]
+ },
+ {
+  "id": "t-sources",
+  "title": "Sources",
+  "kind": "idea",
+  "summary": "Who the numbers come from, and how independent they are",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Epoch AI [epoch] part-of this",
+   "Inference price-trend paper (arXiv 2511.23455) [price-paper] part-of this",
+   "Open-model price analysis (LessWrong) [open-price] part-of this",
+   "Nvidia / Jensen Huang [nvidia] part-of this",
+   "SemiAnalysis [semianalysis] part-of this",
+   "McKinsey [mckinsey] part-of this",
+   "JLL [jll] part-of this",
+   "Accuris / Tech Insider [accuris] part-of this",
+   "Stanford teaching model [stanford-toy] part-of this",
+   "RLVR coverage study [rlvr-study] part-of this",
+   "Tülu 3 (Ai2) [tulu3] part-of this",
+   "DCLM benchmark [dclm] part-of this",
+   "Vision-language specialist study [vl-study] part-of this",
+   "Hybrid robustness paper (2026) [robustness-paper] part-of this",
+   "'No Free Lunch' dLLM survey (2026) [no-free-lunch] part-of this",
+   "Vendor announcements [vendor-claims] part-of this",
+   "GLM-5.2 launch coverage (June 13–15) [glm52-early] part-of this",
+   "GLM-5.2 later coverage (June 16–17) [glm52-late] part-of this"
+  ]
+ },
+ {
+  "id": "fable-gating",
+  "title": "Fable 5 gated behind usage credits",
+  "kind": "event",
+  "summary": "Pulled from subscription plans June 23 and billed at API rates ($10/$50 per M tokens); return is capacity-gated",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2026-06-23",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "capacity",
+  "title": "Capacity constraint",
+  "kind": "idea",
+  "summary": "Not one knob: accelerators, HBM, power and electrical gear bind in turn",
+  "existingBody": "Anthropic doesn't say what \"capacity-driven\" means internally. Industry-wide, the\nbinding constraint has **moved**: power (2024–early 2025), then chips (late 2025 –\nearly 2026), then long-lead electrical gear (from ~May 2026).",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "corrects → Capacity is all about GPUs [m-gpu] (power, HBM and electrical gear each bind in turn)",
+   "Accelerator supply (GPUs/TPUs) [gpu-supply] part-of this",
+   "HBM memory supply [hbm-supply] part-of this",
+   "Power & grid [power] part-of this",
+   "Transformers & switchgear [electrical-gear] part-of this"
+  ]
+ },
+ {
+  "id": "gpu-supply",
+  "title": "Accelerator supply (GPUs/TPUs)",
+  "kind": "idea",
+  "summary": "Blackwell sold out; Nvidia data-center revenue a record $51.2B in a quarter",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Capacity constraint [capacity]",
+   "raises → Available AI compute [compute-supply]",
+   "Hyperscaler capex [capex] raises this ($600B in 2026)"
+  ]
+ },
+ {
+  "id": "hbm-supply",
+  "title": "HBM memory supply",
+  "kind": "idea",
+  "summary": "SK Hynix sold out for 2026; memory ~30% of hyperscaler AI spend, up from ~8%",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Capacity constraint [capacity]",
+   "prerequisite → Inference is memory-bound [memory-bound]",
+   "raises → Available AI compute [compute-supply]",
+   "lowers → Serving cost per token [cost-per-token] (inference is memory-bound)"
+  ]
+ },
+ {
+  "id": "power",
+  "title": "Power & grid",
+  "kind": "idea",
+  "summary": "Operators have held chips they couldn't energize; interconnection queues slip projects",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Capacity constraint [capacity]",
+   "raises → Available AI compute [compute-supply]",
+   "Hyperscaler capex [capex] raises this"
+  ]
+ },
+ {
+  "id": "electrical-gear",
+  "title": "Transformers & switchgear",
+  "kind": "idea",
+  "summary": "High-voltage transformer lead times stretched from 12–18 to 36–48 months",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Capacity constraint [capacity]",
+   "raises → Available AI compute [compute-supply] (the newest chokepoint)"
+  ]
+ },
+ {
+  "id": "compute-supply",
+  "title": "Available AI compute",
+  "kind": "idea",
+  "summary": "What can actually be energized and served",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "lowers → Frontier inference price & scarcity [frontier-price]",
+   "Accelerator supply (GPUs/TPUs) [gpu-supply] raises this",
+   "HBM memory supply [hbm-supply] raises this",
+   "Power & grid [power] raises this",
+   "Transformers & switchgear [electrical-gear] raises this (the newest chokepoint)",
+   "Construction & interconnection delays [slip] lowers this (30–50% of 2026 capacity slips to 2028)"
+  ]
+ },
+ {
+  "id": "compute-demand",
+  "title": "Compute demand",
+  "kind": "idea",
+  "summary": "Grew ~1,000,000× in two years by Nvidia's framing: ~10,000× per request × ~100× usage",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "raises → Frontier inference price & scarcity [frontier-price] (3.4×/yr demand vs multi-year lead times)",
+   "Reasoning & agentic workloads [reasoning-load] raises this (~10,000× per request)",
+   "Usage growth [usage-growth] raises this (~100×)"
+  ]
+ },
+ {
+  "id": "reasoning-load",
+  "title": "Reasoning & agentic workloads",
+  "kind": "idea",
+  "summary": "Compute per inference session up ~10,000× as chatbots became reasoning agents",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "raises → Compute demand [compute-demand] (~10,000× per request)",
+   "raises → Serving cost per token [cost-per-token] (more tokens per answer)"
+  ]
+ },
+ {
+  "id": "usage-growth",
+  "title": "Usage growth",
+  "kind": "idea",
+  "summary": "~100× more usage in two years",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "raises → Compute demand [compute-demand] (~100×)",
+   "Serving cost per token [cost-per-token] lowers this (Jevons: cheaper tokens, more tokens)"
+  ]
+ },
+ {
+  "id": "frontier-price",
+  "title": "Frontier inference price & scarcity",
+  "kind": "idea",
+  "summary": "Premium capacity gets priced up or rationed — Fable's $10/$50 is one instance",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "Compute demand [compute-demand] raises this (3.4×/yr demand vs multi-year lead times)",
+   "Available AI compute [compute-supply] lowers this",
+   "Serving cost per token [cost-per-token] raises this"
+  ]
+ },
+ {
+  "id": "cost-per-token",
+  "title": "Serving cost per token",
+  "kind": "idea",
+  "summary": "What it costs a provider to produce a token at a given capability",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "raises → Frontier inference price & scarcity [frontier-price]",
+   "lowers → Usage growth [usage-growth] (Jevons: cheaper tokens, more tokens)",
+   "Serving optimizations [serving-opts] lowers this (frozen weights)",
+   "Hardware generations [hardware-gens] lowers this (more bandwidth per chip)",
+   "Mixture of Experts [moe] lowers this (active params set the cost)",
+   "Distillation [distillation] lowers this (swap in a smaller model)",
+   "HBM memory supply [hbm-supply] lowers this (inference is memory-bound)",
+   "Reasoning & agentic workloads [reasoning-load] raises this (more tokens per answer)"
+  ]
+ },
+ {
+  "id": "capex",
+  "title": "Hyperscaler capex",
+  "kind": "thing",
+  "summary": "Over $600B in 2026 (+36%), ~$450B of it AI infrastructure",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "raises → Accelerator supply (GPUs/TPUs) [gpu-supply] ($600B in 2026)",
+   "raises → Power & grid [power]"
+  ]
+ },
+ {
+  "id": "slip",
+  "title": "Construction & interconnection delays",
+  "kind": "risk",
+  "summary": "30–50% of planned 2026 AI capacity projected to slip to 2028",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]",
+   "lowers → Available AI compute [compute-supply] (30–50% of 2026 capacity slips to 2028)"
+  ]
+ },
+ {
+  "id": "jevons",
+  "title": "Jevons' paradox",
+  "kind": "idea",
+  "summary": "Cheaper tokens mean more tokens: efficiency gains get consumed by capability and usage, not passed through as price cuts",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "inference-shift",
+  "title": "Inference overtakes training",
+  "kind": "event",
+  "summary": "Expected in 2027; by 2030 AI could be half of all data-center workloads",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2027",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "capacity-relief",
+  "title": "Delayed capacity comes online",
+  "kind": "event",
+  "summary": "The likely window for easing the premium squeeze — if demand growth also slows",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2027",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "dc-growth",
+  "title": "Data centers: ~70 GW → ~220 GW",
+  "kind": "event",
+  "summary": "McKinsey: global supply could triple within five years, ~75% of growth from AI",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2026",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "nuclear",
+  "title": "New nuclear power at scale",
+  "kind": "event",
+  "summary": "Most projected US nuclear growth lands after 2035, as small modular reactors mature",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2035",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "blackwell",
+  "title": "Blackwell sold out",
+  "kind": "event",
+  "summary": "Nvidia FQ3 2026: record $51.2B data-center revenue, cloud GPUs sold out",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2025-11",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "fable-release",
+  "title": "Claude Fable 5 released",
+  "kind": "event",
+  "summary": "Anthropic's most powerful model, priced at double Opus",
+  "existingBody": "",
+  "attributes": {},
+  "date": "2026-06",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Compute economics [t-econ]"
+  ]
+ },
+ {
+  "id": "fixed-capability",
+  "title": "Cost at a fixed capability",
+  "kind": "idea",
+  "summary": "The Epoch metric: the cheapest model that clears a benchmark bar, not a frozen model getting cheaper",
+  "existingBody": "The fixed thing is the **capability** (a benchmark score), not the model. The model that\nclears a bar in 2026 is smaller and cheaper than the one that cleared it in 2025. A\nfrozen set of weights gets cheaper too, but through serving work and hardware, in\nlumps, and far more slowly.",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "prerequisite → Algorithmic efficiency [algorithmic-progress]",
+   "corrects → The 100×/year means a given Sonnet gets 100× cheaper [m-sonnet] (it's the cheapest model that clears a fixed bar)",
+   "Mixture of Experts [moe] prerequisite this"
+  ]
+ },
+ {
+  "id": "price-vs-cost",
+  "title": "Price ≠ serving cost",
+  "kind": "idea",
+  "summary": "List prices hold flat through a model's life and step down when a successor launches",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "corrects → The price you pay tracks the cost to serve [m-price] (prices step down at successor launches)"
+  ]
+ },
+ {
+  "id": "serving-opts",
+  "title": "Serving optimizations",
+  "kind": "idea",
+  "summary": "Batching, quantization, speculative decoding, attention kernels, KV-cache work — frozen weights, cheaper tokens",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "lowers → Serving cost per token [cost-per-token] (frozen weights)"
+  ]
+ },
+ {
+  "id": "hardware-gens",
+  "title": "Hardware generations",
+  "kind": "thing",
+  "summary": "More memory bandwidth and HBM per chip: the same model costs less per token on Blackwell",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "lowers → Serving cost per token [cost-per-token] (more bandwidth per chip)"
+  ]
+ },
+ {
+  "id": "distillation",
+  "title": "Distillation",
+  "kind": "idea",
+  "summary": "Train a smaller student on a stronger model's outputs; the artifact is swapped, the capability kept",
+  "existingBody": "",
+  "attributes": {
+   "area": "training",
+   "stage": "standard",
+   "effect": "both",
+   "applies": "post-training",
+   "bottleneck": "cost of reaching a capability"
+  },
+  "date": "2015",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "lowers → Serving cost per token [cost-per-token] (swap in a smaller model)",
+   "Supervised fine-tuning (SFT) [sft] prerequisite this"
+  ]
+ },
+ {
+  "id": "memory-bound",
+  "title": "Inference is memory-bound",
+  "kind": "idea",
+  "summary": "The bottleneck is moving data between HBM and on-chip SRAM, not arithmetic",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "prerequisite → FlashAttention [flash-attn]",
+   "prerequisite → KV-cache [kv-cache]",
+   "HBM memory supply [hbm-supply] prerequisite this"
+  ]
+ },
+ {
+  "id": "algorithmic-progress",
+  "title": "Algorithmic efficiency",
+  "kind": "idea",
+  "summary": "A smooth ~3×/year from many small wins, punctuated by occasional new ideas",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "supports → Sustained cost declines come mostly from incremental work [c-incremental] (a smooth curve, not a staircase)",
+   "Cost at a fixed capability [fixed-capability] prerequisite this"
+  ]
+ },
+ {
+  "id": "rates",
+  "title": "Measured rates",
+  "kind": "idea",
+  "summary": "Growth and decline rates quoted in the chat, with their methods",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "Doubling every ~7 months [e-stock] part-of this",
+   "Doubling every ~5.2 months [e-train] part-of this",
+   "~1,000,000× over two years [e-demand] part-of this",
+   "+36% in 2026 [e-capex] part-of this",
+   "~70 → ~220 GW in five years [e-dc] part-of this",
+   "~14% CAGR to 2030 [e-dc-jll] part-of this",
+   "~8% → ~30%, 2023 → 2026 [e-hbm] part-of this",
+   "All models, current list prices [e-price-all] part-of this",
+   "Top GPQA bin vs bottom bin [e-price-top] part-of this",
+   "Open-weight models (geo. mean 11.8×) [e-price-open] part-of this",
+   "Frontier price-for-performance [e-price-frontier] part-of this",
+   "Algorithmic efficiency alone [e-price-algo] part-of this",
+   "Same capability, less compute [e-pretrain-eff] part-of this",
+   "GPT-1 → GPT-3: 1000× in two years [e-params-dense] part-of this",
+   "GPT-3 → GPT-4: ~10× in 2¾ years [e-params-gpt4] part-of this",
+   "After GPT-4: ~10× smaller (one step) [e-params-shrink] part-of this",
+   "Doubling every ~2 years [e-moore] part-of this"
+  ]
+ },
+ {
+  "id": "quantization",
+  "title": "Weight quantization",
+  "kind": "idea",
+  "summary": "Run weights at FP8/INT8/INT4, often with negligible quality loss",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "memory and bandwidth"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "modifies → Numeric precision [weights-precision]",
+   "DeepSeek-V3 [deepseek-v3] uses this"
+  ]
+ },
+ {
+  "id": "spec-decoding",
+  "title": "Speculative decoding",
+  "kind": "idea",
+  "summary": "A small draft model proposes tokens; the big model verifies them in parallel",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "one-token-at-a-time latency"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "modifies → Decoding loop [decoding]",
+   "Decoding loop [decoding] prerequisite this"
+  ]
+ },
+ {
+  "id": "cont-batching",
+  "title": "Continuous batching",
+  "kind": "idea",
+  "summary": "Swap requests in and out mid-flight to keep accelerators saturated",
+  "existingBody": "",
+  "attributes": {
+   "area": "serving",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "serving",
+   "bottleneck": "idle accelerators"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Why inference gets cheaper [t-cost]",
+   "modifies → Batching [batching]"
+  ]
+ },
+ {
+  "id": "epoch",
+  "title": "Epoch AI",
+  "kind": "person",
+  "summary": "Trend data from disclosures and prices; the most neutral source in the chat",
+  "existingBody": "",
+  "attributes": {
+   "independence": "independent"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Inference cost at fixed capability falls ~100×/year [c-100x] (all models at current list prices)",
+   "Doubling every ~7 months [e-stock] reported-by this",
+   "Doubling every ~5.2 months [e-train] reported-by this",
+   "All models, current list prices [e-price-all] reported-by this",
+   "Same capability, less compute [e-pretrain-eff] reported-by this",
+   "GPT-1 → GPT-3: 1000× in two years [e-params-dense] reported-by this",
+   "GPT-3 → GPT-4: ~10× in 2¾ years [e-params-gpt4] reported-by this",
+   "After GPT-4: ~10× smaller (one step) [e-params-shrink] reported-by this"
+  ]
+ },
+ {
+  "id": "price-paper",
+  "title": "Inference price-trend paper (arXiv 2511.23455)",
+  "kind": "source",
+  "summary": "Controls for frozen list prices and competition",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → Inference cost at fixed capability falls ~100×/year [c-100x] (controlled: 5–10×; algorithmic alone ~3×)",
+   "supports → Price declines are fastest at the capability frontier [c-frontier-fastest] (top GPQA bin 31×/yr, bottom 1.7×/yr)",
+   "Top GPQA bin vs bottom bin [e-price-top] reported-by this",
+   "Frontier price-for-performance [e-price-frontier] reported-by this",
+   "Algorithmic efficiency alone [e-price-algo] reported-by this"
+  ]
+ },
+ {
+  "id": "open-price",
+  "title": "Open-model price analysis (LessWrong)",
+  "kind": "source",
+  "summary": "Open weights avoid proprietary list-price games",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → Inference cost at fixed capability falls ~100×/year [c-100x] (frozen proprietary list prices inflate it; open models 7–28×)",
+   "challenges → Price declines are fastest at the capability frontier [c-frontier-fastest] (open models fall fairly uniformly across quality)",
+   "Open-weight models (geo. mean 11.8×) [e-price-open] reported-by this"
+  ]
+ },
+ {
+  "id": "nvidia",
+  "title": "Nvidia / Jensen Huang",
+  "kind": "person",
+  "summary": "Sells the chips: '$1 trillion in demand… we are going to be short'",
+  "existingBody": "",
+  "attributes": {
+   "independence": "interested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Frontier capacity stays scarce until ~2027–28 [c-squeeze] ('we are going to be short')",
+   "~1,000,000× over two years [e-demand] reported-by this"
+  ]
+ },
+ {
+  "id": "semianalysis",
+  "title": "SemiAnalysis",
+  "kind": "person",
+  "summary": "Memory share of spend; chips as the binding constraint",
+  "existingBody": "",
+  "attributes": {
+   "independence": "analyst"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "+36% in 2026 [e-capex] reported-by this",
+   "~8% → ~30%, 2023 → 2026 [e-hbm] reported-by this"
+  ]
+ },
+ {
+  "id": "mckinsey",
+  "title": "McKinsey",
+  "kind": "person",
+  "summary": "~70 → ~220 GW of data-center supply in five years",
+  "existingBody": "",
+  "attributes": {
+   "independence": "analyst"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "~70 → ~220 GW in five years [e-dc] reported-by this"
+  ]
+ },
+ {
+  "id": "jll",
+  "title": "JLL",
+  "kind": "person",
+  "summary": "Real-estate outlook: inference overtakes training in 2027",
+  "existingBody": "",
+  "attributes": {
+   "independence": "interested"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "~14% CAGR to 2030 [e-dc-jll] reported-by this"
+  ]
+ },
+ {
+  "id": "accuris",
+  "title": "Accuris / Tech Insider",
+  "kind": "source",
+  "summary": "Slips, cancellations, transformer lead times",
+  "existingBody": "",
+  "attributes": {
+   "independence": "analyst"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Frontier capacity stays scarce until ~2027–28 [c-squeeze] (HBM sold out, 36–48 month transformer lead times)"
+  ]
+ },
+ {
+  "id": "stanford-toy",
+  "title": "Stanford teaching model",
+  "kind": "source",
+  "summary": "Supply/demand scenarios — explicitly a toy, not a forecast",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → Frontier capacity stays scarce until ~2027–28 [c-squeeze] (if demand growth slows to ~100%/yr, supply catches up)"
+  ]
+ },
+ {
+  "id": "rlvr-study",
+  "title": "RLVR coverage study",
+  "kind": "source",
+  "summary": "RL raises the odds of correct samples but narrows what's solvable",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → RLVR creates genuinely new reasoning ability [c-rlvr-new] (sharpens sampling, narrows coverage)"
+  ]
+ },
+ {
+  "id": "tulu3",
+  "title": "Tülu 3 (Ai2)",
+  "kind": "source",
+  "summary": "The rare fully open post-training recipe",
+  "existingBody": "",
+  "attributes": {
+   "independence": "independent"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Distillation from closed models drives open reasoning gains [c-distill-open] (SFT responses written by GPT-4o / Claude)"
+  ]
+ },
+ {
+  "id": "dclm",
+  "title": "DCLM benchmark",
+  "kind": "source",
+  "summary": "Fixed model, only the data curation varies",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Data curation is the biggest lever [c-data-lever] (+6 MMLU at half the compute)"
+  ]
+ },
+ {
+  "id": "vl-study",
+  "title": "Vision-language specialist study",
+  "kind": "source",
+  "summary": "Specialists beat the all-task model on 5 of 7 tasks",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Specialists beat a generalist on their own turf [c-specialists] (5 of 7 tasks)"
+  ]
+ },
+ {
+  "id": "robustness-paper",
+  "title": "Hybrid robustness paper (2026)",
+  "kind": "source",
+  "summary": "Mamba components carry a new robustness weakness",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → Hybrids match transformers at large scale [c-hybrid-parity] (robustness collapse from Mamba parts)"
+  ]
+ },
+ {
+  "id": "no-free-lunch",
+  "title": "'No Free Lunch' dLLM survey (2026)",
+  "kind": "source",
+  "summary": "Diffusion speedups vs autoregressive, compared carefully",
+  "existingBody": "",
+  "attributes": {
+   "independence": "academic"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → Diffusion LMs match autoregressive quality at 5–10× speed [c-diffusion-parity] (speedups shrink under fair comparison)"
+  ]
+ },
+ {
+  "id": "vendor-claims",
+  "title": "Vendor announcements",
+  "kind": "source",
+  "summary": "Benchmarks published by the model's own developer",
+  "existingBody": "",
+  "attributes": {
+   "independence": "self-reported"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → Hybrids match transformers at large scale [c-hybrid-parity] (self-reported)"
+  ]
+ },
+ {
+  "id": "glm52-early",
+  "title": "GLM-5.2 launch coverage (June 13–15)",
+  "kind": "source",
+  "summary": "No official benchmark numbers at release",
+  "existingBody": "",
+  "attributes": {
+   "independence": "analyst"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "challenges → GLM-5.2 beats GPT-5.5 on long-horizon coding [c-glm52] (no benchmarks published at launch)"
+  ]
+ },
+ {
+  "id": "glm52-late",
+  "title": "GLM-5.2 later coverage (June 16–17)",
+  "kind": "source",
+  "summary": "Suddenly claims wins over GPT-5.5, sourcing unclear",
+  "existingBody": "",
+  "attributes": {
+   "independence": "self-reported"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Sources [t-sources]",
+   "supports → GLM-5.2 beats GPT-5.5 on long-horizon coding [c-glm52] (unclear sourcing)"
+  ]
+ },
+ {
+  "id": "e-stock",
+  "title": "Doubling every ~7 months",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "AI chip compute stock",
+   "low": 3.4,
+   "high": 3.4,
+   "direction": "rise",
+   "method": "revenue, disclosures, analyst reports"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-train",
+  "title": "Doubling every ~5.2 months",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Frontier training compute",
+   "low": 5,
+   "high": 5,
+   "direction": "rise",
+   "method": "tracked training runs"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-demand",
+  "title": "~1,000,000× over two years",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Compute demand",
+   "low": 1000,
+   "high": 1000,
+   "direction": "rise",
+   "method": "keynote framing: per-request × usage"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Nvidia / Jensen Huang [nvidia]"
+  ]
+ },
+ {
+  "id": "e-capex",
+  "title": "+36% in 2026",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Hyperscaler capex",
+   "low": 1.36,
+   "high": 1.36,
+   "direction": "rise",
+   "method": "company guidance"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → SemiAnalysis [semianalysis]"
+  ]
+ },
+ {
+  "id": "e-dc",
+  "title": "~70 → ~220 GW in five years",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Data-center power supply",
+   "low": 1.26,
+   "high": 1.26,
+   "direction": "rise",
+   "method": "capacity forecast"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → McKinsey [mckinsey]"
+  ]
+ },
+ {
+  "id": "e-dc-jll",
+  "title": "~14% CAGR to 2030",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Data-center power supply",
+   "low": 1.14,
+   "high": 1.14,
+   "direction": "rise",
+   "method": "sector outlook"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → JLL [jll]"
+  ]
+ },
+ {
+  "id": "e-hbm",
+  "title": "~8% → ~30%, 2023 → 2026",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Memory share of AI spend",
+   "low": 1.55,
+   "high": 1.55,
+   "direction": "rise",
+   "method": "spend estimates"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → SemiAnalysis [semianalysis]"
+  ]
+ },
+ {
+  "id": "e-price-all",
+  "title": "All models, current list prices",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Inference price at fixed capability",
+   "low": 9,
+   "high": 900,
+   "direction": "fall",
+   "method": "range across capability bars"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-price-top",
+  "title": "Top GPQA bin vs bottom bin",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Inference price at fixed capability",
+   "low": 1.7,
+   "high": 31,
+   "direction": "fall",
+   "method": "by capability bin"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Inference price-trend paper (arXiv 2511.23455) [price-paper]"
+  ]
+ },
+ {
+  "id": "e-price-open",
+  "title": "Open-weight models (geo. mean 11.8×)",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Inference price at fixed capability",
+   "low": 7,
+   "high": 28,
+   "direction": "fall",
+   "method": "open models only"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Open-model price analysis (LessWrong) [open-price]"
+  ]
+ },
+ {
+  "id": "e-price-frontier",
+  "title": "Frontier price-for-performance",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Inference price at fixed capability",
+   "low": 5,
+   "high": 10,
+   "direction": "fall",
+   "method": "controls for frozen prices"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Inference price-trend paper (arXiv 2511.23455) [price-paper]"
+  ]
+ },
+ {
+  "id": "e-price-algo",
+  "title": "Algorithmic efficiency alone",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Inference price at fixed capability",
+   "low": 3,
+   "high": 3,
+   "direction": "fall",
+   "method": "hardware & competition divided out"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Inference price-trend paper (arXiv 2511.23455) [price-paper]"
+  ]
+ },
+ {
+  "id": "e-pretrain-eff",
+  "title": "Same capability, less compute",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Pre-training compute efficiency",
+   "low": 3,
+   "high": 3,
+   "direction": "rise",
+   "method": "algorithmic progress estimate"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-params-dense",
+  "title": "GPT-1 → GPT-3: 1000× in two years",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Frontier parameter count",
+   "low": 31,
+   "high": 31,
+   "direction": "rise",
+   "method": "disclosed sizes"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-params-gpt4",
+  "title": "GPT-3 → GPT-4: ~10× in 2¾ years",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Frontier parameter count",
+   "low": 2.3,
+   "high": 2.3,
+   "direction": "rise",
+   "method": "estimate for GPT-4"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-params-shrink",
+  "title": "After GPT-4: ~10× smaller (one step)",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Frontier parameter count",
+   "low": 10,
+   "high": 10,
+   "direction": "fall",
+   "method": "estimates for GPT-4o, 3.5 Sonnet"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]",
+   "reported-by → Epoch AI [epoch]"
+  ]
+ },
+ {
+  "id": "e-moore",
+  "title": "Doubling every ~2 years",
+  "kind": "measurement",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "quantity": "Reference: Moore's law",
+   "low": 1.41,
+   "high": 1.41,
+   "direction": "rise",
+   "method": "for scale"
+  },
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Measured rates [rates]"
+  ]
+ }
+]

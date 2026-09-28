@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Start a graph</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+a{color:#3A45B5;text-decoration:none}a:hover{color:#27308A;text-decoration:underline}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <header style="height: 60px; flex-shrink: 0; box-sizing: border-box; padding: 0 28px; display: flex; align-items: center; gap: 24px; background: #FFFFFF; border-bottom: 1px solid #E4E1DA">
+    <a href="Library.dc.html" style="font-size: 14px; color: #5F5B54; text-decoration: none">← Library</a>
+    <span style="font-family: Newsreader, Georgia, serif; font-size: 22px; font-weight: 500">New graph</span>
+    <div style="flex-grow: 1"></div>
+    <ol style="margin: 0; padding: 0; list-style: none; display: flex; align-items: center; gap: 8px; font-size: 13.5px">
+      <li style="display: flex; align-items: center; gap: 6px; font-weight: 600"><span style="width: 22px; height: 22px; border-radius: 11px; background: #1D1C1A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 12px">1</span>Sources</li>
+      <li style="width: 28px; height: 1px; background: #C9C5BC"></li>
+      <li style="display: flex; align-items: center; gap: 6px; color: #5F5B54"><span style="width: 22px; height: 22px; border-radius: 11px; border: 1px solid #C9C5BC; display: flex; align-items: center; justify-content: center; font-size: 12px">2</span>Review proposal</li>
+      <li style="width: 28px; height: 1px; background: #C9C5BC"></li>
+      <li style="display: flex; align-items: center; gap: 6px; color: #5F5B54"><span style="width: 22px; height: 22px; border-radius: 11px; border: 1px solid #C9C5BC; display: flex; align-items: center; justify-content: center; font-size: 12px">3</span>Open</li>
+    </ol>
+  </header>
+
+  <div style="flex-grow: 1; min-height: 0; display: flex; gap: 28px; box-sizing: border-box; padding: 36px 56px">
+    <main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 36px">What should this graph be about?</h1>
+        <p style="margin: 0; font-size: 15px; color: #5F5B54">Start from anything: a chat, some files, or just a question. Add as many sources as you like; each Concept remembers where it came from.</p>
+      </div>
+
+      <div role="tablist" aria-label="Source type" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+          <button role="tab" aria-selected="{{t.on}}" onClick="{{t.pick}}" style="{{t.style}}">
+            <span style="font-size: 16px; font-weight: 600">{{t.label}}</span>
+            <span style="font-size: 13px; color: #5F5B54; line-height: 1.4">{{t.hint}}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <section style="flex-grow: 1; min-height: 0; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 14px; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+        <sc-if value="{{isChat}}" hint-placeholder-val="{{false}}">
+          <label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600">Paste the conversation, a share link, or drop an export
+            <textarea rows="4" placeholder="Paste a chat, or a share link from any AI assistant" style="box-sizing: border-box; padding: 12px 14px; border: 1px solid #D6D2C9; border-radius: 10px; font: 400 15px/1.5 'IBM Plex Sans', sans-serif; resize: none"></textarea>
+          </label>
+          <div style="font-size: 13.5px; color: #5F5B54; line-height: 1.5">We read the whole conversation. Your own questions count most: “what are the query heads you refer to?” becomes a prerequisite. Several chats on one topic can go into one graph.</div>
+        </sc-if>
+        <sc-if value="{{isFiles}}" hint-placeholder-val="{{false}}">
+          <div style="height: 150px; box-sizing: border-box; border: 1.5px dashed #B8B3A9; border-radius: 12px; background: #FBFAF7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3A45B5" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"></path><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"></path></svg>
+            <span style="font-size: 15px; font-weight: 600">Drop files, or browse</span>
+            <span style="font-size: 13px; color: #5F5B54">PDF, Markdown, Word, text, web pages saved as HTML</span>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600">Or a link to read
+            <input placeholder="https://…" style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D6D2C9; border-radius: 10px; font: 400 15px 'IBM Plex Sans', sans-serif">
+          </label>
+        </sc-if>
+        <sc-if value="{{isPrompt}}" hint-placeholder-val="{{true}}">
+          <label style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 600">What do you want to understand?
+            <textarea rows="4" style="box-sizing: border-box; padding: 12px 14px; border: 1px solid #D6D2C9; border-radius: 10px; font: 400 16px/1.5 Newsreader, Georgia, serif; resize: none">How do mixture-of-experts models work, and why are they cheaper to serve?</textarea>
+          </label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 13.5px">
+            <span style="color: #5F5B54; padding: 5px 0">I want to</span>
+            <span style="padding: 5px 12px; border-radius: 999px; background: #1D1C1A; color: #FFFFFF">learn it</span>
+            <span style="padding: 5px 12px; border-radius: 999px; background: #EDEAE3">compare options</span>
+            <span style="padding: 5px 12px; border-radius: 999px; background: #EDEAE3">decide something</span>
+            <span style="padding: 5px 12px; border-radius: 999px; background: #EDEAE3">plan a trip or project</span>
+          </div>
+          <div style="font-size: 13.5px; color: #5F5B54; line-height: 1.5">With no source, the graph is drafted from general knowledge. Every Concept is marked as background until you add a source or a curator confirms it.</div>
+        </sc-if>
+        <div style="flex-grow: 1"></div>
+        <div style="display: flex; align-items: center; gap: 12px">
+          <button style="height: 40px; padding: 0 14px; border: 1px solid #D6D2C9; border-radius: 10px; background: #FFFFFF; font: 500 14px 'IBM Plex Sans', sans-serif">Add this source</button>
+          <span style="font-size: 13px; color: #5F5B54">then add another, or continue</span>
+        </div>
+      </section>
+    </main>
+
+    <aside style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.06em; color: #5F5B54">SOURCES IN THIS GRAPH · 3</div>
+      <sc-for list="{{sources}}" as="s" hint-placeholder-count="3">
+        <div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 3px 7px; border-radius: 6px; background: #EDEAE3; color: #3F3C37; flex-shrink: 0">{{s.kind}}</span>
+          <span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 14.5px; font-weight: 600">{{s.title}}</span>
+            <span style="font-size: 13px; color: #5F5B54">{{s.meta}}</span>
+          </span>
+          <button aria-label="Remove source" style="border: none; background: none; color: #5F5B54; font-size: 16px">×</button>
+        </div>
+      </sc-for>
+      <div style="flex-grow: 1"></div>
+      <a href="Seed.dc.html" style="height: 48px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: #3A45B5; color: #FFFFFF; border-radius: 12px; font-size: 15px; font-weight: 600; text-decoration: none">Propose a graph from 3 sources</a>
+      <div style="font-size: 12.5px; color: #5F5B54; text-align: center">Nothing is created until you review the proposal.</div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'prompt' }; }
+  renderVals() {
+    const tab = this.state.tab;
+    const tabs = [
+      ['chat', 'An AI chat', 'Paste in a conversation from any assistant'],
+      ['files', 'Files or links', 'PDFs, notes, docs, web pages'],
+      ['prompt', 'Just a prompt', 'Say what you want to understand'],
+    ].map(([id, label, hint]) => ({
+      label, hint, on: tab === id,
+      pick: () => this.setState({ tab: id }),
+      style: 'display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px 18px; border-radius: 12px; text-align: left; cursor: pointer; font-family: inherit; color: #1D1C1A; ' +
+        (tab === id ? 'background: #FFFFFF; border: 2px solid #3A45B5;' : 'background: #FBFAF7; border: 1px solid #E4E1DA;'),
+    }));
+    return {
+      tabs,
+      isChat: tab === 'chat', isFiles: tab === 'files', isPrompt: tab === 'prompt',
+      sources: [
+        { kind: 'CHAT', title: 'AI compute & model internals', meta: 'claude.ai/share/… · June 2026' },
+        { kind: 'FILE', title: '[a paper, e.g. the DeepSeek-V3 report].pdf', meta: '[N] pages' },
+        { kind: 'PROMPT', title: 'How do mixture-of-experts models work?', meta: 'Drafted from general knowledge' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

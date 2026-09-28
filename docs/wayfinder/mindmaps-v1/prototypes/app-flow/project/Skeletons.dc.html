@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>View skeletons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#1D1C1A;background:#F6F5F1}
+@keyframes mmPulse{0%,100%{opacity:.45}50%{opacity:1}}
+</style>
+</helmet>
+<div style="width: 1200px; height: 760px; box-sizing: border-box; padding: 44px 48px; display: flex; flex-direction: column; gap: 24px; background: #F6F5F1; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #5F5B54">While a View builds</div>
+    <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 500; font-size: 32px">Each View shows its own shape first, then fills in</h1>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #FBFAF7">
+        <g style="animation: mmPulse 1.6s ease-in-out infinite"><rect x="200" y="40" width="70" height="26" rx="6" fill="#EDEAE3"></rect><rect x="200" y="110" width="70" height="26" rx="6" fill="#EDEAE3"></rect><rect x="270" y="75" width="50" height="26" rx="6" fill="#EDEAE3"></rect></g>
+        <path d="M90 88 L120 88 M160 88 L200 53 M160 88 L200 123" stroke="#3A45B5" stroke-width="1.5"></path><path d="M270 53 L290 75 M270 123 L290 101" stroke="#C9C5BC" stroke-dasharray="3 4"></path>
+        <rect x="20" y="75" width="70" height="26" rx="6" fill="#FFFFFF" stroke="#E4E1DA"></rect><rect x="20" y="75" width="4" height="26" fill="#2563eb"></rect>
+        <rect x="120" y="75" width="40" height="26" rx="6" fill="#FFFFFF" stroke="#F3D48A"></rect><rect x="120" y="75" width="4" height="26" fill="#2563eb"></rect>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">Learning path, Lineage, Cause &amp; Effect</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">Found Concepts stream in as nodes; placeholders hold their slots, so nothing jumps when the layout lands.</span></div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #FBFAF7">
+        <rect x="20" y="20" width="300" height="24" rx="4" fill="#F1EFEA"></rect>
+        <path d="M20 68 H320 M20 92 H320 M20 116 H320 M20 140 H320 M100 20 V164" stroke="#E4E1DA"></path>
+        <rect x="28" y="52" width="56" height="8" rx="4" fill="#8A857C"></rect><rect x="28" y="76" width="48" height="8" rx="4" fill="#8A857C"></rect><rect x="28" y="100" width="60" height="8" rx="4" fill="#8A857C"></rect><rect x="28" y="124" width="44" height="8" rx="4" fill="#8A857C"></rect><rect x="28" y="148" width="52" height="8" rx="4" fill="#8A857C"></rect>
+        <circle cx="130" cy="56" r="5" fill="#059669"></circle><circle cx="180" cy="56" r="5" fill="#DC2626"></circle><circle cx="130" cy="80" r="5" fill="#059669"></circle><circle cx="180" cy="80" r="5" fill="#059669"></circle><circle cx="130" cy="104" r="5" fill="#059669"></circle>
+        <g style="animation: mmPulse 1.6s ease-in-out infinite"><rect x="220" y="52" width="80" height="8" rx="4" fill="#EDEAE3"></rect><rect x="220" y="76" width="80" height="8" rx="4" fill="#EDEAE3"></rect><rect x="170" y="100" width="130" height="8" rx="4" fill="#EDEAE3"></rect><rect x="120" y="124" width="180" height="8" rx="4" fill="#EDEAE3"></rect><rect x="120" y="148" width="180" height="8" rx="4" fill="#EDEAE3"></rect></g>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">Comparison Table</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">Rows appear first; cells fill left to right as each Attribute is found. Unknowns stay “?” rather than guessed.</span></div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #FBFAF7">
+        <rect x="20" y="16" width="300" height="148" rx="10" fill="#FFFFFF" stroke="#C9C5BC"></rect>
+        <rect x="34" y="42" width="130" height="108" rx="8" fill="#F1EFEA"></rect><rect x="178" y="42" width="128" height="50" rx="8" fill="#F1EFEA"></rect><rect x="178" y="100" width="128" height="50" rx="8" fill="#F1EFEA"></rect>
+        <rect x="44" y="54" width="40" height="10" rx="5" fill="#2563eb"></rect><rect x="90" y="54" width="34" height="10" rx="5" fill="#059669"></rect>
+        <g style="animation: mmPulse 1.6s ease-in-out infinite"><rect x="44" y="72" width="46" height="10" rx="5" fill="#E4E1DA"></rect><rect x="188" y="54" width="44" height="10" rx="5" fill="#E4E1DA"></rect><rect x="188" y="112" width="38" height="10" rx="5" fill="#E4E1DA"></rect></g>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">Anatomy, Outline</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">The structure comes first (parts or headings), then techniques pin onto each part as they're placed.</span></div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #E0F2FE">
+        <path d="M40 180 C30 130 70 110 90 80 C110 45 170 32 220 44 C270 56 310 96 304 140 C302 160 290 176 280 180 Z" fill="#F1EFEA" stroke="#DDD9D1"></path>
+        <circle cx="170" cy="100" r="9" fill="#059669" stroke="#FFFFFF" stroke-width="2.5"></circle><circle cx="110" cy="110" r="6" fill="#8A857C"></circle>
+        <g style="animation: mmPulse 1.6s ease-in-out infinite"><circle cx="230" cy="80" r="6" fill="#FFFFFF" stroke="#A8A29E" stroke-dasharray="2 2"></circle><circle cx="250" cy="130" r="6" fill="#FFFFFF" stroke="#A8A29E" stroke-dasharray="2 2"></circle><circle cx="140" cy="146" r="6" fill="#FFFFFF" stroke="#A8A29E" stroke-dasharray="2 2"></circle></g>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">Map</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">The map frames the area right away; pins drop in as places are geocoded, with open rings for ones still looking.</span></div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #FBFAF7">
+        <path d="M20 58 H320 M20 104 H320 M20 150 H320 M80 16 V164 M160 16 V164 M240 16 V164" stroke="#EDEAE3"></path>
+        <rect x="30" y="28" width="110" height="18" rx="9" fill="#2563eb"></rect><rect x="100" y="72" width="130" height="18" rx="9" fill="#0f766e"></rect>
+        <g style="animation: mmPulse 1.6s ease-in-out infinite"><rect x="170" y="28" width="120" height="18" rx="9" fill="#EDEAE3"></rect><rect x="40" y="118" width="80" height="18" rx="9" fill="#EDEAE3"></rect><rect x="200" y="118" width="100" height="18" rx="9" fill="#EDEAE3"></rect></g>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">Timeline, Rates</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">Lanes and the axis are drawn first; spans and estimates slot in as their dates or ranges are pinned down.</span></div>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E1DA; border-radius: 12px; overflow: hidden">
+      <svg width="100%" height="180" viewBox="0 0 340 180" aria-hidden="true" style="display: block; background: #FEF2F2">
+        <rect x="70" y="40" width="200" height="100" rx="12" fill="#FFFFFF" stroke="#FCA5A5" stroke-dasharray="5 4"></rect>
+        <path d="M150 74 L190 106 M190 74 L150 106" stroke="#B91C1C" stroke-width="3" stroke-linecap="round"></path>
+      </svg>
+      <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px"><b style="font-size: 14.5px">When a View can't be built</b><span style="font-size: 13px; color: #5F5B54; line-height: 1.45">Say why in plain words (“only one estimate per trend”), then offer Retry, a different View, or Remove. The other Views are unaffected.</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

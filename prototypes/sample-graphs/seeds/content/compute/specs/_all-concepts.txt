@@ -1,0 +1,201 @@
+t-econ	Compute economics
+t-cost	Why inference gets cheaper
+t-inside	Inside a transformer
+t-moe	Mixture of Experts
+t-models	Open model landscape
+t-train	Training
+t-data	Data
+t-beyond	Beyond the transformer
+t-sources	Sources
+fable-gating	Fable 5 gated behind usage credits
+capacity	Capacity constraint
+gpu-supply	Accelerator supply (GPUs/TPUs)
+hbm-supply	HBM memory supply
+power	Power & grid
+electrical-gear	Transformers & switchgear
+compute-supply	Available AI compute
+compute-demand	Compute demand
+reasoning-load	Reasoning & agentic workloads
+usage-growth	Usage growth
+frontier-price	Frontier inference price & scarcity
+cost-per-token	Serving cost per token
+capex	Hyperscaler capex
+slip	Construction & interconnection delays
+jevons	Jevons' paradox
+inference-shift	Inference overtakes training
+capacity-relief	Delayed capacity comes online
+dc-growth	Data centers: ~70 GW → ~220 GW
+nuclear	New nuclear power at scale
+blackwell	Blackwell sold out
+fable-release	Claude Fable 5 released
+fixed-capability	Cost at a fixed capability
+price-vs-cost	Price ≠ serving cost
+serving-opts	Serving optimizations
+hardware-gens	Hardware generations
+distillation	Distillation
+memory-bound	Inference is memory-bound
+algorithmic-progress	Algorithmic efficiency
+rates	Measured rates
+transformer	A decoder-only transformer
+tokenizer	Tokenizer
+embedding	Embedding
+layer-stack	Layer stack × 61
+attention	Attention
+heads	Heads (Q · K · V)
+kv-cache	KV-cache
+position	Positional encoding
+attn-kernel	Attention kernel
+ffn	Feed-forward network
+router	Router (gate)
+experts	Routed experts × 256
+shared-expert-c	Shared expert
+residual	Residual stream
+output-head	Output head (unembedding)
+serving	Serving system
+batching	Batching
+weights-precision	Numeric precision
+decoding	Decoding loop
+qkv	Query, key, value
+pretraining	Pre-training
+mha	Multi-head attention
+mqa	Multi-Query Attention (MQA)
+gqa	Grouped-Query Attention (GQA)
+mla	Multi-head Latent Attention (MLA)
+dsa	DeepSeek Sparse Attention (DSA)
+flash-attn	FlashAttention
+paged-attn	PagedAttention
+kv-quant	KV-cache quantization
+prefix-cache	Prefix / prompt caching
+quantization	Weight quantization
+spec-decoding	Speculative decoding
+cont-batching	Continuous batching
+rope	RoPE
+pi	Position Interpolation
+yarn	YaRN
+nope	NoPE
+mtp	Multi-Token Prediction
+layer-sharing	Cross-layer parameter sharing
+kv-sharing	Cross-layer KV-cache sharing
+layer-pruning	Layer pruning
+linear-attn	Linear / hybrid attention
+moe	Mixture of Experts
+moe-1991	Adaptive Mixtures of Local Experts
+sparse-moe	Sparsely-gated MoE layer
+gshard	GShard
+switch	Switch Transformer
+lb-loss	Auxiliary load-balancing loss
+aux-free	Auxiliary-loss-free balancing
+fine-grained	Fine-grained + shared experts
+no-shared	Dropping the shared expert
+sft	Supervised fine-tuning (SFT)
+reward-model	Reward modeling
+rlhf	RLHF
+dpo	DPO
+rlvr	RLVR
+grpo	GRPO
+grpo-variants	GRPO variants (DAPO, Dr. GRPO, VAPO…)
+lora	LoRA
+qlora	QLoRA
+merging	Specialize, then merge
+chinchilla	Chinchilla scaling
+ssm	State-space models
+mamba	Mamba
+hybrids	Mamba–Transformer hybrids
+blt	Byte Latent Transformer
+diffusion-lm	Diffusion language models
+block-diffusion	Block diffusion
+lcm	Large Concept Model
+latent-reasoning	Latent / recurrent-depth reasoning
+post-training	Post-training
+web-crawl	Filtered web crawl
+extraction	Extraction & cleaning
+dedup	Deduplication
+quality-filter	Model-based quality filtering
+decontamination	Decontamination
+synthetic-sft	Synthetic SFT responses
+llm-judge	LLM-as-a-judge preferences
+verifiable-problems	Verifiable problems
+gpt-1	GPT-1
+gpt-3	GPT-3
+gpt-4	GPT-4
+deepseek-v3	DeepSeek-V3
+deepseek-r1	DeepSeek-R1
+deepseek-v32	DeepSeek-V3.2
+llama4	Llama 4 Maverick
+llama4-scout	Llama 4 Scout
+qwen3	Qwen3
+kimi-k2	Kimi K2
+kimi-linear	Kimi Linear
+glm-45	GLM-4.5
+glm-5	GLM-5
+glm-51	GLM-5.1
+glm-52	GLM-5.2
+smollm3	SmolLM3
+jamba	Jamba
+nemotron-h	Nemotron-H
+granite-4	Granite 4.0
+mercury	Mercury Coder
+gemini-diffusion	Gemini Diffusion
+epoch	Epoch AI
+price-paper	Inference price-trend paper (arXiv 2511.23455)
+open-price	Open-model price analysis (LessWrong)
+nvidia	Nvidia / Jensen Huang
+semianalysis	SemiAnalysis
+mckinsey	McKinsey
+jll	JLL
+accuris	Accuris / Tech Insider
+stanford-toy	Stanford teaching model
+rlvr-study	RLVR coverage study
+tulu3	Tülu 3 (Ai2)
+dclm	DCLM benchmark
+vl-study	Vision-language specialist study
+robustness-paper	Hybrid robustness paper (2026)
+no-free-lunch	'No Free Lunch' dLLM survey (2026)
+vendor-claims	Vendor announcements
+glm52-early	GLM-5.2 launch coverage (June 13–15)
+glm52-late	GLM-5.2 later coverage (June 16–17)
+c-100x	Inference cost at fixed capability falls ~100×/year
+c-frontier-fastest	Price declines are fastest at the capability frontier
+c-squeeze	Frontier capacity stays scarce until ~2027–28
+c-incremental	Sustained cost declines come mostly from incremental work
+c-arch-efficiency	Recent architecture wins are efficiency; quality came from post-training
+c-rlvr-new	RLVR creates genuinely new reasoning ability
+c-distill-open	Distillation from closed models drives open reasoning gains
+c-specialists	Specialists beat a generalist on their own turf
+c-data-lever	Data curation is the biggest lever
+c-hybrid-parity	Hybrids match transformers at large scale
+c-diffusion-parity	Diffusion LMs match autoregressive quality at 5–10× speed
+c-glm52	GLM-5.2 beats GPT-5.5 on long-horizon coding
+m-layers	Each layer predicts a token, and the guesses get blended
+r-layers	Layers refine one vector in sequence; only the last one predicts
+m-sonnet	The 100×/year means a given Sonnet gets 100× cheaper
+m-harder	Higher capability bars take cheap models longer to catch
+m-carbon	claude-carbon's token cost is lossy
+r-carbon	Token cost is exact; only the CO₂ estimate is lossy
+m-experts	Experts are topic specialists (a 'chemistry expert')
+r-experts	Experts specialize in low-level token patterns, re-chosen every token at every layer
+m-gpu	Capacity is all about GPUs
+m-bigger	Frontier models keep getting bigger
+r-smaller	Frontier models shrank after GPT-4; MoE split total from active parameters
+m-moe-new	MoE is a recent breakthrough
+r-moe-old	The idea dates to 1991; sparse gating to 2017
+m-price	The price you pay tracks the cost to serve
+m-distill	A chunk of open reasoning gains is distillation doing the heavy lifting
+r-distill	Distillation can transfer reasoning, but there's no good evidence it drives the headline gains
+e-stock	Doubling every ~7 months
+e-train	Doubling every ~5.2 months
+e-demand	~1,000,000× over two years
+e-capex	+36% in 2026
+e-dc	~70 → ~220 GW in five years
+e-dc-jll	~14% CAGR to 2030
+e-hbm	~8% → ~30%, 2023 → 2026
+e-price-all	All models, current list prices
+e-price-top	Top GPQA bin vs bottom bin
+e-price-open	Open-weight models (geo. mean 11.8×)
+e-price-frontier	Frontier price-for-performance
+e-price-algo	Algorithmic efficiency alone
+e-pretrain-eff	Same capability, less compute
+e-params-dense	GPT-1 → GPT-3: 1000× in two years
+e-params-gpt4	GPT-3 → GPT-4: ~10× in 2¾ years
+e-params-shrink	After GPT-4: ~10× smaller (one step)
+e-moore	Doubling every ~2 years

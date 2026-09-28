@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Graph thumbnail</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 220px; height: 110px; position: relative; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1D1C1A">
+  <sc-if value="{{is.outline}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <rect x="30" y="14" width="120" height="8" rx="4" fill="{{color}}"></rect>
+      <rect x="48" y="30" width="96" height="6" rx="3" fill="#C9C5BC"></rect><rect x="48" y="42" width="70" height="6" rx="3" fill="#C9C5BC"></rect>
+      <rect x="30" y="58" width="104" height="8" rx="4" fill="{{color}}" opacity="0.75"></rect>
+      <rect x="48" y="74" width="84" height="6" rx="3" fill="#C9C5BC"></rect><rect x="66" y="86" width="60" height="6" rx="3" fill="#DDD9D1"></rect>
+      <path d="M38 26 V46 M38 70 V90 M56 80 V92" stroke="#DDD9D1" stroke-width="1.5"></path>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.anatomy}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <rect x="20" y="10" width="180" height="90" rx="10" stroke="#C9C5BC" stroke-width="1.5" fill="#FFFFFF"></rect>
+      <rect x="32" y="30" width="72" height="58" rx="7" fill="#F1EFEA"></rect><rect x="114" y="30" width="74" height="26" rx="7" fill="#F1EFEA"></rect><rect x="114" y="62" width="74" height="26" rx="7" fill="#F1EFEA"></rect>
+      <rect x="40" y="40" width="26" height="8" rx="4" fill="{{color}}"></rect><rect x="70" y="40" width="22" height="8" rx="4" fill="#F59E0B"></rect><rect x="40" y="54" width="30" height="8" rx="4" fill="#059669"></rect>
+      <rect x="122" y="38" width="28" height="8" rx="4" fill="{{color}}"></rect><rect x="122" y="70" width="22" height="8" rx="4" fill="#059669"></rect><rect x="148" y="70" width="26" height="8" rx="4" fill="#F59E0B"></rect>
+      <rect x="32" y="16" width="50" height="6" rx="3" fill="#8A857C"></rect>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.learning}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M26 30 L66 30 L106 55 M26 80 L66 80 L106 55 L146 40 L186 55 M106 55 L146 75 L186 55 M66 30 L106 20" stroke="{{color}}" stroke-width="1.6"></path>
+      <path d="M106 20 L146 12" stroke="#DDD9D1" stroke-width="1.4" stroke-dasharray="3 3"></path>
+      <circle cx="26" cy="30" r="6" fill="{{color}}"></circle><circle cx="26" cy="80" r="6" fill="{{color}}"></circle><circle cx="66" cy="30" r="6" fill="{{color}}"></circle><circle cx="66" cy="80" r="6" fill="{{color}}"></circle>
+      <circle cx="106" cy="55" r="6" fill="{{color}}"></circle><circle cx="146" cy="40" r="6" fill="{{color}}"></circle><circle cx="146" cy="75" r="6" fill="{{color}}"></circle>
+      <circle cx="106" cy="20" r="4" fill="#DDD9D1"></circle><circle cx="146" cy="12" r="4" fill="#DDD9D1"></circle>
+      <circle cx="186" cy="55" r="10" fill="#FEF3C7" stroke="#B45309" stroke-width="2"></circle>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.lineage}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <rect x="10" y="10" width="200" height="40" rx="6" fill="#ECFEFF"></rect><rect x="10" y="60" width="200" height="40" rx="6" fill="#F0FDF4"></rect>
+      <path d="M30 30 C60 30 60 22 90 22 M90 22 C120 22 120 34 150 34 M150 34 L190 26 M90 22 C120 22 120 80 150 80 M40 80 L110 80 L150 80 L190 72" stroke="#0f766e" stroke-width="1.6"></path>
+      <circle cx="30" cy="30" r="5" fill="{{color}}"></circle><circle cx="90" cy="22" r="5" fill="{{color}}"></circle><circle cx="150" cy="34" r="5" fill="{{color}}"></circle><circle cx="190" cy="26" r="5" fill="{{color}}"></circle>
+      <circle cx="40" cy="80" r="5" fill="#0f766e"></circle><circle cx="110" cy="80" r="5" fill="#0f766e"></circle><circle cx="150" cy="80" r="5" fill="#0f766e"></circle><circle cx="190" cy="72" r="5" fill="#0f766e"></circle>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.quadrant}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M110 8 V102 M30 55 H190" stroke="#C9C5BC" stroke-width="1.5"></path>
+      <rect x="136" y="16" width="44" height="30" rx="6" fill="{{color}}" opacity="0.12"></rect>
+      <circle cx="150" cy="26" r="6" fill="{{color}}"></circle><circle cx="168" cy="36" r="5" fill="{{color}}"></circle><circle cx="140" cy="40" r="4" fill="{{color}}" opacity="0.7"></circle>
+      <circle cx="70" cy="30" r="5" fill="#8A857C"></circle><circle cx="84" cy="76" r="5" fill="#8A857C"></circle><circle cx="56" cy="86" r="4" fill="#B8B3A9"></circle><circle cx="150" cy="82" r="5" fill="#F59E0B"></circle>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.table}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <rect x="20" y="10" width="180" height="90" rx="8" fill="#FFFFFF" stroke="#DDD9D1"></rect>
+      <rect x="20" y="10" width="180" height="18" rx="8" fill="#F1EFEA"></rect>
+      <rect x="21" y="46" width="178" height="18" fill="{{color}}" opacity="0.14"></rect>
+      <path d="M20 28 H200 M20 46 H200 M20 64 H200 M20 82 H200 M76 10 V100" stroke="#E4E1DA"></path>
+      <rect x="28" y="33" width="36" height="7" rx="3.5" fill="#8A857C"></rect><rect x="28" y="51" width="40" height="7" rx="3.5" fill="{{color}}"></rect><rect x="28" y="69" width="30" height="7" rx="3.5" fill="#B8B3A9"></rect><rect x="28" y="87" width="34" height="7" rx="3.5" fill="#B8B3A9"></rect>
+      <circle cx="100" cy="37" r="4" fill="#059669"></circle><circle cx="136" cy="37" r="4" fill="#DC2626"></circle><circle cx="172" cy="37" r="4" fill="#059669"></circle>
+      <circle cx="100" cy="55" r="4" fill="#059669"></circle><circle cx="136" cy="55" r="4" fill="#059669"></circle><circle cx="172" cy="55" r="4" fill="#059669"></circle>
+      <circle cx="100" cy="73" r="4" fill="#DC2626"></circle><circle cx="136" cy="73" r="4" fill="#059669"></circle><circle cx="172" cy="73" r="4" fill="#C9C5BC"></circle>
+      <circle cx="100" cy="91" r="4" fill="#059669"></circle><circle cx="136" cy="91" r="4" fill="#C9C5BC"></circle><circle cx="172" cy="91" r="4" fill="#DC2626"></circle>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.evidence}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M46 22 L96 55 M46 55 L96 55 M46 88 L96 55 M124 55 L174 30 M124 55 L174 80" stroke="#C9C5BC" stroke-width="1.5"></path>
+      <rect x="26" y="15" width="30" height="14" rx="4" fill="#4f46e5"></rect><rect x="26" y="48" width="30" height="14" rx="4" fill="#4f46e5"></rect><rect x="26" y="81" width="30" height="14" rx="4" fill="#4f46e5" opacity="0.6"></rect>
+      <rect x="92" y="42" width="36" height="26" rx="6" fill="#FEF3C7" stroke="#CA8A04" stroke-width="1.6"></rect>
+      <rect x="164" y="23" width="30" height="14" rx="4" fill="#D97706"></rect><rect x="164" y="73" width="30" height="14" rx="4" fill="#D97706" opacity="0.6"></rect>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.rates}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M20 98 H200 M60 94 V100 M110 94 V100 M160 94 V100" stroke="#C9C5BC" stroke-width="1.5"></path>
+      <path d="M110 8 V92" stroke="#DDD9D1" stroke-dasharray="3 3"></path>
+      <rect x="120" y="14" width="60" height="8" rx="4" fill="#DC2626"></rect><rect x="132" y="28" width="30" height="8" rx="4" fill="#DC2626" opacity="0.7"></rect>
+      <rect x="36" y="48" width="56" height="8" rx="4" fill="{{color}}"></rect><rect x="50" y="62" width="44" height="8" rx="4" fill="{{color}}" opacity="0.7"></rect><rect x="24" y="76" width="40" height="8" rx="4" fill="{{color}}" opacity="0.5"></rect>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.cause}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M50 22 L100 45 M50 55 L100 45 M50 88 L100 70 M112 50 L160 58 M112 70 L160 58" stroke="#DC2626" stroke-width="1.6"></path>
+      <path d="M50 55 L100 70" stroke="#16A34A" stroke-width="1.6"></path>
+      <rect x="22" y="14" width="30" height="16" rx="4" fill="#FFFFFF" stroke="#C9C5BC"></rect><rect x="22" y="47" width="30" height="16" rx="4" fill="#FFFFFF" stroke="{{color}}" stroke-width="2"></rect><rect x="22" y="80" width="30" height="16" rx="4" fill="#FFFFFF" stroke="#C9C5BC"></rect>
+      <rect x="98" y="38" width="28" height="16" rx="4" fill="#FFFFFF" stroke="#C9C5BC"></rect><rect x="98" y="63" width="28" height="16" rx="4" fill="#FFFFFF" stroke="#C9C5BC"></rect>
+      <rect x="158" y="46" width="42" height="24" rx="6" fill="#FEE2E2" stroke="#B91C1C" stroke-width="1.6"></rect>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.timeline}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <path d="M14 36 H206 M14 66 H206 M14 96 H206" stroke="#EDEAE3"></path>
+      <path d="M40 8 V100 M100 8 V100 M160 8 V100" stroke="#EDEAE3"></path>
+      <rect x="24" y="16" width="70" height="12" rx="6" fill="{{color}}"></rect><rect x="110" y="16" width="86" height="12" rx="6" fill="{{color}}" opacity="0.4"></rect>
+      <rect x="60" y="46" width="90" height="12" rx="6" fill="#0f766e"></rect>
+      <path d="M44 80 l6 -6 l6 6 l-6 6 z M124 80 l6 -6 l6 6 l-6 6 z M176 80 l6 -6 l6 6 l-6 6 z" fill="#64748b"></path>
+    </svg>
+  </sc-if>
+  <sc-if value="{{is.map}}" hint-placeholder-val="{{false}}">
+    <svg width="220" height="110" viewBox="0 0 220 110" fill="none" aria-hidden="true">
+      <rect x="0" y="0" width="220" height="110" fill="#E0F2FE"></rect>
+      <path d="M30 100 C24 70 50 58 64 40 C80 20 120 14 150 22 C180 30 200 52 196 80 C194 96 180 106 170 110 L36 110 Z" fill="#F1EFEA" stroke="#DDD9D1"></path>
+      <path d="M110 54 L150 38 M110 54 L88 80" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="4 3"></path>
+      <circle cx="70" cy="62" r="5" fill="#8A857C"></circle><circle cx="130" cy="78" r="5" fill="#8A857C"></circle><circle cx="170" cy="60" r="5" fill="#8A857C"></circle>
+      <circle cx="150" cy="38" r="5" fill="#7c3aed"></circle><circle cx="88" cy="80" r="5" fill="#7c3aed"></circle>
+      <circle cx="110" cy="54" r="9" fill="{{color}}" stroke="#FFFFFF" stroke-width="2.5"></circle>
+    </svg>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"kind":{"editor":"enum","options":["outline","anatomy","learning","lineage","quadrant","table","evidence","rates","cause","timeline","map"],"default":"learning"},"color":{"editor":"color","default":"#2563eb","options":["#2563eb","#ea580c","#059669","#9333ea"]},"$preview":{"width":220,"height":110}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const kind = this.props.kind ?? 'learning';
+    const kinds = ['outline', 'anatomy', 'learning', 'lineage', 'quadrant', 'table', 'evidence', 'rates', 'cause', 'timeline', 'map'];
+    const is = {};
+    for (const k of kinds) is[k] = kind === k;
+    return { is, color: this.props.color ?? '#2563eb' };
+  }
+}
+</script>
+</body>
+</html>

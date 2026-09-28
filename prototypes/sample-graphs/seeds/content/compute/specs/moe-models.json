@@ -1,0 +1,626 @@
+[
+ {
+  "id": "t-moe",
+  "title": "Mixture of Experts",
+  "kind": "idea",
+  "summary": "How sparse experts decouple capacity from cost, and where the idea came from",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "Mixture of Experts [moe] part-of this",
+   "Adaptive Mixtures of Local Experts [moe-1991] part-of this",
+   "Sparsely-gated MoE layer [sparse-moe] part-of this",
+   "GShard [gshard] part-of this",
+   "Switch Transformer [switch] part-of this",
+   "Auxiliary load-balancing loss [lb-loss] part-of this",
+   "Auxiliary-loss-free balancing [aux-free] part-of this",
+   "Fine-grained + shared experts [fine-grained] part-of this",
+   "Dropping the shared expert [no-shared] part-of this",
+   "Experts are topic specialists (a 'chemistry expert') [m-experts] part-of this",
+   "Experts specialize in low-level token patterns, re-chosen every token at every layer [r-experts] part-of this",
+   "MoE is a recent breakthrough [m-moe-new] part-of this",
+   "The idea dates to 1991; sparse gating to 2017 [r-moe-old] part-of this"
+  ]
+ },
+ {
+  "id": "t-models",
+  "title": "Open model landscape",
+  "kind": "idea",
+  "summary": "What the published open models are made of",
+  "existingBody": "",
+  "attributes": {},
+  "date": null,
+  "needsArticle": false,
+  "relationships": [
+   "GPT-1 [gpt-1] part-of this",
+   "GPT-3 [gpt-3] part-of this",
+   "GPT-4 [gpt-4] part-of this",
+   "DeepSeek-V3 [deepseek-v3] part-of this",
+   "DeepSeek-R1 [deepseek-r1] part-of this",
+   "DeepSeek-V3.2 [deepseek-v32] part-of this",
+   "Llama 4 Maverick [llama4] part-of this",
+   "Llama 4 Scout [llama4-scout] part-of this",
+   "Qwen3 [qwen3] part-of this",
+   "Kimi K2 [kimi-k2] part-of this",
+   "Kimi Linear [kimi-linear] part-of this",
+   "GLM-4.5 [glm-45] part-of this",
+   "GLM-5 [glm-5] part-of this",
+   "GLM-5.1 [glm-51] part-of this",
+   "GLM-5.2 [glm-52] part-of this",
+   "SmolLM3 [smollm3] part-of this",
+   "Recent architecture wins are efficiency; quality came from post-training [c-arch-efficiency] part-of this",
+   "GLM-5.2 beats GPT-5.5 on long-horizon coding [c-glm52] part-of this",
+   "Frontier models keep getting bigger [m-bigger] part-of this",
+   "Frontier models shrank after GPT-4; MoE split total from active parameters [r-smaller] part-of this"
+  ]
+ },
+ {
+  "id": "moe",
+  "title": "Mixture of Experts",
+  "kind": "idea",
+  "summary": "Split the FFN into many experts; a router sends each token to a few. Capacity of the total, cost of the active",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "standard",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "cost per parameter"
+  },
+  "date": null,
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Feed-forward network [ffn]",
+   "prerequisite → Router (gate) [router]",
+   "prerequisite → Routed experts × 256 [experts]",
+   "prerequisite → Cost at a fixed capability [fixed-capability]",
+   "lowers → Serving cost per token [cost-per-token] (active params set the cost)",
+   "supports → Sustained cost declines come mostly from incremental work [c-incremental] (idea in 1991/2017, value from a decade of fixes)",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "DeepSeek-R1 [deepseek-r1] uses this",
+   "DeepSeek-V3.2 [deepseek-v32] uses this",
+   "Llama 4 Maverick [llama4] uses this",
+   "Llama 4 Scout [llama4-scout] uses this",
+   "Qwen3 [qwen3] uses this",
+   "Kimi K2 [kimi-k2] uses this",
+   "GLM-5 [glm-5] uses this",
+   "GLM-5.1 [glm-51] uses this",
+   "Jamba [jamba] uses this",
+   "Sparsely-gated MoE layer [sparse-moe] led-to this",
+   "Feed-forward network [ffn] prerequisite this"
+  ]
+ },
+ {
+  "id": "moe-1991",
+  "title": "Adaptive Mixtures of Local Experts",
+  "kind": "idea",
+  "summary": "Jacobs, Hinton, Jordan & Nowlan: the original idea",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "research"
+  },
+  "date": "1991",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "led-to → Sparsely-gated MoE layer [sparse-moe] (sparse gating in deep nets)"
+  ]
+ },
+ {
+  "id": "sparse-moe",
+  "title": "Sparsely-gated MoE layer",
+  "kind": "idea",
+  "summary": "Shazeer et al.: sparse gating in deep nets, up to 137B parameters",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "research",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "cost per parameter"
+  },
+  "date": "2017-01",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Feed-forward network [ffn]",
+   "led-to → GShard [gshard] (into the Transformer)",
+   "led-to → Auxiliary load-balancing loss [lb-loss] (fix expert collapse)",
+   "led-to → Mixture of Experts [moe]",
+   "Adaptive Mixtures of Local Experts [moe-1991] led-to this (sparse gating in deep nets)"
+  ]
+ },
+ {
+  "id": "gshard",
+  "title": "GShard",
+  "kind": "idea",
+  "summary": "MoE folded into the Transformer, past 600B parameters",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "small-scale",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "cost per parameter"
+  },
+  "date": "2020",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Feed-forward network [ffn]",
+   "led-to → Switch Transformer [switch] (top-1 routing)",
+   "Sparsely-gated MoE layer [sparse-moe] led-to this (into the Transformer)"
+  ]
+ },
+ {
+  "id": "switch",
+  "title": "Switch Transformer",
+  "kind": "idea",
+  "summary": "Simplified routing to one expert per token; toward trillion-parameter models",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "small-scale",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "routing cost"
+  },
+  "date": "2021",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Router (gate) [router]",
+   "led-to → Fine-grained + shared experts [fine-grained] (many small experts + shared)",
+   "GShard [gshard] led-to this (top-1 routing)"
+  ]
+ },
+ {
+  "id": "lb-loss",
+  "title": "Auxiliary load-balancing loss",
+  "kind": "idea",
+  "summary": "Penalize lopsided routing so experts don't collapse into a few favourites",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "standard",
+   "effect": "efficiency",
+   "applies": "architecture",
+   "bottleneck": "expert collapse"
+  },
+  "date": "2017-01",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Router (gate) [router]",
+   "led-to → Auxiliary-loss-free balancing [aux-free] (without the loss penalty)",
+   "prerequisite → Auxiliary-loss-free balancing [aux-free]",
+   "Sparsely-gated MoE layer [sparse-moe] led-to this (fix expert collapse)",
+   "Router (gate) [router] prerequisite this"
+  ]
+ },
+ {
+  "id": "aux-free",
+  "title": "Auxiliary-loss-free balancing",
+  "kind": "idea",
+  "summary": "Per-expert bias terms balance load without the loss's quality penalty (DeepSeek)",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "shipped",
+   "effect": "quality",
+   "applies": "architecture",
+   "bottleneck": "expert collapse"
+  },
+  "date": "2024-12",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Router (gate) [router]",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "Auxiliary load-balancing loss [lb-loss] led-to this (without the loss penalty)",
+   "Auxiliary load-balancing loss [lb-loss] prerequisite this"
+  ]
+ },
+ {
+  "id": "fine-grained",
+  "title": "Fine-grained + shared experts",
+  "kind": "idea",
+  "summary": "Many small experts plus an always-on shared one (DeepSeek)",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "shipped",
+   "effect": "both",
+   "applies": "architecture",
+   "bottleneck": "routing granularity"
+  },
+  "date": "2024",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Routed experts × 256 [experts]",
+   "led-to → Dropping the shared expert [no-shared] (Qwen3 drops it)",
+   "DeepSeek-V3 [deepseek-v3] uses this",
+   "DeepSeek-V3.2 [deepseek-v32] uses this",
+   "Kimi K2 [kimi-k2] uses this",
+   "Switch Transformer [switch] led-to this (many small experts + shared)",
+   "Routed experts × 256 [experts] prerequisite this",
+   "Shared expert [shared-expert-c] prerequisite this"
+  ]
+ },
+ {
+  "id": "no-shared",
+  "title": "Dropping the shared expert",
+  "kind": "idea",
+  "summary": "Qwen3 removed it — an unsettled MoE design question",
+  "existingBody": "",
+  "attributes": {
+   "area": "MoE",
+   "stage": "shipped",
+   "effect": "efficiency",
+   "applies": "architecture"
+  },
+  "date": "2025-04",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Mixture of Experts [t-moe]",
+   "modifies → Shared expert [shared-expert-c]",
+   "Qwen3 [qwen3] uses this",
+   "Fine-grained + shared experts [fine-grained] led-to this (Qwen3 drops it)"
+  ]
+ },
+ {
+  "id": "gpt-1",
+  "title": "GPT-1",
+  "kind": "thing",
+  "summary": "The start of the dense scaling era",
+  "existingBody": "",
+  "attributes": {
+   "developer": "OpenAI",
+   "total": 0.117,
+   "notes": "The start of the dense scaling era"
+  },
+  "date": "2018",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]"
+  ]
+ },
+ {
+  "id": "gpt-3",
+  "title": "GPT-3",
+  "kind": "thing",
+  "summary": "1000× GPT-1 in two years",
+  "existingBody": "",
+  "attributes": {
+   "developer": "OpenAI",
+   "total": 175,
+   "notes": "1000× GPT-1 in two years"
+  },
+  "date": "2020",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]"
+  ]
+ },
+ {
+  "id": "gpt-4",
+  "title": "GPT-4",
+  "kind": "thing",
+  "summary": "~1.8T estimated; the peak before sizes reversed",
+  "existingBody": "",
+  "attributes": {
+   "developer": "OpenAI",
+   "total": 1800,
+   "notes": "~1.8T estimated; the peak before sizes reversed"
+  },
+  "date": "2023-03",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]"
+  ]
+ },
+ {
+  "id": "deepseek-v3",
+  "title": "DeepSeek-V3",
+  "kind": "thing",
+  "summary": "3 dense + 58 MoE layers, hidden 7168, FP8 native, MTP",
+  "existingBody": "",
+  "attributes": {
+   "developer": "DeepSeek",
+   "total": 671,
+   "active": 37,
+   "experts": 256,
+   "active-experts": "8 + 1 shared",
+   "shared-expert": true,
+   "attention": "MLA",
+   "layers": 61,
+   "context": "160K (YaRN ×40)",
+   "notes": "3 dense + 58 MoE layers, hidden 7168, FP8 native, MTP"
+  },
+  "date": "2024-12",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Multi-head Latent Attention (MLA) [mla]",
+   "uses → Fine-grained + shared experts [fine-grained]",
+   "uses → Auxiliary-loss-free balancing [aux-free]",
+   "uses → Multi-Token Prediction [mtp]",
+   "uses → YaRN [yarn]",
+   "uses → Mixture of Experts [moe]",
+   "uses → Weight quantization [quantization]"
+  ]
+ },
+ {
+  "id": "deepseek-r1",
+  "title": "DeepSeek-R1",
+  "kind": "thing",
+  "summary": "RLVR elicited reasoning, including an 'aha moment'",
+  "existingBody": "",
+  "attributes": {
+   "developer": "DeepSeek",
+   "total": 671,
+   "active": 37,
+   "experts": 256,
+   "active-experts": "8 + 1 shared",
+   "shared-expert": true,
+   "attention": "MLA",
+   "layers": 61,
+   "notes": "RLVR elicited reasoning, including an 'aha moment'"
+  },
+  "date": "2025-01",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → RLVR [rlvr]",
+   "uses → GRPO [grpo]",
+   "uses → Multi-head Latent Attention (MLA) [mla]",
+   "uses → Mixture of Experts [moe]",
+   "supports → RLVR creates genuinely new reasoning ability [c-rlvr-new] (emergent self-reflection)",
+   "challenges → Distillation from closed models drives open reasoning gains [c-distill-open] (RLVR reasoning without a frontier teacher)"
+  ]
+ },
+ {
+  "id": "deepseek-v32",
+  "title": "DeepSeek-V3.2",
+  "kind": "thing",
+  "summary": "Only architectural change: sparse attention; capability came from scaled RL",
+  "existingBody": "",
+  "attributes": {
+   "developer": "DeepSeek",
+   "total": 671,
+   "active": 37,
+   "experts": 256,
+   "active-experts": "8 + 1 shared",
+   "shared-expert": true,
+   "attention": "MLA + DSA",
+   "layers": 61,
+   "notes": "Only architectural change: sparse attention; capability came from scaled RL"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → DeepSeek Sparse Attention (DSA) [dsa]",
+   "uses → Multi-head Latent Attention (MLA) [mla]",
+   "uses → Mixture of Experts [moe]",
+   "uses → Fine-grained + shared experts [fine-grained]",
+   "supports → Recent architecture wins are efficiency; quality came from post-training [c-arch-efficiency] (DSA aimed to lose nothing, not gain; RL drove capability)"
+  ]
+ },
+ {
+  "id": "llama4",
+  "title": "Llama 4 Maverick",
+  "kind": "thing",
+  "summary": "Fewer, larger experts; MoE every other layer; ~22T tokens",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Meta",
+   "total": 400,
+   "active": 17,
+   "experts": 128,
+   "active-experts": "2 (8192 wide)",
+   "attention": "GQA",
+   "context": "1M",
+   "notes": "Fewer, larger experts; MoE every other layer; ~22T tokens"
+  },
+  "date": "2025-04",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Grouped-Query Attention (GQA) [gqa]",
+   "uses → Mixture of Experts [moe]"
+  ]
+ },
+ {
+  "id": "llama4-scout",
+  "title": "Llama 4 Scout",
+  "kind": "thing",
+  "summary": "The small sibling with a huge context",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Meta",
+   "total": 109,
+   "attention": "GQA",
+   "context": "10M",
+   "notes": "The small sibling with a huge context"
+  },
+  "date": "2025-04",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Grouped-Query Attention (GQA) [gqa]",
+   "uses → Mixture of Experts [moe]"
+  ]
+ },
+ {
+  "id": "qwen3",
+  "title": "Qwen3",
+  "kind": "thing",
+  "summary": "Dropped the shared expert",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Alibaba",
+   "shared-expert": false,
+   "attention": "GQA",
+   "notes": "Dropped the shared expert"
+  },
+  "date": "2025-04",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Grouped-Query Attention (GQA) [gqa]",
+   "uses → Mixture of Experts [moe]",
+   "uses → Dropping the shared expert [no-shared]"
+  ]
+ },
+ {
+  "id": "kimi-k2",
+  "title": "Kimi K2",
+  "kind": "thing",
+  "summary": "The sparsest: 1T total, 32B active",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Moonshot AI",
+   "total": 1000,
+   "active": 32,
+   "experts": 384,
+   "shared-expert": true,
+   "attention": "MLA",
+   "notes": "The sparsest: 1T total, 32B active"
+  },
+  "date": "2025-07",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Multi-head Latent Attention (MLA) [mla]",
+   "uses → Mixture of Experts [moe]",
+   "uses → Fine-grained + shared experts [fine-grained]"
+  ]
+ },
+ {
+  "id": "kimi-linear",
+  "title": "Kimi Linear",
+  "kind": "thing",
+  "summary": "Linear attention in 3 of 4 layers, no positional encoding",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Moonshot AI",
+   "total": 48,
+   "attention": "Delta + MLA (1 in 4)",
+   "notes": "Linear attention in 3 of 4 layers, no positional encoding"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Linear / hybrid attention [linear-attn]",
+   "uses → Multi-head Latent Attention (MLA) [mla]",
+   "uses → NoPE [nope]"
+  ]
+ },
+ {
+  "id": "glm-45",
+  "title": "GLM-4.5",
+  "kind": "thing",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Zhipu",
+   "total": 355,
+   "active": 32,
+   "shared-expert": true
+  },
+  "date": "2025-07",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]"
+  ]
+ },
+ {
+  "id": "glm-5",
+  "title": "GLM-5",
+  "kind": "thing",
+  "summary": "Imports DSA; 80 layers to cut expert-parallel traffic; 'slime' async RL; trained on Huawei Ascend",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Zhipu",
+   "total": 744,
+   "active": 40,
+   "experts": 256,
+   "attention": "DSA",
+   "layers": 80,
+   "notes": "Imports DSA; 80 layers to cut expert-parallel traffic; 'slime' async RL; trained on Huawei Ascend"
+  },
+  "date": "2026",
+  "needsArticle": true,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → DeepSeek Sparse Attention (DSA) [dsa]",
+   "uses → Mixture of Experts [moe]"
+  ]
+ },
+ {
+  "id": "glm-51",
+  "title": "GLM-5.1",
+  "kind": "thing",
+  "summary": "Claims 94.6% of Claude Opus 4.6's coding score (self-reported)",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Zhipu",
+   "total": 744,
+   "active": 40,
+   "experts": 256,
+   "active-experts": "8",
+   "attention": "DSA",
+   "notes": "Claims 94.6% of Claude Opus 4.6's coding score (self-reported)"
+  },
+  "date": "2026-03",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → DeepSeek Sparse Attention (DSA) [dsa]",
+   "uses → Mixture of Experts [moe]"
+  ]
+ },
+ {
+  "id": "glm-52",
+  "title": "GLM-5.2",
+  "kind": "thing",
+  "summary": "High/Max reasoning presets; benchmark claims disputed",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Zhipu",
+   "total": 753,
+   "context": "1M",
+   "notes": "High/Max reasoning presets; benchmark claims disputed"
+  },
+  "date": "2026-06-13",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]"
+  ]
+ },
+ {
+  "id": "smollm3",
+  "title": "SmolLM3",
+  "kind": "thing",
+  "summary": "",
+  "existingBody": "",
+  "attributes": {
+   "developer": "Hugging Face",
+   "attention": "GQA + periodic NoPE"
+  },
+  "date": "2025",
+  "needsArticle": false,
+  "relationships": [
+   "part-of → Open model landscape [t-models]",
+   "uses → Grouped-Query Attention (GQA) [gqa]",
+   "uses → NoPE [nope]"
+  ]
+ }
+]
