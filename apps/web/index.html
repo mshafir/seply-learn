@@ -2,9 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vite-monorepo</title>
+    <meta name="color-scheme" content="light dark" />
+    <!-- No-flash theme: sets .dark before first paint. Must match
+         THEME_STORAGE_KEY in packages/ui/src/components/theme-provider.tsx. -->
+    <script>
+      ;(function () {
+        var theme = "system"
+        try {
+          theme = localStorage.getItem("umbel-theme") || "system"
+        } catch (e) {}
+        var dark =
+          theme === "dark" ||
+          (theme !== "light" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        var root = document.documentElement
+        if (dark) root.classList.add("dark")
+        root.style.colorScheme = dark ? "dark" : "light"
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Umbel Learn</title>
   </head>
   <body>
     <div id="root"></div>

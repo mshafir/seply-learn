@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- PWA / app icon source: the glyph on the ground colour, inside the
+       maskable safe zone (the central 80%). Rasterised to the PNGs here. -->
+  <rect width="512" height="512" fill="#F6F5F1" />
+  <g transform="translate(96 76) scale(5)">
+    <g stroke="#1D1C1A" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M32 52 L32 61" />
+      <path d="M32 52 L10 24" />
+      <path d="M32 52 L20 15" />
+      <path d="M32 52 L32 11" />
+      <path d="M32 52 L44 15" />
+      <path d="M32 52 L54 24" />
+    </g>
+    <g fill="#1D1C1A">
+      <circle cx="10" cy="24" r="5" />
+      <circle cx="20" cy="15" r="5" />
+      <circle cx="32" cy="11" r="5" />
+      <circle cx="54" cy="24" r="5" />
+    </g>
+    <circle fill="#3A45B5" cx="44" cy="15" r="5" />
+  </g>
+</svg>
