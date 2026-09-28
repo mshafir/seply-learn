@@ -4,23 +4,46 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./canvas.css": "./src/canvas/canvas.css"
   },
   "scripts": {
+    "dev": "vite",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@umbel/domain": "workspace:*"
+    "@umbel/domain": "workspace:*",
+    "@xyflow/react": "^12.12.0",
+    "d3-interpolate": "^3.0.1",
+    "d3-timer": "^3.0.1",
+    "elkjs": "^0.12.0",
+    "lucide-react": "^1.48.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
-    "@umbel/config": "workspace:*",
-    "typescript": "~6",
-    "vitest": "^4",
-    "eslint": "^10",
     "@eslint/js": "^10",
+    "@playwright/test": "1.62.1",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-timer": "^3.0.2",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@umbel/config": "workspace:*",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "typescript": "~6",
     "typescript-eslint": "^8",
-    "globals": "^17"
+    "vite": "^8.2.2",
+    "vitest": "^4"
   }
 }

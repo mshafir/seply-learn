@@ -1,0 +1,270 @@
+/*
+ * Canvas styles for @umbel/views. Import alongside React Flow's own styles:
+ *   import "@xyflow/react/dist/style.css";
+ *   import "@umbel/views/canvas.css";
+ *
+ * Every colour is a CSS variable. The defaults below match the prototype's
+ * Tailwind palette (stone, cyan, emerald, amber, rose, indigo).
+ * TODO(tokens): when @umbel/ui's tokens land, point each --umbel-* variable
+ * at the matching token (e.g. --umbel-canvas-bg: var(--background)) instead
+ * of the literal fallbacks, and add the dark theme.
+ */
+:where(:root) {
+  --umbel-canvas-bg: #fafaf9;
+  --umbel-canvas-grid: #e7e5e4;
+  --umbel-canvas-label: #44403c;
+  --umbel-canvas-muted: #a8a29e;
+
+  --umbel-concept-bg: #ffffff;
+  --umbel-concept-fg: #1c1917;
+  --umbel-concept-fg-minor: #57534e;
+  --umbel-concept-border: #e7e5e4;
+  --umbel-concept-selected: #1c1917;
+  --umbel-concept-ring: rgb(28 25 23 / 0.2);
+  --umbel-concept-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+
+  --umbel-edge: #a8a29e;
+  --umbel-edge-raises: #dc2626;
+  --umbel-edge-lowers: #16a34a;
+  --umbel-edge-bridge: #a8a29e;
+
+  --umbel-band-bg: rgb(236 254 255 / 0.6);
+  --umbel-band-border: #67e8f9;
+  --umbel-band-fg: #0e7490;
+
+  --umbel-heading-supports: #4f46e5;
+  --umbel-heading-claims: #a16207;
+  --umbel-heading-challenges: #b45309;
+
+  --umbel-badge-positive-bg: #ecfdf5;
+  --umbel-badge-positive-fg: #047857;
+  --umbel-badge-positive-ring: #a7f3d0;
+  --umbel-badge-caution-bg: #fffbeb;
+  --umbel-badge-caution-fg: #92400e;
+  --umbel-badge-caution-ring: #fde68a;
+  --umbel-badge-negative-bg: #fff1f2;
+  --umbel-badge-negative-fg: #be123c;
+  --umbel-badge-negative-ring: #fecdd3;
+  --umbel-badge-neutral-bg: #f5f5f4;
+  --umbel-badge-neutral-fg: #57534e;
+  --umbel-badge-neutral-ring: #e7e5e4;
+  --umbel-badge-accent-bg: #eef2ff;
+  --umbel-badge-accent-fg: #4338ca;
+  --umbel-badge-accent-ring: #c7d2fe;
+
+  --umbel-toolbar-bg: #ffffff;
+  --umbel-toolbar-border: #e7e5e4;
+  --umbel-toolbar-fg: #57534e;
+  --umbel-toolbar-strong: #1c1917;
+}
+
+.umbel-canvas {
+  background: var(--umbel-canvas-bg);
+}
+.umbel-canvas .react-flow__node {
+  cursor: pointer;
+}
+
+/* Concept card */
+.umbel-concept {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--umbel-concept-border);
+  border-left-width: 4px;
+  border-radius: 0.5rem;
+  background: var(--umbel-concept-bg);
+  color: var(--umbel-concept-fg);
+  box-shadow: var(--umbel-concept-shadow);
+  transition: opacity 150ms;
+}
+.umbel-concept--focal {
+  font-size: 20px;
+  font-weight: 600;
+}
+.umbel-concept--major {
+  font-size: 15px;
+  font-weight: 600;
+}
+.umbel-concept--medium {
+  font-size: 13px;
+  font-weight: 500;
+}
+.umbel-concept--minor {
+  font-size: 12px;
+  color: var(--umbel-concept-fg-minor);
+}
+.umbel-concept--dim {
+  opacity: 0.2;
+}
+.umbel-concept--selected {
+  border-color: var(--umbel-concept-selected);
+  box-shadow: 0 0 0 2px var(--umbel-concept-ring);
+}
+.umbel-concept__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+.umbel-concept__title {
+  line-height: 1.25;
+}
+.umbel-concept__badges {
+  position: absolute;
+  top: -0.625rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+}
+.umbel-handle {
+  opacity: 0 !important;
+}
+
+/* Badge */
+.umbel-badge {
+  white-space: nowrap;
+  border-radius: 9999px;
+  padding: 1px 0.375rem;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.umbel-badge--positive {
+  background: var(--umbel-badge-positive-bg);
+  color: var(--umbel-badge-positive-fg);
+  box-shadow: inset 0 0 0 1px var(--umbel-badge-positive-ring);
+}
+.umbel-badge--caution {
+  background: var(--umbel-badge-caution-bg);
+  color: var(--umbel-badge-caution-fg);
+  box-shadow: inset 0 0 0 1px var(--umbel-badge-caution-ring);
+}
+.umbel-badge--negative {
+  background: var(--umbel-badge-negative-bg);
+  color: var(--umbel-badge-negative-fg);
+  box-shadow: inset 0 0 0 1px var(--umbel-badge-negative-ring);
+}
+.umbel-badge--neutral {
+  background: var(--umbel-badge-neutral-bg);
+  color: var(--umbel-badge-neutral-fg);
+  box-shadow: inset 0 0 0 1px var(--umbel-badge-neutral-ring);
+}
+.umbel-badge--accent {
+  background: var(--umbel-badge-accent-bg);
+  color: var(--umbel-badge-accent-fg);
+  box-shadow: inset 0 0 0 1px var(--umbel-badge-accent-ring);
+}
+
+/* Bands, ticks and headings drawn in canvas coordinates */
+.umbel-band {
+  pointer-events: none;
+  position: absolute;
+  z-index: -10;
+  box-sizing: border-box;
+  border: 1px dashed var(--umbel-band-border);
+  border-radius: 0.75rem;
+  background: var(--umbel-band-bg);
+}
+.umbel-band__label {
+  padding: 0.25rem 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  color: var(--umbel-band-fg);
+}
+.umbel-tick {
+  pointer-events: none;
+  position: absolute;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--umbel-canvas-muted);
+}
+.umbel-heading {
+  pointer-events: none;
+  position: absolute;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.umbel-heading--supports {
+  color: var(--umbel-heading-supports);
+}
+.umbel-heading--claims {
+  color: var(--umbel-heading-claims);
+}
+.umbel-heading--challenges {
+  color: var(--umbel-heading-challenges);
+}
+
+/* Learning path toolbar. TODO(ui): swap for shadcn Button/Checkbox from @umbel/ui in the app. */
+.umbel-lp {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.umbel-lp__canvas {
+  flex: 1;
+  min-height: 0;
+}
+.umbel-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  padding: 0.375rem 1rem;
+  border-bottom: 1px solid var(--umbel-toolbar-border);
+  background: var(--umbel-toolbar-bg);
+  color: var(--umbel-toolbar-fg);
+  font-size: 0.875rem;
+}
+.umbel-toolbar b {
+  color: var(--umbel-toolbar-strong);
+}
+.umbel-toolbar button {
+  border: 1px solid var(--umbel-toolbar-border);
+  border-radius: 0.25rem;
+  background: transparent;
+  padding: 0.125rem 0.5rem;
+  font: inherit;
+  font-size: 0.75rem;
+  color: inherit;
+  cursor: pointer;
+}
+.umbel-toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.umbel-toolbar__accent {
+  background: var(--umbel-badge-accent-bg) !important;
+  color: var(--umbel-badge-accent-fg) !important;
+}
+.umbel-toolbar__muted {
+  color: var(--umbel-canvas-muted);
+}
+.umbel-toolbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+.umbel-chip {
+  border-radius: 9999px !important;
+  background: var(--umbel-badge-neutral-bg) !important;
+}
+.umbel-chip--known {
+  background: var(--umbel-badge-positive-bg) !important;
+  color: var(--umbel-badge-positive-fg) !important;
+}
+.umbel-toolbar__toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
