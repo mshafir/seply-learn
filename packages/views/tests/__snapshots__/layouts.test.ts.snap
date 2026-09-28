@@ -1,0 +1,105 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`layouts are deterministic > Evidence: same positions every run 1`] = `
+{
+  "claim-1": [
+    0,
+    31,
+  ],
+  "claim-2": [
+    0,
+    163,
+  ],
+  "study-1": [
+    -430,
+    31,
+  ],
+  "study-2": [
+    430,
+    97,
+  ],
+  "study-3": [
+    -430,
+    163,
+  ],
+}
+`;
+
+exports[`layouts are deterministic > Learning path: same positions every run 1`] = `
+{
+  "a": [
+    123,
+    70,
+  ],
+  "b": [
+    378,
+    70,
+  ],
+  "c": [
+    633,
+    70,
+  ],
+  "d": [
+    123,
+    230,
+  ],
+  "e": [
+    378,
+    230,
+  ],
+  "t": [
+    640,
+    223,
+  ],
+  "u": [
+    640,
+    300,
+  ],
+}
+`;
+
+exports[`layouts are deterministic > Lineage: same positions every run 1`] = `
+{
+  "newer": [
+    250,
+    62,
+  ],
+  "newest": [
+    500,
+    198,
+  ],
+  "old": [
+    0,
+    62,
+  ],
+}
+`;
+
+exports[`layouts are deterministic > Risk: same positions every run 1`] = `
+{
+  "driver": [
+    115,
+    56,
+  ],
+  "lever-1": [
+    1287,
+    -20,
+  ],
+  "lever-2": [
+    1287,
+    56,
+  ],
+  "lever-3": [
+    1287,
+    132,
+  ],
+  "mid": [
+    437,
+    56,
+  ],
+  "outcome": [
+    807,
+    56,
+  ],
+}
+`;
