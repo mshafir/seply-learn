@@ -58,7 +58,7 @@ Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/0
 
 ## Owner checklist before M0 (a task only the owner can do)
 
-- [ ] **GitHub:** a private repo, with the agent's `gh` authenticated. Push the current tree, and exclude `prototypes/seeding/sources/`, `runs/statins-chat/` and any `gen-statins*` files (see WP-0.1).
+- [x] **GitHub:** `mshafir/umbel-learn` (**public**), pushed 2026-09-28. Personal content is excluded by `.gitignore`, and family and health specifics in the docs were redacted. Keep new fixtures synthetic or public.
 - [ ] **Cloudflare:** a Workers Paid account, plus an API token for CI (Workers, R2, Durable Objects, Workflows, Hyperdrive).
 - [ ] **Neon:** a project, plus an API key for CI branch creation.
 - [ ] **Google OAuth:** a client ID and secret (hosted login).
