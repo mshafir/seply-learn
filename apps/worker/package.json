@@ -7,23 +7,31 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types",
+    "typecheck": "wrangler types >/dev/null && tsc --noEmit",
     "lint": "eslint",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "dev": "wrangler dev",
+    "bundle": "wrangler deploy --dry-run --outdir dist",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@umbel/server": "workspace:*",
     "@umbel/ai": "workspace:*",
-    "@umbel/domain": "workspace:*"
+    "@umbel/domain": "workspace:*",
+    "@umbel/server": "workspace:*",
+    "hono": "^4.13.10",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
-    "@umbel/config": "workspace:*",
-    "typescript": "~6",
-    "vitest": "^4",
-    "eslint": "^10",
     "@eslint/js": "^10",
-    "typescript-eslint": "^8",
+    "@types/node": "^24",
+    "@types/pg": "^8.23.1",
+    "@umbel/config": "workspace:*",
+    "eslint": "^10",
     "globals": "^17",
-    "@types/node": "^24"
+    "typescript": "~6",
+    "typescript-eslint": "^8",
+    "vitest": "^4",
+    "wrangler": "^4.143.0"
   }
 }
