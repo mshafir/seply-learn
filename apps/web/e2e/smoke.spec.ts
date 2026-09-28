@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
 
-// Each project sets colorScheme; the ThemeProvider defaults to "system",
-// so the root element should carry the matching theme class.
+// Each project sets colorScheme; the ThemeProvider defaults to "system".
+// shadcn's convention: <html> gets .dark in dark mode and no theme class in light.
 test("the app renders in the system theme", async ({ page }, testInfo) => {
   const errors: string[] = []
   page.on("pageerror", (err) => errors.push(err.message))
@@ -13,7 +13,9 @@ test("the app renders in the system theme", async ({ page }, testInfo) => {
 
   const scheme = testInfo.project.use.colorScheme
   expect(scheme === "light" || scheme === "dark").toBe(true)
-  await expect(page.locator("html")).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+  const html = page.locator("html")
+  if (scheme === "dark") await expect(html).toHaveClass(/\bdark\b/)
+  else await expect(html).not.toHaveClass(/\bdark\b/)
 
   expect(errors).toEqual([])
 })
