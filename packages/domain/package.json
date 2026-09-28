@@ -12,13 +12,17 @@
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
-    "@umbel/config": "workspace:*",
-    "typescript": "~6",
-    "vitest": "^4",
-    "eslint": "^10",
     "@eslint/js": "^10",
-    "typescript-eslint": "^8",
+    "@types/node": "^24",
+    "@umbel/config": "workspace:*",
+    "eslint": "^10",
     "globals": "^17",
-    "@types/node": "^24"
+    "typescript": "~6",
+    "typescript-eslint": "^8",
+    "vitest": "^4"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.3",
+    "zod": "^4.5.4"
   }
 }
