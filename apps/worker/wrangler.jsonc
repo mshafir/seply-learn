@@ -1,0 +1,32 @@
+// Cloudflare Worker config. See docs/ops/deploy.md for how CI deploys it.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "umbel-learn",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // pg needs Node APIs (net, tls, crypto). On by default from 2026-08-04; kept explicit.
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    // Build it first: `pnpm --filter web build`.
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    // Unknown paths get index.html so client-side routes work.
+    "not_found_handling": "single-page-application",
+    // The API runs before the SPA fallback.
+    "run_worker_first": ["/api/*"],
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      // Placeholder. CI writes the real id per deploy (scripts/deploy-config.mjs):
+      // one Hyperdrive config per PR preview, one for production.
+      // Local dev: set CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE.
+      "id": "00000000000000000000000000000000",
+    },
+  ],
+  "vars": {
+    // The Neon branch this deploy reads from; CI overrides it with --var.
+    "DB_BRANCH": "local",
+  },
+}
