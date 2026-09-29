@@ -14,6 +14,7 @@ import type { Positions } from "./layouts.ts";
 import { ViewCanvas } from "./canvas/ViewCanvas.tsx";
 import type { PositionMemory } from "./canvas/Canvas.tsx";
 import { ComparisonTable } from "./table/ComparisonTable.tsx";
+import { Anatomy } from "./anatomy/Anatomy.tsx";
 import type { BasemapConfig } from "./map/basemap.ts";
 
 // Map (MapLibre) and Timeline (vis-timeline) are large: they load with their View.
@@ -102,6 +103,8 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
         <Suspense fallback={<div className="umbel-view-empty">Loading {view.label}…</div>}>
           {view.viewType === "map" ? <MapView expedition={expedition} view={view} {...rest} /> : <TimelineView expedition={expedition} view={view} {...rest} />}
         </Suspense>
+      ) : view.viewType === "anatomy" ? (
+        <Anatomy expedition={expedition} view={view} {...rest} />
       ) : isCanvasView(view) ? (
         <ViewCanvas expedition={expedition} view={view} memory={memory} {...rest} />
       ) : (

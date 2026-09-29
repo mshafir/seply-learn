@@ -20,7 +20,10 @@ import "./harness.css";
 import computeFile from "@umbel/domain/fixtures/compute.json";
 import { builtinId, relKey, type OpBody } from "@umbel/domain";
 import {
+  anatomy,
+  anatomyStats,
   ExpeditionView,
+  formatAnatomyStats,
   formatLayoutMetrics,
   isCanvasView,
   layoutMetrics,
@@ -98,7 +101,7 @@ const fromLive = (map: Map<string, string>) => {
 const viewFileId = fromLive(f.ids.views);
 const conceptFileId = fromLive(f.ids.concepts);
 
-const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "map", "timeline"].includes(v.viewType);
+const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "anatomy", "map", "timeline"].includes(v.viewType);
 const noLayout: Record<string, string> = { "comparison-table": "a table", map: "a map", timeline: "a timeline" };
 
 function readHash() {
@@ -176,7 +179,13 @@ function Harness() {
         {view?.description}
         <br />
         <code data-testid="metrics">
-          {view && !isCanvasView(view) ? `${view.label}: ${noLayout[view.viewType]}, no layout` : metrics ? formatLayoutMetrics(metrics) : "measuring…"}
+          {view?.viewType === "anatomy"
+            ? formatAnatomyStats(view.label, anatomyStats(anatomy(expedition, view.settings)))
+            : view && !isCanvasView(view)
+              ? `${view.label}: ${noLayout[view.viewType]}, no layout`
+              : metrics
+                ? formatLayoutMetrics(metrics)
+                : "measuring…"}
         </code>
       </p>
       <main className="harness__canvas" data-settled={settled || undefined}>
