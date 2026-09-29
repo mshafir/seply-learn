@@ -84,7 +84,9 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - depends: WP-0.2, WP-0.4
 - spec: 02-architecture.md#22-backend-one-hono-app-two-entrypoints
 - **Build:** a Hono app factory; Better Auth (Google) with the Drizzle adapter per request; migrations; the Worker entry; the Expedition/collaborator basics (create, list mine).
-- **Done when:** sign-in works on a preview; an e2e test signs in with a test account (a credentials provider enabled only in CI).
+  - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `BETTER_AUTH_SECRET` (repo secrets, already set by the owner). The deploy workflow copies them into each Worker as Worker secrets (`wrangler secret bulk`), and sets `BETTER_AUTH_URL` to that Worker's own URL. Local dev reads them from `apps/worker/.dev.vars` (gitignored).
+  - **Previews sign in through production** with Better Auth's OAuth proxy plugin: Google allows no wildcard redirect URIs, so Google always calls back to production's `/api/auth/callback/google`, and production hands the session back to the preview that started the sign-in. The Google client lists only production and localhost (`docs/ops/deploy.md`).
+- **Done when:** sign-in with Google works on a preview (through the proxy) and on production; an e2e test signs in with a test account (a credentials provider enabled only in CI).
 
 ### WP-1.2: Push/pull and the op log
 - lane: A
@@ -215,7 +217,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - milestone: M3
 - depends: WP-1.1
 - spec: 05-ai.md#56-keys-cost-and-limits
-- **Build:** per-request providers; the instance-key vs bring-your-own-key mode from env; AES-GCM key storage under the master key with a Settings UI (last 4, Test, Delete); default models per provider and stage, overridable; token estimation and cost estimate; spending cap accounting per build and per ask.
+- **Build:** per-request providers; the instance-key vs bring-your-own-key mode from env (the hosted instance key is a Vercel AI Gateway key, `AI_GATEWAY_API_KEY`, already a repo secret; the deploy copies it into production and preview Workers, and the AI SDK's `gateway` provider reads it); AES-GCM key storage under the master key with a Settings UI (last 4, Test, Delete); default models per provider and stage, overridable; token estimation and cost estimate; spending cap accounting per build and per ask.
 - **Done when:** unit tests show keys are never returned by any API and round-trip encryption works; the estimate is within ±30% of actual on the fixtures.
 
 ### WP-3.4: Skim and the create flow screens
@@ -307,7 +309,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - milestone: M5
 - depends: WP-1.1
 - spec: 01-domain-model.md#18-visibility-roles-permissions
-- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
+- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted: `RESEND_API_KEY` secret, a sending-only key for `mail.umbel.dev`, and the `EMAIL_FROM` repo variable, `Umbel Learn <invites@mail.umbel.dev>`; the deploy passes both to the Worker); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
 - **Done when:** unit tests run the permissions matrix against the API routes; e2e invites a second account and shows it under Shared with you.
 
 ### WP-5.2: Visibility, public links, Fork and Trash
