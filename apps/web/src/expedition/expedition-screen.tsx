@@ -24,6 +24,7 @@ import {
 import { SidebarProvider } from "@umbel/ui/components/sidebar"
 import { Skeleton } from "@umbel/ui/components/skeleton"
 import { SyncHttpError, type SyncClient } from "@umbel/sync"
+import type { ViewStatusChip } from "@umbel/views"
 
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
@@ -43,6 +44,7 @@ import {
   type BackStack,
 } from "@/expedition/reading.ts"
 import { SidePanel, type PanelContent } from "@/expedition/side-panel.tsx"
+import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsRail } from "@/expedition/views-rail.tsx"
@@ -51,6 +53,7 @@ import { matchConcepts } from "@/lib/search.ts"
 import { useUser } from "@/lib/session.ts"
 import { useSyncClient, type SyncHealth } from "@/lib/sync.ts"
 import { useMediaQuery } from "@/lib/use-media-query.ts"
+import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 
 const frameStyle = {
   "--sidebar-width": RAIL_WIDTH,
@@ -79,6 +82,7 @@ export function ExpeditionScreen({
           expeditionId={expeditionId}
           client={state.client}
           viewId={viewId}
+          userId={user.id}
           canEdit={role === "owner" || role === "editor"}
           health={health}
         />
@@ -165,12 +169,14 @@ function ExpeditionFrame({
   expeditionId,
   client,
   viewId,
+  userId,
   canEdit,
   health,
 }: {
   expeditionId: string
   client: SyncClient
   viewId?: string
+  userId: string
   canEdit: boolean
   health: SyncHealth
 }) {
@@ -192,6 +198,10 @@ function ExpeditionFrame({
     data.views.find((v) => v.id === expedition?.bestViewId) ??
     data.views[0] ??
     null
+
+  const personal = usePersonalViewSettings(userId, view)
+  // The View's status chip, as it reports it (null: none).
+  const [status, setStatus] = React.useState<ViewStatusChip | null>(null)
 
   const conceptById = React.useMemo(
     () => new Map(data.concepts.map((c) => [c.id, c])),
@@ -233,7 +243,15 @@ function ExpeditionFrame({
   }
   const content: PanelContent | null =
     panel?.type === "view" && view
-      ? { type: "view", view }
+      ? {
+          type: "view",
+          view,
+          data,
+          collections: client.collections,
+          canEdit,
+          personal,
+          onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
+        }
       : selectedConcept && place
         ? {
             type: "concept",
@@ -290,6 +308,9 @@ function ExpeditionFrame({
                   )
                 }
                 onSettled={() => setSettledViewId(view.id)}
+                personal={personal.values}
+                onPersonalChange={personal.set}
+                onStatus={setStatus}
                 matches={matches}
               />
               <ViewButton
@@ -302,6 +323,12 @@ function ExpeditionFrame({
                 }
                 className="absolute top-4 left-4 z-10"
               />
+              {status && (
+                <StatusChip
+                  status={status}
+                  className="absolute bottom-4 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2"
+                />
+              )}
             </>
           ) : (
             <Empty className="h-full">

@@ -8,9 +8,12 @@
 //   panel; `null` clears the selection.
 // - The View button floats over the top-left corner; the View starts below
 //   it (pt-21), so it never covers a toolbar or a table header.
+// - `personal` is the reader's personal settings for the View; a View's own
+//   control changing one calls `onPersonalChange`. `onStatus` receives the
+//   View's status for the floating chip.
 // - `matches` (search inside the Expedition) dims every other Concept.
 import type { EngineCollections } from "@umbel/sync"
-import { ExpeditionView } from "@umbel/views"
+import { ExpeditionView, type ViewStatusChip } from "@umbel/views"
 
 export type CanvasSlotProps = {
   collections: EngineCollections
@@ -19,6 +22,9 @@ export type CanvasSlotProps = {
   onSelectConcept: (conceptId: string | null) => void
   /** Called once the View is drawn (a canvas: laid out and fitted). */
   onSettled?: () => void
+  personal?: Record<string, unknown>
+  onPersonalChange?: (key: string, value: unknown) => void
+  onStatus?: (status: ViewStatusChip | null) => void
   /** Search matches: the canvas dims every other Concept. */
   matches?: Set<string>
 }
@@ -29,6 +35,9 @@ export function CanvasSlot({
   selectedConceptId,
   onSelectConcept,
   onSettled,
+  personal,
+  onPersonalChange,
+  onStatus,
   matches,
 }: CanvasSlotProps) {
   return (
@@ -39,6 +48,9 @@ export function CanvasSlot({
         selected={selectedConceptId ?? undefined}
         onSelect={(id) => onSelectConcept(id ?? null)}
         onSettled={onSettled}
+        personal={personal}
+        onPersonalChange={onPersonalChange}
+        onStatus={onStatus}
         matches={matches}
       />
     </div>

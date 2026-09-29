@@ -1,19 +1,15 @@
 // The side panel (spec §3.6): 440 px on the right, opened by a selection; a
 // Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
-// see concept-panel.tsx) or the View panel (a stub until the View renderers
-// own settings).
+// see concept-panel.tsx) or the View panel (view-panel.tsx).
 import * as React from "react"
-import { XIcon } from "lucide-react"
 
-import { Button } from "@umbel/ui/components/button"
 import { ScrollArea } from "@umbel/ui/components/scroll-area"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetTitle,
 } from "@umbel/ui/components/sheet"
-import type { ConceptRow, ViewRow } from "@umbel/sync"
+import type { ConceptRow } from "@umbel/sync"
 
 import {
   ArticleContents,
@@ -23,7 +19,8 @@ import {
   ConceptOverview,
   type ConceptReading,
 } from "@/expedition/concept-panel.tsx"
-import { viewTypeMeta } from "@/expedition/labels.ts"
+import { PanelHeader } from "@/expedition/panel-header.tsx"
+import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
 import {
   articleSectionsOf,
   conceptEyebrow,
@@ -39,7 +36,7 @@ export type PanelContent =
       kindLabel: string
       reading: ConceptReading
     }
-  | { type: "view"; view: ViewRow }
+  | ({ type: "view" } & ViewPanelProps)
 
 /** Inline beside the canvas on wide windows; a modal Sheet on narrow ones. */
 export function SidePanel({
@@ -86,92 +83,12 @@ function PanelBody({
   onClose: () => void
   inline?: boolean
 }) {
-  return content.type === "view" ? (
-    <ViewBody view={content.view} onClose={onClose} inline={inline} />
-  ) : (
-    <ConceptBody content={content} onClose={onClose} inline={inline} />
-  )
-}
-
-function PanelHeader({
-  eyebrow,
-  title,
-  onClose,
-  inline,
-  children,
-}: {
-  eyebrow: string
-  title: string
-  onClose: () => void
-  inline: boolean
-  children?: React.ReactNode
-}) {
-  // Inside a Sheet the title labels the dialog.
-  const Title = inline ? "h2" : SheetTitle
-  return (
-    <div className="flex flex-col gap-1.5 border-b px-6 py-4">
-      <div className="flex items-center gap-2">
-        <span
-          data-testid="panel-eyebrow"
-          className="font-mono text-xs tracking-wider text-primary uppercase"
-        >
-          {eyebrow}
-        </span>
-        <div className="flex-1" />
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Close"
-          onClick={onClose}
-        >
-          <XIcon />
-        </Button>
-      </div>
-      <Title
-        data-testid="panel-title"
-        className="font-reading text-2xl leading-tight font-medium text-foreground"
-      >
-        {title}
-      </Title>
-      {children}
-    </div>
-  )
-}
-
-function ViewBody({
-  view,
-  onClose,
-  inline,
-}: {
-  view: ViewRow
-  onClose: () => void
-  inline: boolean
-}) {
-  const Description = inline ? "p" : SheetDescription
-  const meta = viewTypeMeta(view.viewType)
-  return (
-    <>
-      <PanelHeader
-        eyebrow={`View · ${meta.name}`}
-        title={view.label || meta.name}
-        onClose={onClose}
-        inline={inline}
-      >
-        {view.question && (
-          <Description className="font-reading text-lg text-muted-foreground">
-            {view.question}
-          </Description>
-        )}
-      </PanelHeader>
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-4 px-6 py-4">
-          <p className="text-sm text-muted-foreground">
-            This View's description and settings appear here.
-          </p>
-        </div>
-      </ScrollArea>
-    </>
-  )
+  if (content.type === "view") {
+    const { type: _type, ...view } = content
+    void _type
+    return <ViewPanel {...view} onClose={onClose} inline={inline} />
+  }
+  return <ConceptBody content={content} onClose={onClose} inline={inline} />
 }
 
 function ConceptBody({

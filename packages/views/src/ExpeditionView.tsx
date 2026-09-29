@@ -26,7 +26,16 @@ export type ViewInteraction = {
   transitionMs?: number;
   /** Called once the View is drawn: for a canvas, when its layout has settled and been fitted. */
   onSettled?: () => void;
+  /** The reader's personal settings for this View, View Type defaults filled in (e.g. `showAllSteps`). */
+  personal?: Record<string, unknown>;
+  /** A View's own control changed a personal setting. Without it, such controls keep local state. */
+  onPersonalChange?: (key: string, value: unknown) => void;
+  /** View-specific status for the app's floating chip ("Path to MLA · 7 of 11 read"); null when there is none. */
+  onStatus?: (status: ViewStatusChip | null) => void;
 };
+
+/** What a View reports for the floating status chip, and how to clear it. */
+export type ViewStatusChip = { text: string; clear: () => void };
 
 export type ExpeditionViewProps = ViewInteraction & {
   /** The Expedition's live collections (@umbel/sync `createEngineCollections`, or any with the same tables). */
