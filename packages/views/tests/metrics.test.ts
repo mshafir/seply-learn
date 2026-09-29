@@ -17,6 +17,11 @@ describe("layout metrics", () => {
     expect(byId.get("learn")?.verdict).toBe("reads well");
     expect(byId.get("economics")?.verdict).toBe("reads well");
     expect(byId.get("learn")?.crossTopic).toBeTypeOf("number");
+    // Pinned: the numbers WP-0.6 shipped with. A layout change that moves them
+    // should be deliberate.
+    expect(formatLayoutMetrics(byId.get("learn")!)).toBe(
+      "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 1 edges through other nodes, 1 very long edges, 2 prerequisites cross topics → reads well",
+    );
   });
 
   it("skips View Types not drawn on the canvas", async () => {

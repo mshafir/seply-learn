@@ -7,7 +7,7 @@ const allowed = {
   "@umbel/domain": [],
   "@umbel/ui": [],
   "@umbel/sync": ["@umbel/domain"],
-  "@umbel/views": ["@umbel/domain"],
+  "@umbel/views": ["@umbel/domain", "@umbel/sync"],
   "@umbel/ai": ["@umbel/domain"],
   "@umbel/server": ["@umbel/domain", "@umbel/ai"],
   web: ["@umbel/ui", "@umbel/views", "@umbel/sync", "@umbel/domain"],

@@ -194,12 +194,18 @@ export function readingOrder(scope: Scope): string[] {
   return out;
 }
 
-/** Each Concept's topic: the root it reaches by following part-of upward. */
+/**
+ * Each Concept's topic: the root it reaches by following part-of upward.
+ * part-of is the built-in type (`builtin:part-of`) or, in fixtures written
+ * before the domain types, a type with the plain id `part-of`.
+ */
 export type Topic = { id: string; title: string };
-export function topicRoots(expedition: Expedition, partOf = "part-of"): Map<string, Topic> {
+const PART_OF: readonly string[] = ["builtin:part-of", "part-of"];
+export function topicRoots(expedition: Expedition, partOf: string | readonly string[] = PART_OF): Map<string, Topic> {
+  const types = new Set(typeof partOf === "string" ? [partOf] : partOf);
   const byId = new Map(expedition.concepts.map((c) => [c.id, c]));
   const parent = new Map<string, string>();
-  for (const r of expedition.relationships) if (r.type === partOf && !parent.has(r.from)) parent.set(r.from, r.to);
+  for (const r of expedition.relationships) if (types.has(r.type) && !parent.has(r.from)) parent.set(r.from, r.to);
   const out = new Map<string, Topic>();
   for (const c of expedition.concepts) {
     let id = c.id;

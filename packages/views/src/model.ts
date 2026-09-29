@@ -10,6 +10,8 @@ export type Expedition = {
   id: string;
   title: string;
   summary: string;
+  /** The View the Expedition opens on. */
+  bestViewId?: string;
   source?: { kind: string; url?: string; dates?: string };
   kinds: KindDef[];
   relationshipTypes: RelationshipTypeDef[];

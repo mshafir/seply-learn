@@ -4,13 +4,13 @@
 // prerequisite tree in reading order, and focus is sticky while the
 // selection stays inside the tree.
 //
-// Reading status is local state here; WP-1.6 wires it to the reader's own
-// Reading status and personal settings.
+// Reading status ("I know this") is local state here until the reader's own
+// Reading status and personal settings reach the client.
 import { useMemo, useState } from "react";
 import type { Expedition, LearningPathSettings, View } from "../model.ts";
 import { learningMap } from "../scope.ts";
 import { focusTree, learningPathOverlay, steps as stepsOf } from "../overlay.ts";
-import { Canvas } from "./Canvas.tsx";
+import { Canvas, type PositionMemory } from "./Canvas.tsx";
 
 export type LearningPathCanvasProps = {
   expedition: Expedition;
@@ -20,9 +20,19 @@ export type LearningPathCanvasProps = {
   matches?: Set<string>;
   transitionMs?: number;
   onSettled?: () => void;
+  memory?: PositionMemory;
 };
 
-export function LearningPathCanvas({ expedition, view, selected, onSelect, matches, transitionMs, onSettled }: LearningPathCanvasProps) {
+export function LearningPathCanvas({
+  expedition,
+  view,
+  selected,
+  onSelect,
+  matches,
+  transitionMs,
+  onSettled,
+  memory,
+}: LearningPathCanvasProps) {
   const s: LearningPathSettings = view.settings;
   const map = useMemo(() => learningMap(expedition, s), [expedition, s]);
   const { scope, targets, core } = map;
@@ -40,6 +50,10 @@ export function LearningPathCanvas({ expedition, view, selected, onSelect, match
     setLastSelected(selected);
     if (!inScope(selected)) setFocus(undefined);
     else if (!(focus && focusTree(expedition, s, focus, known)?.concepts.some((c) => c.id === selected))) setFocus(selected);
+  } else if (focus && !inScope(focus)) {
+    // The focused Concept left the path (deleted, or its prerequisites
+    // removed, perhaps in another tab): unfocus rather than draw an empty tree.
+    setFocus(undefined);
   }
 
   const tree = useMemo(() => focusTree(expedition, s, focus, known), [expedition, s, focus, known]);
@@ -121,6 +135,7 @@ export function LearningPathCanvas({ expedition, view, selected, onSelect, match
           overlay={overlay}
           transitionMs={transitionMs}
           onSettled={onSettled}
+          memory={memory}
         />
       </div>
     </div>

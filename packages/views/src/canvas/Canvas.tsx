@@ -24,7 +24,16 @@ export type CanvasProps = {
   transitionMs?: number;
   /** Called once a layout has settled and the view is fitted. */
   onSettled?: () => void;
+  /**
+   * Where the last canvas drew each Concept. Shared across View switches (see
+   * ExpeditionView), so a newly mounted canvas tweens Concepts from where the
+   * previous View had them. Held in memory only; positions are never stored.
+   */
+  memory?: PositionMemory;
 };
+
+/** The last drawn positions, by Concept id; kept by whoever switches Views. */
+export type PositionMemory = { current: Positions };
 
 export function Canvas(props: CanvasProps) {
   return (
@@ -36,10 +45,16 @@ export function Canvas(props: CanvasProps) {
 
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
-function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled }: CanvasProps) {
-  const [positions, setPositions] = useState<Positions>(new Map());
+function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory }: CanvasProps) {
+  // After a View switch, the Concepts the two Views share start where the
+  // last one drew them, then glide.
+  const [positions, setPositions] = useState<Positions>(() => memory?.current ?? new Map());
   const [extras, setExtras] = useState<Extras>({});
-  const current = useRef<Positions>(new Map());
+  const own = useRef<Positions>(new Map());
+  const current = memory ?? own;
+  // What the last finished layout was for (View and visible set). A new View,
+  // or a change in what's visible, refits the view; new data alone reflows in place.
+  const laidOut = useRef<string | undefined>(undefined);
   const flowRef = useRef<HTMLDivElement>(null);
   const colorMode = useInheritedColorMode(flowRef);
   const { fitView } = useReactFlow();
@@ -62,16 +77,26 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
     if (!current.current.size) return;
     const t = setTimeout(() => fit(500), 80);
     return () => clearTimeout(t);
-  }, [fitIds]);
+  }, [fitIds, current]);
 
   // Lay out, then animate every Concept from where it was to where it goes.
+  // Runs again whenever the data changes (an edit, or someone else's arriving
+  // by pull): Concepts glide to their new places and nothing blinks.
   useEffect(() => {
     let cancelled = false;
     let stop: (() => void) | undefined;
+    const key = `${view.id}\n${hiddenKey}`;
     layout(scope, view, visibleNow()).then(({ positions: next, extras }) => {
       if (cancelled) return;
-      setExtras(extras);
+      const refit = laidOut.current !== key;
+      laidOut.current = key;
+      setExtras((was) => (sameExtras(was, extras) ? was : extras));
       const from = current.current;
+      // A reflow that moves nothing (say, a title edit) just redraws.
+      if (!refit && samePositions(from, next)) {
+        setPositions(from);
+        return;
+      }
       const interp = [...next].map(([id, p]) => {
         const f = from.get(id) ?? p;
         return [id, interpolateNumber(f.x, p.x), interpolateNumber(f.y, p.y)] as const;
@@ -84,7 +109,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
         setPositions(frame);
         if (k >= 1) {
           t.stop();
-          fit(transitionMs > 0 ? 500 : 0);
+          if (refit) fit(transitionMs > 0 ? 500 : 0);
           setTimeout(() => settled(), transitionMs > 0 ? 550 : 50);
         }
       });
@@ -94,7 +119,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
       cancelled = true;
       stop?.();
     };
-  }, [scope, view, hiddenKey, transitionMs]);
+  }, [scope, view, hiddenKey, transitionMs, current]);
 
   const kinds = useMemo(() => new Map(expedition.kinds.map((k) => [k.id, k])), [expedition]);
   const relTypes = useMemo(() => new Map(expedition.relationshipTypes.map((t) => [t.id, t])), [expedition]);
@@ -183,6 +208,14 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
     </ReactFlow>
   );
 }
+
+const samePositions = (a: Positions, b: Positions) =>
+  a.size === b.size &&
+  [...b].every(([id, p]) => {
+    const q = a.get(id);
+    return !!q && Math.abs(q.x - p.x) < 0.5 && Math.abs(q.y - p.y) < 0.5;
+  });
+const sameExtras = (a: Extras, b: Extras) => JSON.stringify(a) === JSON.stringify(b);
 
 function EvidenceHeadings({ positions }: { positions: Positions }) {
   const top = Math.min(...[...positions.values()].map((p) => p.y)) - 80;
