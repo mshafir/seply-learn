@@ -3,63 +3,79 @@
  *   import "@xyflow/react/dist/style.css";
  *   import "@umbel/views/canvas.css";
  *
- * Every colour is a CSS variable. The defaults below match the prototype's
- * Tailwind palette (stone, cyan, emerald, amber, rose, indigo).
- * TODO(tokens): when @umbel/ui's tokens land, point each --umbel-* variable
- * at the matching token (e.g. --umbel-canvas-bg: var(--background)) instead
- * of the literal fallbacks, and add the dark theme.
+ * Every colour is a --umbel-* variable pointing at an @umbel/ui token. This
+ * package may not depend on @umbel/ui (dependency rule), so the tokens arrive
+ * as CSS variables from the app, which imports "@umbel/ui/globals.css". There
+ * are no literal colours here: without the tokens the canvas is unstyled.
+ *
+ * Declared on :root and on .light/.dark too, so a themed island re-resolves
+ * them against its own palette (the same trick as ui's .typeset). Both themes
+ * come from the tokens; nothing here is theme-specific.
  */
-:where(:root) {
-  --umbel-canvas-bg: #fafaf9;
-  --umbel-canvas-grid: #e7e5e4;
-  --umbel-canvas-label: #44403c;
-  --umbel-canvas-muted: #a8a29e;
+:where(:root, .light, .dark) {
+  --umbel-canvas-bg: var(--background);
+  --umbel-canvas-grid: var(--border);
+  --umbel-canvas-label: var(--muted-foreground);
+  --umbel-canvas-muted: var(--muted-foreground);
 
-  --umbel-concept-bg: #ffffff;
-  --umbel-concept-fg: #1c1917;
-  --umbel-concept-fg-minor: #57534e;
-  --umbel-concept-border: #e7e5e4;
-  --umbel-concept-selected: #1c1917;
-  --umbel-concept-ring: rgb(28 25 23 / 0.2);
-  --umbel-concept-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  --umbel-concept-bg: var(--card);
+  --umbel-concept-fg: var(--card-foreground);
+  --umbel-concept-fg-minor: var(--muted-foreground);
+  --umbel-concept-border: var(--border);
+  --umbel-concept-selected: var(--foreground);
+  --umbel-concept-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
+  --umbel-concept-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 6%, transparent);
 
-  --umbel-edge: #a8a29e;
-  --umbel-edge-raises: #dc2626;
-  --umbel-edge-lowers: #16a34a;
-  --umbel-edge-bridge: #a8a29e;
+  /* Cause & Effect carries the sign in colour: red raises, green lowers
+     (docs/view-types/cause-and-effect.md). */
+  --umbel-edge: var(--muted-foreground);
+  --umbel-edge-raises: var(--kind-red);
+  --umbel-edge-lowers: var(--kind-green);
+  --umbel-edge-bridge: var(--muted-foreground);
 
-  --umbel-band-bg: rgb(236 254 255 / 0.6);
-  --umbel-band-border: #67e8f9;
-  --umbel-band-fg: #0e7490;
+  --umbel-band-bg: color-mix(in oklch, var(--kind-teal) 7%, var(--background));
+  --umbel-band-border: color-mix(in oklch, var(--kind-teal) 45%, var(--background));
+  --umbel-band-fg: var(--kind-teal);
 
-  --umbel-heading-supports: #4f46e5;
-  --umbel-heading-claims: #a16207;
-  --umbel-heading-challenges: #b45309;
+  --umbel-heading-supports: var(--kind-indigo);
+  --umbel-heading-claims: var(--kind-amber);
+  --umbel-heading-challenges: var(--kind-orange);
 
-  --umbel-badge-positive-bg: #ecfdf5;
-  --umbel-badge-positive-fg: #047857;
-  --umbel-badge-positive-ring: #a7f3d0;
-  --umbel-badge-caution-bg: #fffbeb;
-  --umbel-badge-caution-fg: #92400e;
-  --umbel-badge-caution-ring: #fde68a;
-  --umbel-badge-negative-bg: #fff1f2;
-  --umbel-badge-negative-fg: #be123c;
-  --umbel-badge-negative-ring: #fecdd3;
-  --umbel-badge-neutral-bg: #f5f5f4;
-  --umbel-badge-neutral-fg: #57534e;
-  --umbel-badge-neutral-ring: #e7e5e4;
-  --umbel-badge-accent-bg: #eef2ff;
-  --umbel-badge-accent-fg: #4338ca;
-  --umbel-badge-accent-ring: #c7d2fe;
+  --umbel-badge-positive-bg: color-mix(in oklch, var(--success) 10%, var(--card));
+  --umbel-badge-positive-fg: var(--success);
+  --umbel-badge-positive-ring: color-mix(in oklch, var(--success) 35%, var(--card));
+  --umbel-badge-caution-bg: color-mix(in oklch, var(--suggested) 12%, var(--card));
+  --umbel-badge-caution-fg: var(--suggested-text);
+  --umbel-badge-caution-ring: color-mix(in oklch, var(--suggested) 40%, var(--card));
+  --umbel-badge-negative-bg: color-mix(in oklch, var(--destructive) 10%, var(--card));
+  --umbel-badge-negative-fg: var(--destructive);
+  --umbel-badge-negative-ring: color-mix(in oklch, var(--destructive) 35%, var(--card));
+  --umbel-badge-neutral-bg: var(--muted);
+  --umbel-badge-neutral-fg: var(--muted-foreground);
+  --umbel-badge-neutral-ring: var(--border);
+  --umbel-badge-accent-bg: color-mix(in oklch, var(--primary) 10%, var(--card));
+  --umbel-badge-accent-fg: var(--primary);
+  --umbel-badge-accent-ring: color-mix(in oklch, var(--primary) 30%, var(--card));
 
-  --umbel-toolbar-bg: #ffffff;
-  --umbel-toolbar-border: #e7e5e4;
-  --umbel-toolbar-fg: #57534e;
-  --umbel-toolbar-strong: #1c1917;
+  --umbel-toolbar-bg: var(--card);
+  --umbel-toolbar-border: var(--border);
+  --umbel-toolbar-fg: var(--muted-foreground);
+  --umbel-toolbar-strong: var(--foreground);
 }
 
 .umbel-canvas {
   background: var(--umbel-canvas-bg);
+  /* React Flow's own chrome (background, zoom controls, edge labels) follows
+     the tokens too, overriding its built-in light/dark defaults. */
+  --xy-background-color: var(--umbel-canvas-bg);
+  --xy-controls-button-background-color: var(--umbel-toolbar-bg);
+  --xy-controls-button-background-color-hover: var(--accent);
+  --xy-controls-button-color: var(--umbel-toolbar-strong);
+  --xy-controls-button-color-hover: var(--umbel-toolbar-strong);
+  --xy-controls-button-border-color: var(--umbel-toolbar-border);
+  --xy-controls-box-shadow: 0 0 2px 1px color-mix(in oklch, var(--foreground) 8%, transparent);
+  --xy-edge-label-background-color: var(--umbel-canvas-bg);
+  --xy-edge-label-color: var(--umbel-canvas-label);
 }
 .umbel-canvas .react-flow__node {
   cursor: pointer;

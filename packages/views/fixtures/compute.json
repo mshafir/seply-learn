@@ -11,49 +11,49 @@
   {
    "id": "idea",
    "label": "Idea",
-   "color": "#2563eb",
+   "color": "blue",
    "icon": "idea"
   },
   {
    "id": "person",
    "label": "Person / org",
-   "color": "#9333ea",
+   "color": "violet",
    "icon": "person"
   },
   {
    "id": "thing",
    "label": "Thing",
-   "color": "#ea580c",
+   "color": "orange",
    "icon": "thing"
   },
   {
    "id": "claim",
    "label": "Claim",
-   "color": "#ca8a04",
+   "color": "amber",
    "icon": "claim"
   },
   {
    "id": "source",
    "label": "Evidence",
-   "color": "#4f46e5",
+   "color": "indigo",
    "icon": "evidence"
   },
   {
    "id": "event",
    "label": "Event",
-   "color": "#64748b",
+   "color": "slate",
    "icon": "event"
   },
   {
    "id": "measurement",
    "label": "Measurement",
-   "color": "#059669",
+   "color": "green",
    "icon": "measurement"
   },
   {
    "id": "risk",
    "label": "Risk",
-   "color": "#b91c1c",
+   "color": "red",
    "icon": "risk"
   }
  ],
@@ -61,67 +61,67 @@
   {
    "id": "part-of",
    "label": "is part of",
-   "color": "#7c3aed",
+   "color": "violet",
    "dashed": true
   },
   {
    "id": "prerequisite",
    "label": "is needed to understand",
-   "color": "#2563eb",
+   "color": "blue",
    "dashed": false
   },
   {
    "id": "led-to",
    "label": "led to",
-   "color": "#0f766e",
+   "color": "teal",
    "dashed": false
   },
   {
    "id": "modifies",
    "label": "changes",
-   "color": "#9333ea",
+   "color": "violet",
    "dashed": true
   },
   {
    "id": "uses",
    "label": "uses",
-   "color": "#ea580c",
+   "color": "orange",
    "dashed": false
   },
   {
    "id": "raises",
    "label": "raises",
-   "color": "#dc2626",
+   "color": "red",
    "dashed": false
   },
   {
    "id": "lowers",
    "label": "lowers",
-   "color": "#16a34a",
+   "color": "green",
    "dashed": false
   },
   {
    "id": "supports",
    "label": "supports",
-   "color": "#4f46e5",
+   "color": "indigo",
    "dashed": false
   },
   {
    "id": "challenges",
    "label": "challenges",
-   "color": "#b45309",
+   "color": "orange",
    "dashed": true
   },
   {
    "id": "corrects",
    "label": "corrects",
-   "color": "#a16207",
+   "color": "amber",
    "dashed": false
   },
   {
    "id": "reported-by",
    "label": "is reported by",
-   "color": "#64748b",
+   "color": "slate",
    "dashed": true
   }
  ],
