@@ -15,12 +15,14 @@
 //   check; the Learning path skips them, and hides them with "Hide what I've
 //   read"); `onMarkKnown` is the Learning path's "I know …".
 // - `matches` (search inside the Expedition) dims every other Concept.
+// - The Map View's tiles come from the build's env (lib/basemap.ts).
 import type { EngineCollections } from "@umbel/sync"
 import {
   ExpeditionView,
   type ReaderInteraction,
   type ViewStatusChip,
 } from "@umbel/views"
+import { basemap } from "@/lib/basemap"
 
 export type CanvasSlotProps = {
   collections: EngineCollections
@@ -63,6 +65,7 @@ export function CanvasSlot({
         matches={matches}
         covered={covered}
         onMarkKnown={onMarkKnown}
+        basemap={basemap}
       />
     </div>
   )

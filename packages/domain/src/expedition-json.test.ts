@@ -205,6 +205,28 @@ describe("import fixtures", () => {
   }
 })
 
+describe("synthetic trip fixture", () => {
+  // Hand-written (no prototype): a made-up week of public places, with a Map
+  // and a Timeline View.
+  it("imports with its places, dates and both Views", () => {
+    const file = read("../fixtures/trip.json")
+    const { state } = importExpeditionJson(file, options())
+    expect(counts(state)).toEqual({
+      concepts: file.concepts.length,
+      relationships: file.relationships.length,
+      views: file.views.length,
+    })
+    const concepts = Object.values(state.concepts)
+    expect(concepts.filter((c) => c.lat !== undefined).length).toBeGreaterThan(8)
+    expect(concepts.filter((c) => c.dateEnd).length).toBeGreaterThan(2)
+    expect(concepts.filter((c) => c.dateApprox).length).toBeGreaterThan(1)
+    expect(Object.values(state.views).map((v) => v.viewType).sort()).toEqual([
+      "map",
+      "timeline",
+    ])
+  })
+})
+
 describe("id re-minting", () => {
   it("gives every entity a fresh ULID and remaps references", () => {
     const opts = options()

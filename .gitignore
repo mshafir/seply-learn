@@ -39,3 +39,6 @@ dist-ssr/
 # Agent worktrees and local Claude state (.claude/settings.json is shared)
 .claude/worktrees/
 .claude/settings.local.json
+
+# Basemap extracts (scripts/basemap-tiles.mjs); the harness test extract is committed.
+/basemap-*.pmtiles

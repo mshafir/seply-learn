@@ -1,0 +1,165 @@
+/*
+ * The Timeline View's override sheet: vis-timeline's classes mapped to
+ * @umbel/ui tokens (spec 7.4), loaded after vis-timeline's own sheet. Every
+ * colour is a --umbel-timeline-* variable over a token, so light, dark and
+ * .light/.dark islands all follow; there are no literal colours.
+ */
+:where(:root, .light, .dark) {
+  --umbel-timeline-bg: var(--background);
+  --umbel-timeline-fg: var(--foreground);
+  --umbel-timeline-muted: var(--muted-foreground);
+  --umbel-timeline-rule: var(--border);
+  --umbel-timeline-rule-major: var(--input);
+  --umbel-timeline-lane-bg: var(--card);
+  --umbel-timeline-item-bg: var(--card);
+  --umbel-timeline-item-fg: var(--card-foreground);
+  --umbel-timeline-selected: var(--foreground);
+  --umbel-timeline-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
+  --umbel-timeline-now: var(--destructive);
+  --umbel-timeline-check: var(--success);
+}
+
+.umbel-timeline {
+  position: relative;
+  height: 100%;
+  overflow: auto;
+  background: var(--umbel-timeline-bg);
+  color: var(--umbel-timeline-fg);
+  font-family: var(--font-sans);
+}
+.umbel-timeline__chart {
+  padding: 0.75rem 1rem 0;
+}
+.umbel-timeline__undated {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--umbel-timeline-muted);
+}
+
+/* The frame: panels, axis, grid, lanes. */
+.umbel-timeline .vis-timeline {
+  border-color: var(--umbel-timeline-rule);
+  border-radius: 0.5rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--umbel-timeline-fg);
+  background: var(--umbel-timeline-lane-bg);
+}
+.umbel-timeline .vis-panel.vis-center,
+.umbel-timeline .vis-panel.vis-left,
+.umbel-timeline .vis-panel.vis-right,
+.umbel-timeline .vis-panel.vis-top,
+.umbel-timeline .vis-panel.vis-bottom {
+  border-color: var(--umbel-timeline-rule);
+}
+.umbel-timeline .vis-panel .vis-shadow {
+  box-shadow: 0 0 10px var(--umbel-timeline-ring);
+}
+.umbel-timeline .vis-time-axis .vis-text {
+  color: var(--umbel-timeline-muted);
+}
+.umbel-timeline .vis-time-axis .vis-text.vis-major {
+  color: var(--umbel-timeline-fg);
+  font-weight: 600;
+}
+.umbel-timeline .vis-time-axis .vis-grid.vis-minor {
+  border-color: var(--umbel-timeline-rule);
+}
+.umbel-timeline .vis-time-axis .vis-grid.vis-major {
+  border-color: var(--umbel-timeline-rule-major);
+}
+.umbel-timeline .vis-labelset .vis-label {
+  color: var(--umbel-timeline-fg);
+  border-bottom-color: var(--umbel-timeline-rule);
+  font-weight: 600;
+}
+.umbel-timeline .vis-labelset .vis-label .vis-inner {
+  padding: 0.375rem 0.75rem;
+}
+.umbel-timeline .vis-foreground .vis-group {
+  border-bottom-color: var(--umbel-timeline-rule);
+}
+.umbel-timeline .vis-current-time {
+  background-color: var(--umbel-timeline-now);
+  width: 2px;
+}
+
+/* Items: coloured by Kind (--umbel-item-color, set per item). */
+.umbel-timeline .vis-item {
+  border-color: var(--umbel-item-color, var(--umbel-timeline-muted));
+  background-color: var(--umbel-timeline-item-bg);
+  color: var(--umbel-timeline-item-fg);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.umbel-timeline .vis-item.vis-range {
+  border-radius: 0.375rem;
+  border-width: 1px;
+  border-left-width: 3px;
+  background-color: color-mix(in oklch, var(--umbel-item-color, var(--umbel-timeline-muted)) 14%, var(--umbel-timeline-item-bg));
+}
+.umbel-timeline .vis-item.vis-point {
+  border-width: 0;
+  background: transparent;
+}
+.umbel-timeline .vis-item.vis-dot {
+  background-color: var(--umbel-item-color, var(--umbel-timeline-muted));
+  border-color: var(--umbel-item-color, var(--umbel-timeline-muted));
+}
+.umbel-timeline .vis-item.vis-selected {
+  border-color: var(--umbel-timeline-selected);
+  box-shadow: 0 0 0 3px var(--umbel-timeline-ring);
+  background-color: var(--umbel-timeline-item-bg);
+}
+.umbel-timeline .vis-item.vis-point.vis-selected {
+  background: transparent;
+  box-shadow: none;
+  font-weight: 600;
+}
+.umbel-timeline .vis-item.vis-range .vis-item-content {
+  padding: 0.125rem 0.375rem;
+}
+/* A label longer than its bar runs on past it (a month in a decade), and
+   vis-timeline stacks by bar plus label, so labels never overlap. */
+.umbel-timeline .vis-item.vis-range .vis-item-overflow {
+  overflow: visible;
+}
+
+/* Fuzzy: coarser than a day, or approximate. A soft, dashed bar that fades
+   at both ends, so it doesn't claim exact edges. */
+.umbel-timeline .vis-item.umbel-tl--fuzzy.vis-range {
+  border-style: dashed;
+  border-left-width: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklch, var(--umbel-item-color, var(--umbel-timeline-muted)) 18%, transparent) 20%,
+    color-mix(in oklch, var(--umbel-item-color, var(--umbel-timeline-muted)) 18%, transparent) 80%,
+    transparent
+  );
+  background-color: var(--umbel-timeline-item-bg);
+}
+.umbel-timeline .vis-item.umbel-tl--ongoing.vis-range {
+  border-right-style: dashed;
+}
+.umbel-timeline .vis-item.umbel-tl--dim {
+  opacity: 0.3;
+}
+
+.umbel-tl-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+.umbel-tl-when {
+  color: var(--umbel-timeline-muted);
+  font-size: 0.6875rem;
+}
+.umbel-tl-check {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+  color: var(--umbel-timeline-check);
+}
