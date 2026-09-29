@@ -296,7 +296,9 @@ export async function recentPositions(
     })
     .from(readerPosition)
     .innerJoin(expeditions, eq(expeditions.id, readerPosition.expeditionId))
-    .where(and(eq(readerPosition.userId, userId), isNull(expeditions.deletedAt)))
+    .where(
+      and(eq(readerPosition.userId, userId), isNull(expeditions.deletedAt))
+    )
     .orderBy(desc(readerPosition.at))
     // Some may no longer be viewable; look a little further.
     .limit(limit * 3)

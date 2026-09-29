@@ -88,7 +88,10 @@ function ContinueReading() {
               href={`/e/${e.id}`}
               className="block h-full rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
-              <Card size="sm" className="h-full transition-colors hover:bg-accent">
+              <Card
+                size="sm"
+                className="h-full transition-colors hover:bg-accent"
+              >
                 <CardHeader>
                   <CardTitle className="font-reading text-lg font-medium">
                     {e.title || "Untitled Expedition"}
@@ -259,7 +262,9 @@ export function LibraryScreen() {
                       )}
                     </CardHeader>
                     <CardFooter className="mt-auto gap-2">
-                      <Badge variant="secondary">{STATUS_LABEL[e.status]}</Badge>
+                      <Badge variant="secondary">
+                        {STATUS_LABEL[e.status]}
+                      </Badge>
                       {e.role !== "owner" && (
                         <Badge variant="outline">
                           {e.role === "editor" ? "Editor" : "Viewer"}

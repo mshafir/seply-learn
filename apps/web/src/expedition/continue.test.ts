@@ -41,7 +41,11 @@ describe("resumeFrom", () => {
 
 describe("samePlace", () => {
   it("compares View, Concept and depth", () => {
-    const place = { viewId: "v1", focusConceptId: "c1", panelDepth: "article" as const }
+    const place = {
+      viewId: "v1",
+      focusConceptId: "c1",
+      panelDepth: "article" as const,
+    }
     expect(samePlace(pos(), place)).toBe(true)
     expect(samePlace(pos(), { ...place, panelDepth: "overview" })).toBe(false)
     expect(samePlace(null, place)).toBe(false)

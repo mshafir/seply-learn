@@ -420,17 +420,21 @@ function ExpeditionFrame({
                 className="absolute top-4 left-4 z-10"
               />
               {resumed && (
-                <Alert
-                  data-testid="resumed"
-                  className="absolute bottom-4 left-1/2 z-10 w-auto max-w-md -translate-x-1/2 shadow-sm"
-                >
-                  <AlertTitle>Continuing where you left off</AlertTitle>
-                  <AlertAction>
-                    <Button size="sm" variant="outline" onClick={backToStart}>
-                      Back to the start
-                    </Button>
-                  </AlertAction>
-                </Alert>
+                <div className="absolute right-4 bottom-4 z-10">
+                  <Alert data-testid="resumed" className="shadow-sm">
+                    <AlertTitle>Continuing where you left off</AlertTitle>
+                    <AlertDescription>
+                      <Button
+                        size="xs"
+                        variant="link"
+                        className="h-auto p-0"
+                        onClick={backToStart}
+                      >
+                        Back to the start
+                      </Button>
+                    </AlertDescription>
+                  </Alert>
+                </div>
               )}
             </>
           ) : (

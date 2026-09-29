@@ -53,10 +53,7 @@ export function App() {
       <Route path="/e/:id/:viewId?">
         {(params) => (
           <WaitForSession>
-            <ExpeditionScreen
-              expeditionId={params.id}
-              viewId={params.viewId}
-            />
+            <ExpeditionScreen expeditionId={params.id} viewId={params.viewId} />
           </WaitForSession>
         )}
       </Route>

@@ -7,11 +7,7 @@
 // are the offline mark queue and the rest are a cache for offline reading;
 // an anonymous reader's marks are all pending until they sign in and the
 // marks merge into their account.
-import type {
-  PositionMark,
-  ReadingMark,
-  ViewSettingsMark,
-} from "@umbel/domain"
+import type { PositionMark, ReadingMark, ViewSettingsMark } from "@umbel/domain"
 
 export type MarkRecord =
   | { kind: "reading"; mark: ReadingMark; pending: boolean }

@@ -93,7 +93,9 @@ afterEach(() => {
   for (const c of clients.splice(0)) c.dispose()
 })
 
-function client(opts: Partial<ReaderClientOptions> & { userId: string | null }) {
+function client(
+  opts: Partial<ReaderClientOptions> & { userId: string | null }
+) {
   const c = new ReaderClient({
     store: new MemoryReaderStore(),
     channel: null,
@@ -105,7 +107,8 @@ function client(opts: Partial<ReaderClientOptions> & { userId: string | null }) 
   return c
 }
 
-const covered = (c: ReaderClient) => [...coveredConcepts(c.getState(EXP))].sort()
+const covered = (c: ReaderClient) =>
+  [...coveredConcepts(c.getState(EXP))].sort()
 
 describe("ReaderClient", () => {
   it("saves a mark and shows it at once", async () => {
@@ -177,7 +180,11 @@ describe("ReaderClient", () => {
       hideRead: true,
     })
     // And the queue is empty after another reload.
-    const third = client({ userId: "u1", transport: server.transport("u1"), store })
+    const third = client({
+      userId: "u1",
+      transport: server.transport("u1"),
+      store,
+    })
     await third.ready
     expect(third.pendingCount).toBe(0)
   })
@@ -239,7 +246,11 @@ describe("ReaderClient", () => {
   it("an anonymous reader's marks stay in the browser, then move into the account on sign-in", async () => {
     const server = new FakeReaderServer()
     const store = new IndexedDbReaderStore({ indexedDB: new IDBFactory() })
-    const anon = client({ userId: null, store, transport: server.transport("x") })
+    const anon = client({
+      userId: null,
+      store,
+      transport: server.transport("x"),
+    })
     await anon.ready
     anon.markReading(EXP, "a", "read")
     anon.markReading(EXP, "b", "known")
@@ -252,12 +263,21 @@ describe("ReaderClient", () => {
     // Signed in: the account already has an older mark for "b" and a newer one for "c".
     await server.transport("u1").save({
       reading: [
-        { expeditionId: EXP, conceptId: "c", state: "read", at: new Date(Date.now() + 60_000).toISOString() },
+        {
+          expeditionId: EXP,
+          conceptId: "c",
+          state: "read",
+          at: new Date(Date.now() + 60_000).toISOString(),
+        },
       ],
       viewSettings: [],
       positions: [],
     })
-    const me = client({ userId: "u1", store, transport: server.transport("u1") })
+    const me = client({
+      userId: "u1",
+      store,
+      transport: server.transport("u1"),
+    })
     await me.ready
     expect(await me.adoptAnonymous()).toBe(3)
     expect(covered(me)).toEqual(["a", "b"])

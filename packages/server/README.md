@@ -6,7 +6,7 @@
 
 The Hono app factory: Better Auth, /api (push/pull, per-reader state, Proposals, search, export/import, keys, uploads), /mcp, and the Relay, JobRunner and Mailer interfaces. Runtime-agnostic (Workers and Node). Spec: docs/spec/v1/02-architecture.md, 06-mcp.md.
 
-Today (WP-1.1, WP-1.2, WP-1.4):
+Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5):
 
 | Export | What it is |
 |---|---|
@@ -19,6 +19,8 @@ Today (WP-1.1, WP-1.2, WP-1.4):
 | `appendOps(tx, { expeditionId, userId, ops, changes? })` | The one write path for shared content. Inside the caller's transaction: locks the Expedition row, checks the role (owners and editors), skips ops already logged (idempotent by `opId`), applies the rest with `@umbel/domain`'s `apply`, assigns gap-free `server_seq`, appends them to `ops`, creates or extends their Changes (one author each), and writes the changed rows. Throws `PushError` on refusal, so the transaction rolls back. |
 | `readOps(db, expeditionId, since, limit?)` | Logged ops after `since`, oldest first; each op's `actor` is its Change's author. |
 | `createExpedition(tx, { id, userId, ops, change })` | Inside a transaction: a private Expedition row, its owner Collaborator, and its first Change through `appendOps`. Create and import both use it. |
+| `readReaderState(db, userId, expeditionId)`, `saveReaderMarks(db, userId, batch)`, `recentPositions(db, userId, limit)` | Per-reader state (WP-2.5): the `reading_status`, `personal_view_settings` and `reader_position` rows of one user, outside the op log. Saving upserts each mark only over an older row (the newest `at` wins; a mark from the future is clamped to now); marks of Expeditions the user can't view are skipped, and personal settings must parse with their View Type's personal schema (else skipped). |
+| `Relay.reader?(userId, marks)` | The reader channel: told after a save, with that user's accepted marks only (never anyone else's). Optional; the live relay (M4) will forward it to the reader's other devices. |
 | `loadState(db, id)`, `writeState(db, before, after)` | The tables as a projection of the log: read one Expedition into a `DomainState`; write the rows that differ between two states. |
 
 **Routes** (under `/api`):
@@ -30,6 +32,10 @@ Today (WP-1.1, WP-1.2, WP-1.4):
 - `GET /expeditions`: `{ expeditions: ExpeditionSummary[] }`, every Expedition I collaborate on, not in Trash, newest first.
 - `POST /import` (signed in), body: an Expedition in our JSON (any version, at most 25 MB): validated and upgraded, every entity id re-minted (`@umbel/domain`'s `importExpeditionJson`), then created as a new private Expedition owned by the importer, with its ops logged as one "Imported from file" Change (origin `import`) through `appendOps`, all in one transaction. 201 `{ expedition: ExpeditionSummary, counts: { concepts, relationships, views } }`; 400 `{ error, message, issues }` for an invalid file (nothing written), 413 too large. `importExpedition(db, { userId, file })` is the same without HTTP.
 - `POST /push` `{ expeditionId, ops: Op[], changes?: [{ id, label?, origin? }] }` (signed in): validates every op with the domain schemas (its `expeditionId` and `actor` must match the request and the signed-in user, `schemaV` the current one, no duplicate ids), then `appendOps` in one transaction, then `Relay.published` with the newly logged ops. 200 `{ headSeq, results: [{ opId, serverSeq }] }`, one result per op in batch order; a retry returns the same results and applies nothing. All or nothing: 400 invalid op, 403 a role that may not make it, 404 an Expedition the caller can't view, 409 an op that doesn't apply or a Change of another author. `origin` is `human` (default), `restore` or `merge`; builds, AI and imports are server-side. At most 1000 ops.
+- **Per-reader state** (signed in; private to the reader, spec §1.7):
+  - `GET /reader/expeditions/:id`: `{ reading: ReadingMark[], viewSettings: ViewSettingsMark[], position: PositionMark | null }`, my state in one Expedition I can view (404 otherwise).
+  - `POST /reader` (a `ReaderBatch`: `{ reading?, viewSettings?, positions? }`, marks across Expeditions): saves them, newest winning per row. 200 `{ saved: { reading, viewSettings, positions }, skipped: [expeditionId] }`; 400 for a malformed batch. One route serves a single mark, a browser's offline queue and an anonymous reader's marks merged on sign-in.
+  - `GET /reader/recent?limit=3` (max 20): Continue reading, `{ items: [{ expedition: { id, title, summary, visibility, status }, position }] }`, my most recent positions in Expeditions I can still view, newest first.
 - `GET /pull?expedition=<id>&since=<serverSeq>&limit=<n>`: `{ headSeq, ops: LoggedOp[], more }`, the ops after `since` (default 0), at most `limit` (default and max 1000). For anyone who can view the Expedition, signed in or not where Visibility allows; 404 otherwise.
 
 **Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `DB_BRANCH`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
@@ -38,7 +44,7 @@ Today (WP-1.1, WP-1.2, WP-1.4):
 
 **Migrations:** `drizzle.config.ts` generates SQL migrations from `@umbel/domain`'s schema into `drizzle/` (committed). `db:generate` after a schema change; `db:migrate` (`scripts/migrate.mjs`) applies them to `$DATABASE_URL` and is what CI runs before each deploy.
 
-**Tests** run the app over in-memory PGlite with the committed migrations applied (`src/test-harness.ts`): the push/pull apply path (ordering, idempotency, roles, validation, transactionality, and the compute sample round-tripped through the log), import of both fixtures (counts, one Change, owner, fresh ids, rejections), and the OAuth proxy round trip between a preview and production app with Google's token endpoint stubbed.
+**Tests** run the app over in-memory PGlite with the committed migrations applied (`src/test-harness.ts`): the push/pull apply path (ordering, idempotency, roles, validation, transactionality, and the compute sample round-tripped through the log), import of both fixtures (counts, one Change, owner, fresh ids, rejections), per-reader state (`reader.test.ts`: newest wins, privacy between readers, personal settings validated, future marks clamped, Continue reading order, the reader channel), and the OAuth proxy round trip between a preview and production app with Google's token endpoint stubbed.
 
 ## Allowed dependencies
 

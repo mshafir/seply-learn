@@ -101,7 +101,10 @@ export function applyMarks(
     if (m.expeditionId === expeditionId && isNewer(m, out.reading[m.conceptId]))
       copy().reading[m.conceptId] = m
   for (const m of batch.viewSettings ?? [])
-    if (m.expeditionId === expeditionId && isNewer(m, out.viewSettings[m.viewId]))
+    if (
+      m.expeditionId === expeditionId &&
+      isNewer(m, out.viewSettings[m.viewId])
+    )
       copy().viewSettings[m.viewId] = m
   for (const m of batch.positions ?? [])
     if (m.expeditionId === expeditionId && isNewer(m, out.position))

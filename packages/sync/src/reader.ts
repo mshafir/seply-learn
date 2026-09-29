@@ -95,10 +95,7 @@ export type PositionInput = {
 export type ReaderChannel = {
   postMessage(message: unknown): void
   addEventListener(type: "message", fn: (e: { data: unknown }) => void): void
-  removeEventListener(
-    type: "message",
-    fn: (e: { data: unknown }) => void
-  ): void
+  removeEventListener(type: "message", fn: (e: { data: unknown }) => void): void
   close(): void
 }
 
@@ -150,8 +147,7 @@ export class ReaderClient {
     this.anonymous = !opts.userId
     this.scope = opts.userId ? `user:${opts.userId}` : ANONYMOUS_SCOPE
     this.retryDelay = opts.retryMs ?? 2000
-    this.channel =
-      opts.channel === undefined ? defaultChannel() : opts.channel
+    this.channel = opts.channel === undefined ? defaultChannel() : opts.channel
     this.channel?.addEventListener("message", this.onMessage)
     this.ready = opts.store.load(this.scope).then(
       (saved) => {

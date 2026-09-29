@@ -85,7 +85,8 @@ export function ExpeditionHeader({
           {health.offline ? (
             <>
               <CloudOffIcon className="size-4" />
-              Offline · {health.pending === 1 ? "1 edit" : `${health.pending} edits`}{" "}
+              Offline ·{" "}
+              {health.pending === 1 ? "1 edit" : `${health.pending} edits`}{" "}
               waiting
             </>
           ) : (
