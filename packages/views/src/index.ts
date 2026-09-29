@@ -71,6 +71,7 @@ export {
   ViewRenderer,
   type ExpeditionViewProps,
   type ViewInteraction,
+  type ViewStatusChip,
   type ViewRendererProps,
 } from "./ExpeditionView.tsx";
 
