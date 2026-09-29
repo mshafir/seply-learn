@@ -35,6 +35,13 @@ export {
 } from "./import.ts"
 export { noopRelay, type Relay } from "./relay.ts"
 export {
+  readReaderState,
+  recentPositions,
+  saveReaderMarks,
+  type ContinueReadingItem,
+  type ReaderSnapshot,
+} from "./reader.ts"
+export {
   appendOps,
   readOps,
   PushError,
