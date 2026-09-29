@@ -309,7 +309,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - milestone: M5
 - depends: WP-1.1
 - spec: 01-domain-model.md#18-visibility-roles-permissions
-- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
+- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted: `RESEND_API_KEY` secret, a sending-only key for `mail.umbel.dev`, and the `EMAIL_FROM` repo variable, `Umbel Learn <invites@mail.umbel.dev>`; the deploy passes both to the Worker); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
 - **Done when:** unit tests run the permissions matrix against the API routes; e2e invites a second account and shows it under Shared with you.
 
 ### WP-5.2: Visibility, public links, Fork and Trash
