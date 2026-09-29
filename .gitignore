@@ -36,5 +36,6 @@ dist-ssr/
 !.vscode/extensions.json
 .idea
 
-# Agent worktrees and local Claude state
-.claude/
+# Agent worktrees and local Claude state (.claude/settings.json is shared)
+.claude/worktrees/
+.claude/settings.local.json
