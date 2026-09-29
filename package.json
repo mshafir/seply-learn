@@ -10,7 +10,7 @@
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "check:deps": "node scripts/check-deps.mjs",
-    "check": "pnpm check:deps && turbo typecheck lint test",
+    "check": "pnpm check:deps && VITEST_MAX_WORKERS=${VITEST_MAX_WORKERS:-2} turbo typecheck lint test --concurrency=${TURBO_CONCURRENCY:-2}",
     "check:private": "node scripts/check-private.mjs"
   },
   "devDependencies": {
