@@ -12,6 +12,10 @@
  * them against its own palette (the same trick as ui's .typeset). Both themes
  * come from the tokens; nothing here is theme-specific.
  */
+@import "../outline/outline.css";
+@import "../quadrant/quadrant.css";
+@import "../rates/rates.css";
+
 :where(:root, .light, .dark) {
   --umbel-canvas-bg: var(--background);
   --umbel-canvas-grid: var(--border);

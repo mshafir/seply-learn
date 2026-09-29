@@ -1,0 +1,152 @@
+/*
+ * Outline View (Outline.tsx). Imported by canvas.css; every colour is an
+ * @umbel/ui token through a --umbel-* variable, so both themes follow.
+ */
+:where(:root, .light, .dark) {
+  --umbel-outline-bg: var(--background);
+  --umbel-outline-fg: var(--foreground);
+  --umbel-outline-muted: var(--muted-foreground);
+  --umbel-outline-hover: var(--accent);
+  --umbel-outline-selected: color-mix(in oklch, var(--primary) 10%, var(--background));
+  --umbel-outline-selected-edge: var(--primary);
+  --umbel-outline-rule: var(--border);
+  --umbel-outline-count-bg: var(--muted);
+}
+
+.umbel-outline {
+  height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  background: var(--umbel-outline-bg);
+  color: var(--umbel-outline-fg);
+  font-family: var(--font-sans);
+}
+.umbel-outline ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.umbel-outline__tree {
+  max-width: 48rem;
+}
+.umbel-outline__tree > li + li {
+  margin-top: 0.25rem;
+}
+.umbel-outline__line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+.umbel-outline__line:hover {
+  background: var(--umbel-outline-hover);
+}
+.umbel-outline__line--selected,
+.umbel-outline__line--selected:hover {
+  background: var(--umbel-outline-selected);
+  box-shadow: inset 3px 0 0 var(--umbel-outline-selected-edge);
+}
+.umbel-outline__line--dim {
+  opacity: 0.3;
+}
+.umbel-outline__chevron {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--umbel-outline-muted);
+  cursor: pointer;
+}
+.umbel-outline__chevron:hover {
+  color: var(--umbel-outline-fg);
+}
+.umbel-outline__chevron--none {
+  visibility: hidden;
+}
+.umbel-outline__chevron-icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 150ms;
+}
+.umbel-outline__chevron-icon--open {
+  transform: rotate(90deg);
+}
+.umbel-outline__icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+}
+.umbel-outline__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.125rem;
+}
+.umbel-outline__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.umbel-outline__line--topic .umbel-outline__title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+.umbel-outline__summary {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--umbel-outline-muted);
+}
+.umbel-outline__count {
+  padding: 0 0.375rem;
+  border-radius: 9999px;
+  background: var(--umbel-outline-count-bg);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--umbel-outline-muted);
+}
+.umbel-outline__folded {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.125rem;
+}
+.umbel-outline__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--umbel-outline-rule);
+  border-radius: 9999px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--umbel-outline-fg);
+  cursor: pointer;
+}
+.umbel-outline__chip--selected {
+  border-color: var(--umbel-outline-selected-edge);
+  background: var(--umbel-outline-selected);
+}
+.umbel-outline__unsorted {
+  margin-top: 1rem !important;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--umbel-outline-rule);
+}
+.umbel-outline__empty {
+  color: var(--umbel-outline-muted);
+  font-size: 0.875rem;
+}

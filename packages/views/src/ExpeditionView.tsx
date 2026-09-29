@@ -14,6 +14,9 @@ import type { Positions } from "./layouts.ts";
 import { ViewCanvas } from "./canvas/ViewCanvas.tsx";
 import type { PositionMemory } from "./canvas/Canvas.tsx";
 import { ComparisonTable } from "./table/ComparisonTable.tsx";
+import { Outline } from "./outline/Outline.tsx";
+import { Quadrant } from "./quadrant/Quadrant.tsx";
+import { Rates } from "./rates/Rates.tsx";
 
 /** What every View renderer takes besides the data. */
 export type ViewInteraction = {
@@ -89,6 +92,12 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
     <div className="umbel-view" key={view.id} data-view={view.id} data-view-type={view.viewType}>
       {view.viewType === "comparison-table" ? (
         <ComparisonTable expedition={expedition} view={view} {...rest} />
+      ) : view.viewType === "outline" ? (
+        <Outline expedition={expedition} view={view} {...rest} />
+      ) : view.viewType === "quadrant" ? (
+        <Quadrant expedition={expedition} view={view} {...rest} />
+      ) : view.viewType === "rates" ? (
+        <Rates expedition={expedition} view={view} {...rest} />
       ) : isCanvasView(view) ? (
         <ViewCanvas expedition={expedition} view={view} memory={memory} {...rest} />
       ) : (

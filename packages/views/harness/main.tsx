@@ -80,7 +80,7 @@ const fromLive = (map: Map<string, string>) => {
 const viewFileId = fromLive(f.ids.views);
 const conceptFileId = fromLive(f.ids.concepts);
 
-const drawable = (v: View) => isCanvasView(v) || v.viewType === "comparison-table";
+const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "outline", "quadrant", "rates"].includes(v.viewType);
 
 function readHash() {
   const [v, c] = decodeURIComponent(location.hash.slice(1)).split("/");
@@ -157,7 +157,7 @@ function Harness() {
         {view?.description}
         <br />
         <code data-testid="metrics">
-          {view && !isCanvasView(view) ? `${view.label}: a table, no layout` : metrics ? formatLayoutMetrics(metrics) : "measuring…"}
+          {view && !isCanvasView(view) ? `${view.label}: no canvas layout` : metrics ? formatLayoutMetrics(metrics) : "measuring…"}
         </code>
       </p>
       <main className="harness__canvas" data-settled={settled || undefined}>
