@@ -38,7 +38,7 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
 
     | Authorized JavaScript origins | Authorized redirect URIs |
     |---|---|
-    | `https://umbel-learn.<subdomain>.workers.dev` | `https://umbel-learn.<subdomain>.workers.dev/api/auth/callback/google` |
+    | `https://umbel-learn.michael-shafir.workers.dev` | `https://umbel-learn.michael-shafir.workers.dev/api/auth/callback/google` |
     | `http://localhost:8787` | `http://localhost:8787/api/auth/callback/google` |
     | `http://localhost:5173` | `http://localhost:5173/api/auth/callback/google` |
 
