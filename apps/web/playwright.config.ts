@@ -10,7 +10,9 @@ const CI = !!process.env.CI
 const DATABASE_URL = process.env.E2E_DATABASE_URL
 
 // UI tests run against the production build (`vite build` + `vite preview`),
-// in light and dark. API tests run against the Worker with a real database.
+// in light and dark. API tests run against the Worker with a real database,
+// and so do the app tests (e2e/app): the Worker serves the same build and the
+// API on one origin, in light and dark.
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -26,13 +28,31 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-light",
-      testIgnore: /api\//,
+      testIgnore: /(api|app)\//,
       use: { ...devices["Desktop Chrome"], colorScheme: "light" },
     },
     {
       name: "chromium-dark",
-      testIgnore: /api\//,
+      testIgnore: /(api|app)\//,
       use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
+    },
+    {
+      name: "app-light",
+      testMatch: /app\/.*\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        colorScheme: "light",
+        baseURL: `http://localhost:${API_PORT}`,
+      },
+    },
+    {
+      name: "app-dark",
+      testMatch: /app\/.*\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        colorScheme: "dark",
+        baseURL: `http://localhost:${API_PORT}`,
+      },
     },
     {
       name: "api",

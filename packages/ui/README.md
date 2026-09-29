@@ -9,7 +9,8 @@ shadcn components on Base UI, design tokens (light + warm charcoal dark), fonts,
 | Export | What it is |
 |---|---|
 | `@umbel/ui/globals.css` | Tailwind v4, shadcn tokens, our tokens, fonts, Typeset. Import once, in the app entry. |
-| `@umbel/ui/components/*` | shadcn (Base UI) components: `button`, `badge`, `card`, `dropdown-menu`, `separator`, `toast`. Add more with `mise exec -- pnpm dlx shadcn@latest add <name>` from `apps/web`. |
+| `@umbel/ui/components/*` | shadcn (Base UI) components: `alert`, `avatar`, `badge`, `button`, `card`, `dropdown-menu`, `empty`, `input`, `scroll-area`, `separator`, `sheet`, `sidebar`, `skeleton`, `spinner`, `toast`, `tooltip`. Add more with `mise exec -- pnpm dlx shadcn@latest add <name>` from `apps/web` (hooks land in `apps/web/src/hooks`; move them to `src/hooks`, which is where the components import them from). |
+| `@umbel/ui/hooks/use-mobile` | shadcn's `useIsMobile` (below 768 px), used by `sidebar`. Rewritten with `useSyncExternalStore` so it passes the React Compiler lint rule against setState in effects; same behaviour. |
 | `@umbel/ui/components/theme-provider` | `ThemeProvider` and `useTheme()` → `{ theme, resolvedTheme, setTheme }`. `theme` is `system \| light \| dark` (persisted under `umbel-theme`); `resolvedTheme` is what is on screen and follows the OS live. |
 | `@umbel/ui/components/mode-toggle` | `ModeToggle`: System / Light / Dark (DropdownMenu + Button). |
 | `@umbel/ui/components/brand` | `Wordmark` and `UmbelGlyph`, drawn with tokens so they follow the theme. |
