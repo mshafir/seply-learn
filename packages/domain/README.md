@@ -8,7 +8,7 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 
 | Module | Exports |
 |---|---|
-| `schema` (as `schema.*`) | The Drizzle schema (Postgres, `drizzle-orm/pg-core`) for every table in §1.2, including the Better Auth tables. Logged tables are keyed `(expedition_id, id)`. |
+| `schema` (as `schema.*`) | The Drizzle schema (Postgres, `drizzle-orm/pg-core`) for every table in §1.2, including the Better Auth tables (their timestamps are `Date`s, as Better Auth expects; the rest are ISO strings). Migrations are generated from it in `packages/server/drizzle`. Logged tables are keyed `(expedition_id, id)`. |
 | `ops` | `OpEnvelope`, `OpBody` (a discriminated union of the 28 op kinds in §1.3), `Op`, `parseOp`, `parseOpBody`, `makeOps`, `OP_KINDS`, `SCHEMA_V`, the per-path field schemas. |
 | `state` | `DomainState` (the in-memory shape ops fold into), `emptyState`, `relKey`/`parseRelKey`, `isLive`. |
 | `apply` | `apply(state, op)` and `applyAll`: pure, never mutate their input, throw `ApplyError` on an invalid op. Tombstone times come from the op's ULID. |

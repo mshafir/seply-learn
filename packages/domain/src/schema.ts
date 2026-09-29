@@ -21,6 +21,12 @@ import { VIEW_TYPE_IDS } from "./view-types.ts"
 const ts = (name: string) =>
   timestamp(name, { withTimezone: true, mode: "string" })
 const exp = () => text("expedition_id").notNull()
+/**
+ * Better Auth's tables read and write Date objects (it compares expiry times
+ * directly), so they use Drizzle's "date" mode. The SQL type is the same.
+ */
+const authTs = (name: string) =>
+  timestamp(name, { withTimezone: true, mode: "date" })
 
 // --- Better Auth -----------------------------------------------------------
 
@@ -30,8 +36,8 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull().default(false),
   image: text("image"),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
+  createdAt: authTs("created_at").notNull().defaultNow(),
+  updatedAt: authTs("updated_at").notNull().defaultNow(),
 })
 
 export const sessions = pgTable("sessions", {
@@ -40,11 +46,11 @@ export const sessions = pgTable("sessions", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
-  expiresAt: ts("expires_at").notNull(),
+  expiresAt: authTs("expires_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
+  createdAt: authTs("created_at").notNull().defaultNow(),
+  updatedAt: authTs("updated_at").notNull().defaultNow(),
 })
 
 export const accounts = pgTable("accounts", {
@@ -57,12 +63,12 @@ export const accounts = pgTable("accounts", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: ts("access_token_expires_at"),
-  refreshTokenExpiresAt: ts("refresh_token_expires_at"),
+  accessTokenExpiresAt: authTs("access_token_expires_at"),
+  refreshTokenExpiresAt: authTs("refresh_token_expires_at"),
   scope: text("scope"),
   password: text("password"),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
+  createdAt: authTs("created_at").notNull().defaultNow(),
+  updatedAt: authTs("updated_at").notNull().defaultNow(),
 })
 
 /** Better Auth's verification tokens (part of its core tables). */
@@ -70,9 +76,9 @@ export const verifications = pgTable("verifications", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: ts("expires_at").notNull(),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  updatedAt: ts("updated_at").notNull().defaultNow(),
+  expiresAt: authTs("expires_at").notNull(),
+  createdAt: authTs("created_at").notNull().defaultNow(),
+  updatedAt: authTs("updated_at").notNull().defaultNow(),
 })
 
 /** API tokens (and MCP agents): inherit the user's role, optionally restricted to chosen Expeditions. */
@@ -85,9 +91,9 @@ export const apiKeys = pgTable("api_keys", {
   start: text("start"),
   keyHash: text("key_hash").notNull().unique(),
   expeditionIds: text("expedition_ids").array(),
-  createdAt: ts("created_at").notNull().defaultNow(),
-  lastUsedAt: ts("last_used_at"),
-  expiresAt: ts("expires_at"),
+  createdAt: authTs("created_at").notNull().defaultNow(),
+  lastUsedAt: authTs("last_used_at"),
+  expiresAt: authTs("expires_at"),
 })
 
 /** BYOK mode only. */
@@ -101,7 +107,7 @@ export const aiKeys = pgTable(
     ciphertext: text("ciphertext").notNull(),
     iv: text("iv").notNull(),
     last4: text("last4").notNull(),
-    createdAt: ts("created_at").notNull().defaultNow(),
+    createdAt: authTs("created_at").notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.provider] })]
 )

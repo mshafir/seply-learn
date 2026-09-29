@@ -84,8 +84,11 @@ jobs:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           branch_name: ${{ env.NEON_BRANCH_PREVIEW }}
 
-      # Migrations go here once there is a schema (WP-1.1): run them against
-      # steps.neon.outputs.db_url before deploying.
+      # Direct (non-pooled) connection: migrations take locks Hyperdrive can't hold.
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: pnpm --filter @umbel/server db:migrate
 
       - name: Point a Hyperdrive config at the branch
         working-directory: apps/worker
@@ -93,19 +96,43 @@ jobs:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
         run: node scripts/ci.mjs hyperdrive-upsert "$WORKER_PREVIEW"
 
+      - name: Work out the Worker URLs
+        id: urls
+        working-directory: apps/worker
+        run: node scripts/ci.mjs worker-urls "$WORKER_PREVIEW"
+
+      - name: Write the Worker secrets file
+        working-directory: apps/worker
+        env:
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
+
+      # Google sign-in goes through production (AUTH_PROXY_URL): Google only
+      # knows production's callback. See docs/ops/deploy.md.
       - name: Deploy the preview Worker
         id: deploy
         working-directory: apps/worker
+        env:
+          URL: ${{ steps.urls.outputs.url }}
+          PRODUCTION_URL: ${{ steps.urls.outputs.production_url }}
+          PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
         run: |
+          trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --name "$WORKER_PREVIEW" \
-            --var "DB_BRANCH:$NEON_BRANCH_PREVIEW" | tee deploy.log
-          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
-          if [ -z "$url" ]; then
-            echo "::error::No workers.dev URL in the wrangler output. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
+            --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
+            --var "DB_BRANCH:$NEON_BRANCH_PREVIEW" \
+            --var "BETTER_AUTH_URL:$URL" \
+            --var "AUTH_PROXY_URL:$PRODUCTION_URL" \
+            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" | tee deploy.log
+          deployed=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
+          if [ "$deployed" != "$URL" ]; then
+            echo "::error::Deployed to '$deployed', expected $URL. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
             exit 1
           fi
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Check /api/health
         id: health
@@ -124,11 +151,19 @@ jobs:
           echo "::error::$URL/api/health did not answer"
           exit 1
 
+      - name: Check Google sign-in goes through production
+        id: signin
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          PRODUCTION_URL: ${{ steps.urls.outputs.production_url }}
+        run: node apps/worker/scripts/check-signin.mjs "$URL" "$PRODUCTION_URL"
+
       - name: Comment the preview URL
         uses: actions/github-script@v9
         env:
           URL: ${{ steps.deploy.outputs.url }}
           HEALTH: ${{ steps.health.outputs.body }}
+          REDIRECT_URI: ${{ steps.signin.outputs.redirect_uri }}
         with:
           script: |
             const marker = "<!-- umbel-preview -->"
@@ -139,6 +174,7 @@ jobs:
               `- Worker: \`${process.env.WORKER_PREVIEW}\``,
               `- Neon branch: \`${process.env.NEON_BRANCH_PREVIEW}\``,
               `- \`/api/health\`: \`${process.env.HEALTH}\``,
+              `- Google sign-in: redirects to Google with \`redirect_uri=${process.env.REDIRECT_URI}\` (production, through the OAuth proxy)`,
               `- Commit: ${context.payload.pull_request.head.sha}`,
             ].join("\n")
             await upsertComment(body)
@@ -233,7 +269,10 @@ jobs:
         working-directory: apps/worker
         run: node scripts/ci.mjs neon-default-branch
 
-      # Migrations go here once there is a schema (WP-1.1).
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: pnpm --filter @umbel/server db:migrate
 
       - name: Point the production Hyperdrive config at it
         working-directory: apps/worker
@@ -241,15 +280,37 @@ jobs:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
         run: node scripts/ci.mjs hyperdrive-upsert umbel-production
 
+      - name: Work out the Worker URLs
+        id: urls
+        working-directory: apps/worker
+        run: node scripts/ci.mjs worker-urls umbel-learn
+
+      - name: Write the Worker secrets file
+        working-directory: apps/worker
+        env:
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
+
+      # AUTH_PROXY_URL is production itself: the OAuth proxy plugin only unwraps
+      # callbacks that previews started. Previews are trusted origins.
       - name: Deploy
         id: deploy
         working-directory: apps/worker
         env:
           BRANCH: ${{ steps.neon.outputs.name }}
+          URL: ${{ steps.urls.outputs.url }}
+          PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
         run: |
-          pnpm exec wrangler deploy --config wrangler.ci.json --var "DB_BRANCH:$BRANCH" | tee deploy.log
-          url=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
-          echo "url=$url" >> "$GITHUB_OUTPUT"
+          trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
+          pnpm exec wrangler deploy --config wrangler.ci.json \
+            --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
+            --var "DB_BRANCH:$BRANCH" \
+            --var "BETTER_AUTH_URL:$URL" \
+            --var "AUTH_PROXY_URL:$URL" \
+            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" | tee deploy.log
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Check /api/health
         if: steps.deploy.outputs.url != ''
@@ -262,3 +323,9 @@ jobs:
           done
           echo "::error::$URL/api/health did not answer"
           exit 1
+
+      - name: Check Google sign-in uses production's callback
+        if: steps.deploy.outputs.url != ''
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: node apps/worker/scripts/check-signin.mjs "$URL" "$URL"
