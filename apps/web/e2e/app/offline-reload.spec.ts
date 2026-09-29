@@ -5,7 +5,8 @@ import { needsDatabase, signUp } from "./helpers.ts"
 // The real-browser reload test WP-1.3 couldn't run: rename the Expedition
 // through the sync client with the network blocked, reload (still blocked),
 // and the pending edit is still there, in IndexedDB; once the network is back
-// it is pushed and the server has it.
+// it is pushed and the server has it. (Reading offline, WP-2.7, is
+// offline-reading.spec.ts.)
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 /** Pending ops the sync client keeps in IndexedDB (@umbel/sync's store). */
@@ -72,9 +73,16 @@ test("an edit made offline survives a reload and is pushed when the network is b
   expect(await serverTitle(page, id)).toBe("Before")
 
   // Reload while still offline: the edit is still pending on this device.
+  // The screen reads the copy saved for offline reading (WP-2.7), read-only,
+  // as of before the edit, and counts the edit waiting.
   await page.reload()
-  await expect(page.getByTestId("expedition-offline")).toContainText(
-    "Your edits are saved on this device"
+  await expect(page.getByTestId("offline-chip")).toContainText("Offline, as of")
+  await expect(header.getByRole("heading", { name: "Before" })).toBeVisible()
+  await expect(
+    header.getByRole("button", { name: /Rename the Expedition/ })
+  ).toHaveCount(0)
+  await expect(page.getByTestId("sync-status")).toContainText(
+    "Offline · 1 edit waiting"
   )
   expect(await pendingOps(page)).toBe(1)
   expect(await serverTitle(page, id)).toBe("Before")

@@ -71,6 +71,10 @@ async function openPanel(page: Page) {
 test("shared settings sync to another context; personal ones don't", async ({
   browser,
 }, testInfo) => {
+  // Two contexts, each loading the app cold (the service worker precaches
+  // the shell on first load, WP-2.7), a fixed 4 s wait and two 15 s sync
+  // windows: more than the default 30 s budget allows on a slow runner.
+  test.setTimeout(60_000)
   const ada = await person(browser, "Ada")
   const ed = await person(browser, "Ed")
   try {
