@@ -26,6 +26,21 @@ export type ViewInteraction = {
   transitionMs?: number;
   /** Called once the View is drawn: for a canvas, when its layout has settled and been fitted. */
   onSettled?: () => void;
+} & ReaderInteraction;
+
+/**
+ * The reader's own state (spec §1.7, §4.2), from the app. Every View checks
+ * covered Concepts; the Learning path also skips them in its steps.
+ */
+export type ReaderInteraction = {
+  /** Concepts the reader has read or knows ("read" and "known" count the same). */
+  covered?: ReadonlySet<string>;
+  /** The reader's personal settings for this View, defaults filled in (e.g. `hideRead`, `showAllSteps`). */
+  personal?: Record<string, unknown>;
+  /** The reader changed a personal setting from inside the View (e.g. "Show all steps"). */
+  onPersonalChange?: (settings: Record<string, unknown>) => void;
+  /** The reader said they know a Concept (the Learning path's "I know …"). */
+  onMarkKnown?: (conceptId: string) => void;
 };
 
 export type ExpeditionViewProps = ViewInteraction & {

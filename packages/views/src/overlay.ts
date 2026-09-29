@@ -71,6 +71,15 @@ export type LearningPathState = {
   known: Set<string>;
   showAll: boolean;
   matches?: Set<string>;
+  /**
+   * `known` is the reader's Reading status (read or known), drawn as a check:
+   * no "known" badge, and covered Concepts aren't pulled into view.
+   */
+  readingStatus?: boolean;
+  /** "Hide what I've read": covered Concepts are hidden (bridged over), except the selection and focus. */
+  hideKnown?: boolean;
+  /** Steps per target, excluding what the reader has covered (default: the map's counts). */
+  targetSteps?: Map<string, number>;
 };
 
 /** The focus tree: the focused target and what it needs, minus what the reader knows. */
@@ -88,9 +97,10 @@ export function learningPathOverlay(map: LearningMap, tree: Scope | undefined, s
   const treeIds = new Set(tree?.concepts.map((c) => c.id));
   const around = (id?: string) =>
     id ? scope.relationships.filter((r) => r.from === id || r.to === id).flatMap((r) => [r.from, r.to]) : [];
-  const visible = new Set([...core, ...treeIds, ...around(st.selected), ...around(st.focus), ...st.known]);
+  const visible = new Set([...core, ...treeIds, ...around(st.selected), ...around(st.focus), ...(st.readingStatus ? [] : st.known)]);
   if (st.matches) for (const id of st.matches) visible.add(id);
   const hidden = new Set(st.showAll ? [] : scope.concepts.map((c) => c.id).filter((id) => !visible.has(id)));
+  if (st.hideKnown) for (const id of st.known) if (id !== st.selected && id !== st.focus) hidden.add(id);
 
   const bridges: Overlay["bridges"] = [];
   const direct = new Set(scope.relationships.map((r) => `${r.from}>${r.to}`));
@@ -115,9 +125,9 @@ export function learningPathOverlay(map: LearningMap, tree: Scope | undefined, s
     add(st.focus, { text: "goal", tone: "accent" });
     steps(tree, st.focus, st.known).forEach((id, i) => add(id, { text: `step ${i + 1}`, tone: "neutral" }));
   } else {
-    for (const [id, n] of targets) add(id, { text: `${n} steps`, tone: "neutral" });
+    for (const [id, n] of st.targetSteps ?? targets) add(id, { text: `${n} steps`, tone: "neutral" });
   }
-  for (const id of st.known) add(id, { text: "known", tone: "positive" });
+  if (!st.readingStatus) for (const id of st.known) add(id, { text: "known", tone: "positive" });
 
   return { hidden, lit: st.focus ? treeIds : undefined, badges, bridges, fit: st.focus ? [...treeIds] : undefined };
 }
