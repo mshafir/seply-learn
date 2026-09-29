@@ -99,6 +99,8 @@ jobs:
       - name: Work out the Worker URLs
         id: urls
         working-directory: apps/worker
+        env:
+          PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
         run: node scripts/ci.mjs worker-urls "$WORKER_PREVIEW"
 
       - name: Write the Worker secrets file
@@ -283,7 +285,16 @@ jobs:
       - name: Work out the Worker URLs
         id: urls
         working-directory: apps/worker
+        env:
+          PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
         run: node scripts/ci.mjs worker-urls umbel-learn
+
+      # The zone must be on Cloudflare, and the token needs Zone: Read, DNS: Edit and
+      # Workers Routes: Edit on it (docs/ops/deploy.md).
+      - name: Attach the custom domain
+        if: vars.PRODUCTION_DOMAIN != ''
+        working-directory: apps/worker
+        run: node scripts/ci.mjs custom-domain "${{ vars.PRODUCTION_DOMAIN }}"
 
       - name: Write the Worker secrets file
         working-directory: apps/worker
@@ -317,7 +328,8 @@ jobs:
         env:
           URL: ${{ steps.deploy.outputs.url }}
         run: |
-          for _ in $(seq 1 12); do
+          # A newly attached custom domain can take a moment to get its certificate.
+          for _ in $(seq 1 18); do
             curl -fsS "$URL/api/health" && exit 0
             sleep 10
           done
