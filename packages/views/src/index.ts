@@ -37,6 +37,9 @@ export {
   type Visible,
 } from "./layouts.ts";
 
+// Straight-line geometry, shared by the layouts' tidy-up and the metrics
+export { drawnCost, untangle } from "./geometry.ts";
+
 // What a canvas View draws, shared by the renderer and the metrics
 export { drawnRelationships, type DrawnRelationship } from "./drawn.ts";
 
@@ -93,6 +96,10 @@ export {
   type VerdictTone,
 } from "./table.ts";
 export { ComparisonTable, type ComparisonTableProps } from "./table/ComparisonTable.tsx";
+
+// Anatomy (nested parts with pins; not a canvas)
+export { anatomy, anatomyStats, formatAnatomyStats, litParts, type AnatomyModel, type AnatomyPart } from "./anatomy/anatomy.ts";
+export { Anatomy, type AnatomyProps } from "./anatomy/Anatomy.tsx";
 
 // Canvas (React Flow 12)
 export { Canvas, type CanvasProps, type PositionMemory } from "./canvas/Canvas.tsx";
