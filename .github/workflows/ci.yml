@@ -80,6 +80,14 @@ jobs:
       - name: Run e2e tests
         run: pnpm --filter web test:e2e
 
+      # The Views harness screenshots (packages/views/e2e). Its Playwright
+      # version can differ from web's, so it installs its own Chromium.
+      - name: Run Views harness e2e
+        if: ${{ !cancelled() }}
+        run: |
+          pnpm --filter @umbel/views exec playwright install chromium
+          pnpm --filter @umbel/views test:e2e
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
@@ -88,4 +96,6 @@ jobs:
           path: |
             apps/web/playwright-report/
             apps/web/test-results/
+            packages/views/playwright-report/
+            packages/views/test-results/
           retention-days: 14

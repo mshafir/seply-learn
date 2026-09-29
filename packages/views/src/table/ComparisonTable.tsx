@@ -156,11 +156,19 @@ function useMoreToTheRight(ref: RefObject<HTMLElement | null>) {
     const check = () => setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
     check();
     el.addEventListener("scroll", check, { passive: true });
-    const ro = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(check);
+    // Checked on the next frame, not inside the observer's callback, so the
+    // re-render never lands in the same resize loop.
+    let frame = 0;
+    const later = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(check);
+    };
+    const ro = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(later);
     ro?.observe(el);
     if (el.firstElementChild) ro?.observe(el.firstElementChild);
     return () => {
       el.removeEventListener("scroll", check);
+      cancelAnimationFrame(frame);
       ro?.disconnect();
     };
   }, [ref]);
