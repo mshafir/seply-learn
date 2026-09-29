@@ -1,0 +1,13 @@
+# Local dev settings for `wrangler dev`. Copy to .dev.vars (gitignored) and fill in.
+# See docs/ops/deploy.md, "Running it locally".
+
+# This server's own origin: http://localhost:8787 for `wrangler dev`, or
+# http://localhost:5173 when you browse through the Vite dev server.
+BETTER_AUTH_URL=http://localhost:8787
+# Any random string, e.g. `openssl rand -base64 32`. Local only.
+BETTER_AUTH_SECRET=
+# The Google OAuth client (localhost:8787 and :5173 are registered with it).
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# "1" enables email + password sign-in for tests. Ignored on non-localhost URLs.
+AUTH_TEST_CREDENTIALS=

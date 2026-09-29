@@ -19,13 +19,11 @@
     "@umbel/ai": "workspace:*",
     "@umbel/domain": "workspace:*",
     "@umbel/server": "workspace:*",
-    "hono": "^4.13.10",
-    "pg": "^8.23.0"
+    "hono": "^4.13.10"
   },
   "devDependencies": {
     "@eslint/js": "^10",
     "@types/node": "^24",
-    "@types/pg": "^8.23.1",
     "@umbel/config": "workspace:*",
     "eslint": "^10",
     "globals": "^17",

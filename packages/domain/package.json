@@ -12,6 +12,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^10",
     "@types/node": "^24",
     "@umbel/config": "workspace:*",

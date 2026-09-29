@@ -4,25 +4,37 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./migrations": "./drizzle"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
+    "@umbel/ai": "workspace:*",
     "@umbel/domain": "workspace:*",
-    "@umbel/ai": "workspace:*"
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "^0.45.3",
+    "hono": "^4.13.10",
+    "pg": "^8.23.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@umbel/config": "workspace:*",
-    "typescript": "~6",
-    "vitest": "^4",
-    "eslint": "^10",
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^10",
-    "typescript-eslint": "^8",
+    "@types/node": "^24",
+    "@types/pg": "^8.23.1",
+    "@umbel/config": "workspace:*",
+    "drizzle-kit": "^0.31.11",
+    "eslint": "^10",
     "globals": "^17",
-    "@types/node": "^24"
+    "typescript": "~6",
+    "typescript-eslint": "^8",
+    "vitest": "^4"
   }
 }

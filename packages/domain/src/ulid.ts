@@ -19,7 +19,7 @@ export function ulid(timeMs: number, random?: string): string {
   let rand = random
   if (rand === undefined) {
     const bytes = new Uint8Array(16)
-    globalThis.crypto.getRandomValues(bytes)
+    crypto.getRandomValues(bytes)
     rand = Array.from(bytes, (b) => ALPHABET[b % 32]).join("")
   }
   const id = time + rand

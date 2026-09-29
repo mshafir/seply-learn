@@ -2,3 +2,4 @@
 worker-configuration.d.ts
 # Written by scripts/deploy-config.mjs in CI.
 wrangler.ci.json
+.dev.vars

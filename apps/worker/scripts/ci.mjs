@@ -9,10 +9,17 @@
 //   node scripts/ci.mjs neon-default-branch        print name=, and write the default branch's
 //                                                  connection string to $GITHUB_OUTPUT as db_url
 //   node scripts/ci.mjs neon-branch-delete <name>  delete a Neon branch by name (no-op if absent)
+//   node scripts/ci.mjs worker-urls <name>         write url= (this Worker's workers.dev URL),
+//                                                  production_url= and preview_origins= to
+//                                                  $GITHUB_OUTPUT, before the first deploy
+//   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below)
+//                                                  from env to <path> as JSON, mode 0600, for
+//                                                  `wrangler deploy --secrets-file`
 //
 // Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, NEON_API_KEY, NEON_PROJECT_ID,
-// DATABASE_URL, and optionally NEON_DATABASE (neondb) and NEON_ROLE (neondb_owner).
-import { appendFileSync, readFileSync, writeFileSync } from "node:fs"
+// DATABASE_URL, the AUTH_SECRETS, and optionally NEON_DATABASE (neondb),
+// NEON_ROLE (neondb_owner) and WORKER_PRODUCTION (umbel-learn).
+import { appendFileSync, chmodSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import ts from "typescript"
@@ -148,7 +155,53 @@ async function neonBranchDelete(name) {
   console.log(`neon branch deleted: ${name}`)
 }
 
+function output(values) {
+  const out = process.env.GITHUB_OUTPUT
+  if (!out) throw new Error("GITHUB_OUTPUT is not set")
+  appendFileSync(
+    out,
+    Object.entries(values)
+      .map(([k, v]) => `${k}=${v}\n`)
+      .join("")
+  )
+}
+
+// A Worker's URL is known before it is deployed: https://<name>.<subdomain>.workers.dev.
+// BETTER_AUTH_URL has to be set by the same deploy that first creates the Worker.
+async function workerUrls(name) {
+  const res = await cf("GET", "/workers/subdomain")
+  const sub = res?.result?.subdomain
+  if (!sub)
+    throw new Error(
+      "no workers.dev subdomain on this account (see the docs/ops/deploy.md checklist)"
+    )
+  const production = process.env.WORKER_PRODUCTION || "umbel-learn"
+  const values = {
+    url: `https://${name}.${sub}.workers.dev`,
+    production_url: `https://${production}.${sub}.workers.dev`,
+    preview_origins: `https://umbel-pr-*.${sub}.workers.dev`,
+  }
+  output(values)
+  console.log(values)
+}
+
+// Copied into every Worker, preview and production. Values never reach the log.
+const AUTH_SECRETS = [
+  "BETTER_AUTH_SECRET",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+]
+
+function secretsFile(path) {
+  const secrets = Object.fromEntries(AUTH_SECRETS.map((n) => [n, env(n)]))
+  writeFileSync(path, JSON.stringify(secrets), { mode: 0o600 })
+  chmodSync(path, 0o600)
+  console.log(`wrote ${AUTH_SECRETS.join(", ")} to ${path}`)
+}
+
 const commands = {
+  "worker-urls": workerUrls,
+  "secrets-file": secretsFile,
   "hyperdrive-upsert": hyperdriveUpsert,
   "hyperdrive-delete": hyperdriveDelete,
   "worker-delete": workerDelete,

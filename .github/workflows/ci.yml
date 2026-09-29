@@ -37,9 +37,32 @@ jobs:
     name: Playwright
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The API tests (apps/web/e2e/api) run the Worker (`wrangler dev`) against this.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: umbel
+          POSTGRES_PASSWORD: umbel
+          POSTGRES_DB: umbel_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U umbel"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://umbel:umbel@localhost:5432/umbel_e2e
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
+
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: ${{ env.E2E_DATABASE_URL }}
+        run: pnpm --filter @umbel/server db:migrate
+
+      # The Worker serves apps/web/dist; build it before Playwright starts servers.
+      - name: Build web
+        run: pnpm --filter web build
 
       - name: Playwright version
         id: pw
