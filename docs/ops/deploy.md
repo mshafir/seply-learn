@@ -11,7 +11,7 @@ Two workflows:
 
 **CI** runs `pnpm check` (dependency rule, typecheck, lint, Vitest), `pnpm check:private`, `pnpm --filter web build`, a dry-run bundle of the Worker, and the Playwright smoke test (light and dark). The Playwright report is uploaded as an artifact when it fails.
 
-**Deploy** starts with a `gate` job. If any of the four secrets is missing, it logs a notice (_"Deploys skipped: missing repo secrets …"_) and every other job is skipped, so the workflow passes. Fork PRs never get secrets, so they skip too.
+**Deploy** starts with a `gate` job. If any of the four (three secrets and the `NEON_PROJECT_ID` variable) is missing, it logs a notice (_"Deploys skipped: missing repo secrets …"_) and every other job is skipped, so the workflow passes. Fork PRs never get secrets, so they skip too.
 
 ## Owner checklist (issue #40)
 
@@ -28,7 +28,8 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - Durable Objects and Workflows have no permission of their own; they deploy under Workers Scripts.
   - No **User** permissions: wrangler only needs them to discover the account, and CI always sets `CLOUDFLARE_ACCOUNT_ID`. `scripts/ci.mjs` calls only `/accounts/<id>/…` endpoints.
 - [ ] **Neon project.** Create it in the region closest to your Cloudflare users. Its default branch (usually `main`) is **production**. Keep the default database `neondb` and role `neondb_owner`, or set the `NEON_DATABASE` / `NEON_ROLE` env in the workflow.
-- [ ] **`NEON_PROJECT_ID`:** _Project settings → General_, e.g. `cool-name-123456`. Add it as a **secret**; the workflow reads `secrets.NEON_PROJECT_ID`, and a repo variable of the same name is ignored.
+- [ ] **`NEON_PROJECT_ID`:** a repo **variable** (not a secret), e.g. `cool-name-123456`, from _Project settings → General_.
+- **Neon's GitHub integration** (_Neon project → Integrations → GitHub_) sets both for you, `NEON_API_KEY` as a secret and `NEON_PROJECT_ID` as a variable. The workflow follows its convention so the integration can re-sync them without breaking deploys.
 - [ ] **`NEON_API_KEY`:** _Account settings → API keys_. A project-scoped key is enough.
 
 - [ ] **Google OAuth client** (Google Cloud Console → Google Auth Platform). Needed from WP-1.1.
@@ -51,7 +52,7 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **`RESEND_API_KEY`:** a _Sending access_ key restricted to `mail.umbel.dev`.
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Umbel Learn <invites@mail.umbel.dev>`.
 
-When the four Cloudflare and Neon secrets exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
+When the Cloudflare and Neon secrets and the variable exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
 ## How a preview works
 
