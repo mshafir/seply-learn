@@ -26,12 +26,24 @@ export type ViewInteraction = {
   transitionMs?: number;
   /** Called once the View is drawn: for a canvas, when its layout has settled and been fitted. */
   onSettled?: () => void;
-  /** The reader's personal settings for this View, View Type defaults filled in (e.g. `showAllSteps`). */
+  /** The reader's personal settings for this View, View Type defaults filled in (e.g. `showAllSteps`, `hideRead`). */
   personal?: Record<string, unknown>;
   /** A View's own control changed a personal setting. Without it, such controls keep local state. */
   onPersonalChange?: (key: string, value: unknown) => void;
   /** View-specific status for the app's floating chip ("Path to MLA · 7 of 11 read"); null when there is none. */
   onStatus?: (status: ViewStatusChip | null) => void;
+} & ReaderInteraction;
+
+/**
+ * The reader's Reading status (spec §1.7, §4.2), from the app. Every View
+ * checks covered Concepts; the Learning path also skips them in its steps,
+ * and hides them when `personal.hideRead` is on.
+ */
+export type ReaderInteraction = {
+  /** Concepts the reader has read or knows ("read" and "known" count the same). */
+  covered?: ReadonlySet<string>;
+  /** The reader said they know a Concept (the Learning path's "I know …"). */
+  onMarkKnown?: (conceptId: string) => void;
 };
 
 /** What a View reports for the floating status chip, and how to clear it. */

@@ -20,12 +20,15 @@ export function ExpeditionHeader({
   canEdit,
   onRename,
   health,
+  signInHref,
   search,
 }: {
   title: string
   canEdit: boolean
   onRename?: (title: string) => void
   health?: SyncHealth
+  /** Signed out (reading a public or unlisted link): where "Sign in" goes. */
+  signInHref?: string | null
   /** Search inside the Expedition, before the sync status. */
   search?: React.ReactNode
 }) {
@@ -86,7 +89,8 @@ export function ExpeditionHeader({
           {health.offline ? (
             <>
               <CloudOffIcon className="size-4" />
-              Offline · {health.pending === 1 ? "1 edit" : `${health.pending} edits`}{" "}
+              Offline ·{" "}
+              {health.pending === 1 ? "1 edit" : `${health.pending} edits`}{" "}
               waiting
             </>
           ) : (
@@ -96,6 +100,14 @@ export function ExpeditionHeader({
             </>
           )}
         </span>
+      )}
+      {signInHref && (
+        <Link
+          href={signInHref}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Sign in
+        </Link>
       )}
       <AccountMenu />
     </header>

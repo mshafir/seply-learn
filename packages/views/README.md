@@ -22,8 +22,12 @@ import { ExpeditionView } from "@umbel/views";
   personal={values} // optional: the reader's personal settings (View Type defaults filled in)
   onPersonalChange={(key, value) => …} // optional: a View's own control changed one (e.g. "Show all steps")
   onStatus={(status) => …} // optional: { text, clear } for the floating status chip, or null
+  covered={readIds} // optional: the reader's read or known Concepts (Reading status): a check in every View
+  onMarkKnown={(id) => …} // optional: the Learning path's "I know …" marks the reader's status
 />
 ```
+
+- **Reading status** (`covered`): every drawn Concept (canvas node, table row) that is read or known gets a check (`[data-covered]`, `data-testid="read-check"`). The Learning path skips covered Concepts in its step counts and target badges, counts them in its status chip ("k of n read"), and with `personal.hideRead` hides them (bridged over, never the selection or focus). Without `covered`, the Learning path keeps "I know this" as local state (the harness).
 
 - **Live:** every change to the collections (a local edit, or someone else's arriving by pull) re-derives the View. Canvas Views re-run their pure layout and tween each Concept to its new place: nothing is removed and redrawn, and the view isn't refitted for data alone. A change that moves nothing (a title) just redraws.
 - **Switching Views** (change `viewId`): the incoming View fades in (`.umbel-view`, off under `prefers-reduced-motion`), and a canvas View tweens each Concept from where the previous canvas View drew it, by Concept id, then fits. Positions live only in memory for that tween; they are never stored.

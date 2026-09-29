@@ -79,6 +79,27 @@ export function createExpedition(title: string): Promise<ExpeditionSummary> {
   })
 }
 
+/** One entry of Continue reading: an Expedition and where I left off. */
+export type ContinueReadingItem = {
+  expedition: Omit<ExpeditionSummary, "role">
+  position: {
+    viewId: string | null
+    focusConceptId: string | null
+    at: string
+  }
+}
+
+/** My most recently read Expeditions (spec §3.2), newest first. */
+export async function continueReading(
+  limit = 3
+): Promise<ContinueReadingItem[]> {
+  return (
+    await call<{ items: ContinueReadingItem[] }>(
+      `/reader/recent?limit=${limit}`
+    )
+  ).items
+}
+
 /** Our JSON, as read from the file (the server validates it). */
 export function importExpedition(fileText: string): Promise<ImportResult> {
   return call("/import", { method: "POST", body: fileText })

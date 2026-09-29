@@ -114,11 +114,14 @@ test("sign in, import the compute fixture, and open it in three panes", async ({
   await sheet.getByRole("button", { name: "Close" }).click()
   await expect(sheet).toHaveCount(0)
 
-  // Back to the Library: the import is listed.
+  // Back to the Library: the import is listed (Continue reading may list it
+  // too; reading-status.spec.ts covers that).
   await page.setViewportSize(WIDE)
   await header.getByRole("link", { name: "Library" }).click()
   await expect(
-    page.getByRole("link", { name: /AI compute & model internals/ })
+    page
+      .getByRole("list", { name: "Your Expeditions" })
+      .getByRole("link", { name: /AI compute & model internals/ })
   ).toBeVisible()
   await screenshot(page, testInfo, "library")
 

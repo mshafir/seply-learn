@@ -4,18 +4,23 @@
 // prerequisite tree in reading order, and focus is sticky while the
 // selection stays inside the tree.
 //
-// Reading status ("I know this") is local state here until the reader's own
-// Reading status reaches the client. "Show all steps" is the reader's personal
-// setting when the app passes `personal` and `onPersonalChange`. While a tree
-// is focused, the View reports "Path to X · k of n read" for the app's status
-// chip; clearing it unfocuses.
+// Reading status comes from the app (`covered`: read or known): covered
+// Concepts get a check, step counts skip them, and "I know …" marks the
+// reader's status (`onMarkKnown`). "Show all steps" and "Hide what I've read"
+// are the reader's personal settings when the app passes `personal` and
+// `onPersonalChange`. Without them (the harness), all of it is local state.
+// While a tree is focused, the View reports "Path to X · k of n read" for the
+// app's status chip; clearing it unfocuses.
 import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import type { Expedition, LearningPathSettings, View } from "../model.ts";
-import { learningMap } from "../scope.ts";
+import type { ReaderInteraction } from "../ExpeditionView.tsx";
+import { learningMap, learningScope } from "../scope.ts";
 import { focusTree, learningPathOverlay, steps as stepsOf } from "../overlay.ts";
 import { readingOrder } from "../scope.ts";
 import { Canvas, type PositionMemory } from "./Canvas.tsx";
 import type { ViewStatusChip } from "../ExpeditionView.tsx";
+
+const noneCovered = new Set<string>();
 
 export type LearningPathCanvasProps = {
   expedition: Expedition;
@@ -29,7 +34,7 @@ export type LearningPathCanvasProps = {
   personal?: Record<string, unknown>;
   onPersonalChange?: (key: string, value: unknown) => void;
   onStatus?: (status: ViewStatusChip | null) => void;
-};
+} & ReaderInteraction;
 
 /** Every step on the path to `focus`, known ones included, in reading order. */
 function readingOrderOf(tree: NonNullable<ReturnType<typeof focusTree>>, focus: string) {
@@ -45,8 +50,10 @@ export function LearningPathCanvas({
   transitionMs,
   onSettled,
   memory,
+  covered,
   personal,
   onPersonalChange,
+  onMarkKnown,
   onStatus,
 }: LearningPathCanvasProps) {
   const s: LearningPathSettings = view.settings;
@@ -55,10 +62,26 @@ export function LearningPathCanvas({
   const inScope = (id?: string) => !!id && scope.concepts.some((c) => c.id === id);
   const byId = useMemo(() => new Map(expedition.concepts.map((c) => [c.id, c])), [expedition]);
 
-  const [known, setKnown] = useState<Set<string>>(new Set());
+  const [localKnown, setKnown] = useState<Set<string>>(new Set());
   const [localShowAll, setLocalShowAll] = useState(false);
+  // The reader's Reading status and personal settings, when the app has them.
+  const readingStatus = covered !== undefined;
+  const coveredSet = covered ?? noneCovered;
+  const known = useMemo(() => (readingStatus ? new Set(coveredSet) : localKnown), [readingStatus, coveredSet, localKnown]);
   const showAll = onPersonalChange ? personal?.showAllSteps === true : localShowAll;
-  const setShowAll = (on: boolean) => (onPersonalChange ? onPersonalChange("showAllSteps", on) : setLocalShowAll(on));
+  const hideKnown = personal?.hideRead === true;
+  const toggleShowAll = (on: boolean) => (onPersonalChange ? onPersonalChange("showAllSteps", on) : setLocalShowAll(on));
+  const markKnown = (id: string) => (onMarkKnown ? onMarkKnown(id) : setKnown(new Set(localKnown).add(id)));
+  // Step counts per target skip what the reader has covered.
+  const targetSteps = useMemo(() => {
+    if (!known.size) return undefined;
+    const out = new Map<string, number>();
+    for (const id of targets.keys()) {
+      const tree = learningScope(expedition, s.relationshipTypes, id, known);
+      out.set(id, tree.concepts.filter((c) => c.id !== id && !known.has(c.id)).length);
+    }
+    return out;
+  }, [expedition, s, targets, known]);
   const [focus, setFocus] = useState<string | undefined>(inScope(selected) ? selected : undefined);
   const [lastSelected, setLastSelected] = useState(selected);
 
@@ -79,15 +102,14 @@ export function LearningPathCanvas({
   const steps = tree && focus ? stepsOf(tree, focus, known) : [];
   const unlocks = focus ? scope.relationships.filter((r) => r.from === focus).map((r) => r.to) : [];
   const overlay = useMemo(
-    () => learningPathOverlay(map, tree, { selected, focus, known, showAll, matches }),
-    [map, tree, selected, focus, known, showAll, matches],
+    () => learningPathOverlay(map, tree, { selected, focus, known, showAll, matches, readingStatus, hideKnown, targetSteps }),
+    [map, tree, selected, focus, known, showAll, matches, readingStatus, hideKnown, targetSteps],
   );
-
-  // The status chip: the focused path and how much of it is covered.
+  // The status chip: the focused path and how much of it the reader has covered.
   const pathIds = tree && focus ? readingOrderOf(tree, focus) : [];
-  const covered = pathIds.filter((id) => known.has(id)).length;
+  const pathRead = pathIds.filter((id) => known.has(id)).length;
   const statusText = focus
-    ? `Path to ${byId.get(focus)?.title ?? "…"} · ${covered} of ${pathIds.length} read`
+    ? `Path to ${byId.get(focus)?.title ?? "…"} · ${pathRead} of ${pathIds.length} read`
     : null;
   const report = useEffectEvent((text: string | null) =>
     onStatus?.(text ? { text, clear: () => setFocus(undefined) } : null),
@@ -106,7 +128,7 @@ export function LearningPathCanvas({
             <span>
               To understand <b>{byId.get(focus)?.title}</b>: {steps.length ? `${steps.length} steps first` : "nothing else first"}
             </span>
-            <button disabled={!canMark} onClick={() => selected && setKnown(new Set(known).add(selected))}>
+            <button disabled={!canMark} onClick={() => selected && markKnown(selected)}>
               I know {canMark ? `"${byId.get(selected!)?.title}"` : "the selected step"}
             </button>
             {selected && selected !== focus && treeIds.has(selected) && (
@@ -130,7 +152,7 @@ export function LearningPathCanvas({
             {targets.size} techniques and the foundations they share. Click one to see what it takes, in order.
           </span>
         )}
-        {known.size > 0 && (
+        {!readingStatus && known.size > 0 && (
           <span className="umbel-toolbar__chips">
             Known:
             {[...known].map((id) => (
@@ -150,7 +172,7 @@ export function LearningPathCanvas({
           </span>
         )}
         <label className="umbel-toolbar__toggle">
-          <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+          <input type="checkbox" checked={showAll} onChange={(e) => toggleShowAll(e.target.checked)} />
           Show all steps ({hiddenCount} more)
         </label>
       </div>
@@ -166,6 +188,7 @@ export function LearningPathCanvas({
           transitionMs={transitionMs}
           onSettled={onSettled}
           memory={memory}
+          covered={covered}
         />
       </div>
     </div>

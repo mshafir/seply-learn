@@ -11,9 +11,16 @@
 // - `personal` is the reader's personal settings for the View; a View's own
 //   control changing one calls `onPersonalChange`. `onStatus` receives the
 //   View's status for the floating chip.
+// - `covered` is the reader's Reading status (read or known Concepts get a
+//   check; the Learning path skips them, and hides them with "Hide what I've
+//   read"); `onMarkKnown` is the Learning path's "I know …".
 // - `matches` (search inside the Expedition) dims every other Concept.
 import type { EngineCollections } from "@umbel/sync"
-import { ExpeditionView, type ViewStatusChip } from "@umbel/views"
+import {
+  ExpeditionView,
+  type ReaderInteraction,
+  type ViewStatusChip,
+} from "@umbel/views"
 
 export type CanvasSlotProps = {
   collections: EngineCollections
@@ -27,7 +34,7 @@ export type CanvasSlotProps = {
   onStatus?: (status: ViewStatusChip | null) => void
   /** Search matches: the canvas dims every other Concept. */
   matches?: Set<string>
-}
+} & ReaderInteraction
 
 export function CanvasSlot({
   collections,
@@ -39,6 +46,8 @@ export function CanvasSlot({
   onPersonalChange,
   onStatus,
   matches,
+  covered,
+  onMarkKnown,
 }: CanvasSlotProps) {
   return (
     <div data-testid="canvas-view" className="size-full pt-21">
@@ -52,6 +61,8 @@ export function CanvasSlot({
         onPersonalChange={onPersonalChange}
         onStatus={onStatus}
         matches={matches}
+        covered={covered}
+        onMarkKnown={onMarkKnown}
       />
     </div>
   )

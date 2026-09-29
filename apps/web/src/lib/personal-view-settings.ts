@@ -2,11 +2,13 @@
 // View ("Show all steps", "Hide what I've read"). They are never shared and
 // never logged; defaults come from the View Type's personal schema only.
 //
-// The spec keeps them server-side in `personal_view_settings`, behind the
-// per-reader API WP-2.5 builds. Until that lands, this interface is the one
-// seam: the app reads and writes through `PersonalViewSettingsStore`, and the
-// store here keeps them in this browser (localStorage), per user and View.
-// Other tabs of the same browser see changes through the `storage` event.
+// The app reads and writes them through `PersonalViewSettingsStore`. The
+// Expedition screen passes the reader's store (lib/reader.ts,
+// `ReaderPersonalViewSettings`): saved server-side in
+// `personal_view_settings` through the reader API, so they follow the reader
+// across devices. The localStorage store here (per user and View; other tabs
+// see changes through the `storage` event) is the default for callers
+// without one.
 import * as React from "react"
 import { parsePersonalSettings, type ViewTypeId } from "@umbel/domain"
 
