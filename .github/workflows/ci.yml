@@ -88,17 +88,6 @@ jobs:
           pnpm --filter @umbel/views exec playwright install chromium
           pnpm --filter @umbel/views test:e2e
 
-      # TEMPORARY (WP-2.1): print the failing harness shots so the baselines
-      # can be taken from CI's Chromium. Reverted before merge.
-      - name: Dump Views harness actual screenshots
-        if: failure()
-        run: |
-          for f in $(find packages/views/test-results -name '*-actual.png'); do
-            echo "SHOT-BEGIN $(basename "$f")"
-            base64 -w 8000 "$f" | sed 's/^/SHOT-DATA /'
-            echo "SHOT-END"
-          done
-
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v7
