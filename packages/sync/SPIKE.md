@@ -31,18 +31,18 @@ Consequences for WP-1.3:
 
 Each scenario runs twice: once through the collection handlers (`collection.update`), once through `createTransaction({ mutationFn })`.
 
-| Scenario | Result |
-|---|---|
-| One edit, echo later | optimistic → synced, no revert (at most one redundant same-value event) |
-| Fast typing: 60 overlapping, unawaited edits; pushes and partial echoes interleaved | no flicker; ends on the last value with nothing pending |
-| Delayed confirmation: the handler also awaits push + echo (not the design) | no flicker |
-| Reorder: another client's edit of the same field lands first | ours stays on top through the rebase and wins on echo; theirs never shows |
-| Reorder on another field | fields merge; the edited field doesn't move |
-| A later remote edit legitimately replaces ours | mine → theirs, no revert in between |
-| The server refuses the pending ops | one real revert to the confirmed value, not a flicker |
-| Randomised: 200 steps of edits, pushes, partial pulls, remote edits (seeded) | no flicker |
-| **Negative control:** diff delivered after `mutationFn` resolved, explicit transaction | **flickers**: `Concept c1 → A → Concept c1 → A`, caught in both layers |
-| Same late diff, collection handlers | no flicker (the direct-row net) |
+| Scenario                                                                               | Result                                                                    |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| One edit, echo later                                                                   | optimistic → synced, no revert (at most one redundant same-value event)   |
+| Fast typing: 60 overlapping, unawaited edits; pushes and partial echoes interleaved    | no flicker; ends on the last value with nothing pending                   |
+| Delayed confirmation: the handler also awaits push + echo (not the design)             | no flicker                                                                |
+| Reorder: another client's edit of the same field lands first                           | ours stays on top through the rebase and wins on echo; theirs never shows |
+| Reorder on another field                                                               | fields merge; the edited field doesn't move                               |
+| A later remote edit legitimately replaces ours                                         | mine → theirs, no revert in between                                       |
+| The server refuses the pending ops                                                     | one real revert to the confirmed value, not a flicker                     |
+| Randomised: 200 steps of edits, pushes, partial pulls, remote edits (seeded)           | no flicker                                                                |
+| **Negative control:** diff delivered after `mutationFn` resolved, explicit transaction | **flickers**: `Concept c1 → A → Concept c1 → A`, caught in both layers    |
+| Same late diff, collection handlers                                                    | no flicker (the direct-row net)                                           |
 
 `src/engine.test.ts` covers the op engine itself: pending ops and the synchronous diff, echo acknowledgement (and redelivery), rebase with ours on top, dropping ops that no longer apply, and a local op that doesn't apply.
 
@@ -60,6 +60,8 @@ Run: `mise exec -- pnpm --filter @umbel/sync test`.
 - `src/spike/`: `SimServer`/`SimClient` (control over when pushes land and when each client pulls), and the `Recorder`/`findFlicker` detector.
 
 Left for WP-1.3: all tables with `drizzle-zod` row types, IndexedDB mirroring of pending ops, push/pull transport, Change coalescing, undo per Change, view-as-of and Proposal preview. `projectRows` rebuilds every row map per step (O(n)). That's fine for the spike; WP-1.3 should diff only the entities the ops touched. A rebase already emits one diff, so one `begin/commit` per table.
+
+**WP-1.3 update:** the spike code is now the production code (see README.md). All logged tables have collections (rows are the `@umbel/domain` state types rather than `drizzle-zod` ones: the client state has no `expedition_id` column and folds tags into rows); `RowProjection` skips entities whose identity didn't change; pending ops are mirrored to IndexedDB; push/pull go through a `SyncTransport`; Changes coalesce. `flicker.test.ts` runs against all of it, with two new suites: typing into other tables (a Relationship note, a View label) and the `SyncClient` with its own push/pull timing. Undo per Change, view-as-of and Proposal preview are later work packages.
 
 ## Watch list (TanStack DB is pre-1.0)
 

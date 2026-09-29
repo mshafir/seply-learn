@@ -1,11 +1,15 @@
-// TanStack DB collections fed by the op engine (spike, WP-0.5).
+// TanStack DB collections fed by the op engine: the live query layer.
 //
-// One collection per table. Its custom `sync` loads the engine's rows, calls
-// `markReady`, then forwards every engine diff as one begin → write… → commit.
-// UI edits (`collection.update`) become field-level ops in `onUpdate`, which
-// hands them to the engine and resolves once they are applied locally.
+// One collection per table (rows.ts). Its custom `sync` loads the engine's
+// rows, calls `markReady`, then forwards every engine diff as one
+// begin → write… → commit. UI edits (`collection.insert/update/delete`, or
+// several in `createTransaction({ mutationFn })`) become ops in the shared
+// `mutationFn`, which proposes them to the engine as one Change (coalescing
+// with the open editing session where it can) and resolves once they are
+// applied locally. Durability, push, retry and rebase stay in the engine and
+// the sync client.
 //
-// The anti-flicker rule (see SPIKE.md): the engine emits its diff, and the sync
+// The anti-flicker rule (SPIKE.md): the engine emits its diff, and the sync
 // commit is queued, BEFORE the mutation handler resolves. TanStack DB holds
 // sync commits while a transaction is `persisting` and applies them in the
 // same step that drops the optimistic layer, so the row goes straight from the
@@ -16,14 +20,14 @@ import {
   type PendingMutation,
   type SyncConfig,
 } from "@tanstack/db"
-import type { Op, OpBody } from "@umbel/domain"
-import type { OpEngine } from "./engine.ts"
-import { deepEqual } from "./engine.ts"
-import type {
-  ConceptRow,
-  RelationshipRow,
-  RowChange,
-  TableName,
+import type { Op } from "@umbel/domain"
+import type { OpEngine, ProposeOptions } from "./engine.ts"
+import { mutationsToOps, type RowMutation } from "./mutations.ts"
+import {
+  TABLES,
+  type RowChange,
+  type RowsByTable,
+  type TableName,
 } from "./rows.ts"
 
 // Mutations of any collection: a transaction can span several.
@@ -37,28 +41,49 @@ export type EngineCollectionsOptions = {
    * How engine diffs reach the collections. `sync` (the default and the
    * design) forwards them in the same call stack. `deferred` forwards them on
    * a macrotask, after the mutation handler has resolved: the broken wiring,
-   * kept only so the spike's tests and harness can show the flicker it causes.
+   * kept only so the flicker tests and harness can show the flicker it causes.
    */
   delivery?: "sync" | "deferred"
   /**
    * Optional: the handler also waits for this (e.g. server confirmation of
    * the ops) before resolving. Not the design (the op engine owns durability),
-   * but the spike checks it doesn't flicker either.
+   * but the flicker tests check it doesn't flicker either.
    */
   awaitPersist?: (ops: Op[]) => Promise<void>
 }
 
-export type EngineCollections = {
-  concepts: Collection<ConceptRow, string>
-  relationships: Collection<RelationshipRow, string>
+export type TableCollections = {
+  [T in TableName]: Collection<RowsByTable[T], string>
+}
+
+export type MutationFn = (params: {
+  transaction: {
+    mutations: ReadonlyArray<AnyMutation>
+    metadata?: Record<string, unknown>
+  }
+}) => Promise<void>
+
+export type EngineCollections = TableCollections & {
   /**
    * For `createTransaction({ mutationFn })` / `createOptimisticAction`:
    * several edits as one Change. The collections' own handlers use it too.
+   * A transaction's `metadata.change` (ProposeOptions) sets the Change's
+   * label or origin, or turns coalescing off.
    */
-  mutationFn: (params: {
-    transaction: { mutations: ReadonlyArray<AnyMutation> }
-  }) => Promise<void>
+  mutationFn: MutationFn
   dispose: () => void
+}
+
+const KEY: { [T in TableName]: (row: RowsByTable[T]) => string } = {
+  expeditions: (r) => r.id,
+  concepts: (r) => r.id,
+  articleSections: (r) => r.id,
+  relationships: (r) => r.key,
+  kindDefs: (r) => r.id,
+  relTypeDefs: (r) => r.id,
+  attributeDefs: (r) => r.id,
+  views: (r) => r.id,
+  sources: (r) => r.id,
 }
 
 export function createEngineCollections(
@@ -107,138 +132,58 @@ export function createEngineCollections(
     }
   }
 
+  const tableOf = new Map<unknown, TableName>()
+
   /**
-   * The one mutation handler: every Concept mutation of a transaction → field
-   * ops, proposed to the engine as one Change. The engine applies them and
-   * emits the diff synchronously (queued behind this still-persisting
-   * transaction), then this resolves.
+   * The one mutation handler: every mutation of a transaction → ops,
+   * proposed to the engine as one Change. The engine applies them and emits
+   * the diff synchronously (queued behind this still-persisting
+   * transaction), then this resolves. An edit no op can express throws, so
+   * the transaction rolls back instead of leaving the optimistic row showing.
    */
-  const mutationFn = async ({
-    transaction,
-  }: {
-    transaction: { mutations: ReadonlyArray<AnyMutation> }
-  }): Promise<void> => {
-    const bodies: OpBody[] = []
+  const mutationFn: MutationFn = async ({ transaction }) => {
+    const mutations: RowMutation[] = []
     for (const m of transaction.mutations) {
-      if (m.collection !== concepts) continue
-      bodies.push(...conceptMutationToOps(m as PendingMutation<ConceptRow>))
+      const table = tableOf.get(m.collection)
+      if (!table) continue
+      mutations.push({
+        table,
+        type: m.type,
+        key: String(m.key),
+        value: (m.type === "update" ? m.changes : m.modified) as object,
+      })
     }
+    if (!mutations.length) return
+    const at = new Date().toISOString()
+    const bodies = mutationsToOps(engine.state, mutations, at)
     if (!bodies.length) return
-    const ops = engine.propose(bodies)
+    const change = transaction.metadata?.change as ProposeOptions | undefined
+    const ops = engine.propose(bodies, change)
     if (opts.awaitPersist) await opts.awaitPersist(ops)
   }
 
-  const concepts: Collection<ConceptRow, string> = createCollection<
-    ConceptRow,
-    string
-  >({
-    id: `${prefix}:concepts`,
-    getKey: (c) => c.id,
-    startSync: true,
-    gcTime: 0,
-    sync: syncFor<ConceptRow>("concepts"),
-    onUpdate: mutationFn,
-    onInsert: mutationFn,
-    onDelete: mutationFn,
-  })
-
-  // Read-only in the spike: Relationship edits arrive as ops only.
-  const relationships = createCollection<RelationshipRow, string>({
-    id: `${prefix}:relationships`,
-    getKey: (r) => r.key,
-    startSync: true,
-    gcTime: 0,
-    sync: syncFor<RelationshipRow>("relationships"),
-  })
+  const collections = {} as Record<TableName, Collection<object, string>>
+  for (const table of TABLES) {
+    const c = createCollection<object, string>({
+      id: `${prefix}:${table}`,
+      getKey: KEY[table] as (row: object) => string,
+      startSync: true,
+      gcTime: 0,
+      sync: syncFor<object>(table),
+      onInsert: mutationFn,
+      onUpdate: mutationFn,
+      onDelete: mutationFn,
+    })
+    collections[table] = c
+    tableOf.set(c, table)
+  }
 
   return {
-    concepts,
-    relationships,
+    ...(collections as unknown as TableCollections),
     mutationFn,
     dispose: () => {
       for (const c of cleanups) c()
-      void concepts.cleanup()
-      void relationships.cleanup()
+      for (const c of Object.values(collections)) void c.cleanup()
     },
   }
-}
-
-function conceptMutationToOps(m: PendingMutation<ConceptRow>): OpBody[] {
-  switch (m.type) {
-    case "update": {
-      const ops = conceptEditToOps(m.original as ConceptRow, m.modified)
-      // An edit no op can express would otherwise stay on screen: TanStack DB
-      // keeps a completed optimistic row until sync writes that key.
-      if (!ops.length && !deepEqual(m.original, m.modified))
-        throw new Error(`no op for this edit of Concept ${String(m.key)}`)
-      return ops
-    }
-    case "insert": {
-      const { id, title, kind, tags, aliases } = m.modified
-      return [
-        {
-          kind: "concept.create",
-          target: id,
-          value: { title, kind, tags, aliases },
-        },
-      ]
-    }
-    case "delete":
-      return [{ kind: "concept.delete", target: String(m.key) }]
-  }
-}
-
-const SET_FIELDS = [
-  "title",
-  "aliases",
-  "kind",
-  "summary",
-  "overview",
-  "overviewProv",
-  "prov",
-  "date",
-  "dateEnd",
-  "dateApprox",
-  "lane",
-  "lat",
-  "lon",
-  "weightPin",
-] as const
-
-/** A Concept row edit → field-level ops (`concept.set` per field, tag add/remove). */
-export function conceptEditToOps(
-  before: ConceptRow,
-  after: ConceptRow
-): OpBody[] {
-  const target = after.id
-  const ops: OpBody[] = []
-  for (const f of SET_FIELDS) {
-    if (!deepEqual(before[f], after[f]))
-      ops.push({
-        kind: "concept.set",
-        target,
-        path: f,
-        value: after[f] ?? null,
-      } as OpBody)
-  }
-  const attrs = new Set([
-    ...Object.keys(before.attributes),
-    ...Object.keys(after.attributes),
-  ])
-  for (const a of attrs) {
-    if (!deepEqual(before.attributes[a], after.attributes[a]))
-      ops.push({
-        kind: "concept.set",
-        target,
-        path: `attributes.${a}`,
-        value: after.attributes[a] ?? null,
-      } as OpBody)
-  }
-  for (const t of after.tags)
-    if (!before.tags.includes(t))
-      ops.push({ kind: "concept.tag.add", target, value: t })
-  for (const t of before.tags)
-    if (!after.tags.includes(t))
-      ops.push({ kind: "concept.tag.remove", target, value: t })
-  return ops
 }
