@@ -26,6 +26,7 @@ import { Skeleton } from "@umbel/ui/components/skeleton"
 import { SyncHttpError, type SyncClient } from "@umbel/sync"
 
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
+import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
 import { kindLabel } from "@/expedition/labels.ts"
 import {
@@ -46,6 +47,7 @@ import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsRail } from "@/expedition/views-rail.tsx"
 import { listExpeditions, type Role } from "@/lib/api.ts"
+import { matchConcepts } from "@/lib/search.ts"
 import { useUser } from "@/lib/session.ts"
 import { useSyncClient, type SyncHealth } from "@/lib/sync.ts"
 import { useMediaQuery } from "@/lib/use-media-query.ts"
@@ -175,7 +177,12 @@ function ExpeditionFrame({
   const [, navigate] = useLocation()
   const data = useExpeditionData(client.collections)
   const inlinePanel = useMediaQuery(INLINE_PANEL_QUERY)
-  const [panel, setPanel] = React.useState<Panel>(null)
+  // A Concept picked in global search arrives as ?concept=<id>.
+  const [panel, setPanel] = React.useState<Panel>(() => {
+    const id = new URLSearchParams(window.location.search).get("concept")
+    return id ? { type: "concept", stack: openConcept(id) } : null
+  })
+  const [query, setQuery] = React.useState("")
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
   const expedition = data.expedition
@@ -189,6 +196,10 @@ function ExpeditionFrame({
   const conceptById = React.useMemo(
     () => new Map(data.concepts.map((c) => [c.id, c])),
     [data.concepts]
+  )
+  const matches = React.useMemo(
+    () => matchConcepts(data.concepts, query),
+    [data.concepts, query]
   )
   // The back stack, without places whose Concept has gone (deleted, merged).
   const stack =
@@ -247,6 +258,13 @@ function ExpeditionFrame({
         canEdit={canEdit}
         onRename={rename}
         health={health}
+        search={
+          <ConceptSearch
+            query={query}
+            onQueryChange={setQuery}
+            matchCount={matches?.size}
+          />
+        }
       />
       <div className="flex min-h-0 flex-1">
         <ViewsRail
@@ -272,6 +290,7 @@ function ExpeditionFrame({
                   )
                 }
                 onSettled={() => setSettledViewId(view.id)}
+                matches={matches}
               />
               <ViewButton
                 view={view}

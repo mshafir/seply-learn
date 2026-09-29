@@ -1,6 +1,7 @@
 // Test helpers: the app over an in-memory PGlite database with the committed
 // migrations applied, and a tiny cookie jar. Not exported from the package.
 import { PGlite } from "@electric-sql/pglite"
+import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm"
 import { schema } from "@umbel/domain"
 import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
@@ -14,7 +15,8 @@ import type { Relay } from "./relay.ts"
 const migrationsFolder = fileURLToPath(new URL("../drizzle", import.meta.url))
 
 export async function testDb(): Promise<Db> {
-  const db = drizzle(new PGlite(), { schema })
+  // pg_trgm is a contrib extension; migration 0001 (search) creates it.
+  const db = drizzle(new PGlite({ extensions: { pg_trgm } }), { schema })
   await migrate(db, { migrationsFolder })
   return db as unknown as Db
 }

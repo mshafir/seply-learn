@@ -11,7 +11,7 @@ The Vite SPA (installable PWA): routes and screens from docs/spec/v1/03-screens-
 | Path | Screen |
 |---|---|
 | `/sign-in` | Sign in: "Continue with Google" starts Better Auth's Google flow (`POST /api/auth/sign-in/social`). |
-| `/` | The Library (spec §3.2, basic): your Expeditions from `GET /api/expeditions`; **New** creates an untitled draft (`POST /api/expeditions`) and opens it; **Import** posts a JSON file to `/api/import` and opens the result. |
+| `/` | The Library (spec §3.2, basic): your Expeditions from `GET /api/expeditions`; **New** creates an untitled draft (`POST /api/expeditions`) and opens it; **Import** posts a JSON file to `/api/import` and opens the result. **Global search** ("Search Concepts, articles and #tags", or ⌘K/Ctrl+K; `src/components/global-search.tsx`) opens a shadcn Command dialog over `GET /api/search`: results grouped by Expedition, Concept (with its Expedition) and Tag, an "Include public Expeditions" switch, `#tag` filters, and picking a Tag puts it in the query. A Concept opens as `/e/:id?concept=<conceptId>`, with its side panel open. |
 | `/e/:id` and `/e/:id/:viewId` | The Expedition screen (spec §3.6) on a View: the URL's, else the best View, else the first. |
 | `/showcase` | Every token, Kind hue, type style and component, in both palettes (WP-0.3). |
 
@@ -19,7 +19,7 @@ The Vite SPA (installable PWA): routes and screens from docs/spec/v1/03-screens-
 
 ### The Expedition screen
 
-- **Header** (`h-14`): the glyph back to the Library, the title (owners and editors rename it in place, through the sync client), sync status ("Saving", "Offline · N edits waiting") and the **account menu** (name, theme System / Light / Dark, sign out).
+- **Header** (`h-14`): the glyph back to the Library, the title (owners and editors rename it in place, through the sync client), **search inside the Expedition** ("Search text or #tag", `src/expedition/concept-search.tsx`: client-side over the loaded Concepts' titles, aliases, summaries and Tags, so it works offline; every word must match, `#tag` by Tag prefix; the canvas dims the rest through `ExpeditionView`'s `matches`, a badge counts matches, Escape clears; `matchConcepts` in `src/lib/search.ts`, unit tested), sync status ("Saving", "Offline · N edits waiting") and the **account menu** (name, theme System / Light / Dark, sign out).
 - **Views rail**: shadcn `Sidebar` at `--sidebar-width: 272px`, under the header; each entry is the View's name and question. Below 768 px it is a Sheet opened from the header.
 - **Canvas pane**: as wide as possible. `src/expedition/canvas-slot.tsx` mounts `@umbel/views`' `ExpeditionView` on the sync client's collections with the selected View and Concept. The **View button** (icon, name, question, settings icon) floats over its top-left corner and opens the View panel; the View is drawn below it.
 - **Side panel**: 440 px (`w-110`), opened by selecting a Concept (the Concept panel) or by the View button (the View panel, a stub). Below 1200 px it is a right-hand Sheet.
@@ -36,6 +36,7 @@ The Vite SPA (installable PWA): routes and screens from docs/spec/v1/03-screens-
 - `e2e/app/` (`app-light`, `app-dark`), against the Worker (`wrangler dev`, which serves this build and the API on one origin) and Postgres:
   - `shell.spec.ts`: sign in with the CI-only test credentials, reach the Library, import `packages/domain/fixtures/compute.json`, open it; the rail is 272 px, the canvas fills the rest, the side panel is 440 px (View panel, then a Concept clicked on the Learning path canvas), a Comparison Table View draws, and at 1024 px the panel is a Sheet. Screenshots of each step, in both themes, are attached to the report (`test-results/…/*-light.png`, `*-dark.png`). Also: the account menu's theme toggle.
   - `side-panel.spec.ts`: import the compute fixture, open GQA from the Techniques table, check the rendered overview, Tags, Attributes and Relationships both ways, follow an in-text `#c/` link (the panel navigates, not the page), go back, open the article, and see a provenance badge on the overview and on each section. Screenshots in both themes.
+  - `search.spec.ts` (WP-2.6): from the Library, find GQA by title, filter by `#tag` through the Tags group, find the Expedition by title, open the Concept from its result (side panel open); a stranger in another browser context finds nothing, public toggle on. Inside the Expedition, on a canvas View, a title search leaves the match lit and dims the rest, `#economics` lights several, Escape clears.
   - `offline-reload.spec.ts`: rename the Expedition with the API blocked, reload (still blocked): the edit is still pending in IndexedDB; unblock: it is pushed and the server has it.
 - `e2e/api/` (`api`): the Worker's API and the sync client against it.
 

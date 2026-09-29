@@ -100,3 +100,30 @@ export async function signInWithGoogle(callbackPath = "/"): Promise<void> {
 export async function signOut(): Promise<void> {
   await call("/auth/sign-out", { method: "POST", body: "{}" })
 }
+
+/** Global search results (the server's `SearchResults`), grouped. */
+export type SearchResults = {
+  expeditions: (Pick<
+    ExpeditionSummary,
+    "id" | "title" | "summary" | "visibility"
+  > & { role: Role | null })[]
+  concepts: {
+    id: string
+    expeditionId: string
+    expeditionTitle: string
+    title: string
+    kind: string
+    summary: string | null
+  }[]
+  tags: { tag: string; count: number }[]
+}
+
+/** Searches the Expeditions I collaborate on, plus public ones if asked. */
+export function searchAll(
+  q: string,
+  includePublic: boolean,
+  signal?: AbortSignal
+): Promise<SearchResults> {
+  const params = new URLSearchParams({ q, public: includePublic ? "1" : "0" })
+  return call(`/search?${params}`, { signal })
+}
