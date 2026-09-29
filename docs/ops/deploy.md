@@ -39,12 +39,19 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
 
     | Authorized JavaScript origins | Authorized redirect URIs |
     |---|---|
+    | `https://learn.umbel.dev` | `https://learn.umbel.dev/api/auth/callback/google` |
     | `https://umbel-learn.michael-shafir.workers.dev` | `https://umbel-learn.michael-shafir.workers.dev/api/auth/callback/google` |
     | `http://localhost:8787` | `http://localhost:8787/api/auth/callback/google` |
     | `http://localhost:5173` | `http://localhost:5173/api/auth/callback/google` |
 
-    Previews are not listed: Google allows no wildcards, so previews sign in through production with Better Auth's OAuth proxy plugin (WP-1.1). Add a custom domain here when production moves to one.
+    Previews are not listed: Google allows no wildcards, so previews sign in through production with Better Auth's OAuth proxy plugin (WP-1.1). The workers.dev row is only needed while `PRODUCTION_DOMAIN` is unset (below).
   - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `BETTER_AUTH_SECRET` (session signing; generate it without seeing it: `openssl rand -base64 32 | gh secret set BETTER_AUTH_SECRET -R mshafir/umbel-learn`).
+
+- [ ] **Production domain (optional):** `learn.umbel.dev`. Unset, production stays on `https://umbel-learn.<subdomain>.workers.dev`.
+  - The zone (`umbel.dev`) must be **active on Cloudflare**: a Worker custom domain can't be reached by a CNAME from another DNS host. The domain stays registered with Google Cloud Domains; only its nameservers point at Cloudflare. Its mail (`mail.umbel.dev`, Resend) and `api.`/`app.` records are DNS only (not proxied).
+  - Add **Zone** permissions for that zone to `CLOUDFLARE_API_TOKEN`: Zone: Read, DNS: Edit, Workers Routes: Edit.
+  - Add the domain's origin and callback to the Google client (table above) **before** setting the variable, or sign-in breaks.
+  - Then set the repo **variable** `PRODUCTION_DOMAIN=learn.umbel.dev`. The next production deploy attaches it as the Worker's custom domain (`ci.mjs custom-domain`, production only) and makes it `BETTER_AUTH_URL` and every preview's `AUTH_PROXY_URL`. The workers.dev URL keeps working.
 
 - [ ] **`AI_GATEWAY_API_KEY`:** a Vercel AI Gateway key (_Vercel dashboard → AI Gateway → API keys_), the hosted instance key (spec §5.1, §5.7). Needed from WP-3.3. Set a spend limit in Vercel: previews use it too, and per-user caps are phase 2.
 
@@ -83,13 +90,13 @@ Workers get these, in addition to `DB_BRANCH`:
 | `BETTER_AUTH_SECRET` | secret | repo secret | repo secret | any random string |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | secret | repo secret | repo secret | the same client |
 | `BETTER_AUTH_URL` | var | its own URL | its own URL | `http://localhost:8787` (or `:5173`) |
-| `AUTH_PROXY_URL` | var | production URL | its own URL | unset |
+| `AUTH_PROXY_URL` | var | production URL (`https://$PRODUCTION_DOMAIN` when set) | its own URL | unset |
 | `AUTH_TRUSTED_ORIGINS` | var | `https://umbel-pr-*.<subdomain>.workers.dev` | same | unset |
 | `AUTH_TEST_CREDENTIALS` | var | never set | never set | `1` only for API tests |
 
 **Previews sign in through production.** Google allows no wildcard redirect URIs, and the Google client lists only production and localhost. Better Auth's [OAuth proxy plugin](https://www.better-auth.com/docs/plugins/oauth-proxy) handles this:
 
-1. The preview starts sign-in with production's callback (`https://umbel-learn.<subdomain>.workers.dev/api/auth/callback/google`) as `redirect_uri`, and wraps its OAuth state, encrypted with `BETTER_AUTH_SECRET`.
+1. The preview starts sign-in with production's callback (`https://learn.umbel.dev/api/auth/callback/google`, or the workers.dev URL when `PRODUCTION_DOMAIN` is unset) as `redirect_uri`, and wraps its OAuth state, encrypted with `BETTER_AUTH_SECRET`.
 2. Google calls production back. Production unwraps the state, exchanges the code, encrypts the profile and redirects to the preview's `/api/auth/callback/google/oauth-proxy`. Production writes nothing to its own database.
 3. The preview decrypts the profile (it must be under 60 seconds old and match the state it stored), creates the user and session in its own Neon branch, and sets its cookie.
 

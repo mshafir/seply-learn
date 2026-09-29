@@ -9,16 +9,19 @@
 //   node scripts/ci.mjs neon-default-branch        print name=, and write the default branch's
 //                                                  connection string to $GITHUB_OUTPUT as db_url
 //   node scripts/ci.mjs neon-branch-delete <name>  delete a Neon branch by name (no-op if absent)
-//   node scripts/ci.mjs worker-urls <name>         write url= (this Worker's workers.dev URL),
+//   node scripts/ci.mjs worker-urls <name>         write url= (this Worker's URL),
 //                                                  production_url= and preview_origins= to
 //                                                  $GITHUB_OUTPUT, before the first deploy
+//   node scripts/ci.mjs custom-domain <hostname>   add <hostname> to wrangler.ci.json as the
+//                                                  Worker's custom domain (production only)
 //   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below)
 //                                                  from env to <path> as JSON, mode 0600, for
 //                                                  `wrangler deploy --secrets-file`
 //
 // Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, NEON_API_KEY, NEON_PROJECT_ID,
 // DATABASE_URL, the AUTH_SECRETS, and optionally NEON_DATABASE (neondb),
-// NEON_ROLE (neondb_owner) and WORKER_PRODUCTION (umbel-learn).
+// NEON_ROLE (neondb_owner), WORKER_PRODUCTION (umbel-learn) and PRODUCTION_DOMAIN
+// (e.g. learn.umbel.dev; unset means production stays on workers.dev).
 import { appendFileSync, chmodSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -167,7 +170,8 @@ function output(values) {
   )
 }
 
-// A Worker's URL is known before it is deployed: https://<name>.<subdomain>.workers.dev.
+// A Worker's URL is known before it is deployed: https://<name>.<subdomain>.workers.dev,
+// or https://$PRODUCTION_DOMAIN for production when that is set.
 // BETTER_AUTH_URL has to be set by the same deploy that first creates the Worker.
 async function workerUrls(name) {
   const res = await cf("GET", "/workers/subdomain")
@@ -177,9 +181,16 @@ async function workerUrls(name) {
       "no workers.dev subdomain on this account (see the docs/ops/deploy.md checklist)"
     )
   const production = process.env.WORKER_PRODUCTION || "umbel-learn"
+  const domain = process.env.PRODUCTION_DOMAIN
+  const productionUrl = domain
+    ? `https://${domain}`
+    : `https://${production}.${sub}.workers.dev`
   const values = {
-    url: `https://${name}.${sub}.workers.dev`,
-    production_url: `https://${production}.${sub}.workers.dev`,
+    url:
+      name === production
+        ? productionUrl
+        : `https://${name}.${sub}.workers.dev`,
+    production_url: productionUrl,
     preview_origins: `https://umbel-pr-*.${sub}.workers.dev`,
   }
   output(values)
@@ -200,7 +211,18 @@ function secretsFile(path) {
   console.log(`wrote ${AUTH_SECRETS.join(", ")} to ${path}`)
 }
 
+// Attaches the production Worker to its own hostname. Only the production job calls
+// this: previews deploy from the same config and must not claim the domain.
+function customDomain(hostname) {
+  const path = join(root, "wrangler.ci.json")
+  const config = JSON.parse(readFileSync(path, "utf8"))
+  config.routes = [{ pattern: hostname, custom_domain: true }]
+  writeFileSync(path, JSON.stringify(config, null, 2))
+  console.log(`wrangler.ci.json: custom domain ${hostname}`)
+}
+
 const commands = {
+  "custom-domain": customDomain,
   "worker-urls": workerUrls,
   "secrets-file": secretsFile,
   "hyperdrive-upsert": hyperdriveUpsert,
