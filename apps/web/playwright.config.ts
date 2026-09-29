@@ -10,6 +10,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,
+  // One browser at a time locally: builders share a laptop (see CLAUDE.md, "Resources").
+  workers: CI ? undefined : 1,
   reporter: CI ? [["list"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
