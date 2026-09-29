@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url"
 import { createApp } from "./app.ts"
 import type { ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
+import type { Relay } from "./relay.ts"
 
 const migrationsFolder = fileURLToPath(new URL("../drizzle", import.meta.url))
 
@@ -19,12 +20,13 @@ export async function testDb(): Promise<Db> {
 }
 
 /** The app mounted at /api, as the Worker mounts it, bound to `env`. */
-export function testApp(env: ServerEnv, db: Db | null) {
+export function testApp(env: ServerEnv, db: Db | null, relay?: Relay) {
   const root = new Hono()
   root.route(
     "/api",
     createApp({
       connect: async () => (db ? { db, close: async () => {} } : null),
+      relay,
     })
   )
   const request = (path: string, init: RequestInit = {}) =>
