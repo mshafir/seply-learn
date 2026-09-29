@@ -15,14 +15,19 @@ body {
   flex-direction: column;
   height: 100%;
 }
+/* One line however many Views there are: the nav scrolls sideways, so adding
+   a View never moves the canvas in the screenshots. */
 .harness__bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 1rem;
   padding: 0.5rem 1rem;
   border-bottom: 1px solid var(--umbel-toolbar-border);
   background: var(--umbel-toolbar-bg);
+}
+.harness__bar > * {
+  flex-shrink: 0;
 }
 .harness__bar {
   flex-wrap: nowrap;
@@ -36,6 +41,12 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.harness__bar nav button {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .harness__bar nav button,
 .harness__bar > button,

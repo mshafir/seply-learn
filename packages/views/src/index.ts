@@ -97,6 +97,22 @@ export {
 } from "./table.ts";
 export { ComparisonTable, type ComparisonTableProps } from "./table/ComparisonTable.tsx";
 
+// Outline, Quadrant, Rates & estimates
+export {
+  ancestorsOf,
+  defaultOpen,
+  outlineTree,
+  UNSORTED,
+  type OutlineItem,
+  type OutlineModel,
+  type OutlineOptions,
+  type OutlineViewSettings,
+} from "./outline/outline.ts";
+export { Outline, type OutlineProps } from "./outline/Outline.tsx";
+export { quadrantGrid, type QuadrantAxis, type QuadrantCard, type QuadrantModel, type QuadrantViewSettings } from "./quadrant/quadrant.ts";
+export { Quadrant, type QuadrantProps } from "./quadrant/Quadrant.tsx";
+export { logAxis, rateLabel, ratesModel, type LogAxis, type RateEstimate, type RatesModel, type RatesViewSettings } from "./rates/rates.ts";
+export { Rates, type RatesProps } from "./rates/Rates.tsx";
 // Anatomy (nested parts with pins; not a canvas)
 export { anatomy, anatomyStats, formatAnatomyStats, litParts, type AnatomyModel, type AnatomyPart } from "./anatomy/anatomy.ts";
 export { Anatomy, type AnatomyProps } from "./anatomy/Anatomy.tsx";

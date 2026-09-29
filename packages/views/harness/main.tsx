@@ -101,8 +101,8 @@ const fromLive = (map: Map<string, string>) => {
 const viewFileId = fromLive(f.ids.views);
 const conceptFileId = fromLive(f.ids.concepts);
 
-const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "anatomy", "map", "timeline"].includes(v.viewType);
-const noLayout: Record<string, string> = { "comparison-table": "a table", map: "a map", timeline: "a timeline" };
+const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "outline", "quadrant", "rates", "anatomy", "map", "timeline"].includes(v.viewType);
+const noLayout: Record<string, string> = { "comparison-table": "a table", outline: "an outline", quadrant: "a quadrant", rates: "a rates chart", map: "a map", timeline: "a timeline" };
 
 function readHash() {
   const [v, c] = decodeURIComponent(location.hash.slice(1)).split("/");
