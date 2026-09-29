@@ -1,8 +1,8 @@
 // The Expedition screen's header (spec §3.6): the way back to the Library,
 // the title (editors rename it in place, through the sync client), sync
-// status and the account menu. Render it inside a SidebarProvider (its
-// trigger opens the Views rail on phones). Presence, Share, Suggestions and History
-// arrive with their work packages.
+// status, search inside the Expedition and the account menu. Render it
+// inside a SidebarProvider (its trigger opens the Views rail on phones).
+// Presence, Share, Suggestions and History arrive with their work packages.
 import * as React from "react"
 import { CloudOffIcon, LoaderCircleIcon } from "lucide-react"
 import { Link } from "wouter"
@@ -20,11 +20,14 @@ export function ExpeditionHeader({
   canEdit,
   onRename,
   health,
+  search,
 }: {
   title: string
   canEdit: boolean
   onRename?: (title: string) => void
   health?: SyncHealth
+  /** Search inside the Expedition, before the sync status. */
+  search?: React.ReactNode
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -73,6 +76,7 @@ export function ExpeditionHeader({
         <h1 className="truncate px-2 text-base font-semibold">{shown}</h1>
       )}
       <div className="flex-1" />
+      {search}
       {health && health.pending > 0 && (
         <span
           role="status"

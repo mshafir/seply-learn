@@ -8,6 +8,7 @@
 //   panel; `null` clears the selection.
 // - The View button floats over the top-left corner; the View starts below
 //   it (pt-21), so it never covers a toolbar or a table header.
+// - `matches` (search inside the Expedition) dims every other Concept.
 import type { EngineCollections } from "@umbel/sync"
 import { ExpeditionView } from "@umbel/views"
 
@@ -18,6 +19,8 @@ export type CanvasSlotProps = {
   onSelectConcept: (conceptId: string | null) => void
   /** Called once the View is drawn (a canvas: laid out and fitted). */
   onSettled?: () => void
+  /** Search matches: the canvas dims every other Concept. */
+  matches?: Set<string>
 }
 
 export function CanvasSlot({
@@ -26,6 +29,7 @@ export function CanvasSlot({
   selectedConceptId,
   onSelectConcept,
   onSettled,
+  matches,
 }: CanvasSlotProps) {
   return (
     <div data-testid="canvas-view" className="size-full pt-21">
@@ -35,6 +39,7 @@ export function CanvasSlot({
         selected={selectedConceptId ?? undefined}
         onSelect={(id) => onSelectConcept(id ?? null)}
         onSettled={onSettled}
+        matches={matches}
       />
     </div>
   )
