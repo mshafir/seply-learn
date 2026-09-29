@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 1,
+  "id": "trip",
+  "title": "A week on the Swiss rail loop",
+  "summary": "A synthetic, made-up itinerary for testing the Map and Timeline Views: a week by train through public Swiss landmarks, with the planning before it. Nobody real took this trip.",
+  "tags": [
+    "synthetic",
+    "travel"
+  ],
+  "bestViewId": "map",
+  "kinds": [],
+  "relationshipTypes": [
+    {
+      "id": "day-trip-from",
+      "label": "is a day trip from",
+      "inverseLabel": "has day trip",
+      "color": "teal",
+      "dashed": true
+    }
+  ],
+  "attributes": [
+    {
+      "id": "elevation",
+      "label": "Elevation",
+      "type": "number",
+      "unit": "m"
+    }
+  ],
+  "sources": [],
+  "concepts": [
+    {
+      "id": "zurich",
+      "title": "Zürich HB",
+      "kind": "builtin:place",
+      "summary": "Zürich's main station, where the loop starts and ends.",
+      "lat": 47.378,
+      "lon": 8.54,
+      "tags": [
+        "station"
+      ]
+    },
+    {
+      "id": "lucerne",
+      "title": "Lucerne",
+      "kind": "builtin:place",
+      "summary": "A lakeside old town, base for the first two nights.",
+      "lat": 47.05,
+      "lon": 8.309,
+      "tags": [
+        "town"
+      ]
+    },
+    {
+      "id": "chapel-bridge",
+      "title": "Chapel Bridge",
+      "kind": "builtin:place",
+      "summary": "The covered wooden footbridge across the Reuss in Lucerne.",
+      "lat": 47.052,
+      "lon": 8.307,
+      "tags": [
+        "sight"
+      ]
+    },
+    {
+      "id": "rigi",
+      "title": "Mount Rigi",
+      "kind": "builtin:place",
+      "summary": "A summit above Lake Lucerne, reached by Europe's oldest mountain railway.",
+      "lat": 47.057,
+      "lon": 8.485,
+      "tags": [
+        "summit"
+      ],
+      "attributes": {
+        "elevation": 1798
+      }
+    },
+    {
+      "id": "interlaken",
+      "title": "Interlaken",
+      "kind": "builtin:place",
+      "summary": "Between Lake Thun and Lake Brienz; base for the Bernese Oberland.",
+      "lat": 46.686,
+      "lon": 7.863,
+      "tags": [
+        "town"
+      ]
+    },
+    {
+      "id": "lauterbrunnen",
+      "title": "Lauterbrunnen",
+      "kind": "builtin:place",
+      "summary": "A glacial valley of waterfalls below the Jungfrau.",
+      "lat": 46.594,
+      "lon": 7.909,
+      "tags": [
+        "valley"
+      ]
+    },
+    {
+      "id": "jungfraujoch",
+      "title": "Jungfraujoch",
+      "kind": "builtin:place",
+      "summary": "The saddle between the Mönch and the Jungfrau, with a station at the top.",
+      "lat": 46.548,
+      "lon": 7.985,
+      "tags": [
+        "summit"
+      ],
+      "attributes": {
+        "elevation": 3454
+      }
+    },
+    {
+      "id": "zermatt",
+      "title": "Zermatt",
+      "kind": "builtin:place",
+      "summary": "A car-free village at the foot of the Matterhorn.",
+      "lat": 46.021,
+      "lon": 7.749,
+      "tags": [
+        "town"
+      ]
+    },
+    {
+      "id": "gornergrat",
+      "title": "Gornergrat",
+      "kind": "builtin:place",
+      "summary": "A ridge facing the Matterhorn, reached by cog railway.",
+      "lat": 45.984,
+      "lon": 7.785,
+      "tags": [
+        "summit"
+      ],
+      "attributes": {
+        "elevation": 3089
+      }
+    },
+    {
+      "id": "montreux",
+      "title": "Montreux",
+      "kind": "builtin:place",
+      "summary": "A lakeside town on Lake Geneva's Riviera.",
+      "lat": 46.431,
+      "lon": 6.911,
+      "tags": [
+        "town"
+      ]
+    },
+    {
+      "id": "chillon",
+      "title": "Château de Chillon",
+      "kind": "builtin:place",
+      "summary": "A medieval island castle on Lake Geneva.",
+      "lat": 46.414,
+      "lon": 6.927,
+      "tags": [
+        "sight"
+      ]
+    },
+    {
+      "id": "bern",
+      "title": "Bern old town",
+      "kind": "builtin:place",
+      "summary": "The arcaded old town of the Swiss capital, a stop on the way back.",
+      "lat": 46.948,
+      "lon": 7.447,
+      "tags": [
+        "town"
+      ]
+    },
+    {
+      "id": "idea",
+      "title": "The idea: a week by train",
+      "kind": "builtin:event",
+      "summary": "Sometime in 2026 the plan became one loop by rail, no car.",
+      "date": "2026",
+      "dateApprox": true,
+      "lane": "planning",
+      "tags": []
+    },
+    {
+      "id": "pass",
+      "title": "Buy a travel pass",
+      "kind": "builtin:action",
+      "summary": "A rail pass covering the trains and most boats; bought in early spring.",
+      "date": "2027-03",
+      "dateApprox": true,
+      "lane": "planning",
+      "tags": []
+    },
+    {
+      "id": "seats",
+      "title": "Reserve panorama seats",
+      "kind": "builtin:action",
+      "summary": "Seat reservations for the scenic legs, about two months ahead.",
+      "date": "2027-04",
+      "lane": "planning",
+      "tags": []
+    },
+    {
+      "id": "photobook",
+      "title": "Make the photo book",
+      "kind": "builtin:action",
+      "summary": "A photo book of the week, some time after the trip.",
+      "date": "2027-09",
+      "dateApprox": true,
+      "lane": "planning",
+      "tags": []
+    },
+    {
+      "id": "stay-lucerne",
+      "title": "Two nights in Lucerne",
+      "kind": "builtin:event",
+      "summary": "Arrive, walk the old town, a day on the Rigi.",
+      "date": "2027-06-05",
+      "dateEnd": "2027-06-06",
+      "lane": "stays",
+      "lat": 47.05,
+      "lon": 8.309,
+      "tags": []
+    },
+    {
+      "id": "stay-interlaken",
+      "title": "Two nights in Interlaken",
+      "kind": "builtin:event",
+      "summary": "The Bernese Oberland: valleys and the Jungfraujoch.",
+      "date": "2027-06-07",
+      "dateEnd": "2027-06-08",
+      "lane": "stays",
+      "tags": []
+    },
+    {
+      "id": "stay-zermatt",
+      "title": "Two nights in Zermatt",
+      "kind": "builtin:event",
+      "summary": "The Matterhorn from the Gornergrat.",
+      "date": "2027-06-09",
+      "dateEnd": "2027-06-10",
+      "lane": "stays",
+      "tags": []
+    },
+    {
+      "id": "stay-montreux",
+      "title": "A night in Montreux",
+      "kind": "builtin:event",
+      "summary": "Lake Geneva and the castle.",
+      "date": "2027-06-11",
+      "lane": "stays",
+      "tags": []
+    },
+    {
+      "id": "arrive",
+      "title": "Arrive at Zürich HB",
+      "kind": "builtin:event",
+      "summary": "The loop starts at the main station.",
+      "date": "2027-06-05",
+      "lane": "travel",
+      "tags": []
+    },
+    {
+      "id": "to-interlaken",
+      "title": "Train over the Brünig Pass",
+      "kind": "builtin:event",
+      "summary": "Lucerne to Interlaken along the lakes.",
+      "date": "2027-06-07",
+      "lane": "travel",
+      "tags": []
+    },
+    {
+      "id": "to-zermatt",
+      "title": "Train to Zermatt",
+      "kind": "builtin:event",
+      "summary": "Via the Lötschberg tunnel and Visp.",
+      "date": "2027-06-09",
+      "lane": "travel",
+      "tags": []
+    },
+    {
+      "id": "to-montreux",
+      "title": "Train down the Rhône valley",
+      "kind": "builtin:event",
+      "summary": "Zermatt to Montreux.",
+      "date": "2027-06-11",
+      "lane": "travel",
+      "tags": []
+    },
+    {
+      "id": "home",
+      "title": "Back via Bern",
+      "kind": "builtin:event",
+      "summary": "A last stop in Bern, then Zürich HB.",
+      "date": "2027-06-12",
+      "lane": "travel",
+      "tags": []
+    },
+    {
+      "id": "day-rigi",
+      "title": "Up the Rigi",
+      "kind": "builtin:event",
+      "summary": "Boat to Vitznau, cog railway up, cable car down.",
+      "date": "2027-06-06",
+      "lane": "days",
+      "tags": []
+    },
+    {
+      "id": "day-jungfrau",
+      "title": "Jungfraujoch day",
+      "kind": "builtin:event",
+      "summary": "Up through Lauterbrunnen and Wengen to the saddle.",
+      "date": "2027-06-08",
+      "lane": "days",
+      "tags": []
+    },
+    {
+      "id": "day-gornergrat",
+      "title": "Gornergrat at sunrise",
+      "kind": "builtin:event",
+      "summary": "The first train up for the Matterhorn at dawn.",
+      "date": "2027-06-10",
+      "lane": "days",
+      "tags": []
+    },
+    {
+      "id": "day-chillon",
+      "title": "Château de Chillon",
+      "kind": "builtin:event",
+      "summary": "A walk along the lake to the castle.",
+      "date": "2027-06-11",
+      "lane": "days",
+      "tags": []
+    }
+  ],
+  "relationships": [
+    {
+      "from": "chapel-bridge",
+      "type": "builtin:located-in",
+      "to": "lucerne"
+    },
+    {
+      "from": "chillon",
+      "type": "builtin:located-in",
+      "to": "montreux"
+    },
+    {
+      "from": "rigi",
+      "type": "day-trip-from",
+      "to": "lucerne"
+    },
+    {
+      "from": "lauterbrunnen",
+      "type": "day-trip-from",
+      "to": "interlaken"
+    },
+    {
+      "from": "jungfraujoch",
+      "type": "day-trip-from",
+      "to": "interlaken"
+    },
+    {
+      "from": "gornergrat",
+      "type": "day-trip-from",
+      "to": "zermatt"
+    },
+    {
+      "from": "chillon",
+      "type": "day-trip-from",
+      "to": "montreux"
+    },
+    {
+      "from": "day-rigi",
+      "type": "builtin:uses",
+      "to": "rigi"
+    },
+    {
+      "from": "day-jungfrau",
+      "type": "builtin:uses",
+      "to": "jungfraujoch"
+    },
+    {
+      "from": "day-gornergrat",
+      "type": "builtin:uses",
+      "to": "gornergrat"
+    },
+    {
+      "from": "day-chillon",
+      "type": "builtin:uses",
+      "to": "chillon"
+    }
+  ],
+  "views": [
+    {
+      "id": "map",
+      "viewType": "map",
+      "label": "The route",
+      "question": "Where does the week go, and what is near each stay?",
+      "settings": {
+        "kinds": [
+          "builtin:place"
+        ],
+        "home": "zurich",
+        "relationshipTypes": [
+          "day-trip-from"
+        ]
+      },
+      "settingsVersion": 1
+    },
+    {
+      "id": "timeline",
+      "viewType": "timeline",
+      "label": "The week",
+      "question": "What happens when, from the first idea to the photo book? Opens on the week itself.",
+      "settings": {
+        "lanes": [
+          {
+            "id": "planning",
+            "label": "Planning"
+          },
+          {
+            "id": "travel",
+            "label": "Travel"
+          },
+          {
+            "id": "stays",
+            "label": "Stays"
+          },
+          {
+            "id": "days",
+            "label": "Day trips"
+          }
+        ],
+        "focus": [
+          "2027-06-03",
+          "2027-06-14"
+        ]
+      },
+      "settingsVersion": 1
+    }
+  ]
+}

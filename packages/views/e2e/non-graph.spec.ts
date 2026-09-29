@@ -15,7 +15,7 @@ const shots = views.flatMap((v) => [v, { ...v, name: `${v.name}-dark`, dark: tru
 
 const settled = async (page: Page) => {
   await expect(page.locator("[data-settled]")).toBeVisible();
-  await expect(page.getByTestId("metrics")).toContainText("no canvas layout");
+  await expect(page.getByTestId("metrics")).toContainText("no layout");
 };
 
 for (const { name, hash, dark } of shots) {

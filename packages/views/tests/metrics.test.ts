@@ -3,6 +3,7 @@ import { compute, computeRiskView, tiny } from "../fixtures/index.ts";
 import { expeditionLayoutMetrics, formatLayoutMetrics, layoutMetrics, overlappingConcepts } from "../src/metrics.ts";
 import { drawnRelationships } from "../src/drawn.ts";
 import { scopeFor } from "../src/scope.ts";
+import { drawnCost, untangle } from "../src/geometry.ts";
 import type { CauseEffectSettings, Expedition, View } from "../src/model.ts";
 import { learningPathOverlaps } from "./learningPathStates.ts";
 
@@ -24,8 +25,12 @@ describe("layout metrics", () => {
       "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 0 edges through other nodes, 1 very long edges, 0 overlapping Concepts, 2 prerequisites cross topics → reads well",
     );
     expect(byId.get("evidence")).toMatchObject({ crossings: 0, edgesThroughNodes: 0, verdict: "reads well" });
-    expect(byId.get("economics")).toMatchObject({ crossings: 0, edgesThroughNodes: 1 });
-    expect(byId.get("lineage")).toMatchObject({ crossings: 4, edgesThroughNodes: 9 });
+    // WP-2.1: the layouts clear lines drawn through cards (untangle, and
+    // Lineage's row search). Before: economics 1 edge through other nodes,
+    // Lineage 4 crossings and 9 edges through other nodes (cluttered).
+    expect(byId.get("economics")).toMatchObject({ crossings: 0, edgesThroughNodes: 0 });
+    expect(byId.get("lineage")).toMatchObject({ crossings: 0, edgesThroughNodes: 0, verdict: "reads well" });
+    expect(risk).toMatchObject({ crossings: 0, edgesThroughNodes: 0, verdict: "reads well" });
     for (const m of [...all, risk!]) expect(m.overlaps).toBe(0);
   });
 
@@ -51,8 +56,9 @@ describe("layout metrics", () => {
     expect(await layoutMetrics(compute, outline)).toBeUndefined();
   });
 
-  it("counts crossings on a hand-drawn tangle", async () => {
-    // Synthetic: a lineage whose led-to links cross between two year columns.
+  it("counts crossings on a hand-drawn tangle, which the Lineage layout then uncrosses", async () => {
+    // Synthetic: a lineage whose led-to links cross between two year columns
+    // when each year's Concepts take rows first come, first served.
     const tangle = {
       ...tiny,
       concepts: [
@@ -66,10 +72,40 @@ describe("layout metrics", () => {
         { from: "q", to: "r", type: "led-to" },
       ],
     };
+    const at = (x: number, y: number) => ({ x, y });
+    const drawn = new Map([
+      ["p", at(0, 0)],
+      ["q", at(0, 64)],
+      ["r", at(250, 0)],
+      ["s", at(250, 64)],
+    ]);
+    const size = () => ({ width: 150, height: 38 });
+    expect(drawnCost(drawn, size, tangle.relationships, 0)).toBe(1); // one crossing
+
     const m = await layoutMetrics(tangle, tiny.views.find((v) => v.id === "lineage")!);
     expect(m?.edges).toBe(2);
-    expect(m?.crossings).toBe(1);
-    expect(m?.verdict).toBe("cluttered");
+    expect(m?.crossings).toBe(0);
+    expect(m?.verdict).toBe("reads well");
+  });
+
+  it("untangle nudges a card off a straight line drawn through it", () => {
+    // Synthetic: a → c drawn straight through b, which sits on the line.
+    const pos = new Map([
+      ["a", { x: 0, y: 0 }],
+      ["b", { x: 200, y: 0 }],
+      ["c", { x: 400, y: 0 }],
+    ]);
+    const lines = [
+      { from: "a", to: "b" },
+      { from: "b", to: "c" },
+      { from: "a", to: "c" },
+    ];
+    const size = () => ({ width: 150, height: 38 });
+    expect(drawnCost(pos, size, lines, 16)).toBe(3);
+    const out = untangle(pos, { size, lines, movable: ["b"], axis: "y", step: 36, gap: 16 });
+    expect(drawnCost(out, size, lines, 16)).toBe(0);
+    expect(out.get("b")!.x).toBe(200);
+    expect(out.get("a")).toEqual({ x: 0, y: 0 });
   });
 });
 

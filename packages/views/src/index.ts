@@ -37,6 +37,9 @@ export {
   type Visible,
 } from "./layouts.ts";
 
+// Straight-line geometry, shared by the layouts' tidy-up and the metrics
+export { drawnCost, untangle } from "./geometry.ts";
+
 // What a canvas View draws, shared by the renderer and the metrics
 export { drawnRelationships, type DrawnRelationship } from "./drawn.ts";
 
@@ -110,6 +113,9 @@ export { quadrantGrid, type QuadrantAxis, type QuadrantCard, type QuadrantModel,
 export { Quadrant, type QuadrantProps } from "./quadrant/Quadrant.tsx";
 export { logAxis, rateLabel, ratesModel, type LogAxis, type RateEstimate, type RatesModel, type RatesViewSettings } from "./rates/rates.ts";
 export { Rates, type RatesProps } from "./rates/Rates.tsx";
+// Anatomy (nested parts with pins; not a canvas)
+export { anatomy, anatomyStats, formatAnatomyStats, litParts, type AnatomyModel, type AnatomyPart } from "./anatomy/anatomy.ts";
+export { Anatomy, type AnatomyProps } from "./anatomy/Anatomy.tsx";
 
 // Canvas (React Flow 12)
 export { Canvas, type CanvasProps, type PositionMemory } from "./canvas/Canvas.tsx";
@@ -117,3 +123,27 @@ export { LearningPathCanvas, type LearningPathCanvasProps } from "./canvas/Learn
 export { ViewCanvas, type ViewCanvasProps } from "./canvas/ViewCanvas.tsx";
 export { KindIcon } from "./canvas/KindIcon.tsx";
 export { buildEdges } from "./canvas/edges.ts";
+
+// Map (MapLibre + our PMTiles) and Timeline (vis-timeline): pure models here;
+// ExpeditionView loads their renderers lazily.
+export { mapModel, placeLabels, type MapModel, type Pin } from "./map/pins.ts";
+export {
+  fallbackStyleUrl,
+  OPENFREEMAP_STYLES,
+  PROTOMAPS_ASSETS,
+  protomapsStyle,
+  withCoarseWorld,
+  type BasemapConfig,
+  type MapTheme,
+} from "./map/basemap.ts";
+export {
+  formatCalendarDate,
+  formatWhen,
+  parseCalendarDate,
+  timelineModel,
+  type CalendarDate,
+  type Precision,
+  type TimelineItem,
+  type TimelineLane,
+  type TimelineModel,
+} from "./timeline/items.ts";

@@ -5,6 +5,7 @@
 import ELK from "elkjs/lib/elk.bundled.js";
 import type { CauseEffectSettings, Concept, EvidenceSettings, View } from "./model.ts";
 import { leversOf, type Scope, type Topic } from "./scope.ts";
+import { drawnCost, untangle } from "./geometry.ts";
 
 export type Point = { x: number; y: number };
 export type Positions = Map<string, Point>;
@@ -267,10 +268,15 @@ async function causeEffect(scope: Scope, s: CauseEffectSettings): Promise<Layout
       .filter((r) => flowIds.has(r.from) && flowIds.has(r.to))
       .map((r, i) => ({ id: `e${i}`, sources: [r.from], targets: [r.to] })),
   });
-  const pos: Positions = new Map();
+  let pos: Positions = new Map();
   for (const n of res.children ?? []) {
     pos.set(n.id, { x: (n.x ?? 0) + (n.width ?? 0) / 2, y: (n.y ?? 0) + (n.height ?? 0) / 2 });
   }
+  // ELK routes a long edge around the cards between its ends; we draw it
+  // straight, so nudge those cards off the line (across the flow). The
+  // outcome stays put in risk mode: it anchors the lever column.
+  const tidy = (lines: { from: string; to: string }[], movable: string[]) =>
+    (pos = untangle(pos, { size: (id) => size(scope, id), lines, movable, axis: risk ? "y" : "x", step: 36, gap: 16 }));
 
   const bands: Band[] = [];
   const pad = 22;
@@ -284,6 +290,8 @@ async function causeEffect(scope: Scope, s: CauseEffectSettings): Promise<Layout
       height: Math.max(...ys) - Math.min(...ys) + 2 * pad + 18,
     };
   };
+
+  if (risk) tidy(scope.relationships.filter((r) => flowIds.has(r.from) && flowIds.has(r.to)), flow.map((c) => c.id).filter((id) => !s.outcomes.includes(id)));
 
   if (risk && levers.length) {
     const outcome = pos.get(s.outcomes[0]) ?? { x: 0, y: 0 };
@@ -305,8 +313,9 @@ async function causeEffect(scope: Scope, s: CauseEffectSettings): Promise<Layout
       pos.set(c.id, { x, y: top - 150 });
       right = x + w / 2;
     }
-    bands.push({ ...bbox(levers.map((c) => c.id)), label: "Levers · things you can change" });
   }
+  if (!risk) tidy(scope.relationships, scope.concepts.map((c) => c.id));
+  if (!risk && levers.length) bands.push({ ...bbox(levers.map((c) => c.id)), label: "Levers · things you can change" });
   return { positions: pos, extras: { bands } };
 }
 
@@ -409,7 +418,10 @@ async function learningPath(scope: Scope, visible?: Visible): Promise<LayoutResu
 }
 
 // Lineage: one band per area (or per connected family), one column per
-// distinct year so 1991 and a busy 2025 can share a readable axis.
+// distinct year so 1991 and a busy 2025 can share a readable axis. Within a
+// band each Concept takes a row: first come, first served per year, then
+// Concepts change rows (or swap) while that clears a line through a card or
+// a crossing, since the lines are drawn straight across the years between.
 function lineage(scope: Scope, groupBy?: string): LayoutResult {
   const byId = new Map(scope.concepts.map((c) => [c.id, c]));
   const year = (id: string) => Number(byId.get(id)!.date!.slice(0, 4));
@@ -425,18 +437,65 @@ function lineage(scope: Scope, groupBy?: string): LayoutResult {
 
   const years = [...new Set(scope.concepts.map((c) => year(c.id)))].sort((a, b) => a - b);
   const col = new Map(years.map((y, i) => [y, i * 250]));
-  const pos: Positions = new Map();
-  const bands: Band[] = [];
-  let top = 0;
+  const row = new Map<string, number>();
   for (const ids of sorted) {
     const perYear = new Map<number, number>();
-    let rows = 1;
     for (const id of ids) {
       const k = perYear.get(year(id)) ?? 0;
       perYear.set(year(id), k + 1);
-      rows = Math.max(rows, k + 1);
-      pos.set(id, { x: col.get(year(id))!, y: top + 62 + k * 64 });
+      row.set(id, k);
     }
+  }
+  const rowsOf = (ids: string[]) => 1 + Math.max(0, ...ids.map((id) => row.get(id)!));
+  const place = () => {
+    const pos: Positions = new Map();
+    let top = 0;
+    for (const ids of sorted) {
+      for (const id of ids) pos.set(id, { x: col.get(year(id))!, y: top + 62 + row.get(id)! * 64 });
+      top += rowsOf(ids) * 64 + 72;
+    }
+    return pos;
+  };
+  const sz = (id: string) => size(scope, id);
+  // Fewer rows breaks ties, so the bands stay as compact as the lines allow.
+  const cost = () => drawnCost(place(), sz, scope.relationships, 0) + 0.01 * sorted.reduce((n, ids) => n + rowsOf(ids), 0);
+  const at = new Map(scope.concepts.map((c, i) => [c.id, i]));
+  let best = cost();
+  for (let pass = 0; pass < 20; pass++) {
+    let improved = false;
+    for (const ids of sorted)
+      for (const id of [...ids].sort((a, b) => at.get(a)! - at.get(b)!)) {
+        const was = row.get(id)!;
+        const limit = rowsOf(ids);
+        let pick: number | undefined;
+        for (let r = 0; r <= limit; r++) {
+          if (r === was) continue;
+          const other = ids.find((o) => o !== id && year(o) === year(id) && row.get(o) === r);
+          row.set(id, r);
+          if (other) row.set(other, was);
+          const c = cost();
+          if (c < best - 1e-9) {
+            best = c;
+            pick = r;
+          }
+          row.set(id, was);
+          if (other) row.set(other, r);
+        }
+        if (pick !== undefined) {
+          const other = ids.find((o) => o !== id && year(o) === year(id) && row.get(o) === pick);
+          row.set(id, pick);
+          if (other) row.set(other, was);
+          improved = true;
+        }
+      }
+    if (!improved) break;
+  }
+
+  const pos = place();
+  const bands: Band[] = [];
+  let top = 0;
+  for (const ids of sorted) {
+    const rows = rowsOf(ids);
     const xs = ids.map((id) => col.get(year(id))!);
     const first = byId.get(ids[0])!;
     const area = groupBy ? first.attributes?.[groupBy] : undefined;

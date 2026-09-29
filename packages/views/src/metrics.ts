@@ -3,9 +3,10 @@
 // these, and reshapes structure (never positions) when a View won't read well.
 // Ported from the prototype's `scripts/layout-metrics.ts`.
 import { isCanvasView, type Expedition, type View } from "./model.ts";
-import { conceptSize, layout, type Point, type Positions, type Visible } from "./layouts.ts";
+import { conceptSize, layout, type Positions, type Visible } from "./layouts.ts";
 import { learningMap, scopeFor, topicRoots, type Scope } from "./scope.ts";
 import { drawnRelationships } from "./drawn.ts";
+import { boxesOverlap, passesThrough, segmentsCross, type Seg } from "./geometry.ts";
 
 export type LayoutMetrics = {
   viewId: string;
@@ -27,13 +28,6 @@ export type LayoutMetrics = {
 
 /** Thresholds calibrated on the hand-made samples, which all read well. */
 export const READS_WELL = { crossings: 0.2, edgesThroughNodes: 0.1 } as const;
-
-type Seg = { a: Point; b: Point; from: string; to: string };
-const orient = (p: Point, q: Point, r: Point) => Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
-const cross = (s: Seg, t: Seg) => {
-  if ([s.from, s.to].some((id) => id === t.from || id === t.to)) return false;
-  return orient(s.a, s.b, t.a) !== orient(s.a, s.b, t.b) && orient(t.a, t.b, s.a) !== orient(t.a, t.b, s.b);
-};
 
 /**
  * Metrics for one View as a reader first sees it (for a Learning path: the
@@ -66,7 +60,7 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
     .map((r) => ({ a: positions.get(r.from)!, b: positions.get(r.to)!, from: r.from, to: r.to }));
 
   let crossings = 0;
-  for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) if (cross(segs[i], segs[j])) crossings++;
+  for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) if (segmentsCross(segs[i], segs[j])) crossings++;
 
   const lens = segs.map((s) => Math.hypot(s.a.x - s.b.x, s.a.y - s.b.y)).sort((a, b) => a - b);
   const median = lens[Math.floor(lens.length / 2)] ?? 0;
@@ -76,15 +70,7 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
   for (const s of segs)
     for (const c of shown) {
       if (c.id === s.from || c.id === s.to) continue;
-      const p = positions.get(c.id)!;
-      const { width, height } = conceptSize(scope, c.id);
-      let hit = false;
-      for (let k = 3; k < 18 && !hit; k++) {
-        const x = s.a.x + ((s.b.x - s.a.x) * k) / 20;
-        const y = s.a.y + ((s.b.y - s.a.y) * k) / 20;
-        hit = Math.abs(x - p.x) < width * 0.35 && Math.abs(y - p.y) < height * 0.35;
-      }
-      if (hit) edgesThroughNodes++;
+      if (passesThrough(s, positions.get(c.id)!, conceptSize(scope, c.id))) edgesThroughNodes++;
     }
 
   const overlaps = overlappingConcepts(scope, positions, shown.map((c) => c.id)).length;
@@ -121,8 +107,7 @@ export function overlappingConcepts(scope: Scope, positions: Positions, ids: str
     for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i];
       const b = boxes[j];
-      if (Math.abs(a.p.x - b.p.x) < (a.s.width + b.s.width) / 2 && Math.abs(a.p.y - b.p.y) < (a.s.height + b.s.height) / 2)
-        out.push([a.id, b.id]);
+      if (boxesOverlap(a.p, a.s, b.p, b.s)) out.push([a.id, b.id]);
     }
   return out;
 }

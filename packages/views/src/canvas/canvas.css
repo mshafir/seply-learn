@@ -1,3 +1,5 @@
+@import "../anatomy/anatomy.css";
+
 /*
  * Canvas styles for @umbel/views. Import alongside React Flow's own styles:
  *   import "@xyflow/react/dist/style.css";

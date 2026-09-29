@@ -29,16 +29,29 @@ body {
 .harness__bar > * {
   flex-shrink: 0;
 }
+.harness__bar {
+  flex-wrap: nowrap;
+}
+/* One line whatever the fonts measure: the Views scroll sideways rather than
+   wrap, so the bar's height (and every shot below it) never depends on it. */
 .harness__bar nav {
   display: flex;
   flex: 0 1 auto;
   min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
   gap: 0.25rem;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .harness__bar nav button {
   flex-shrink: 0;
+  white-space: nowrap;
+}
+.harness__bar nav button,
+.harness__bar > button,
+.harness__bar > strong {
+  flex: none;
   white-space: nowrap;
 }
 .harness__bar button {
