@@ -23,3 +23,14 @@ export {
   type Schema,
 } from "./db.ts"
 export { CreateExpedition, type ExpeditionSummary } from "./expeditions.ts"
+export { noopRelay, type Relay } from "./relay.ts"
+export {
+  appendOps,
+  readOps,
+  PushError,
+  type AppendResult,
+  type ChangeInfo,
+  type OpResult,
+} from "./oplog.ts"
+export { loadState, writeState } from "./projection.ts"
+export { PushBody, PullQuery, PUSH_LIMIT } from "./sync.ts"

@@ -1,10 +1,12 @@
 // Expedition and Collaborator basics (WP-1.1): create one, list mine.
 // Routes here run behind `requireUser`.
-import { schema, ulid, type Role } from "@umbel/domain"
+import { makeOps, schema, ulid, type OpBody, type Role } from "@umbel/domain"
 import { and, desc, eq, isNull } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "./app.ts"
+import { appendOps } from "./oplog.ts"
+import { publishCommitted, type Relay } from "./relay.ts"
 
 const { expeditions, collaborators } = schema
 
@@ -29,11 +31,12 @@ const summaryColumns = {
   status: expeditions.status,
 }
 
-export function expeditionRoutes() {
+export function expeditionRoutes(relay: Relay) {
   const r = new Hono<AppEnv>()
 
-  // Create: a new private draft; the creator is its owner Collaborator.
-  // The title is written directly for now; WP-1.2 moves logged fields onto ops.
+  // Create: a new private draft; the creator is its owner Collaborator. The
+  // row and the owner are plain; the title is logged, as the first Change
+  // ("Created the Expedition"), in the same transaction.
   r.post("/", async (c) => {
     const body = CreateExpedition.safeParse(
       await c.req.json().catch(() => ({}))
@@ -42,17 +45,43 @@ export function expeditionRoutes() {
       return c.json({ error: "invalid body", issues: body.error.issues }, 400)
     const user = c.var.user
     const db = await c.var.db()
-    const id = ulid(Date.now())
-    const created = await db.transaction(async (tx) => {
-      const [row] = await tx
-        .insert(expeditions)
-        .values({ id, ownerId: user.id, title: body.data.title })
-        .returning(summaryColumns)
+    const now = Date.now()
+    const id = ulid(now)
+    const bodies: OpBody[] = body.data.title
+      ? [
+          {
+            kind: "expedition.set",
+            target: id,
+            path: "title",
+            value: body.data.title,
+          },
+        ]
+      : []
+    const changeId = ulid(now)
+    const ops = makeOps(bodies, {
+      expeditionId: id,
+      actor: user.id,
+      changeId,
+      nextOpId: () => ulid(Date.now()),
+    })
+    const { created, logged } = await db.transaction(async (tx) => {
+      await tx.insert(expeditions).values({ id, ownerId: user.id })
       await tx
         .insert(collaborators)
         .values({ expeditionId: id, userId: user.id, role: "owner" })
-      return row!
+      const { logged } = await appendOps(tx, {
+        expeditionId: id,
+        userId: user.id,
+        ops,
+        changes: [{ id: changeId, label: "Created the Expedition" }],
+      })
+      const [row] = await tx
+        .select(summaryColumns)
+        .from(expeditions)
+        .where(eq(expeditions.id, id))
+      return { created: row!, logged }
     })
+    await publishCommitted(relay, id, logged)
     const out: ExpeditionSummary = { ...created, role: "owner" }
     return c.json(out, 201)
   })

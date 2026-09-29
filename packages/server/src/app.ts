@@ -12,6 +12,8 @@ import {
 } from "./config.ts"
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
+import { noopRelay, type Relay } from "./relay.ts"
+import { syncRoutes } from "./sync.ts"
 
 export type SessionUser = { id: string; email: string; name: string }
 
@@ -32,6 +34,8 @@ export type AppEnv = {
 
 export type AppOptions<Env extends ServerEnv> = {
   connect: Connect<Env>
+  /** Told about newly logged ops after each push commits. Default: `noopRelay`. */
+  relay?: Relay
 }
 
 class NoDatabase extends Error {}
@@ -92,6 +96,7 @@ export function requireUser(): MiddlewareHandler<AppEnv> {
 
 export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   const app = new Hono<AppEnv>()
+  const relay = opts.relay ?? noopRelay
   app.use(resources(opts))
 
   app.onError((err, c) => {
@@ -137,7 +142,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.get("/me", signedIn, (c) => c.json({ user: c.var.user }))
   app.use("/expeditions", signedIn)
   app.use("/expeditions/*", signedIn)
-  app.route("/expeditions", expeditionRoutes())
+  app.route("/expeditions", expeditionRoutes(relay))
+  app.route("/", syncRoutes(relay))
 
   app.notFound((c) => c.json({ error: "not found" }, 404))
   return app
