@@ -174,6 +174,22 @@ function mapPath(
   cur[last] = Array.isArray(v) ? v.map((x) => fn(String(x))) : fn(String(v))
 }
 
+/**
+ * Generated sample graphs write absent fields as `null` (e.g. `article: null`);
+ * the format means "absent", so null fields of entries are dropped.
+ */
+function dropNullFields(input: unknown): unknown {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return input
+  const g = { ...(input as Record<string, unknown>) }
+  const clean = (e: unknown) =>
+    e && typeof e === "object" && !Array.isArray(e)
+      ? Object.fromEntries(Object.entries(e).filter(([, v]) => v !== null))
+      : e
+  for (const k of ["concepts", "relationships", "views"])
+    if (Array.isArray(g[k])) g[k] = (g[k] as unknown[]).map(clean)
+  return g
+}
+
 export type ConvertOptions = {
   expeditionId: string
   actor: string
@@ -189,7 +205,7 @@ export function sampleToOpBodies(
   input: unknown,
   opts: Pick<ConvertOptions, "expeditionId" | "actor" | "at">
 ): OpBody[] {
-  const g = SampleGraph.parse(input)
+  const g = SampleGraph.parse(dropNullFields(input))
   const ops: OpBody[] = []
   const exp = opts.expeditionId
 

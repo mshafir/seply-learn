@@ -55,3 +55,42 @@ export class Jar {
     return this.cookies.size
   }
 }
+
+export const TEST_ORIGIN = "http://localhost:8787"
+
+/** Env with email + password sign-in on (localhost only). */
+export const TEST_ENV: ServerEnv = {
+  BETTER_AUTH_URL: TEST_ORIGIN,
+  BETTER_AUTH_SECRET: "test-secret-at-least-32-characters-long!!",
+  AUTH_TEST_CREDENTIALS: "1",
+}
+
+export type TestUser = { id: string; headers: Record<string, string> }
+
+/** Signs a new user up (with TEST_ENV); returns their id and request headers. */
+export async function signUp(
+  app: ReturnType<typeof testApp>,
+  name: string
+): Promise<TestUser> {
+  const jar = new Jar()
+  jar.take(
+    await app.request(`${TEST_ORIGIN}/api/auth/sign-up/email`, {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: TEST_ORIGIN },
+      body: JSON.stringify({
+        email: `${name}@example.com`,
+        password: "correct horse battery staple",
+        name,
+      }),
+    })
+  )
+  const headers = {
+    cookie: jar.header(),
+    origin: TEST_ORIGIN,
+    "content-type": "application/json",
+  }
+  const me = (await (await app.request("/api/me", { headers })).json()) as {
+    user: { id: string }
+  }
+  return { id: me.user.id, headers }
+}

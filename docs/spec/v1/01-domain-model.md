@@ -162,3 +162,5 @@ trash            expedition_id, deleted_by, purge_after                (30 days)
 
   No history, Proposals, per-reader state or collaborators are exported.
 - **Import:** our own JSON only, as a **new private Expedition via a first build** ("Imported from file"). It is validated, upgraded from older versions, and gets fresh ids.
+  - A file without `schemaVersion` is version 0: the prototype sample-graph format, upgraded like any older version.
+  - Fresh ids go to the Expedition, Concepts, article sections, Views and Sources, with references remapped. Custom Kind, Relationship Type and Attribute ids are Expedition-scoped vocabulary that View settings name, so they are kept.

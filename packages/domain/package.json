@@ -4,12 +4,14 @@
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./fixtures/*": "./fixtures/*"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "fixtures": "node --experimental-transform-types --no-warnings scripts/build-fixtures.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

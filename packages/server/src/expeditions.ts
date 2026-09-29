@@ -1,11 +1,20 @@
 // Expedition and Collaborator basics (WP-1.1): create one, list mine.
 // Routes here run behind `requireUser`.
-import { makeOps, schema, ulid, type OpBody, type Role } from "@umbel/domain"
+import {
+  makeOps,
+  schema,
+  ulid,
+  type LoggedOp,
+  type Op,
+  type OpBody,
+  type Role,
+} from "@umbel/domain"
 import { and, desc, eq, isNull } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "./app.ts"
-import { appendOps } from "./oplog.ts"
+import type { Db } from "./db.ts"
+import { appendOps, type ChangeInfo } from "./oplog.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
 
 const { expeditions, collaborators } = schema
@@ -29,6 +38,32 @@ const summaryColumns = {
   summary: expeditions.summary,
   visibility: expeditions.visibility,
   status: expeditions.status,
+}
+
+/**
+ * Creates a private Expedition owned by `userId` and logs its first Change
+ * (`ops`, which may be empty) through the op log. Run inside a transaction.
+ */
+export async function createExpedition(
+  tx: Db,
+  args: { id: string; userId: string; ops: readonly Op[]; change: ChangeInfo }
+): Promise<{ summary: ExpeditionSummary; logged: LoggedOp[] }> {
+  const { id, userId } = args
+  await tx.insert(expeditions).values({ id, ownerId: userId })
+  await tx
+    .insert(collaborators)
+    .values({ expeditionId: id, userId, role: "owner" })
+  const { logged } = await appendOps(tx, {
+    expeditionId: id,
+    userId,
+    ops: args.ops,
+    changes: [args.change],
+  })
+  const [row] = await tx
+    .select(summaryColumns)
+    .from(expeditions)
+    .where(eq(expeditions.id, id))
+  return { summary: { ...row!, role: "owner" }, logged }
 }
 
 export function expeditionRoutes(relay: Relay) {
@@ -64,26 +99,16 @@ export function expeditionRoutes(relay: Relay) {
       changeId,
       nextOpId: () => ulid(Date.now()),
     })
-    const { created, logged } = await db.transaction(async (tx) => {
-      await tx.insert(expeditions).values({ id, ownerId: user.id })
-      await tx
-        .insert(collaborators)
-        .values({ expeditionId: id, userId: user.id, role: "owner" })
-      const { logged } = await appendOps(tx, {
-        expeditionId: id,
+    const { summary, logged } = await db.transaction((tx) =>
+      createExpedition(tx, {
+        id,
         userId: user.id,
         ops,
-        changes: [{ id: changeId, label: "Created the Expedition" }],
+        change: { id: changeId, label: "Created the Expedition" },
       })
-      const [row] = await tx
-        .select(summaryColumns)
-        .from(expeditions)
-        .where(eq(expeditions.id, id))
-      return { created: row!, logged }
-    })
+    )
     await publishCommitted(relay, id, logged)
-    const out: ExpeditionSummary = { ...created, role: "owner" }
-    return c.json(out, 201)
+    return c.json(summary, 201)
   })
 
   // List mine: every Expedition I collaborate on (as owner, editor or viewer),
