@@ -20,6 +20,7 @@
     "@eslint/js": "^10",
     "@umbel/config": "workspace:*",
     "eslint": "^10",
+    "fake-indexeddb": "^6.2.5",
     "globals": "^17",
     "typescript": "~6",
     "typescript-eslint": "^8",

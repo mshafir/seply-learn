@@ -14,6 +14,9 @@ import {
 } from "@umbel/domain"
 import { afterEach, describe, expect, it } from "vitest"
 import type { ConceptRow } from "../rows.ts"
+import { openSyncClient } from "../client.ts"
+import { MemoryPendingStore } from "../store.ts"
+import { FakeServer } from "../test/fake-server.ts"
 import { findFlicker, Recorder } from "./flicker.ts"
 import { SimClient, SimServer } from "./sim.ts"
 
@@ -310,5 +313,140 @@ describe("diffs delivered late (after the handler resolved)", () => {
     await tick()
     expect(t.shown()).toBe("A")
     expect(t.flickers(["Concept c1", "A"])).toEqual(NONE)
+  })
+})
+
+// WP-1.3: the same evidence against the production pieces: other tables'
+// collections, and the SyncClient with its own push/pull timing.
+describe("production engine, other tables: no flicker", () => {
+  it("typing into a Relationship note and a View label, with remote edits between", async () => {
+    const t = setup("handlers")
+    const rel = `c1|${builtinId("prerequisite")}|c2`
+    t.other.engine.propose([
+      { kind: "relationship.add", target: rel, value: { note: "n0" } },
+      {
+        kind: "view.create",
+        target: "v1",
+        value: {
+          viewType: "timeline",
+          label: "v0",
+          orderKey: "a",
+          settings: { lanes: [] },
+        },
+      },
+    ])
+    t.other.push()
+    t.me.pull()
+    await tick()
+    const notes = new Recorder(t.me.collections.relationships, (r) => r.note)
+    const labels = new Recorder(t.me.collections.views, (v) => v.label)
+    disposers.push(
+      () => notes.stop(),
+      () => labels.stop()
+    )
+    const typed: string[] = []
+    for (let i = 1; i <= 30; i++) {
+      typed.push(`n${i}`)
+      t.me.collections.relationships.update(rel, (d) => {
+        d.note = `n${i}`
+      })
+      t.me.collections.views.update("v1", (d) => {
+        d.label = `n${i}`
+      })
+      if (i % 4 === 0) t.me.push()
+      if (i % 6 === 0) {
+        // Someone else edits another path of the same View.
+        t.other.engine.propose([
+          {
+            kind: "view.set",
+            target: "v1",
+            path: "settings.hide",
+            value: [`c${i}`],
+          },
+        ])
+        t.other.push()
+      }
+      if (i % 5 === 0) t.me.pull(3)
+      if (i % 7 === 0) await tick()
+    }
+    t.me.push()
+    t.me.pull()
+    await tick()
+    expect(t.me.collections.relationships.get(rel)?.note).toBe("n30")
+    expect(t.me.collections.views.get("v1")?.label).toBe("n30")
+    expect(t.me.engine.pending).toHaveLength(0)
+    expect(findFlicker(notes.timeline(rel), ["n0", ...typed])).toEqual([])
+    expect(findFlicker(labels.timeline("v1"), ["v0", ...typed])).toEqual([])
+  })
+})
+
+describe("production SyncClient (auto push, async transport): no flicker", () => {
+  it("fast typing while pushes and pulls run on their own schedule", async () => {
+    const server = new FakeServer(emptyState(EXP))
+    server.seed([
+      {
+        kind: "concept.create",
+        target: "c1",
+        value: { title: "Concept c1", kind: builtinId("idea") },
+      },
+    ])
+    const client = await openSyncClient({
+      expeditionId: EXP,
+      actor: "me",
+      transport: server.transport("me"),
+      store: new MemoryPendingStore(),
+      pushDelayMs: 2,
+      collections: { id: `prod${++seq}` },
+    })
+    const coll = new Recorder(client.collections.concepts, (c) => c.title)
+    const live = createLiveQueryCollection({
+      id: `prod${seq}:live`,
+      startSync: true,
+      query: (q) =>
+        q
+          .from({ c: client.collections.concepts })
+          .select(({ c }) => ({ id: c.id, title: c.title })),
+    })
+    const query = new Recorder(live, (r: { title: string }) => r.title)
+    disposers.push(
+      () => coll.stop(),
+      () => query.stop(),
+      () => void live.cleanup(),
+      () => client.dispose()
+    )
+    const typed: string[] = []
+    for (let i = 1; i <= 60; i++) {
+      typed.push(`typed ${i}`)
+      client.collections.concepts.update("c1", (d) => {
+        d.title = `typed ${i}`
+      })
+      if (i % 9 === 0) {
+        // Another person edits another field; we pull it mid-typing.
+        server.seed(
+          [
+            {
+              kind: "concept.set",
+              target: "c1",
+              path: "summary",
+              value: `s${i}`,
+            },
+          ],
+          "other"
+        )
+        void client.pull()
+      }
+      if (i % 4 === 0) await wait(1)
+    }
+    await expect.poll(() => client.engine.pending.length).toBe(0)
+    await client.pull()
+    await tick()
+    expect(client.collections.concepts.get("c1")?.title).toBe("typed 60")
+    expect(server.state.concepts.c1?.title).toBe("typed 60")
+    const order = ["Concept c1", ...typed]
+    expect(findFlicker(coll.timeline("c1"), order)).toEqual([])
+    expect(findFlicker(query.timeline("c1"), order)).toEqual([])
+    // One editing session: the pushes extended one Change.
+    const mine = server.log.filter((op) => op.actor === "me")
+    expect(new Set(mine.map((op) => op.changeId)).size).toBe(1)
   })
 })
