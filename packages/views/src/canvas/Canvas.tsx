@@ -9,6 +9,7 @@ import { layout, nodeSize, EVIDENCE_COLUMN, type Extras, type Positions } from "
 import { topicRoots, trace, type Scope } from "../scope.ts";
 import { badgesFor, type Overlay } from "../overlay.ts";
 import { buildEdges } from "./edges.ts";
+import { useInheritedColorMode } from "./colorMode.ts";
 import { cx, edgeTypes, nodeTypes, type ConceptData } from "./parts.tsx";
 
 export type CanvasProps = {
@@ -39,6 +40,8 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
   const [positions, setPositions] = useState<Positions>(new Map());
   const [extras, setExtras] = useState<Extras>({});
   const current = useRef<Positions>(new Map());
+  const flowRef = useRef<HTMLDivElement>(null);
+  const colorMode = useInheritedColorMode(flowRef);
   const { fitView } = useReactFlow();
   const fitIds = overlay?.fit?.join(",");
   const isLearningPath = view.viewType === "learning-path";
@@ -139,6 +142,8 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
 
   return (
     <ReactFlow
+      ref={flowRef}
+      colorMode={colorMode}
       className="umbel-canvas"
       nodes={nodes}
       edges={edges}

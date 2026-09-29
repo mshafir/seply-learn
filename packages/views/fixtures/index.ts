@@ -1,6 +1,8 @@
 // Fixtures for tests and the harness. `compute.json` is a copy of the
 // prototype's committed compute sample (prototypes/sample-graphs/src/graphs/
-// compute.json), the only sample fixtures may use. Everything else here is
+// compute.json), the only sample fixtures may use, with its Kind and
+// Relationship Type colours stored as palette names (spec 7.2) rather than
+// the prototype's hex values. Everything else here is
 // synthetic.
 import type { Concept, Expedition, View } from "../src/model.ts";
 import computeJson from "./compute.json" with { type: "json" };
@@ -37,17 +39,17 @@ export const tiny: Expedition = {
   title: "Tiny",
   summary: "Synthetic fixture for layout tests.",
   kinds: [
-    { id: "idea", label: "Idea", color: "#2563eb" },
-    { id: "claim", label: "Claim", color: "#ca8a04" },
+    { id: "idea", label: "Idea", color: "blue" },
+    { id: "claim", label: "Claim", color: "amber" },
   ],
   relationshipTypes: [
-    { id: "prerequisite", label: "is needed to understand", color: "#2563eb" },
-    { id: "part-of", label: "is part of", color: "#7c3aed", dashed: true },
-    { id: "raises", label: "raises", color: "#dc2626" },
-    { id: "lowers", label: "lowers", color: "#16a34a" },
-    { id: "supports", label: "supports", color: "#4f46e5" },
-    { id: "challenges", label: "challenges", color: "#b45309" },
-    { id: "led-to", label: "led to", color: "#0f766e" },
+    { id: "prerequisite", label: "is needed to understand", color: "blue" },
+    { id: "part-of", label: "is part of", color: "violet", dashed: true },
+    { id: "raises", label: "raises", color: "red" },
+    { id: "lowers", label: "lowers", color: "green" },
+    { id: "supports", label: "supports", color: "indigo" },
+    { id: "challenges", label: "challenges", color: "orange" },
+    { id: "led-to", label: "led to", color: "teal" },
   ],
   concepts: [
     // Learning path: topic "maths" (a, b, c) and topic "models" (d, e, t, u)

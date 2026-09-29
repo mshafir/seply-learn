@@ -1,4 +1,4 @@
-/* Harness-only chrome. Uses the canvas variables; no palette of its own. */
+/* Harness-only chrome. Uses the canvas variables (so @umbel/ui tokens); no palette of its own. */
 html,
 body,
 #root {
@@ -6,7 +6,7 @@ body,
   margin: 0;
 }
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   color: var(--umbel-concept-fg);
   background: var(--umbel-canvas-bg);
 }
@@ -52,4 +52,10 @@ body {
 .harness__canvas {
   flex: 1;
   min-height: 0;
+}
+.harness__theme {
+  margin-left: auto;
+}
+.harness__bar button {
+  color: inherit;
 }

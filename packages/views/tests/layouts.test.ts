@@ -3,7 +3,7 @@ import { compute, tiny, viewOf } from "../fixtures/index.ts";
 import { layout, nodeSize, type Positions } from "../src/layouts.ts";
 import { learningMap, scopeFor, topicRoots, trace } from "../src/scope.ts";
 import { actsOn } from "../src/overlay.ts";
-import { drawnRelationships } from "../src/canvas/edges.ts";
+import { drawnRelationships } from "../src/drawn.ts";
 
 const round = (p: Positions) => Object.fromEntries([...p].sort(([a], [b]) => a.localeCompare(b)).map(([id, q]) => [id, [Math.round(q.x), Math.round(q.y)]]));
 

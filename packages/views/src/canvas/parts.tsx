@@ -4,6 +4,7 @@ import type { Concept, KindDef } from "../model.ts";
 import { nodeSize } from "../layouts.ts";
 import type { Badge } from "../overlay.ts";
 import { KindIcon } from "./KindIcon.tsx";
+import { paletteColor } from "./color.ts";
 
 export const cx = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join(" ");
 
@@ -27,12 +28,12 @@ export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
     <div
       title={concept.summary}
       // The Kind's accent colour is Expedition data, not a UI colour.
-      style={{ width: size.width, minHeight: size.height, borderLeftColor: kind?.color }}
+      style={{ width: size.width, minHeight: size.height, borderLeftColor: paletteColor(kind?.color) }}
       className={cx("umbel-concept", weightClass(weight), dim && "umbel-concept--dim", selected && "umbel-concept--selected")}
       data-concept={concept.id}
     >
       <Handle type="target" position={Position.Left} className="umbel-handle" />
-      <KindIcon name={kind?.icon ?? kind?.id} className="umbel-concept__icon" style={{ color: kind?.color }} />
+      <KindIcon name={kind?.icon ?? kind?.id} className="umbel-concept__icon" style={{ color: paletteColor(kind?.color) }} />
       <span className="umbel-concept__title">{concept.title}</span>
       {badges.length > 0 && (
         <div className="umbel-concept__badges">

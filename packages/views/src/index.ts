@@ -35,6 +35,9 @@ export {
   type Visible,
 } from "./layouts.ts";
 
+// What a canvas View draws, shared by the renderer and the metrics
+export { drawnRelationships, type DrawnRelationship } from "./drawn.ts";
+
 // Layout metrics (spec §4.4)
 export {
   expeditionLayoutMetrics,
@@ -62,4 +65,4 @@ export { Canvas, type CanvasProps } from "./canvas/Canvas.tsx";
 export { LearningPathCanvas, type LearningPathCanvasProps } from "./canvas/LearningPathCanvas.tsx";
 export { ViewCanvas, type ViewCanvasProps } from "./canvas/ViewCanvas.tsx";
 export { KindIcon } from "./canvas/KindIcon.tsx";
-export { buildEdges, drawnRelationships, type DrawnRelationship } from "./canvas/edges.ts";
+export { buildEdges } from "./canvas/edges.ts";
