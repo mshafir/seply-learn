@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sync spike: flicker harness</title>
+    <style>
+      body {
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        margin: 24px;
+        color-scheme: light dark;
+      }
+      fieldset {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        align-items: end;
+      }
+      label {
+        display: grid;
+        gap: 2px;
+      }
+      input[type="number"] {
+        width: 6em;
+      }
+      table {
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+      td,
+      th {
+        padding: 4px 10px;
+        border-bottom: 1px solid GrayText;
+        text-align: left;
+      }
+      #stats {
+        margin-top: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+      #log {
+        max-height: 16em;
+        overflow: auto;
+        font:
+          12px ui-monospace,
+          monospace;
+      }
+      .bad {
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Op engine → TanStack DB: optimistic flicker harness</h1>
+    <p>
+      Types fast into Concept c1's title while a simulated server echoes with
+      delay and, sometimes, lands another client's edit first. Every DOM change
+      of the title cell is recorded; a flicker is the cell going back to a value
+      it had already moved past.
+    </p>
+    <fieldset>
+      <label
+        >Edits per burst <input id="edits" type="number" value="50"
+      /></label>
+      <label
+        >Ms between edits <input id="gap" type="number" value="10"
+      /></label>
+      <label
+        >Max push delay (ms) <input id="pushDelay" type="number" value="40"
+      /></label>
+      <label
+        >Max echo delay (ms) <input id="echoDelay" type="number" value="120"
+      /></label>
+      <label
+        >Reorder chance (0–1)
+        <input id="reorder" type="number" step="0.1" value="0.3"
+      /></label>
+      <label
+        >Edit path
+        <select id="path">
+          <option value="handlers">collection.update (onUpdate)</option>
+          <option value="transaction">createTransaction(mutationFn)</option>
+        </select>
+      </label>
+      <label
+        >Diff delivery
+        <select id="delivery">
+          <option value="sync">sync (the design)</option>
+          <option value="deferred">deferred (broken, for contrast)</option>
+        </select>
+      </label>
+      <button id="run" type="button">Run burst</button>
+      <button id="reset" type="button">Reset</button>
+    </fieldset>
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>Title</th>
+          <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="stats"></div>
+    <pre id="log"></pre>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
