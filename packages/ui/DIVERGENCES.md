@@ -12,8 +12,8 @@ All 8 are accepted. Entries marked *planned* are not built yet; the work package
 | 4 | **Live cursors** | Presence on the canvas; shadcn has no cursor overlay. | An absolutely positioned overlay with Avatar colours and a Badge name tag. | `@umbel/views` | planned |
 | 5 | **Step indicator** (Sources → Choose Views → Open) | shadcn has no stepper; one component serves the horizontal wizard and the vertical build stage list. | Separator, Badge and Spinner, laid out with flex. | `@umbel/ui` | planned |
 | 6 | **File drop zone** | shadcn has no drop target. | A native drag-and-drop area styled with tokens (dashed `--border`), wrapping Button and Input (`type=file`). | `@umbel/ui` | planned |
-| 7 | **Attribute list** | A key/value `<dl>`; minor. | A semantic `<dl>` with tokens and type styles; Tooltip for units. | `@umbel/ui` | planned |
-| 8 | **Badge variants** (extension) | Build status (`success`, `progress`, `queued`) and provenance (`source`, `background`) need colours shadcn's Badge doesn't have, plus a pulsing status dot. | New `cva` variants on the shadcn Badge, using `--success`, `--suggested`, `--suggested-text` and `--muted`. | `@umbel/ui` | planned |
+| 7 | **Attribute list** | A key/value `<dl>`; minor. | `src/components/attribute-list.tsx`: a semantic `<dl>` in a two-column grid on `bg-muted/50`, labels in `text-muted-foreground`. Units are formatted into the value by the caller ("405B", "12 hours"), so no Tooltip yet. | `@umbel/ui` | built (WP-1.7) |
+| 8 | **Badge variants** (extension) | Build status (`success`, `progress`, `queued`) and provenance (`source`, `background`) need colours shadcn's Badge doesn't have, plus a pulsing status dot. | New `cva` variants on the shadcn Badge, using `--success`, `--suggested`, `--suggested-text` and `--muted`. Provenance: `source` is `bg-suggested/15 text-suggested-text`, `background` is `bg-muted text-muted-foreground`. | `@umbel/ui` | provenance built (WP-1.7); status planned |
 
 ## Also listed
 

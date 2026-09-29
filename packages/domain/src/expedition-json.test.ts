@@ -8,6 +8,7 @@ import {
   ImportError,
   importExpeditionJson,
   parseExpeditionJson,
+  remapConceptLinks,
   stateToExpeditionJson,
   type ExpeditionJsonInput,
   type ImportOptions,
@@ -98,6 +99,7 @@ function tiny(): ExpeditionJsonInput {
         id: "engine",
         title: "Engine",
         kind: "gadget",
+        overview: "Driven by a [piston](#c/piston) and a [ghost](#c/ghost).",
         attributes: { size: 3, tier: "a" },
         prov: [
           { source: "src", segment: "s1", quote: "an engine" },
@@ -105,7 +107,11 @@ function tiny(): ExpeditionJsonInput {
         ],
         sections: [
           { id: "engine-lead", heading: "", md: "Lead." },
-          { id: "engine-how", heading: "How", md: "It turns." },
+          {
+            id: "engine-how",
+            heading: "How",
+            md: "It turns: [spark](#c/spark).",
+          },
         ],
       },
       { id: "piston", title: "Piston", kind: "builtin:idea" },
@@ -232,6 +238,11 @@ describe("id re-minting", () => {
       [engine, ""],
       [engine, "How"],
     ])
+    // In-text links follow their Concept; dangling ones are left alone.
+    expect(state.concepts[engine].overview).toBe(
+      `Driven by a [piston](#c/${piston}) and a [ghost](#c/ghost).`
+    )
+    expect(sections[1].md).toBe(`It turns: [spark](#c/${spark}).`)
     expect(state.concepts[engine].prov).toEqual([
       { source: ids.sources.get("src"), segment: "s1", quote: "an engine" },
     ])
@@ -410,5 +421,22 @@ describe("validation", () => {
       tags: [],
       sections: [],
     })
+  })
+})
+
+describe("remapConceptLinks", () => {
+  const map = new Map([
+    ["kv-cache", "01K"],
+    ["mha", "01M"],
+  ])
+  it("rewrites #c/ links through the map and leaves others", () => {
+    expect(
+      remapConceptLinks(
+        "See [the cache](#c/kv-cache), [MHA](#c/mha). Also <#c/mha>, [x](#c/nope) and [web](https://example.com/#c/mha-ish).",
+        map
+      )
+    ).toBe(
+      "See [the cache](#c/01K), [MHA](#c/01M). Also <#c/01M>, [x](#c/nope) and [web](https://example.com/#c/mha-ish)."
+    )
   })
 })
