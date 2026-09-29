@@ -4,6 +4,8 @@
     "types": []
   },
   "include": [
-    "src"
+    "src",
+    "harness",
+    "vite.harness.config.ts"
   ]
 }
