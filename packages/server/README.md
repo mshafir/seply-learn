@@ -6,7 +6,7 @@
 
 The Hono app factory: Better Auth, /api (push/pull, per-reader state, Proposals, search, export/import, keys, uploads), /mcp, and the Relay, JobRunner and Mailer interfaces. Runtime-agnostic (Workers and Node). Spec: docs/spec/v1/02-architecture.md, 06-mcp.md.
 
-Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5):
+Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6):
 
 | Export | What it is |
 |---|---|
@@ -21,6 +21,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5):
 | `createExpedition(tx, { id, userId, ops, change })` | Inside a transaction: a private Expedition row, its owner Collaborator, and its first Change through `appendOps`. Create and import both use it. |
 | `readReaderState(db, userId, expeditionId)`, `saveReaderMarks(db, userId, batch)`, `recentPositions(db, userId, limit)` | Per-reader state (WP-2.5): the `reading_status`, `personal_view_settings` and `reader_position` rows of one user, outside the op log. Saving upserts each mark only over an older row (the newest `at` wins; a mark from the future is clamped to now); marks of Expeditions the user can't view are skipped, and personal settings must parse with their View Type's personal schema (else skipped). |
 | `Relay.reader?(userId, marks)` | The reader channel: told after a save, with that user's accepted marks only (never anyone else's). Optional; the live relay (M4) will forward it to the reader's other devices. |
+| `search(db, { userId, q, includePublic?, limit? })` | Global search (spec §2.8), grouped `{ expeditions, concepts, tags }`. `parseQuery(q)` splits free text from `#tag` filters; `buildSearchQueries(params)` returns the three SQL queries (or null for an empty query); `searchableExpeditions(userId, includePublic)` is the access rule they all share: Expeditions the user collaborates on (any role), plus public ones when `includePublic`; never unlisted ones they don't collaborate on, never Trash. |
 | `loadState(db, id)`, `writeState(db, before, after)` | The tables as a projection of the log: read one Expedition into a `DomainState`; write the rows that differ between two states. |
 
 **Routes** (under `/api`):
@@ -36,15 +37,16 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5):
   - `GET /reader/expeditions/:id`: `{ reading: ReadingMark[], viewSettings: ViewSettingsMark[], position: PositionMark | null }`, my state in one Expedition I can view (404 otherwise).
   - `POST /reader` (a `ReaderBatch`: `{ reading?, viewSettings?, positions? }`, marks across Expeditions): saves them, newest winning per row. 200 `{ saved: { reading, viewSettings, positions }, skipped: [expeditionId] }`; 400 for a malformed batch. One route serves a single mark, a browser's offline queue and an anonymous reader's marks merged on sign-in.
   - `GET /reader/recent?limit=3` (max 20): Continue reading, `{ items: [{ expedition: { id, title, summary, visibility, status }, position }] }`, my most recent positions in Expeditions I can still view, newest first.
+- `GET /search?q=<text and #tags>&public=0|1&limit=<n>` (signed in): `{ expeditions, concepts, tags }`. Free text runs `websearch_to_tsquery('english', …)` against the weighted `search` vectors, or matches titles and aliases fuzzily with pg_trgm (`%`, `<%`), ranked by `ts_rank_cd` plus word similarity. Each `#tag` must be on the Concept (Concept Tags) or Expedition (Expedition Tags); Tags are suggested by prefix (the free text, else the last `#tag`) with their counts. Expeditions: at most 10; Concepts: `limit` (default 20, max 50), each with its Expedition's title; Tags: at most 8. 400 for an invalid query.
 - `GET /pull?expedition=<id>&since=<serverSeq>&limit=<n>`: `{ headSeq, ops: LoggedOp[], more }`, the ops after `since` (default 0), at most `limit` (default and max 1000). For anyone who can view the Expedition, signed in or not where Visibility allows; 404 otherwise.
 
 **Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `DB_BRANCH`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
 
 **Test credentials:** email + password sign-in is on only when `AUTH_TEST_CREDENTIALS=1` **and** `BETTER_AUTH_URL` is a localhost URL, so a deployed Worker can never enable it.
 
-**Migrations:** `drizzle.config.ts` generates SQL migrations from `@umbel/domain`'s schema into `drizzle/` (committed). `db:generate` after a schema change; `db:migrate` (`scripts/migrate.mjs`) applies them to `$DATABASE_URL` and is what CI runs before each deploy.
+**Migrations:** `drizzle.config.ts` generates SQL migrations from `@umbel/domain`'s schema into `drizzle/` (committed). `db:generate` after a schema change; `0001_search.sql` is hand-written (`drizzle-kit generate --custom`): it adds `pg_trgm`, the trigger-maintained `search` tsvector columns on `expeditions` (title A, summary B) and `concepts` (title and aliases A, summary B, overview C, live article sections D; an article section's insert, edit or delete re-indexes its Concept), `concepts.search_title` (title + aliases), GIN indexes on the vectors, pg_trgm GIN indexes on `expeditions.title` and `concepts.search_title`, and `lower(tag)` indexes on both tag tables. These columns are not in the Drizzle schema: only search reads them, through SQL; `db:migrate` (`scripts/migrate.mjs`) applies them to `$DATABASE_URL` and is what CI runs before each deploy.
 
-**Tests** run the app over in-memory PGlite with the committed migrations applied (`src/test-harness.ts`): the push/pull apply path (ordering, idempotency, roles, validation, transactionality, and the compute sample round-tripped through the log), import of both fixtures (counts, one Change, owner, fresh ids, rejections), per-reader state (`reader.test.ts`: newest wins, privacy between readers, personal settings validated, future marks clamped, Continue reading order, the reader channel), and the OAuth proxy round trip between a preview and production app with Google's token endpoint stubbed.
+**Tests** run the app over in-memory PGlite (with its `pg_trgm` contrib extension loaded) with the committed migrations applied (`src/test-harness.ts`): search (query parsing, parameter binding, the trigger-maintained vectors, full-text, fuzzy and `#tag` matching, and access: a private Expedition never appears for a stranger, unlisted never appears in global search, public only with the toggle), the push/pull apply path (ordering, idempotency, roles, validation, transactionality, and the compute sample round-tripped through the log), import of both fixtures (counts, one Change, owner, fresh ids, rejections), per-reader state (`reader.test.ts`: newest wins, privacy between readers, personal settings validated, future marks clamped, Continue reading order, the reader channel), and the OAuth proxy round trip between a preview and production app with Google's token endpoint stubbed.
 
 ## Allowed dependencies
 

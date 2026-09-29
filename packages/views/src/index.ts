@@ -72,6 +72,7 @@ export {
   type ExpeditionViewProps,
   type ReaderInteraction,
   type ViewInteraction,
+  type ViewStatusChip,
   type ViewRendererProps,
 } from "./ExpeditionView.tsx";
 

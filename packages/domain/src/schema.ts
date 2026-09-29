@@ -157,6 +157,12 @@ export const sources = pgTable(
   (t) => [primaryKey({ columns: [t.expeditionId, t.id] })]
 )
 
+/**
+ * Search (spec §2.8) adds trigger-maintained `search` tsvector columns here
+ * and on `expeditions`, plus `concepts.search_title`, in
+ * packages/server/drizzle/0001_search.sql. They are left out of this schema:
+ * only search reads them, and nothing writes them but the triggers.
+ */
 export const concepts = pgTable(
   "concepts",
   {

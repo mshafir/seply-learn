@@ -8,11 +8,15 @@ import * as React from "react"
 import {
   coveredConcepts,
   emptyReaderState,
-  parsePersonalSettings,
   type ReaderState,
-  type ViewTypeId,
 } from "@umbel/domain"
 import type { ReaderClient } from "@umbel/sync"
+
+import {
+  personalViewSettingsStore,
+  type PersonalValues,
+  type PersonalViewSettingsStore,
+} from "@/lib/personal-view-settings.ts"
 
 export const ReaderContext = React.createContext<ReaderClient | null>(null)
 
@@ -77,19 +81,44 @@ export function useReaderSync(expeditionId: string): { loaded: boolean } {
   return { loaded: loaded === expeditionId }
 }
 
-/** Labels for the personal settings a View Type has (spec §3.6 "your settings"). */
-export const PERSONAL_SETTING_LABELS: Record<string, string> = {
-  showAllSteps: "Show all steps",
-  hideRead: "Hide what I've read",
+const NO_SETTINGS: PersonalValues = {}
+
+/**
+ * Personal View settings kept with the reader's other state: saved through
+ * the reader API (`personal_view_settings`), so they follow the reader across
+ * devices; an anonymous reader's stay in this browser. One store per
+ * Expedition (marks carry their Expedition). The user id is the reader
+ * client's own, so the one passed in is ignored.
+ */
+export class ReaderPersonalViewSettings implements PersonalViewSettingsStore {
+  constructor(
+    private readonly reader: ReaderClient,
+    private readonly expeditionId: string
+  ) {}
+  get(_userId: string, viewId: string): PersonalValues {
+    return (
+      this.reader.getState(this.expeditionId).viewSettings[viewId]?.settings ??
+      NO_SETTINGS
+    )
+  }
+  set(_userId: string, viewId: string, values: PersonalValues): void {
+    this.reader.setViewSettings(this.expeditionId, viewId, values)
+  }
+  subscribe(listener: () => void): () => void {
+    return this.reader.subscribe(listener)
+  }
 }
 
-/** The reader's personal settings for a View, with the View Type's defaults. */
-export function effectivePersonal(
-  viewType: string,
-  own: Record<string, unknown> | undefined
-): Record<string, unknown> {
-  const parsed = parsePersonalSettings(viewType as ViewTypeId, own ?? {})
-  if (parsed.success) return parsed.data
-  const defaults = parsePersonalSettings(viewType as ViewTypeId, {})
-  return defaults.success ? defaults.data : {}
+/** The personal settings store for an Expedition: the reader's (this browser's until the session loads). */
+export function useReaderPersonalStore(
+  expeditionId: string
+): PersonalViewSettingsStore {
+  const reader = useReader()
+  return React.useMemo(
+    () =>
+      reader
+        ? new ReaderPersonalViewSettings(reader, expeditionId)
+        : personalViewSettingsStore(),
+    [reader, expeditionId]
+  )
 }

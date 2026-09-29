@@ -6,6 +6,10 @@
 // it can't reach it, the hook retries with backoff (1 s doubling to 30 s) and
 // `retry()` tries again at once; the saved pending ops stay untouched until
 // then.
+//
+// Until the live relay (WP-4.1) pushes other people's and other tabs' edits,
+// an open client pulls every few seconds while the page is visible, and at
+// once when it becomes visible again.
 import * as React from "react"
 import {
   fetchTransport,
@@ -69,6 +73,25 @@ export function isRetryable(error: unknown): boolean {
 
 let clientCount = 0
 
+/** How often an open client pulls while the page is visible (no relay yet). */
+export const POLL_MS = 3000
+
+/** Pulls now and then, while the page is visible. Returns a stop function. */
+function pollWhileVisible(client: SyncClient): () => void {
+  const visible = () =>
+    typeof document === "undefined" || document.visibilityState === "visible"
+  const pull = () => {
+    // A failed poll changes nothing; the next one tries again.
+    if (visible()) client.pull().catch(() => {})
+  }
+  const timer = setInterval(pull, POLL_MS)
+  document.addEventListener("visibilitychange", pull)
+  return () => {
+    clearInterval(timer)
+    document.removeEventListener("visibilitychange", pull)
+  }
+}
+
 export function useSyncClient(
   expeditionId: string,
   actor: string
@@ -88,6 +111,7 @@ export function useSyncClient(
     let cancelled = false
     let client: SyncClient | null = null
     let timer: ReturnType<typeof setTimeout> | null = null
+    let stopPolling: (() => void) | null = null
     let attempt = 0
 
     const store = new CountingStore(idbStore(), (pending) => {
@@ -122,6 +146,7 @@ export function useSyncClient(
           return
         }
         client = opened
+        stopPolling = pollWhileVisible(opened)
         setHealth((h) => ({ ...h, offline: false }))
         setState({ status: "ready", client: opened })
       } catch (error) {
@@ -138,6 +163,7 @@ export function useSyncClient(
     return () => {
       cancelled = true
       if (timer) clearTimeout(timer)
+      stopPolling?.()
       client?.dispose()
     }
   }, [expeditionId, actor, nonce])

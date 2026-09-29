@@ -29,8 +29,10 @@ import {
 import { SidebarProvider } from "@umbel/ui/components/sidebar"
 import { Skeleton } from "@umbel/ui/components/skeleton"
 import { SyncHttpError, type SyncClient } from "@umbel/sync"
+import type { ViewStatusChip } from "@umbel/views"
 
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
+import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { resumeFrom, samePlace, type Place } from "@/expedition/continue.ts"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
 import { kindLabel } from "@/expedition/labels.ts"
@@ -48,17 +50,20 @@ import {
   type BackStack,
 } from "@/expedition/reading.ts"
 import { SidePanel, type PanelContent } from "@/expedition/side-panel.tsx"
+import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsRail } from "@/expedition/views-rail.tsx"
 import { listExpeditions, type Role } from "@/lib/api.ts"
+import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 import {
-  effectivePersonal,
   useCovered,
   useReader,
+  useReaderPersonalStore,
   useReaderState,
   useReaderSync,
 } from "@/lib/reader.ts"
+import { matchConcepts } from "@/lib/search.ts"
 import { useSession } from "@/lib/session.ts"
 import { useSyncClient, type SyncHealth } from "@/lib/sync.ts"
 import { useMediaQuery } from "@/lib/use-media-query.ts"
@@ -84,10 +89,8 @@ export function ExpeditionScreen({
 }) {
   const { session } = useSession()
   const user = session.status === "signed-in" ? session.user : null
-  const { state, health, retry } = useSyncClient(
-    expeditionId,
-    user?.id ?? ANONYMOUS_ACTOR
-  )
+  const actor = user?.id ?? ANONYMOUS_ACTOR
+  const { state, health, retry } = useSyncClient(expeditionId, actor)
   const role = useRole(expeditionId, !!user)
   const signInHref = user ? null : signInHrefFor(expeditionId)
 
@@ -102,6 +105,7 @@ export function ExpeditionScreen({
           expeditionId={expeditionId}
           client={state.client}
           viewId={viewId}
+          userId={actor}
           canEdit={role === "owner" || role === "editor"}
           health={health}
           signInHref={signInHref}
@@ -206,6 +210,7 @@ function ExpeditionFrame({
   expeditionId,
   client,
   viewId,
+  userId,
   canEdit,
   health,
   signInHref,
@@ -213,6 +218,7 @@ function ExpeditionFrame({
   expeditionId: string
   client: SyncClient
   viewId?: string
+  userId: string
   canEdit: boolean
   health: SyncHealth
   signInHref: string | null
@@ -220,7 +226,14 @@ function ExpeditionFrame({
   const [, navigate] = useLocation()
   const data = useExpeditionData(client.collections)
   const inlinePanel = useMediaQuery(INLINE_PANEL_QUERY)
-  const [panel, setPanel] = React.useState<Panel>(null)
+  // A Concept picked in global search arrives as ?concept=<id>.
+  const [conceptParam] = React.useState(() =>
+    new URLSearchParams(window.location.search).get("concept")
+  )
+  const [panel, setPanel] = React.useState<Panel>(() =>
+    conceptParam ? { type: "concept", stack: openConcept(conceptParam) } : null
+  )
+  const [query, setQuery] = React.useState("")
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
   const reader = useReader()
@@ -236,9 +249,20 @@ function ExpeditionFrame({
     null
   const view = data.views.find((v) => v.id === viewId) ?? startView
 
+  // Personal settings live with the reader's other state (per reader, saved
+  // through the reader API; an anonymous reader's stay in this browser).
+  const personalStore = useReaderPersonalStore(expeditionId)
+  const personal = usePersonalViewSettings(userId, view, personalStore)
+  // The View's status chip, as it reports it (null: none).
+  const [status, setStatus] = React.useState<ViewStatusChip | null>(null)
+
   const conceptById = React.useMemo(
     () => new Map(data.concepts.map((c) => [c.id, c])),
     [data.concepts]
+  )
+  const matches = React.useMemo(
+    () => matchConcepts(data.concepts, query),
+    [data.concepts, query]
   )
   // The back stack, without places whose Concept has gone (deleted, merged).
   const stack =
@@ -248,21 +272,22 @@ function ExpeditionFrame({
   const place = stack[stack.length - 1]
   const selectedConcept = place ? conceptById.get(place.conceptId) : undefined
 
-  // Continue reading: opened without a View in the URL, land where the reader
-  // left off (once, when both the data and the reader's state are in).
-  // (Adjusting state during render, not in an effect; the URL follows below.)
+  // Continue reading: opened without a View (or Concept) in the URL, land
+  // where the reader left off, once both the data and the reader's state are
+  // in. (Adjusting state during render, not in an effect; the URL follows.)
   const [landed, setLanded] = React.useState(false)
   const [resumed, setResumed] = React.useState(false)
   const [resumeView, setResumeView] = React.useState<string | null>(null)
   if (!landed && readerLoaded && data.views.length > 0) {
     setLanded(true)
-    const to = viewId
-      ? null
-      : resumeFrom(
-          readerState.position,
-          (id) => data.views.some((v) => v.id === id),
-          (id) => conceptById.has(id)
-        )
+    const to =
+      viewId || conceptParam
+        ? null
+        : resumeFrom(
+            readerState.position,
+            (id) => data.views.some((v) => v.id === id),
+            (id) => conceptById.has(id)
+          )
     if (to) {
       if (to.viewId && to.viewId !== view?.id) setResumeView(to.viewId)
       if (to.stack) setPanel({ type: "concept", stack: to.stack })
@@ -322,13 +347,6 @@ function ExpeditionFrame({
     previous: stack.length > 1 ? stack[stack.length - 2]! : null,
   }
 
-  const ownPersonal = view
-    ? readerState.viewSettings[view.id]?.settings
-    : undefined
-  const personal = view ? effectivePersonal(view.viewType, ownPersonal) : {}
-  const setPersonal = (settings: Record<string, unknown>) => {
-    if (view) reader?.setViewSettings(expeditionId, view.id, settings)
-  }
   const markKnown = (conceptId: string) =>
     reader?.markReading(expeditionId, conceptId, "known")
   // Anonymous readers get the hint once they've marked something.
@@ -342,10 +360,11 @@ function ExpeditionFrame({
       ? {
           type: "view",
           view,
+          data,
+          collections: client.collections,
+          canEdit,
           personal,
-          personalSet: !!ownPersonal && Object.keys(ownPersonal).length > 0,
-          onPersonal: setPersonal,
-          onResetPersonal: () => setPersonal({}),
+          onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
         }
       : selectedConcept && place
         ? {
@@ -376,6 +395,13 @@ function ExpeditionFrame({
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        search={
+          <ConceptSearch
+            query={query}
+            onQueryChange={setQuery}
+            matchCount={matches?.size}
+          />
+        }
       />
       <div className="flex min-h-0 flex-1">
         <ViewsRail
@@ -404,9 +430,11 @@ function ExpeditionFrame({
                   )
                 }
                 onSettled={() => setSettledViewId(view.id)}
+                personal={personal.values}
+                onPersonalChange={personal.set}
+                onStatus={setStatus}
+                matches={matches}
                 covered={covered}
-                personal={personal}
-                onPersonalChange={setPersonal}
                 onMarkKnown={markKnown}
               />
               <ViewButton
@@ -419,6 +447,12 @@ function ExpeditionFrame({
                 }
                 className="absolute top-4 left-4 z-10"
               />
+              {status && (
+                <StatusChip
+                  status={status}
+                  className="absolute bottom-4 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2"
+                />
+              )}
               {resumed && (
                 <div className="absolute right-4 bottom-4 z-10">
                   <Alert data-testid="resumed" className="shadow-sm">

@@ -1,6 +1,6 @@
-// The Library (spec §3.2), basic for now: Continue reading, your Expeditions
-// from the API, New and Import. Shared with you, Drafts, the Tag filter,
-// thumbnails and global search come in later work packages.
+// The Library (spec §3.2), basic for now: Continue reading, your
+// Expeditions from the API, global search, New and Import. Shared with
+// you, Drafts, the Tag filter and thumbnails come in later work packages.
 import * as React from "react"
 import { BookOpenIcon, CompassIcon, PlusIcon, UploadIcon } from "lucide-react"
 import { Link, useLocation } from "wouter"
@@ -29,6 +29,7 @@ import { Spinner } from "@umbel/ui/components/spinner"
 import { toast } from "@umbel/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
+import { GlobalSearch } from "@/components/global-search.tsx"
 import {
   ApiError,
   continueReading,
@@ -185,7 +186,9 @@ export function LibraryScreen() {
         <Link href="/" aria-label="Library">
           <Wordmark />
         </Link>
-        <div className="flex-1" />
+        <div className="flex flex-1 justify-center">
+          <GlobalSearch />
+        </div>
         {actions}
         <AccountMenu />
         <input
