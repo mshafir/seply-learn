@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { compute, computeRiskView, tiny } from "../fixtures/index.ts";
-import { expeditionLayoutMetrics, formatLayoutMetrics, layoutMetrics } from "../src/metrics.ts";
+import { expeditionLayoutMetrics, formatLayoutMetrics, layoutMetrics, overlappingConcepts } from "../src/metrics.ts";
 import { drawnRelationships } from "../src/drawn.ts";
 import { scopeFor } from "../src/scope.ts";
 import type { CauseEffectSettings, Expedition, View } from "../src/model.ts";
+import { learningPathOverlaps } from "./learningPathStates.ts";
 
 describe("layout metrics", () => {
   it("the compute sample's Learning path and Cause & Effect Views read well", async () => {
@@ -17,11 +18,32 @@ describe("layout metrics", () => {
     expect(byId.get("learn")?.verdict).toBe("reads well");
     expect(byId.get("economics")?.verdict).toBe("reads well");
     expect(byId.get("learn")?.crossTopic).toBeTypeOf("number");
-    // Pinned: the numbers WP-0.6 shipped with. A layout change that moves them
-    // should be deliberate.
+    // Pinned. A layout change that moves them should be deliberate. (#60 made
+    // the layouts order-independent: 1 edge through other nodes → 0.)
     expect(formatLayoutMetrics(byId.get("learn")!)).toBe(
-      "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 1 edges through other nodes, 1 very long edges, 2 prerequisites cross topics → reads well",
+      "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 0 edges through other nodes, 1 very long edges, 0 overlapping Concepts, 2 prerequisites cross topics → reads well",
     );
+    expect(byId.get("evidence")).toMatchObject({ crossings: 0, edgesThroughNodes: 0, verdict: "reads well" });
+    expect(byId.get("economics")).toMatchObject({ crossings: 0, edgesThroughNodes: 1 });
+    expect(byId.get("lineage")).toMatchObject({ crossings: 4, edgesThroughNodes: 9 });
+    for (const m of [...all, risk!]) expect(m.overlaps).toBe(0);
+  });
+
+  it("no Learning path state draws Concepts over each other, dimmed or not (#62)", async () => {
+    const { states, found } = await learningPathOverlaps(compute);
+    expect(states).toBeGreaterThan(50);
+    expect(found).toEqual([]);
+  });
+
+  it("counts Concept cards drawn over each other", () => {
+    const e: Expedition = { ...tiny, concepts: [...tiny.concepts] };
+    const scope = scopeFor(e, tiny.views.find((v) => v.id === "lineage")!);
+    const positions = new Map([
+      ["old", { x: 0, y: 0 }],
+      ["newer", { x: 40, y: 10 }], // on top of "old"
+      ["newest", { x: 1000, y: 0 }],
+    ]);
+    expect(overlappingConcepts(scope, positions, ["old", "newer", "newest"])).toEqual([["old", "newer"]]);
   });
 
   it("skips View Types not drawn on the canvas", async () => {

@@ -42,6 +42,8 @@ The View Type definitions live in [`docs/view-types/`](../../view-types/README.m
 ## 4.3 Layout rules (canvas Views)
 
 - **Each View is a pure layout function** `(scope, view, visible?) → positions (+ bands, ticks)`. React Flow 12 only renders. There are **no stored positions**.
+- **Layouts don't depend on input order.** Before laying out, the scope is sorted by what a reader sees: Concepts by title, then id; Relationships by their ends in that order. The same Expedition lays out the same from a file or from live collections (which list rows by key and hold minted ids). ([#60](https://github.com/mshafir/umbel-learn/issues/60))
+- **Cards are sized for their titles:** a title that wraps to more lines gets a taller card, and the layout leaves room for it, so cards never run into each other.
 - **View switches** tween node positions by Concept id (d3-timer), then call `fitView`.
 - **Performance:** hundreds of nodes are comfortable. About 1–2k works but degrades; beyond that, simplify at low zoom.
 - **ELK layered** is the workhorse for directed graphs:
@@ -72,6 +74,7 @@ The View Type definitions live in [`docs/view-types/`](../../view-types/README.m
 - crossings
 - edges drawn through other nodes
 - very long edges
+- overlapping Concepts (cards drawn over each other)
 - cross-topic prerequisites
 
-A View "reads well" when crossings are ≤ 20% of edges and edges through nodes are ≤ 10%, thresholds calibrated on the hand-made samples. The curator agent's `view.inspect` tool returns these metrics (see [AI §5.3](05-ai.md#53-tools-and-checks)). **A View with problems can't be committed.** The agent fixes them by reshaping structure: targets, pins, placement, real links. It never sets positions.
+A View "reads well" when crossings are ≤ 20% of edges, edges through nodes are ≤ 10%, and no Concepts overlap. The crossing and edge thresholds are calibrated on the hand-made samples. The curator agent's `view.inspect` tool returns these metrics (see [AI §5.3](05-ai.md#53-tools-and-checks)). **A View with problems can't be committed.** The agent fixes them by reshaping structure: targets, pins, placement, real links. It never sets positions.

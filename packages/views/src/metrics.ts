@@ -3,8 +3,8 @@
 // these, and reshapes structure (never positions) when a View won't read well.
 // Ported from the prototype's `scripts/layout-metrics.ts`.
 import { isCanvasView, type Expedition, type View } from "./model.ts";
-import { layout, nodeSize, type Point, type Visible } from "./layouts.ts";
-import { learningMap, scopeFor, topicRoots } from "./scope.ts";
+import { conceptSize, layout, type Point, type Positions, type Visible } from "./layouts.ts";
+import { learningMap, scopeFor, topicRoots, type Scope } from "./scope.ts";
 import { drawnRelationships } from "./drawn.ts";
 
 export type LayoutMetrics = {
@@ -18,6 +18,8 @@ export type LayoutMetrics = {
   edgesThroughNodes: number;
   /** Edges more than 3× the median edge length. */
   veryLongEdges: number;
+  /** Pairs of Concept cards drawn over each other. Any makes the View cluttered. */
+  overlaps: number;
   /** Learning path only: visible prerequisites whose ends sit in different topics. */
   crossTopic?: number;
   verdict: "reads well" | "cluttered";
@@ -75,7 +77,7 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
     for (const c of shown) {
       if (c.id === s.from || c.id === s.to) continue;
       const p = positions.get(c.id)!;
-      const { width, height } = nodeSize(scope.weights.get(c.id) ?? 0);
+      const { width, height } = conceptSize(scope, c.id);
       let hit = false;
       for (let k = 3; k < 18 && !hit; k++) {
         const x = s.a.x + ((s.b.x - s.a.x) * k) / 20;
@@ -85,8 +87,12 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
       if (hit) edgesThroughNodes++;
     }
 
+  const overlaps = overlappingConcepts(scope, positions, shown.map((c) => c.id)).length;
+
   const readsWell =
-    crossings <= segs.length * READS_WELL.crossings && edgesThroughNodes <= segs.length * READS_WELL.edgesThroughNodes;
+    crossings <= segs.length * READS_WELL.crossings &&
+    edgesThroughNodes <= segs.length * READS_WELL.edgesThroughNodes &&
+    overlaps === 0;
   return {
     viewId: view.id,
     label: view.label,
@@ -96,9 +102,29 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
     crossings,
     edgesThroughNodes,
     veryLongEdges,
+    overlaps,
     ...(crossTopic !== undefined && { crossTopic }),
     verdict: readsWell ? "reads well" : "cluttered",
   };
+}
+
+/**
+ * Pairs of the given Concepts whose cards overlap where the layout put them
+ * (card sizes as drawn: `conceptSize`).
+ */
+export function overlappingConcepts(scope: Scope, positions: Positions, ids: string[]): [string, string][] {
+  const boxes = ids
+    .filter((id) => positions.has(id))
+    .map((id) => ({ id, p: positions.get(id)!, s: conceptSize(scope, id) }));
+  const out: [string, string][] = [];
+  for (let i = 0; i < boxes.length; i++)
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i];
+      const b = boxes[j];
+      if (Math.abs(a.p.x - b.p.x) < (a.s.width + b.s.width) / 2 && Math.abs(a.p.y - b.p.y) < (a.s.height + b.s.height) / 2)
+        out.push([a.id, b.id]);
+    }
+  return out;
 }
 
 /** Metrics for every canvas View of an Expedition, in the Expedition's View order. */
@@ -115,7 +141,8 @@ export async function expeditionLayoutMetrics(expedition: Expedition): Promise<L
 export function formatLayoutMetrics(m: LayoutMetrics): string {
   return (
     `${m.label} (${m.viewType}): ${m.shown} shown, ${m.edges} edges, ${m.crossings} crossings, ` +
-    `${m.edgesThroughNodes} edges through other nodes, ${m.veryLongEdges} very long edges` +
+    `${m.edgesThroughNodes} edges through other nodes, ${m.veryLongEdges} very long edges, ` +
+    `${m.overlaps} overlapping Concepts` +
     (m.crossTopic !== undefined ? `, ${m.crossTopic} prerequisites cross topics` : "") +
     ` → ${m.verdict}`
   );

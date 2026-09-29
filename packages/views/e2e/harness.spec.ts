@@ -64,8 +64,14 @@ test("another tab's edit reflows the Learning path after a pull", async ({ page 
   await settled(page);
   const before = await page.locator(".react-flow__node").count();
   await page.getByRole("button", { name: /Another tab's edit/ }).click();
-  await expect(page.locator(".react-flow__node")).toHaveCount(before + 1);
+  // The new technique needs MLA, so everything on MLA's path is now shared by
+  // one more target. That lifts two foundations over the "shared by enough
+  // targets" bar, and they join the core: the technique plus those two.
+  await expect(page.locator(".react-flow__node")).toHaveCount(before + 3);
   await expect(page.getByText("Technique 1 (another tab)")).toBeVisible();
+  await expect(page.getByText("Heads (Q · K · V)")).toBeVisible();
+  await expect(page.getByText("Query, key, value")).toBeVisible();
+  await expect(page.locator("[data-settled]")).toBeVisible();
   await expect(page).toHaveScreenshot("learning-path-after-pull.png");
 });
 

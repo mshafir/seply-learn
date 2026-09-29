@@ -13,9 +13,51 @@ export type Tick = { x: number; label: string };
 export type Extras = { bands?: Band[]; ticks?: Tick[] };
 export type LayoutResult = { positions: Positions; extras: Extras };
 
-/** Card size for a Concept of this weight. Weight above 1 marks a View's focal Concept (the outcome in risk mode). */
-export const nodeSize = (w: number) =>
-  w > 1 ? { width: 300, height: 88 } : { width: Math.round(150 + w * 70), height: Math.round(38 + w * 18) };
+/** Title font size in px by weight: focal, major, medium, minor (canvas.css `.umbel-concept--*`). */
+const titleFont = (w: number) => (w > 1 ? 20 : w > 0.6 ? 15 : w > 0.3 ? 13 : 12);
+/** A card's horizontal chrome: padding, borders, the Kind icon and its gap (canvas.css `.umbel-concept`). */
+const CARD_CHROME_X = 2 * 10 + 4 + 1 + 16 + 8;
+/** Vertical chrome: padding and borders. */
+const CARD_CHROME_Y = 2 * 6 + 2;
+/** A generous average glyph width, in em, so the estimate errs towards more lines. */
+const GLYPH_EM = 0.58;
+
+/** Lines a title wraps to in a card's text column (word wrap; an estimate). */
+function titleLines(title: string, textWidth: number, font: number) {
+  const space = font * 0.3;
+  let lines = 1;
+  let used = 0;
+  for (const word of title.split(/\s+/).filter(Boolean)) {
+    const w = word.length * font * GLYPH_EM;
+    if (used > 0 && used + space + w > textWidth) {
+      lines += Math.max(1, Math.ceil(w / textWidth));
+      used = w % textWidth;
+    } else used += (used > 0 ? space : 0) + w;
+  }
+  return lines;
+}
+
+/**
+ * Card size for a Concept of this weight and title. Weight above 1 marks a
+ * View's focal Concept (the outcome in risk mode). A long title makes the
+ * card taller, so the layout leaves room for what the card really draws and
+ * wrapped cards never run into their neighbours (#62).
+ */
+export const nodeSize = (w: number, title = "") => {
+  const width = w > 1 ? 300 : Math.round(150 + w * 70);
+  const base = w > 1 ? 88 : Math.round(38 + w * 18);
+  const font = titleFont(w);
+  const lines = title ? titleLines(title, width - CARD_CHROME_X, font) : 1;
+  return { width, height: Math.max(base, Math.ceil(lines * font * 1.25 + CARD_CHROME_Y)) };
+};
+
+/** A Concept's card size in a scope (its weight there, and its title). */
+export function conceptSize(scope: Scope, id: string) {
+  let titles = titleCache.get(scope.concepts);
+  if (!titles) titleCache.set(scope.concepts, (titles = new Map(scope.concepts.map((c) => [c.id, c.title]))));
+  return nodeSize(scope.weights.get(id) ?? 0, titles.get(id));
+}
+const titleCache = new WeakMap<Concept[], Map<string, string>>();
 
 const elk = new ELK();
 
@@ -35,7 +77,45 @@ export type Visible = {
   topics?: Map<string, Topic>;
 };
 
-export async function layout(scope: Scope, view: View, visible?: Visible): Promise<LayoutResult> {
+/** Code-point order, the same in every locale and runtime. */
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * The scope in a canonical order, so a layout never depends on the order
+ * Concepts and Relationships arrive in (#60). ELK breaks ties by input order,
+ * and a live collection lists rows by key, not in the order a file wrote
+ * them. The key is what a reader sees, so it survives an import that mints
+ * new ids: Concepts by title, then id; Relationships by their ends' places in
+ * that order, then Relationship Type (without its `builtin:` prefix).
+ */
+export function canonicalScope(scope: Scope): Scope {
+  const concepts = [...scope.concepts].sort((a, b) => cmp(a.title, b.title) || cmp(a.id, b.id));
+  const rank = new Map(concepts.map((c, i) => [c.id, i]));
+  const at = (id: string) => rank.get(id) ?? Number.MAX_SAFE_INTEGER;
+  const type = (t: string) => t.replace(/^builtin:/, "");
+  const relationships = [...scope.relationships].sort(
+    (a, b) =>
+      at(a.from) - at(b.from) ||
+      at(a.to) - at(b.to) ||
+      cmp(type(a.type), type(b.type)) ||
+      cmp(a.from, b.from) ||
+      cmp(a.to, b.to),
+  );
+  return { ...scope, concepts, relationships };
+}
+
+/** Bridges in the canonical order of their ends (see `canonicalScope`). */
+function canonicalVisible(scope: Scope, visible?: Visible): Visible | undefined {
+  if (!visible) return undefined;
+  const rank = new Map(scope.concepts.map((c, i) => [c.id, i]));
+  const at = (id: string) => rank.get(id) ?? Number.MAX_SAFE_INTEGER;
+  const bridges = [...visible.bridges].sort((a, b) => at(a.from) - at(b.from) || at(a.to) - at(b.to));
+  return { ...visible, bridges };
+}
+
+export async function layout(given: Scope, view: View, givenVisible?: Visible): Promise<LayoutResult> {
+  const scope = canonicalScope(given);
+  const visible = canonicalVisible(scope, givenVisible);
   if (view.viewType === "evidence") return { positions: evidence(scope, view.settings), extras: {} };
   if (view.viewType === "cause-and-effect") return causeEffect(scope, view.settings);
   if (view.viewType === "lineage") return lineage(scope, view.settings.groupBy);
@@ -43,7 +123,7 @@ export async function layout(scope: Scope, view: View, visible?: Visible): Promi
   return { positions: new Map(), extras: {} };
 }
 
-const size = (scope: Scope, id: string) => nodeSize(scope.weights.get(id) ?? 0);
+const size = conceptSize;
 
 /** Stack items in a column near their wanted y without overlapping. */
 function stack(items: { id: string; want: number; h: number }[], gap: number) {
@@ -64,9 +144,10 @@ export const EVIDENCE_COLUMN = 430;
 // Claims down the middle; supporting evidence fans left, challenges right.
 // Evidence shared by several claims is drawn once, level with their middle.
 function evidence(scope: Scope, s: EvidenceSettings): Positions {
-  const claims = scope.concepts.filter((c) => s.claimKinds.includes(c.kind) && scope.relationships.some((r) => r.to === c.id));
-  const claimIds = new Set(claims.map((c) => c.id));
+  const candidates = scope.concepts.filter((c) => s.claimKinds.includes(c.kind) && scope.relationships.some((r) => r.to === c.id));
+  const claimIds = new Set(candidates.map((c) => c.id));
   const first = scope.relationships.filter((r) => claimIds.has(r.to));
+  const claims = claimOrder(candidates, first);
   const side = (id: string) => {
     const rs = first.filter((r) => r.from === id);
     const pro = rs.filter((r) => s.supports.includes(r.type)).length;
@@ -107,6 +188,46 @@ function evidence(scope: Scope, s: EvidenceSettings): Positions {
     place(ids, sd * EVIDENCE_COLUMN * 1.8, (id) => pos.get(second.find((r) => r.from === id)!.to)!.y);
   }
   return pos;
+}
+
+/**
+ * Claims top to bottom so that claims sharing evidence sit next to each
+ * other, which keeps the shared evidence's lines short and uncrossed. Claims
+ * linked by shared evidence form a family; families keep the canonical order
+ * of their first claim, and within one the claims form a chain, each
+ * followed by the one it shares most with. Deterministic, since every tie
+ * falls back to the canonical order.
+ */
+function claimOrder(claims: Concept[], first: { from: string; to: string }[]): Concept[] {
+  const at = new Map(claims.map((c, i) => [c.id, i]));
+  const claimsOf = new Map<string, string[]>();
+  for (const r of first) claimsOf.set(r.from, [...(claimsOf.get(r.from) ?? []), r.to]);
+  const shared = new Map<string, Map<string, number>>(claims.map((c) => [c.id, new Map()]));
+  for (const cs of claimsOf.values())
+    for (const a of cs) for (const b of cs) if (a !== b) shared.get(a)!.set(b, (shared.get(a)!.get(b) ?? 0) + 1);
+  const byAt = (a: string, b: string) => at.get(a)! - at.get(b)!;
+
+  const out: string[] = [];
+  const placed = new Set<string>();
+  for (const c of claims) {
+    if (placed.has(c.id)) continue;
+    // The family: every claim reachable through shared evidence.
+    const family = [c.id];
+    for (let i = 0; i < family.length; i++)
+      for (const n of shared.get(family[i])!.keys()) if (!family.includes(n)) family.push(n);
+    // Start at an end of the chain (fewest partners), then follow the strongest link.
+    let cur = [...family].sort((a, b) => shared.get(a)!.size - shared.get(b)!.size || byAt(a, b))[0];
+    while (cur) {
+      out.push(cur);
+      placed.add(cur);
+      const links = shared.get(cur)!;
+      const next = family.filter((id) => !placed.has(id));
+      next.sort((a, b) => (links.get(b) ?? 0) - (links.get(a) ?? 0) || byAt(a, b));
+      cur = next[0];
+    }
+  }
+  const byId = new Map(claims.map((c) => [c.id, c]));
+  return out.map((id) => byId.get(id)!);
 }
 
 /** Risk mode: vertical distance between ranked levers, and the column's gap from the outcome. */
@@ -236,21 +357,30 @@ async function learningPath(scope: Scope, visible?: Visible): Promise<LayoutResu
     return { positions: pos, extras: {} };
   }
 
-  // Order topics so the ones others build on come first (sources of cross-topic edges).
+  // Order topics so the ones others build on come first (sources of
+  // cross-topic edges), each followed where it can be by the topics that
+  // build on it, so a cross-topic line spans the gap between neighbours.
   const gOf = new Map<string, string>();
   for (const [gid, g] of groups) for (const id of g.ids) gOf.set(id, gid);
-  const out = new Map<string, number>();
-  const into = new Map<string, number>();
+  const deps = new Map<string, Set<string>>([...groups.keys()].map((g) => [g, new Set()]));
   for (const e of edges) {
     const a = gOf.get(e.sources[0])!;
     const b = gOf.get(e.targets[0])!;
-    if (a === b) continue;
-    out.set(a, (out.get(a) ?? 0) + 1);
-    into.set(b, (into.get(b) ?? 0) + 1);
+    if (a !== b) deps.get(b)!.add(a);
   }
-  const order = [...groups.keys()].sort(
-    (a, b) => (into.get(a) ?? 0) - (out.get(a) ?? 0) - ((into.get(b) ?? 0) - (out.get(b) ?? 0)),
-  );
+  const order: string[] = [];
+  const byTitle = (a: string, b: string) => cmp(groups.get(a)!.title, groups.get(b)!.title) || cmp(a, b);
+  while (order.length < groups.size) {
+    const left = [...groups.keys()].filter((g) => !order.includes(g));
+    const waiting = (g: string) => [...deps.get(g)!].filter((d) => !order.includes(d)).length;
+    const last = order[order.length - 1];
+    const buildsOnLast = (g: string) => (last !== undefined && deps.get(g)!.has(last) ? 0 : 1);
+    const dependents = (g: string) => left.filter((h) => deps.get(h)!.has(g)).length;
+    // Ready topics first (cycles: the least blocked), then one that builds on
+    // the topic just placed, then the most built on, then by title.
+    left.sort((a, b) => waiting(a) - waiting(b) || buildsOnLast(a) - buildsOnLast(b) || dependents(b) - dependents(a) || byTitle(a, b));
+    order.push(left[0]);
+  }
 
   // Lay out each topic on its own, then shelf-pack the blocks into rows.
   const pad = { top: 34, side: 18, bottom: 18 };

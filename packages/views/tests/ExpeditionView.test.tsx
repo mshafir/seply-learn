@@ -123,6 +123,32 @@ describe("Comparison Table on live collections", () => {
     expect(rowOf("Crema Compact").querySelectorAll(".umbel-table__unknown")).toHaveLength(1);
     expect(rowOf("Crema Compact").textContent).toContain("a 1.8 L tank");
   });
+
+  it("shades the right edge while columns are hidden past it, until scrolled to the end (#62)", async () => {
+    // jsdom has no layout: a scroller 400 px wide over a 1000 px table.
+    const proto = HTMLElement.prototype;
+    const was = {
+      scrollWidth: Object.getOwnPropertyDescriptor(proto, "scrollWidth"),
+      clientWidth: Object.getOwnPropertyDescriptor(proto, "clientWidth"),
+    };
+    Object.defineProperty(proto, "scrollWidth", { configurable: true, get: () => 1000 });
+    Object.defineProperty(proto, "clientWidth", { configurable: true, get: () => 400 });
+    try {
+      const f = live(optionsFile);
+      const { container } = render(<ExpeditionView collections={f.collections} onSelect={noop} />);
+      const frame = container.querySelector<HTMLElement>(".umbel-table__frame")!;
+      const scroller = container.querySelector<HTMLElement>(".umbel-table__scroll")!;
+      await waitFor(() => expect(frame.dataset.moreRight).toBe(""));
+      scroller.scrollLeft = 600;
+      act(() => void scroller.dispatchEvent(new Event("scroll")));
+      await waitFor(() => expect(frame.dataset.moreRight).toBeUndefined());
+      // Every cell's content wraps at a cap rather than widening its column.
+      const cells = container.querySelectorAll(".umbel-table__cell");
+      expect(container.querySelectorAll(".umbel-table__cell > .umbel-table__cell-inner")).toHaveLength(cells.length);
+    } finally {
+      for (const [k, d] of Object.entries(was)) if (d) Object.defineProperty(proto, k, d);
+    }
+  });
 });
 
 describe("View switching", () => {

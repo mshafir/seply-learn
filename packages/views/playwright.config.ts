@@ -1,6 +1,6 @@
 // Screenshot tests of the dev harness. Not part of `pnpm check`: run with
 // `pnpm --filter @umbel/views test:e2e` (needs Playwright's Chromium). CI
-// wiring is WP-0.2's.
+// runs it in the Playwright job (.github/workflows/ci.yml).
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
