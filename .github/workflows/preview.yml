@@ -74,6 +74,9 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Build web
+        env:
+          # The Map View's PMTiles (docs/ops/basemap-tiles.md); unset: the OpenFreeMap fallback.
+          VITE_MAP_TILES_URL: ${{ vars.MAP_TILES_URL }}
         run: pnpm --filter web build
 
       - name: Create (or reuse) the Neon branch
@@ -264,6 +267,9 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Build web
+        env:
+          # The Map View's PMTiles (docs/ops/basemap-tiles.md); unset: the OpenFreeMap fallback.
+          VITE_MAP_TILES_URL: ${{ vars.MAP_TILES_URL }}
         run: pnpm --filter web build
 
       - name: Look up the Neon default branch

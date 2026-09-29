@@ -7,7 +7,7 @@
 // - Switching Views: the incoming View fades in, and a canvas View tweens
 //   each Concept from where the previous View drew it (by Concept id), then
 //   fits. Positions are only ever held in memory for that tween.
-import { useEffect, useEffectEvent, useRef } from "react";
+import { lazy, Suspense, useEffect, useEffectEvent, useRef } from "react";
 import { useLiveExpedition, type ExpeditionCollections } from "./live.ts";
 import { isCanvasView, type Expedition, type View } from "./model.ts";
 import type { Positions } from "./layouts.ts";
@@ -15,6 +15,13 @@ import { ViewCanvas } from "./canvas/ViewCanvas.tsx";
 import type { PositionMemory } from "./canvas/Canvas.tsx";
 import { ComparisonTable } from "./table/ComparisonTable.tsx";
 import { Anatomy } from "./anatomy/Anatomy.tsx";
+import type { BasemapConfig } from "./map/basemap.ts";
+
+// Map (MapLibre) and Timeline (vis-timeline) are large: they load with their View.
+const MapView = lazy(() => import("./map/MapView.tsx").then((m) => ({ default: m.MapView })));
+const TimelineView = lazy(() => import("./timeline/TimelineView.tsx").then((m) => ({ default: m.TimelineView })));
+/** View Types that call `onSettled` themselves, once drawn. */
+const selfSettling = new Set(["map", "timeline"]);
 
 /** What every View renderer takes besides the data. */
 export type ViewInteraction = {
@@ -33,6 +40,8 @@ export type ViewInteraction = {
   onPersonalChange?: (key: string, value: unknown) => void;
   /** View-specific status for the app's floating chip ("Path to MLA · 7 of 11 read"); null when there is none. */
   onStatus?: (status: ViewStatusChip | null) => void;
+  /** The Map View's tiles, from the app's config. Unset: the fallback style (OpenFreeMap). */
+  basemap?: BasemapConfig;
 } & ReaderInteraction;
 
 /**
@@ -80,7 +89,7 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
   // Shared by every canvas this renderer mounts, so a View switch tweens.
   const memory = useRef<Positions>(new Map()) as PositionMemory;
   // Views with no layout to wait for are settled as soon as they're shown.
-  const drawnNow = !view || !isCanvasView(view);
+  const drawnNow = !view || (!isCanvasView(view) && !selfSettling.has(view.viewType));
   const settled = useEffectEvent(() => rest.onSettled?.());
   useEffect(() => {
     if (drawnNow) settled();
@@ -90,6 +99,10 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
     <div className="umbel-view" key={view.id} data-view={view.id} data-view-type={view.viewType}>
       {view.viewType === "comparison-table" ? (
         <ComparisonTable expedition={expedition} view={view} {...rest} />
+      ) : view.viewType === "map" || view.viewType === "timeline" ? (
+        <Suspense fallback={<div className="umbel-view-empty">Loading {view.label}…</div>}>
+          {view.viewType === "map" ? <MapView expedition={expedition} view={view} {...rest} /> : <TimelineView expedition={expedition} view={view} {...rest} />}
+        </Suspense>
       ) : view.viewType === "anatomy" ? (
         <Anatomy expedition={expedition} view={view} {...rest} />
       ) : isCanvasView(view) ? (

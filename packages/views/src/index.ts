@@ -107,3 +107,27 @@ export { LearningPathCanvas, type LearningPathCanvasProps } from "./canvas/Learn
 export { ViewCanvas, type ViewCanvasProps } from "./canvas/ViewCanvas.tsx";
 export { KindIcon } from "./canvas/KindIcon.tsx";
 export { buildEdges } from "./canvas/edges.ts";
+
+// Map (MapLibre + our PMTiles) and Timeline (vis-timeline): pure models here;
+// ExpeditionView loads their renderers lazily.
+export { mapModel, placeLabels, type MapModel, type Pin } from "./map/pins.ts";
+export {
+  fallbackStyleUrl,
+  OPENFREEMAP_STYLES,
+  PROTOMAPS_ASSETS,
+  protomapsStyle,
+  withCoarseWorld,
+  type BasemapConfig,
+  type MapTheme,
+} from "./map/basemap.ts";
+export {
+  formatCalendarDate,
+  formatWhen,
+  parseCalendarDate,
+  timelineModel,
+  type CalendarDate,
+  type Precision,
+  type TimelineItem,
+  type TimelineLane,
+  type TimelineModel,
+} from "./timeline/items.ts";

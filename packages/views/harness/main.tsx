@@ -4,10 +4,11 @@
 // <ExpeditionView>, with each canvas View's layout metrics.
 // `pnpm --filter @umbel/views dev`.
 //
-// URL: `?expedition=options` for the synthetic options table (default: the
-// compute sample); `#<viewId>[/<conceptId>]` with the ids as the file writes
+// URL: `?expedition=options` for the synthetic options table, `?expedition=trip`
+// for the synthetic trip (Map and Timeline; default: the compute sample); `#<viewId>[/<conceptId>]` with the ids as the file writes
 // them; `?instant` skips the layout tween (screenshots); `?theme=dark` starts
-// in the dark theme. "Another tab's edit" pulls an edit as if another tab had
+// in the dark theme; `?tiles=<url>` sets the Map's PMTiles (default: the
+// VITE_MAP_TILES_URL env, else the OpenFreeMap fallback). "Another tab's edit" pulls an edit as if another tab had
 // pushed it, so the View reflows. The harness stands in for the app: it loads
 // @umbel/ui's tokens, which every colour comes from.
 import { StrictMode, useEffect, useMemo, useState } from "react";
@@ -32,10 +33,13 @@ import {
 } from "../src/index.ts";
 import { computeRiskViewOp, openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import optionsFile from "../fixtures/options.json";
+import tripFile from "@umbel/domain/fixtures/trip.json";
 
 const params = new URLSearchParams(location.search);
 const instant = params.has("instant");
-const which = params.get("expedition") === "options" ? "options" : "compute";
+const which = params.get("expedition") === "options" ? "options" : params.get("expedition") === "trip" ? "trip" : "compute";
+const tiles = params.get("tiles") ?? (import.meta.env.VITE_MAP_TILES_URL as string | undefined);
+const basemap = tiles ? { tiles } : undefined;
 type Theme = "light" | "dark";
 const initialTheme: Theme = params.get("theme") === "dark" ? "dark" : "light";
 
@@ -54,6 +58,20 @@ function open(): { f: LiveFixture; anotherTab: (n: number) => OpBody[] } {
         const g = gaps[n % gaps.length];
         return [{ kind: "relationship.add", target: relKey(f.concept(g[0]), builtinId(g[1]), f.concept(g[2])), value: { note: g[3] } }];
       },
+    };
+  }
+  if (which === "trip") {
+    const f = openLiveFixture(tripFile, { expeditionId: "harness-trip" });
+    return {
+      f,
+      // Another stop: a new place on the Map, and its day on the Timeline.
+      anotherTab: (n): OpBody[] => [
+        {
+          kind: "concept.create",
+          target: `another-tab-${n}`,
+          value: { title: `Lugano (another tab ${n + 1})`, kind: builtinId("place"), tags: [], lat: 46.004, lon: 8.951, date: "2027-06-12", lane: "days" },
+        },
+      ],
     };
   }
   const f = openLiveFixture(computeFile, { expeditionId: "harness-compute" });
@@ -83,7 +101,8 @@ const fromLive = (map: Map<string, string>) => {
 const viewFileId = fromLive(f.ids.views);
 const conceptFileId = fromLive(f.ids.concepts);
 
-const drawable = (v: View) => isCanvasView(v) || v.viewType === "comparison-table" || v.viewType === "anatomy";
+const drawable = (v: View) => isCanvasView(v) || ["comparison-table", "anatomy", "map", "timeline"].includes(v.viewType);
+const noLayout: Record<string, string> = { "comparison-table": "a table", map: "a map", timeline: "a timeline" };
 
 function readHash() {
   const [v, c] = decodeURIComponent(location.hash.slice(1)).split("/");
@@ -163,7 +182,7 @@ function Harness() {
           {view?.viewType === "anatomy"
             ? formatAnatomyStats(view.label, anatomyStats(anatomy(expedition, view.settings)))
             : view && !isCanvasView(view)
-              ? `${view.label}: a table, no layout`
+              ? `${view.label}: ${noLayout[view.viewType]}, no layout`
               : metrics
                 ? formatLayoutMetrics(metrics)
                 : "measuring…"}
@@ -177,6 +196,7 @@ function Harness() {
           onSelect={select}
           transitionMs={instant ? 0 : undefined}
           onSettled={() => setSettled(true)}
+          basemap={basemap}
         />
       </main>
     </div>
