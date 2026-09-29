@@ -81,6 +81,8 @@
   --umbel-band-must: var(--destructive);
   --umbel-band-nice: var(--success);
   --umbel-band-other: var(--muted-foreground);
+  --umbel-table-scrollbar: var(--muted-foreground);
+  --umbel-table-more: color-mix(in oklch, var(--foreground) 14%, transparent);
 }
 
 .umbel-canvas {
@@ -361,12 +363,58 @@
   background: var(--umbel-canvas-bg);
   color: var(--umbel-table-fg);
 }
+/* The table scrolls inside the View, both ways. Columns keep their natural
+   widths (long text wraps at a cap, below), so a wide table scrolls
+   sideways instead of squeezing every column to its longest word. The
+   scrollbar stays visible and sits right under the rows, and a shade on the
+   right edge says there are more columns. */
+.umbel-table__frame {
+  position: relative;
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+.umbel-table__frame::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  width: 2.5rem;
+  background: linear-gradient(to left, var(--umbel-table-more), transparent);
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.umbel-table__frame[data-more-right]::after {
+  opacity: 1;
+}
 .umbel-table__scroll {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
   overflow: auto;
 }
+/* Styled WebKit scrollbars are always drawn, even where the system hides
+   scrollbars until you scroll (macOS). Firefox gets the standard properties. */
+@supports not selector(::-webkit-scrollbar) {
+  .umbel-table__scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--umbel-table-scrollbar) transparent;
+  }
+}
+.umbel-table__scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.umbel-table__scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background: var(--umbel-table-scrollbar) padding-box;
+}
 .umbel-table {
+  width: max-content;
   min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -392,6 +440,10 @@
   text-align: left;
   vertical-align: bottom;
   font-weight: 600;
+}
+.umbel-table__head-label {
+  display: block;
+  max-width: 14rem;
 }
 .umbel-table__corner.umbel-table__head {
   padding-left: 1.5rem;
@@ -462,22 +514,32 @@
   min-width: 14rem;
   padding: 0.5rem 0.5rem 0.5rem 1.5rem;
   text-align: left;
+  vertical-align: top;
   font-weight: 500;
 }
+/* Every cell in a row starts on the same top line, the option name too. */
 .umbel-table__option-inner {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
+  max-width: 18rem;
+  line-height: 1.25rem;
 }
 .umbel-table__icon {
   width: 1rem;
   height: 1rem;
+  margin-top: 0.125rem;
   flex-shrink: 0;
 }
 .umbel-table__cell {
-  max-width: 16rem;
   padding: 0.5rem;
   vertical-align: top;
+  line-height: 1.25rem;
+}
+/* Long text wraps at a readable width rather than stretching its column. */
+.umbel-table__cell-inner {
+  display: block;
+  max-width: 18rem;
 }
 .umbel-table__cell--fails {
   background: var(--umbel-table-fails-cell);
