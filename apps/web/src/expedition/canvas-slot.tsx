@@ -11,6 +11,7 @@
 // - `personal` is the reader's personal settings for the View; a View's own
 //   control changing one calls `onPersonalChange`. `onStatus` receives the
 //   View's status for the floating chip.
+// - `matches` (search inside the Expedition) dims every other Concept.
 import type { EngineCollections } from "@umbel/sync"
 import { ExpeditionView, type ViewStatusChip } from "@umbel/views"
 
@@ -24,6 +25,8 @@ export type CanvasSlotProps = {
   personal?: Record<string, unknown>
   onPersonalChange?: (key: string, value: unknown) => void
   onStatus?: (status: ViewStatusChip | null) => void
+  /** Search matches: the canvas dims every other Concept. */
+  matches?: Set<string>
 }
 
 export function CanvasSlot({
@@ -35,6 +38,7 @@ export function CanvasSlot({
   personal,
   onPersonalChange,
   onStatus,
+  matches,
 }: CanvasSlotProps) {
   return (
     <div data-testid="canvas-view" className="size-full pt-21">
@@ -47,6 +51,7 @@ export function CanvasSlot({
         personal={personal}
         onPersonalChange={onPersonalChange}
         onStatus={onStatus}
+        matches={matches}
       />
     </div>
   )
