@@ -144,13 +144,18 @@ const hideRead = z.boolean().default(false)
 const NoPersonalSettings = z.strictObject({})
 
 /**
- * Where a View Type's settings refer to Relationship Types and Kinds, as
- * top-level keys (`rows.kinds` style for filters). Used by converters and by
- * anything that rewrites references.
+ * Where a View Type's settings refer to Relationship Types, Kinds and
+ * Concepts, as dotted paths (`rows.kinds` style for filters;
+ * `columns[].concept` reaches into each item of a list). Each path holds an id
+ * or a list of ids. The per-View overrides (`placement`, `order`, `hide`,
+ * `fold`) refer to Concepts in every View Type and are not listed. Used by
+ * converters and by anything that rewrites references (import re-mints
+ * Concept ids).
  */
 export type SettingsRefs = {
   relTypes: readonly string[]
   kinds: readonly string[]
+  concepts: readonly string[]
 }
 
 type ViewTypeSpec = {
@@ -165,43 +170,59 @@ export const VIEW_TYPES = {
     version: 1,
     shared: ComparisonTableSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: [], kinds: ["rows.kinds"] },
+    refs: {
+      relTypes: [],
+      kinds: ["rows.kinds"],
+      concepts: ["columns[].concept"],
+    },
   },
   outline: {
     version: 1,
     shared: OutlineSettings,
     personal: z.strictObject({ hideRead }),
-    refs: { relTypes: ["relationshipTypes"], kinds: [] },
+    refs: { relTypes: ["relationshipTypes"], kinds: [], concepts: [] },
   },
   evidence: {
     version: 1,
     shared: EvidenceSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["supports", "challenges"], kinds: ["claimKinds"] },
+    refs: {
+      relTypes: ["supports", "challenges"],
+      kinds: ["claimKinds"],
+      concepts: [],
+    },
   },
   "cause-and-effect": {
     version: 1,
     shared: CauseEffectSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["positive", "negative"], kinds: ["levers.kinds"] },
+    refs: {
+      relTypes: ["positive", "negative"],
+      kinds: ["levers.kinds"],
+      concepts: ["outcomes"],
+    },
   },
   map: {
     version: 1,
     shared: MapSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["relationshipTypes"], kinds: ["kinds"] },
+    refs: {
+      relTypes: ["relationshipTypes"],
+      kinds: ["kinds"],
+      concepts: ["home"],
+    },
   },
   timeline: {
     version: 1,
     shared: TimelineSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: [], kinds: [] },
+    refs: { relTypes: [], kinds: [], concepts: [] },
   },
   anatomy: {
     version: 1,
     shared: AnatomySettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["containment", "pins"], kinds: [] },
+    refs: { relTypes: ["containment", "pins"], kinds: [], concepts: ["roots"] },
   },
   "learning-path": {
     version: 1,
@@ -210,25 +231,29 @@ export const VIEW_TYPES = {
       showAllSteps: z.boolean().default(false),
       hideRead,
     }),
-    refs: { relTypes: ["relationshipTypes"], kinds: ["targets.kinds"] },
+    refs: {
+      relTypes: ["relationshipTypes"],
+      kinds: ["targets.kinds"],
+      concepts: [],
+    },
   },
   lineage: {
     version: 1,
     shared: LineageSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["relationshipTypes"], kinds: [] },
+    refs: { relTypes: ["relationshipTypes"], kinds: [], concepts: [] },
   },
   quadrant: {
     version: 1,
     shared: QuadrantSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["evidence"], kinds: [] },
+    refs: { relTypes: ["evidence"], kinds: [], concepts: [] },
   },
   rates: {
     version: 1,
     shared: RatesSettings,
     personal: NoPersonalSettings,
-    refs: { relTypes: ["sourceRelationship"], kinds: [] },
+    refs: { relTypes: ["sourceRelationship"], kinds: [], concepts: [] },
   },
 } as const satisfies Record<ViewTypeId, ViewTypeSpec>
 

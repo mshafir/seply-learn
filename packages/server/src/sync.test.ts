@@ -15,50 +15,25 @@ import { and, eq } from "drizzle-orm"
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
-import type { ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
 import { loadState } from "./projection.ts"
 import type { Relay } from "./relay.ts"
-import { Jar, testApp, testDb } from "./test-harness.ts"
+import {
+  signUp,
+  TEST_ENV,
+  testApp,
+  testDb,
+  type TestUser,
+} from "./test-harness.ts"
 
-const LOCAL = "http://localhost:8787"
-const env: ServerEnv = {
-  BETTER_AUTH_URL: LOCAL,
-  BETTER_AUTH_SECRET: "test-secret-at-least-32-characters-long!!",
-  AUTH_TEST_CREDENTIALS: "1",
-}
+const env = TEST_ENV
 
-type App = ReturnType<typeof testApp>
-type User = { id: string; headers: Record<string, string> }
+type User = TestUser
 type PushResponse = {
   headSeq: number
   results: { opId: string; serverSeq: number }[]
 }
 type PullResponse = { headSeq: number; ops: LoggedOp[]; more: boolean }
-
-async function signUp(app: App, name: string): Promise<User> {
-  const jar = new Jar()
-  jar.take(
-    await app.request(`${LOCAL}/api/auth/sign-up/email`, {
-      method: "POST",
-      headers: { "content-type": "application/json", origin: LOCAL },
-      body: JSON.stringify({
-        email: `${name}@example.com`,
-        password: "correct horse battery staple",
-        name,
-      }),
-    })
-  )
-  const headers = {
-    cookie: jar.header(),
-    origin: LOCAL,
-    "content-type": "application/json",
-  }
-  const me = (await (await app.request("/api/me", { headers })).json()) as {
-    user: { id: string }
-  }
-  return { id: me.user.id, headers }
-}
 
 async function setup(relay?: Relay) {
   const db = await testDb()

@@ -12,6 +12,7 @@ import {
 } from "./config.ts"
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
+import { importRoutes } from "./import.ts"
 import { noopRelay, type Relay } from "./relay.ts"
 import { syncRoutes } from "./sync.ts"
 
@@ -143,6 +144,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/expeditions", signedIn)
   app.use("/expeditions/*", signedIn)
   app.route("/expeditions", expeditionRoutes(relay))
+  app.use("/import", signedIn)
+  app.route("/import", importRoutes(relay))
   app.route("/", syncRoutes(relay))
 
   app.notFound((c) => c.json({ error: "not found" }, 404))

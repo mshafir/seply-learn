@@ -15,11 +15,23 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 | `history` | `groupChanges`, `stateAt` ("view as of"), `opSubject`/`changeSubject`/`shouldCoalesce` (editing sessions), `undoChange` (reverts only fields still holding the Change's value; returns `kept`), `restoreTo` (inverse ops). Both return op bodies to append as a new Change. |
 | `commands` | `mergeConcepts` (one Change: Relationships, Tags, provenance, alias, View overrides, tombstone), `removeKind`, `removeRelType`, `effectiveOverrides` (ignores deleted Concepts), `liveAttributes`, `higherReadingState`. |
 | `fields` | The field-level view history is built on: `flattenState`, `diffKeys`, `opsToReach`. |
-| `view-types` | `VIEW_TYPES`: for all 11 View Types, a versioned shared-settings schema (with the `placement` / `order` / `hide` / `fold` overrides) and a personal-settings schema; `parseSharedSettings`, `parsePersonalSettings`. |
+| `view-types` | `VIEW_TYPES`: for all 11 View Types, a versioned shared-settings schema (with the `placement` / `order` / `hide` / `fold` overrides), a personal-settings schema, and `refs` (the settings paths that name Relationship Types, Kinds and Concepts); `parseSharedSettings`, `parsePersonalSettings`. |
 | `builtins` | `BUILTIN_KINDS` (16), `BUILTIN_REL_TYPES` (18), ids `builtin:<name>`. |
 | `permissions` | `PERMISSIONS` (the §1.8 matrix), `can`, `canPropose`, `actionForOp`. |
 | `sample` | `sampleToState`: converts the prototype sample-graph JSON into one import Change. |
+| `expedition-json` | Our JSON (§1.9). `ExpeditionJson` (v1, `EXPEDITION_JSON_VERSION`): the Zod schema with internal references checked (unique ids; Concept Kinds, Relationship ends and types, Attribute values, View settings and their Kind/Relationship Type refs). `stateToExpeditionJson` (export: live entities only, built-ins inlined, sections in order, Views in rail order). `parseExpeditionJson` (validates, upgrading older `schemaVersion`s first; a file without one is version 0, the prototype sample-graph format). `importExpeditionJson` → `{ ops, change, state, ids }`: one "Imported from file" Change (origin `import`) with every entity id re-minted. Throws `ImportError` (`message`, `issues`). |
 | `ulid`, `order-key`, `common` | ULIDs, fractional index keys, shared enums and schemas (palette, Visibility, roles, provenance, …). |
+
+### Fixtures
+
+`fixtures/` holds our JSON (v1) for the two public Expeditions: `compute.json` (the hand-made compute sample: 201 Concepts, 425 Relationships, 12 Views) and `research-doc.json` (generated from `docs/research/knowledge-graph-learning-tools.md`: 141, 331, 4). Import them as `@umbel/domain/fixtures/<name>.json`. `pnpm --filter @umbel/domain fixtures` regenerates them from `prototypes/sample-graphs` by upgrading version 0 files. Never add personal graphs (see the plan's private-data rule).
+
+### Import: what is re-minted
+
+- **Re-minted** (fresh ULIDs, references remapped): the Expedition, Concepts, article sections, Views, Sources, and so Relationship keys. Provenance refs follow their Source; View settings follow their Concepts (the View Type's `refs.concepts` paths and the `placement`/`order`/`hide`/`fold` overrides).
+- **Kept:** custom Kind, Relationship Type and Attribute ids. They are Expedition-scoped vocabulary that View settings name (`x`, `colorBy`, columns), and every row is keyed by its Expedition. A `builtin:` id this server doesn't know becomes a custom definition from its inlined label and colour.
+- **Dropped:** references to things not in the file (provenance to a missing Source, View overrides naming a deleted Concept), a dangling best View (the first View is used). Structural references that don't resolve (a Relationship end, a Concept's Kind) reject the file.
+- Sources' `addedBy` becomes the importer; Views exported while `queued` or `building` arrive `failed`; the Expedition is `ready`.
 
 ### Semantics worth knowing
 

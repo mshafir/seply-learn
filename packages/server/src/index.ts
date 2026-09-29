@@ -22,7 +22,17 @@ export {
   type DbConnection,
   type Schema,
 } from "./db.ts"
-export { CreateExpedition, type ExpeditionSummary } from "./expeditions.ts"
+export {
+  CreateExpedition,
+  createExpedition,
+  type ExpeditionSummary,
+} from "./expeditions.ts"
+export {
+  importExpedition,
+  IMPORT_MAX_BYTES,
+  type ImportCounts,
+  type ImportResponse,
+} from "./import.ts"
 export { noopRelay, type Relay } from "./relay.ts"
 export {
   appendOps,
