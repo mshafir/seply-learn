@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "office-coffee",
+  "title": "A coffee machine for the office",
+  "summary": "Synthetic fixture: invented machines compared against a team's must-haves and nice-to-haves, with gaps left unknown.",
+  "bestViewId": "compare",
+  "attributes": [
+    { "id": "price", "label": "Price", "type": "money" },
+    { "id": "cups", "label": "Cups a day", "type": "number" },
+    { "id": "type", "label": "Type", "type": "text" },
+    { "id": "standing", "label": "Standing", "type": "enum", "enumValues": ["chosen", "in-play", "ruled-out"] },
+    { "id": "priority", "label": "Priority", "type": "enum", "enumValues": ["hard", "nice", "dropped"] }
+  ],
+  "concepts": [
+    { "id": "brewline-40", "title": "Brewline 40", "kind": "builtin:thing", "tags": ["option"], "summary": "A bean-to-cup machine sized for a floor of forty.", "attributes": { "price": 1350, "cups": 60, "type": "bean-to-cup", "standing": "chosen" } },
+    { "id": "kettleworks-duo", "title": "Kettleworks Duo", "kind": "builtin:thing", "tags": ["option"], "summary": "Two filter jugs on a hot plate.", "attributes": { "price": 240, "cups": 30, "type": "filter", "standing": "ruled-out" } },
+    { "id": "pourmaster-pro", "title": "Pourmaster Pro", "kind": "builtin:thing", "tags": ["option"], "summary": "A commercial espresso machine with two groups.", "attributes": { "price": 2900, "cups": 120, "type": "espresso", "standing": "in-play" } },
+    { "id": "crema-compact", "title": "Crema Compact", "kind": "builtin:thing", "tags": ["option"], "summary": "A small bean-to-cup machine.", "attributes": { "price": 890, "type": "bean-to-cup", "standing": "in-play" } },
+    { "id": "stillroom-batch", "title": "Stillroom batch brewer", "kind": "builtin:thing", "tags": ["option"], "summary": "Brews three litres at a time into a flask.", "attributes": { "price": 1100, "cups": 80, "type": "batch filter", "standing": "in-play" } },
+
+    { "id": "forty-cups", "title": "40 cups a day", "kind": "builtin:criterion", "summary": "The floor drinks about forty cups a day.", "attributes": { "priority": "hard" } },
+    { "id": "budget", "title": "Under $1,500 all-in", "kind": "builtin:criterion", "summary": "The budget, including installation.", "attributes": { "priority": "hard" } },
+    { "id": "plumbed", "title": "Plumbed-in water", "kind": "builtin:criterion", "summary": "Nobody wants to refill a tank.", "attributes": { "priority": "nice" } },
+    { "id": "milk", "title": "Frothed milk", "kind": "builtin:criterion", "summary": "For the latte drinkers.", "attributes": { "priority": "nice" } },
+    { "id": "quiet", "title": "Quiet on the open-plan floor", "kind": "builtin:criterion", "summary": "Dropped once the machine moved to the kitchen.", "attributes": { "priority": "dropped" } }
+  ],
+  "relationships": [
+    { "from": "brewline-40", "type": "builtin:meets", "to": "forty-cups", "note": "rated for 60" },
+    { "from": "brewline-40", "type": "builtin:meets", "to": "budget", "note": "$1,350 installed" },
+    { "from": "brewline-40", "type": "builtin:meets", "to": "plumbed" },
+    { "from": "brewline-40", "type": "builtin:partly-meets", "to": "milk", "note": "steam wand only, no auto-froth" },
+    { "from": "brewline-40", "type": "builtin:meets", "to": "quiet" },
+
+    { "from": "kettleworks-duo", "type": "builtin:fails", "to": "forty-cups", "note": "two jugs, 30 cups before a refill" },
+    { "from": "kettleworks-duo", "type": "builtin:meets", "to": "budget" },
+    { "from": "kettleworks-duo", "type": "builtin:fails", "to": "plumbed" },
+    { "from": "kettleworks-duo", "type": "builtin:fails", "to": "milk" },
+
+    { "from": "pourmaster-pro", "type": "builtin:meets", "to": "forty-cups" },
+    { "from": "pourmaster-pro", "type": "builtin:fails", "to": "budget", "note": "$2,900 before the plumber" },
+    { "from": "pourmaster-pro", "type": "builtin:meets", "to": "plumbed" },
+    { "from": "pourmaster-pro", "type": "builtin:meets", "to": "milk" },
+
+    { "from": "crema-compact", "type": "builtin:meets", "to": "budget" },
+    { "from": "crema-compact", "type": "builtin:meets", "to": "milk", "note": "auto-froth" },
+
+    { "from": "stillroom-batch", "type": "builtin:meets", "to": "forty-cups", "note": "3 L a batch" },
+    { "from": "stillroom-batch", "type": "builtin:meets", "to": "budget" },
+    { "from": "stillroom-batch", "type": "builtin:partly-meets", "to": "plumbed", "note": "optional kit, not quoted" },
+    { "from": "stillroom-batch", "type": "builtin:fails", "to": "milk" }
+  ],
+  "views": [
+    {
+      "id": "compare",
+      "viewType": "comparison-table",
+      "label": "Which machine?",
+      "question": "How do the machines stack up against what the team needs?",
+      "settings": {
+        "rows": { "kinds": ["builtin:thing"], "tags": ["option"] },
+        "columns": [{ "attribute": "price" }, { "attribute": "cups" }, { "attribute": "type" }, { "criteria": "auto" }],
+        "sortBy": "price",
+        "standing": "standing",
+        "priority": "priority"
+      },
+      "settingsVersion": 1
+    }
+  ]
+}

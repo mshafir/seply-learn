@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { CanvasView, Expedition } from "../model.ts";
 import { scopeFor } from "../scope.ts";
-import { Canvas } from "./Canvas.tsx";
+import { Canvas, type PositionMemory } from "./Canvas.tsx";
 import { LearningPathCanvas } from "./LearningPathCanvas.tsx";
 
 export type ViewCanvasProps = {
@@ -12,6 +12,7 @@ export type ViewCanvasProps = {
   matches?: Set<string>;
   transitionMs?: number;
   onSettled?: () => void;
+  memory?: PositionMemory;
 };
 
 /** Any canvas View (Evidence, Cause & Effect, Lineage, Learning path), scoped from its settings. */

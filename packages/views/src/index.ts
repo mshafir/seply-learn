@@ -60,8 +60,37 @@ export {
   type Overlay,
 } from "./overlay.ts";
 
+// Live data: an Expedition's @umbel/sync collections → what the Views draw
+export { expeditionFromRows, type ExpeditionRows } from "./data.ts";
+export { readExpedition, useLiveExpedition, type ExpeditionCollections } from "./live.ts";
+
+// The component the app mounts: live collections + the selected View
+export {
+  ExpeditionView,
+  pickView,
+  ViewRenderer,
+  type ExpeditionViewProps,
+  type ViewInteraction,
+  type ViewRendererProps,
+} from "./ExpeditionView.tsx";
+
+// Comparison Table
+export {
+  comparisonTable,
+  formatValue,
+  verdictTone,
+  type ComparisonTableModel,
+  type Standing,
+  type TableBand,
+  type TableCell,
+  type TableColumn,
+  type TableRow,
+  type VerdictTone,
+} from "./table.ts";
+export { ComparisonTable, type ComparisonTableProps } from "./table/ComparisonTable.tsx";
+
 // Canvas (React Flow 12)
-export { Canvas, type CanvasProps } from "./canvas/Canvas.tsx";
+export { Canvas, type CanvasProps, type PositionMemory } from "./canvas/Canvas.tsx";
 export { LearningPathCanvas, type LearningPathCanvasProps } from "./canvas/LearningPathCanvas.tsx";
 export { ViewCanvas, type ViewCanvasProps } from "./canvas/ViewCanvas.tsx";
 export { KindIcon } from "./canvas/KindIcon.tsx";

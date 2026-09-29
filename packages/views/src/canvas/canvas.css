@@ -61,6 +61,26 @@
   --umbel-toolbar-border: var(--border);
   --umbel-toolbar-fg: var(--muted-foreground);
   --umbel-toolbar-strong: var(--foreground);
+
+  /* Comparison Table: verdicts carry their tone in colour and in words. */
+  --umbel-table-bg: var(--card);
+  --umbel-table-fg: var(--card-foreground);
+  --umbel-table-head-bg: var(--background);
+  --umbel-table-border: var(--border);
+  --umbel-table-muted: var(--muted-foreground);
+  --umbel-table-hover: var(--accent);
+  --umbel-table-selected: color-mix(in oklch, var(--primary) 8%, var(--card));
+  --umbel-table-chosen: color-mix(in oklch, var(--success) 8%, var(--card));
+  --umbel-table-chosen-edge: var(--success);
+  --umbel-table-fails: color-mix(in oklch, var(--destructive) 7%, var(--card));
+  --umbel-table-fails-cell: color-mix(in oklch, var(--destructive) 14%, var(--card));
+  --umbel-verdict-meets: var(--success);
+  --umbel-verdict-partly: var(--suggested-text);
+  --umbel-verdict-fails: var(--destructive);
+  --umbel-verdict-other: var(--muted-foreground);
+  --umbel-band-must: var(--destructive);
+  --umbel-band-nice: var(--success);
+  --umbel-band-other: var(--muted-foreground);
 }
 
 .umbel-canvas {
@@ -283,4 +303,213 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.75rem;
+}
+
+/* Switching Views: the incoming View fades in. Canvas Views also tween every
+   Concept from where the last View drew it (Canvas.tsx). */
+.umbel-view {
+  height: 100%;
+  animation: umbel-view-in 220ms ease-out;
+}
+@keyframes umbel-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .umbel-view {
+    animation: none;
+  }
+}
+.umbel-view-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--umbel-canvas-muted);
+  font-size: 0.875rem;
+}
+
+/* Comparison Table. TODO(ui): the app can swap in shadcn's Table; the
+   structure (thead/tbody/th/td) matches it. */
+.umbel-table-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--umbel-canvas-bg);
+  color: var(--umbel-table-fg);
+}
+.umbel-table__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.umbel-table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+}
+.umbel-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.umbel-table thead th {
+  background: var(--umbel-table-head-bg);
+}
+.umbel-table__corner {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.umbel-table__head {
+  min-width: 7rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--umbel-table-border);
+  text-align: left;
+  vertical-align: bottom;
+  font-weight: 600;
+}
+.umbel-table__corner.umbel-table__head {
+  padding-left: 1.5rem;
+}
+.umbel-table__head--concept {
+  cursor: pointer;
+}
+.umbel-table__head--concept:hover,
+.umbel-table__head--concept[data-selected="true"] {
+  text-decoration: underline;
+}
+.umbel-band-head {
+  padding: 0.75rem 0.5rem 0;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--umbel-band-other);
+}
+.umbel-band-head__label {
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid currentColor;
+}
+.umbel-band-head--must-haves {
+  color: var(--umbel-band-must);
+}
+.umbel-band-head--nice-to-haves {
+  color: var(--umbel-band-nice);
+}
+.umbel-table__row {
+  cursor: pointer;
+  background: var(--umbel-table-bg);
+}
+.umbel-table__row > * {
+  background: inherit;
+  border-bottom: 1px solid var(--umbel-table-border);
+}
+.umbel-table__row:hover {
+  background: var(--umbel-table-hover);
+}
+.umbel-table__row--chosen {
+  background: var(--umbel-table-chosen);
+}
+.umbel-table__row--chosen .umbel-table__option {
+  box-shadow: inset 4px 0 0 var(--umbel-table-chosen-edge);
+}
+.umbel-table__row--fails {
+  background: var(--umbel-table-fails);
+}
+.umbel-table__row--selected {
+  background: var(--umbel-table-selected);
+}
+.umbel-table__row--ruled-out .umbel-table__title {
+  color: var(--umbel-table-muted);
+  text-decoration: line-through;
+}
+.umbel-table__row--ruled-out .umbel-table__cell {
+  opacity: 0.6;
+}
+.umbel-table__row--dim {
+  opacity: 0.2;
+}
+.umbel-table__option {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 14rem;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  text-align: left;
+  font-weight: 500;
+}
+.umbel-table__option-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.umbel-table__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+.umbel-table__cell {
+  max-width: 16rem;
+  padding: 0.5rem;
+  vertical-align: top;
+}
+.umbel-table__cell--fails {
+  background: var(--umbel-table-fails-cell);
+}
+.umbel-table__num {
+  font-variant-numeric: tabular-nums;
+}
+.umbel-table__none,
+.umbel-table__unknown {
+  color: var(--umbel-table-muted);
+}
+.umbel-table__unknown {
+  font-weight: 600;
+}
+.umbel-verdict {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  color: var(--umbel-verdict-other);
+}
+.umbel-verdict--meets {
+  color: var(--umbel-verdict-meets);
+}
+.umbel-verdict--partly {
+  color: var(--umbel-verdict-partly);
+}
+.umbel-verdict--fails {
+  color: var(--umbel-verdict-fails);
+}
+.umbel-verdict__dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: currentColor;
+}
+.umbel-verdict__label {
+  font-weight: 500;
+}
+.umbel-verdict__note {
+  color: var(--umbel-table-muted);
+}
+.umbel-table__empty,
+.umbel-table__dropped {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.75rem;
+  color: var(--umbel-table-muted);
+}
+.umbel-table__dropped button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
