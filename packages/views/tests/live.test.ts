@@ -6,9 +6,10 @@ import { builtinId, relKey } from "@umbel/domain";
 import { compute, computeRiskView } from "../fixtures/index.ts";
 import { computeRiskViewOp, openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";
-import { expeditionLayoutMetrics, formatLayoutMetrics, layoutMetrics } from "../src/metrics.ts";
+import { expeditionLayoutMetrics, formatLayoutMetrics, layoutMetrics, type LayoutMetrics } from "../src/metrics.ts";
 import { learningMap } from "../src/scope.ts";
 import type { Expedition, LearningPathSettings } from "../src/model.ts";
+import { learningPathOverlaps } from "./learningPathStates.ts";
 
 let open: LiveFixture[] = [];
 afterEach(() => {
@@ -19,6 +20,12 @@ const live = () => {
   const f = openLiveFixture(computeFile);
   open.push(f);
   return f;
+};
+/** Metrics without the View's id, which the import mints anew. */
+const sansId = (m: LayoutMetrics): Omit<LayoutMetrics, "viewId"> => {
+  const out: Partial<LayoutMetrics> = { ...m };
+  delete out.viewId;
+  return out as Omit<LayoutMetrics, "viewId">;
 };
 const lpOf = (e: Expedition) => e.views.find((v) => v.viewType === "learning-path")!;
 
@@ -37,22 +44,18 @@ describe("the imported compute fixture, read live", () => {
     const fromStatic = (await layoutMetrics(compute, compute.views.find((v) => v.id === "learn")!))!;
     // Printed so the numbers show up in CI logs and PRs.
     console.log(`live:   ${formatLayoutMetrics(fromLive)}\nstatic: ${formatLayoutMetrics(fromStatic)}`);
-    // Same Concepts drawn, same lines, same crossings and topics. Only ELK's
-    // tie-breaking can differ: a collection lists Relationships by key
-    // (from|type|to), not in the order the file wrote them, which moves one
-    // edge in the static sample's very-long count (1 there, 0 here).
-    const same = ({ shown, edges, crossings, edgesThroughNodes, crossTopic, verdict }: typeof fromLive) => ({
-      shown,
-      edges,
-      crossings,
-      edgesThroughNodes,
-      crossTopic,
-      verdict,
-    });
-    expect(same(fromLive)).toEqual(same(fromStatic));
+    // A collection lists Relationships by key (from|type|to) and the import
+    // mints new ids, but the layouts sort their input by what a reader sees
+    // (#60), so the numbers are the same.
+    expect(sansId(fromLive)).toEqual(sansId(fromStatic));
     expect(formatLayoutMetrics(fromLive)).toBe(
-      "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 1 edges through other nodes, 0 very long edges, 2 prerequisites cross topics → reads well",
+      "Learning path (learning-path): 24 shown, 18 edges, 1 crossings, 0 edges through other nodes, 1 very long edges, 0 overlapping Concepts, 2 prerequisites cross topics → reads well",
     );
+  });
+
+  it("no Learning path state draws Concepts over each other, read live either (#62)", async () => {
+    const { found } = await learningPathOverlaps(readExpedition(live().collections));
+    expect(found).toEqual([]);
   });
 
   it("lays out the same way every time the same rows are read", async () => {
@@ -68,15 +71,14 @@ describe("the imported compute fixture, read live", () => {
     const all = await expeditionLayoutMetrics(e);
     const risk = await layoutMetrics(e, e.views.find((v) => v.id === computeRiskView.id)!);
     console.log([...all, risk!].map(formatLayoutMetrics).join("\n"));
+    // Exactly the numbers the static sample gets (tests/metrics.test.ts).
+    // Before #60, mechanism-mode Cause & Effect drew 2 crossings here and 0
+    // from the file.
+    const fromStatic = await expeditionLayoutMetrics(compute);
+    expect(all.filter((m) => m.label !== computeRiskView.label).map(sansId)).toEqual(fromStatic.map(sansId));
+    expect(sansId(risk!)).toEqual(sansId((await layoutMetrics(compute, computeRiskView))!));
     const byLabel = new Map(all.map((m) => [m.label, m]));
-    // The same numbers as tests/metrics.test.ts prints for the static sample.
-    expect(risk).toMatchObject({ shown: 16, edges: 17, crossings: 0, edgesThroughNodes: 2 });
-    expect(byLabel.get("Evidence")).toMatchObject({ shown: 36, edges: 27, crossings: 0, verdict: "reads well" });
-    expect(byLabel.get("Lineage")).toMatchObject({ shown: 33, edges: 26, crossings: 6 });
-    // Known gap (not this work package's Views): mechanism-mode Cause & Effect
-    // is sensitive to Relationship order. In the file's hand order it reads
-    // well (0 crossings); in the collections' key order ELK draws 2 crossings.
-    expect(byLabel.get("Compute economics")).toMatchObject({ shown: 16, edges: 19 });
+    expect(byLabel.get("Compute economics")).toMatchObject({ shown: 16, edges: 19, crossings: 0, verdict: "reads well" });
   });
 
   it("sees another tab's edit as soon as it is pulled", () => {

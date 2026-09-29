@@ -102,6 +102,8 @@
 }
 
 /* Concept card */
+/* Keep the font sizes, padding, borders and icon in step with nodeSize
+   (layouts.ts), which sizes each card for its title. */
 .umbel-concept {
   position: relative;
   display: flex;
@@ -139,6 +141,26 @@
 .umbel-concept--selected {
   border-color: var(--umbel-concept-selected);
   box-shadow: 0 0 0 2px var(--umbel-concept-ring);
+}
+/* A Concept (and its lines) appearing in a reflow, say when a Learning path
+   focus shows more steps: it waits while the others glide, then fades in,
+   so nothing is drawn over a Concept still on its way. --umbel-enter-ms is
+   the tween length (Canvas.tsx). */
+.umbel-concept--entering,
+.umbel-canvas .umbel-edge--entering {
+  animation: umbel-concept-enter var(--umbel-enter-ms, 0ms) linear both;
+}
+@keyframes umbel-concept-enter {
+  0%,
+  60% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .umbel-concept--entering,
+  .umbel-canvas .umbel-edge--entering {
+    animation: none;
+  }
 }
 .umbel-concept__icon {
   width: 1rem;

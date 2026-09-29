@@ -204,8 +204,17 @@ const PART_OF: readonly string[] = ["builtin:part-of", "part-of"];
 export function topicRoots(expedition: Expedition, partOf: string | readonly string[] = PART_OF): Map<string, Topic> {
   const types = new Set(typeof partOf === "string" ? [partOf] : partOf);
   const byId = new Map(expedition.concepts.map((c) => [c.id, c]));
+  // A Concept part of several things takes the first by title (then id), so
+  // its topic doesn't depend on the order Relationships arrive in.
+  const key = (id: string) => [byId.get(id)?.title ?? "", id] as const;
+  const before = (a: string, b: string) => {
+    const [ta, ia] = key(a);
+    const [tb, ib] = key(b);
+    return ta < tb || (ta === tb && ia < ib);
+  };
   const parent = new Map<string, string>();
-  for (const r of expedition.relationships) if (types.has(r.type) && !parent.has(r.from)) parent.set(r.from, r.to);
+  for (const r of expedition.relationships)
+    if (types.has(r.type) && (!parent.has(r.from) || before(r.to, parent.get(r.from)!))) parent.set(r.from, r.to);
   const out = new Map<string, Topic>();
   for (const c of expedition.concepts) {
     let id = c.id;

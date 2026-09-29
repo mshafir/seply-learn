@@ -1,6 +1,6 @@
 // The React Flow canvas for graph-drawn Views. It renders what the pure
 // layout functions compute and tweens Concepts by id when the layout changes.
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Background, Controls, ReactFlow, ReactFlowProvider, ViewportPortal, useReactFlow, type Node } from "@xyflow/react";
 import { timer } from "d3-timer";
 import { interpolateNumber } from "d3-interpolate";
@@ -50,6 +50,9 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
   // last one drew them, then glide.
   const [positions, setPositions] = useState<Positions>(() => memory?.current ?? new Map());
   const [extras, setExtras] = useState<Extras>({});
+  // Concepts appearing in this reflow (not drawn before it). They fade in as
+  // the others arrive, rather than sit where the gliding ones still pass.
+  const [entering, setEntering] = useState<Set<string>>(noneEntering);
   const own = useRef<Positions>(new Map());
   const current = memory ?? own;
   // What the last finished layout was for (View and visible set). A new View,
@@ -97,6 +100,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
         setPositions(from);
         return;
       }
+      setEntering(from.size ? new Set([...next.keys()].filter((id) => !from.has(id))) : noneEntering);
       const interp = [...next].map(([id, p]) => {
         const f = from.get(id) ?? p;
         return [id, interpolateNumber(f.x, p.x), interpolateNumber(f.y, p.y)] as const;
@@ -109,6 +113,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
         setPositions(frame);
         if (k >= 1) {
           t.stop();
+          setEntering(noneEntering);
           if (refit) fit(transitionMs > 0 ? 500 : 0);
           setTimeout(() => settled(), transitionMs > 0 ? 550 : 50);
         }
@@ -146,7 +151,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
     .filter((c) => positions.has(c.id) && shown(c.id))
     .map((c) => {
       const w = scope.weights.get(c.id) ?? 0;
-      const size = nodeSize(w);
+      const size = nodeSize(w, c.title);
       const p = positions.get(c.id)!;
       return {
         id: c.id,
@@ -158,18 +163,20 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
           weight: w,
           dim: (!!matches && !matches.has(c.id)) || (!!lit && !lit.has(c.id)),
           selected: c.id === selected,
+          entering: entering.has(c.id),
           badges: overlay ? (overlay.badges.get(c.id) ?? []) : badgesFor(view, scope, c, tr),
         },
       };
     });
 
-  const edges = buildEdges({ scope, ce, relTypes, shown, tr, selected, lit, matches, overlay });
+  const edges = buildEdges({ scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering });
 
   return (
     <ReactFlow
       ref={flowRef}
       colorMode={colorMode}
       className="umbel-canvas"
+      style={{ "--umbel-enter-ms": `${transitionMs}ms` } as CSSProperties}
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
@@ -208,6 +215,8 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
     </ReactFlow>
   );
 }
+
+const noneEntering = new Set<string>();
 
 const samePositions = (a: Positions, b: Positions) =>
   a.size === b.size &&

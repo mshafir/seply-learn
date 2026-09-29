@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { compute, tiny, viewOf } from "../fixtures/index.ts";
-import { layout, nodeSize, type Positions } from "../src/layouts.ts";
+import { compute, computeRiskView, tiny, viewOf } from "../fixtures/index.ts";
+import { layout, nodeSize, type Positions, type Visible } from "../src/layouts.ts";
+import { layoutMetrics } from "../src/metrics.ts";
+import { isCanvasView, type Expedition, type View } from "../src/model.ts";
 import { learningMap, scopeFor, topicRoots, trace } from "../src/scope.ts";
 import { actsOn } from "../src/overlay.ts";
 import { drawnRelationships } from "../src/drawn.ts";
@@ -19,6 +21,65 @@ describe("layouts are deterministic", () => {
       expect(round(a.positions)).toMatchSnapshot();
     });
   }
+});
+
+// A seeded shuffle (Fisher–Yates), so a failure can be replayed.
+function shuffled<T>(xs: T[], seed: number): T[] {
+  const out = [...xs];
+  let s = seed;
+  const rand = () => (s = (s * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/** What a reader first sees: for a Learning path, its core (as the metrics measure it). */
+function visibleFor(e: Expedition, view: View): Visible | undefined {
+  if (view.viewType !== "learning-path") return undefined;
+  const m = learningMap(e, view.settings);
+  return { hidden: new Set(m.scope.concepts.map((c) => c.id).filter((id) => !m.core.has(id))), bridges: [], topics: topicRoots(e) };
+}
+
+describe("layouts don't depend on input order (#60)", () => {
+  const views = [...compute.views.filter(isCanvasView), computeRiskView];
+  for (const view of views) {
+    it(`${view.label}: shuffled Concepts and Relationships lay out the same`, async () => {
+      const base = await layout(scopeFor(compute, view), view, visibleFor(compute, view));
+      const metrics = await layoutMetrics(compute, view);
+      for (const seed of [1, 2, 3]) {
+        const e: Expedition = {
+          ...compute,
+          concepts: shuffled(compute.concepts, seed),
+          relationships: shuffled(compute.relationships, seed + 100),
+        };
+        const again = await layout(scopeFor(e, view), view, visibleFor(e, view));
+        expect(round(again.positions)).toEqual(round(base.positions));
+        expect(again.extras).toEqual(base.extras);
+        expect(await layoutMetrics(e, view)).toEqual(metrics);
+      }
+    });
+  }
+
+  it("reversed input lays out the same (tiny, every View)", async () => {
+    for (const view of tiny.views) {
+      const e = { ...tiny, concepts: [...tiny.concepts].reverse(), relationships: [...tiny.relationships].reverse() };
+      const a = await layout(scopeFor(tiny, view), view, visibleFor(tiny, view));
+      const b = await layout(scopeFor(e, view), view, visibleFor(e, view));
+      expect(round(b.positions)).toEqual(round(a.positions));
+    }
+  });
+});
+
+describe("card sizes", () => {
+  it("a long title makes a taller card, never a narrower one", () => {
+    const short = nodeSize(0.2, "RLVR");
+    const long = nodeSize(0.2, "GRPO variants (DAPO, Dr. GRPO, VAPO…)");
+    expect(short).toEqual(nodeSize(0.2));
+    expect(long.width).toBe(short.width);
+    expect(long.height).toBeGreaterThan(short.height);
+  });
 });
 
 describe("learning path", () => {

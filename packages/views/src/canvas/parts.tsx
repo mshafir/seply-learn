@@ -14,6 +14,8 @@ export type ConceptData = {
   weight: number;
   dim: boolean;
   selected: boolean;
+  /** Appearing in the current reflow: fades in as the others arrive. */
+  entering?: boolean;
   badges: Badge[];
 };
 
@@ -22,14 +24,20 @@ const weightClass = (w: number) =>
   w > 1 ? "umbel-concept--focal" : w > 0.6 ? "umbel-concept--major" : w > 0.3 ? "umbel-concept--medium" : "umbel-concept--minor";
 
 export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
-  const { concept, kind, weight, dim, selected, badges } = data;
-  const size = nodeSize(weight);
+  const { concept, kind, weight, dim, selected, entering, badges } = data;
+  const size = nodeSize(weight, concept.title);
   return (
     <div
       title={concept.summary}
       // The Kind's accent colour is Expedition data, not a UI colour.
       style={{ width: size.width, minHeight: size.height, borderLeftColor: paletteColor(kind?.color) }}
-      className={cx("umbel-concept", weightClass(weight), dim && "umbel-concept--dim", selected && "umbel-concept--selected")}
+      className={cx(
+        "umbel-concept",
+        weightClass(weight),
+        dim && "umbel-concept--dim",
+        selected && "umbel-concept--selected",
+        entering && "umbel-concept--entering",
+      )}
       data-concept={concept.id}
     >
       <Handle type="target" position={Position.Left} className="umbel-handle" />

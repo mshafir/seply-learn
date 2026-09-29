@@ -24,6 +24,8 @@ export {
 
 // Pure layouts
 export {
+  canonicalScope,
+  conceptSize,
   layout,
   nodeSize,
   type Band,
@@ -43,6 +45,7 @@ export {
   expeditionLayoutMetrics,
   formatLayoutMetrics,
   layoutMetrics,
+  overlappingConcepts,
   READS_WELL,
   type LayoutMetrics,
 } from "./metrics.ts";

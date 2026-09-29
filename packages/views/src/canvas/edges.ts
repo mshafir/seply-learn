@@ -7,6 +7,7 @@ import { sign, type Scope, type Trace } from "../scope.ts";
 import { drawnRelationships } from "../drawn.ts";
 import type { Overlay } from "../overlay.ts";
 import { paletteColor } from "./color.ts";
+import { cx } from "./parts.tsx";
 
 // canvas.css points these at @umbel/ui tokens (light and dark).
 export const edgeColor = {
@@ -26,8 +27,11 @@ export function buildEdges(args: {
   lit?: Set<string>;
   matches?: Set<string>;
   overlay?: Overlay;
+  /** Concepts appearing in the current reflow; their lines fade in with them. */
+  entering?: Set<string>;
 }): Edge[] {
-  const { scope, ce, relTypes, shown, tr, selected, lit, matches, overlay } = args;
+  const { scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering } = args;
+  const enters = (from: string, to: string) => !!entering && (entering.has(from) || entering.has(to));
   const edges: Edge[] = drawnRelationships(scope, ce, { shown, tr, selected }).map((r, i) => {
     const t = relTypes.get(r.type);
     const touches = !!selected && (r.from === selected || r.to === selected);
@@ -41,7 +45,7 @@ export function buildEdges(args: {
       source: r.from,
       target: r.to,
       type: "floating",
-      className: r.synthetic ? "umbel-edge--lever" : undefined,
+      className: cx(r.synthetic && "umbel-edge--lever", enters(r.from, r.to) && "umbel-edge--entering") || undefined,
       label: on && (!overlay || touches) ? [t?.label, r.note].filter(Boolean).join(" · ") : undefined,
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       style: {
@@ -59,7 +63,7 @@ export function buildEdges(args: {
       source: b.from,
       target: b.to,
       type: "floating",
-      className: "umbel-edge--bridge",
+      className: cx("umbel-edge--bridge", enters(b.from, b.to) && "umbel-edge--entering"),
       markerEnd: { type: MarkerType.ArrowClosed, color: edgeColor.bridge, width: 14, height: 14 },
       style: { stroke: edgeColor.bridge, strokeWidth: 1.2, strokeDasharray: "2 4", opacity: dim ? 0.1 : 0.8 },
     });
