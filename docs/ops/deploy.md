@@ -20,17 +20,32 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
 - [ ] **Cloudflare account on Workers Paid** ($5/month; the free plan's 10 ms CPU limit is too tight, see §2.2).
 - [ ] **A workers.dev subdomain.** Open _Workers & Pages_ once in the dashboard and pick one. Preview URLs are `https://umbel-pr-<n>.<subdomain>.workers.dev`.
 - [ ] **`CLOUDFLARE_ACCOUNT_ID`:** from the dashboard's account home, or `wrangler whoami`.
-- [ ] **`CLOUDFLARE_API_TOKEN`:** _My Profile → API Tokens → Create Token → Custom token_, scoped to this account, with these **Account** permissions:
+- [ ] **`CLOUDFLARE_API_TOKEN`:** an account-owned token (_Manage Account → Account API Tokens → Create Token → Custom token_). Under **Account Resources**, include this account; a zones scope fails with _"Failed common permission check"_. **Account** permissions (the dashboard may say _Write_ for _Edit_):
   - Workers Scripts: Edit
   - Hyperdrive: Edit
+  - Workers R2 Storage: Edit (not used yet; added now so the token doesn't need re-issuing when WP-1.x adds buckets)
   - Account Settings: Read
-  - Workers R2 Storage, Durable Objects and Workflows are not used yet. Add _Workers R2 Storage: Edit_ now so the token doesn't need re-issuing when WP-1.x adds buckets (DOs and Workflows deploy under Workers Scripts).
-  - Also add **User → Memberships: Read** and **User → User Details: Read**. Wrangler reads them on deploy.
+  - Durable Objects and Workflows have no permission of their own; they deploy under Workers Scripts.
+  - No **User** permissions: wrangler only needs them to discover the account, and CI always sets `CLOUDFLARE_ACCOUNT_ID`. `scripts/ci.mjs` calls only `/accounts/<id>/…` endpoints.
 - [ ] **Neon project.** Create it in the region closest to your Cloudflare users. Its default branch (usually `main`) is **production**. Keep the default database `neondb` and role `neondb_owner`, or set the `NEON_DATABASE` / `NEON_ROLE` env in the workflow.
 - [ ] **`NEON_PROJECT_ID`:** _Project settings → General_, e.g. `cool-name-123456`.
 - [ ] **`NEON_API_KEY`:** _Account settings → API keys_. A project-scoped key is enough.
 
-When all four exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
+- [ ] **Google OAuth client** (Google Cloud Console → Google Auth Platform). Needed from WP-1.1.
+  - **Audience:** External, publishing status _Testing_, with yourself under **Test users**. Publish before anyone else signs in.
+  - **Data access (scopes):** `openid`, `userinfo.email`, `userinfo.profile`.
+  - **Client** (type: Web application):
+
+    | Authorized JavaScript origins | Authorized redirect URIs |
+    |---|---|
+    | `https://umbel-learn.<subdomain>.workers.dev` | `https://umbel-learn.<subdomain>.workers.dev/api/auth/callback/google` |
+    | `http://localhost:8787` | `http://localhost:8787/api/auth/callback/google` |
+    | `http://localhost:5173` | `http://localhost:5173/api/auth/callback/google` |
+
+    Previews are not listed: Google allows no wildcards, so previews sign in through production with Better Auth's OAuth proxy plugin (WP-1.1). Add a custom domain here when production moves to one.
+  - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `BETTER_AUTH_SECRET` (session signing; generate it without seeing it: `openssl rand -base64 32 | gh secret set BETTER_AUTH_SECRET -R mshafir/umbel-learn`).
+
+When the four Cloudflare and Neon secrets exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
 ## How a preview works
 

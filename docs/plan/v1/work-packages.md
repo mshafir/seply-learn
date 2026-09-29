@@ -84,7 +84,9 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - depends: WP-0.2, WP-0.4
 - spec: 02-architecture.md#22-backend-one-hono-app-two-entrypoints
 - **Build:** a Hono app factory; Better Auth (Google) with the Drizzle adapter per request; migrations; the Worker entry; the Expedition/collaborator basics (create, list mine).
-- **Done when:** sign-in works on a preview; an e2e test signs in with a test account (a credentials provider enabled only in CI).
+  - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and `BETTER_AUTH_SECRET` (repo secrets, already set by the owner). The deploy workflow copies them into each Worker as Worker secrets (`wrangler secret bulk`), and sets `BETTER_AUTH_URL` to that Worker's own URL. Local dev reads them from `apps/worker/.dev.vars` (gitignored).
+  - **Previews sign in through production** with Better Auth's OAuth proxy plugin: Google allows no wildcard redirect URIs, so Google always calls back to production's `/api/auth/callback/google`, and production hands the session back to the preview that started the sign-in. The Google client lists only production and localhost (`docs/ops/deploy.md`).
+- **Done when:** sign-in with Google works on a preview (through the proxy) and on production; an e2e test signs in with a test account (a credentials provider enabled only in CI).
 
 ### WP-1.2: Push/pull and the op log
 - lane: A
