@@ -89,7 +89,7 @@ test("sign in, import the compute fixture, and open it in three panes", async ({
   const node = canvas.locator(".react-flow__node").first()
   await node.click()
   await expect(panel).not.toContainText("View · Learning path")
-  const conceptTitle = (await panel.getByRole("heading").textContent())!
+  const conceptTitle = (await panel.getByTestId("panel-title").textContent())!
   expect(conceptTitle.length).toBeGreaterThan(0)
   expect(await node.textContent()).toContain(conceptTitle)
   expect(await widthOf(page, "[data-testid=side-panel]")).toBe(PANEL)

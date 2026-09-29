@@ -18,6 +18,10 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Divergence 8 (DIVERGENCES.md): provenance. Amber marks "from the
+        // Source"; background knowledge is muted.
+        source: "bg-suggested/15 text-suggested-text [a]:hover:bg-suggested/25",
+        background: "bg-muted text-muted-foreground [a]:hover:bg-muted/80",
       },
     },
     defaultVariants: {

@@ -28,7 +28,7 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 
 ### Import: what is re-minted
 
-- **Re-minted** (fresh ULIDs, references remapped): the Expedition, Concepts, article sections, Views, Sources, and so Relationship keys. Provenance refs follow their Source; View settings follow their Concepts (the View Type's `refs.concepts` paths and the `placement`/`order`/`hide`/`fold` overrides).
+- **Re-minted** (fresh ULIDs, references remapped): the Expedition, Concepts, article sections, Views, Sources, and so Relationship keys. Provenance refs follow their Source; in-text links (`#c/<id>`) in overviews and article sections follow their Concept (`remapConceptLinks`); View settings follow their Concepts (the View Type's `refs.concepts` paths and the `placement`/`order`/`hide`/`fold` overrides).
 - **Kept:** custom Kind, Relationship Type and Attribute ids. They are Expedition-scoped vocabulary that View settings name (`x`, `colorBy`, columns), and every row is keyed by its Expedition. A `builtin:` id this server doesn't know becomes a custom definition from its inlined label and colour.
 - **Dropped:** references to things not in the file (provenance to a missing Source, View overrides naming a deleted Concept), a dangling best View (the first View is used). Structural references that don't resolve (a Relationship end, a Concept's Kind) reject the file.
 - Sources' `addedBy` becomes the importer; Views exported while `queued` or `building` arrive `failed`; the Expedition is `ready`.

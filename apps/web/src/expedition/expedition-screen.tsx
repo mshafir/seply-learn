@@ -6,7 +6,12 @@ import * as React from "react"
 import { RotateCwIcon, SearchXIcon } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@umbel/ui/components/alert"
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@umbel/ui/components/alert"
 import { Button, buttonVariants } from "@umbel/ui/components/button"
 import {
   Empty,
@@ -28,6 +33,14 @@ import {
   INLINE_PANEL_QUERY,
   RAIL_WIDTH,
 } from "@/expedition/layout.ts"
+import type { ConceptReading } from "@/expedition/concept-panel.tsx"
+import {
+  back,
+  openConcept,
+  pruneStack,
+  push,
+  type BackStack,
+} from "@/expedition/reading.ts"
 import { SidePanel, type PanelContent } from "@/expedition/side-panel.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
@@ -143,7 +156,8 @@ function useRole(expeditionId: string): Role | null {
   return role
 }
 
-type Panel = { type: "concept"; conceptId: string } | { type: "view" } | null
+/** What the side panel shows: a Concept (with its back stack) or the View. */
+type Panel = { type: "concept"; stack: BackStack } | { type: "view" } | null
 
 function ExpeditionFrame({
   expeditionId,
@@ -172,18 +186,50 @@ function ExpeditionFrame({
     data.views[0] ??
     null
 
-  const selectedConcept =
+  const conceptById = React.useMemo(
+    () => new Map(data.concepts.map((c) => [c.id, c])),
+    [data.concepts]
+  )
+  // The back stack, without places whose Concept has gone (deleted, merged).
+  const stack =
     panel?.type === "concept"
-      ? data.concepts.find((c) => c.id === panel.conceptId)
-      : undefined
+      ? pruneStack(panel.stack, (id) => conceptById.has(id))
+      : []
+  const place = stack[stack.length - 1]
+  const selectedConcept = place ? conceptById.get(place.conceptId) : undefined
+  const reading: ConceptReading = {
+    data,
+    conceptById,
+    onNavigate: (entry) =>
+      setPanel((p) =>
+        p?.type === "concept" ? { ...p, stack: push(p.stack, entry) } : p
+      ),
+    onBack:
+      stack.length > 1
+        ? () =>
+            setPanel((p) =>
+              p?.type === "concept"
+                ? {
+                    ...p,
+                    stack: back(
+                      pruneStack(p.stack, (id) => conceptById.has(id))
+                    ),
+                  }
+                : p
+            )
+        : null,
+    previous: stack.length > 1 ? stack[stack.length - 2]! : null,
+  }
   const content: PanelContent | null =
     panel?.type === "view" && view
       ? { type: "view", view }
-      : selectedConcept
+      : selectedConcept && place
         ? {
             type: "concept",
             concept: selectedConcept,
+            depth: place.depth,
             kindLabel: kindLabel(selectedConcept.kind, data.kindDefs),
+            reading,
           }
         : null
 
@@ -221,7 +267,9 @@ function ExpeditionFrame({
                 viewId={view.id}
                 selectedConceptId={selectedConcept?.id ?? null}
                 onSelectConcept={(id) =>
-                  setPanel(id ? { type: "concept", conceptId: id } : null)
+                  setPanel(
+                    id ? { type: "concept", stack: openConcept(id) } : null
+                  )
                 }
                 onSettled={() => setSettledViewId(view.id)}
               />
@@ -229,7 +277,9 @@ function ExpeditionFrame({
                 view={view}
                 open={panel?.type === "view"}
                 onClick={() =>
-                  setPanel((p) => (p?.type === "view" ? null : { type: "view" }))
+                  setPanel((p) =>
+                    p?.type === "view" ? null : { type: "view" }
+                  )
                 }
                 className="absolute top-4 left-4 z-10"
               />
