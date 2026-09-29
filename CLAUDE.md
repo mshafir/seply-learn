@@ -21,6 +21,7 @@ Umbel Learn (a placeholder name) is a collaborative, LLM-assisted tool for build
 ## Working
 
 - **Tools:** `mise` provides Node and pnpm (`mise exec -- pnpm …`).
+- **Cloud sessions (claude.ai/code):** the SessionStart hook in `.claude/settings.json` runs `scripts/claude-remote-setup.sh`, which installs mise, Node, pnpm, dependencies and Chromium. It does nothing locally. Each cloud session has its own VM, so the laptop limits below don't apply there. The PR rules do.
 - **Resources (builders share one 14 GB laptop):**
   - At most **two builder lanes run locally at once**, and only one of them runs Playwright at a time.
   - While iterating, check only what you touch: `mise exec -- pnpm turbo typecheck lint test --filter=<package>...`. Run the full `pnpm check` once, before the PR. It already caps Turbo and Vitest at two workers each; locally Playwright uses one.
