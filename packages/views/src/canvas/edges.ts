@@ -1,43 +1,20 @@
-// Which Relationships a canvas View draws, and how. Pure, so risk mode's
-// lever edges can be tested without a DOM.
+// How a canvas View draws its Relationships as React Flow edges. Which lines
+// are drawn comes from drawnRelationships (../drawn.ts), which the layout
+// metrics share, so they measure what the reader sees.
 import { MarkerType, type Edge } from "@xyflow/react";
-import type { CauseEffectSettings, Relationship, RelationshipTypeDef } from "../model.ts";
-import { leversOf, sign, type Scope, type Trace } from "../scope.ts";
+import type { CauseEffectSettings, RelationshipTypeDef } from "../model.ts";
+import { sign, type Scope, type Trace } from "../scope.ts";
+import { drawnRelationships } from "../drawn.ts";
 import type { Overlay } from "../overlay.ts";
+import { paletteColor } from "./color.ts";
 
-// TODO(tokens): wire these to @umbel/ui tokens once they land. canvas.css
-// defines the variables with fallbacks.
+// canvas.css points these at @umbel/ui tokens (light and dark).
 export const edgeColor = {
   default: "var(--umbel-edge)",
   raises: "var(--umbel-edge-raises)",
   lowers: "var(--umbel-edge-lowers)",
   bridge: "var(--umbel-edge-bridge)",
 };
-
-export type DrawnRelationship = Relationship & { synthetic?: boolean };
-
-/**
- * Risk mode: a lever's real edges are drawn only while its path is traced;
- * by default each lever points straight at the outcome, keeping the ranked
- * column readable as a priority list. The data keeps the accurate links.
- */
-export function drawnRelationships(
-  scope: Scope,
-  ce: CauseEffectSettings | undefined,
-  opts: { shown: (id: string) => boolean; tr?: Trace; selected?: string },
-): DrawnRelationship[] {
-  const { shown, tr, selected } = opts;
-  const riskLevers = ce?.mode === "risk" ? leversOf(scope, ce) : new Set<string>();
-  const outcome = ce?.mode === "risk" ? ce.outcomes[0] : undefined;
-  const drawn = scope.relationships.filter(
-    (r) => shown(r.from) && shown(r.to) && (!riskLevers.has(r.from) || r.to === outcome || (tr && tr.edges.has(r))),
-  );
-  const direct = new Set(drawn.filter((r) => riskLevers.has(r.from) && r.to === outcome).map((r) => r.from));
-  const synthetic: DrawnRelationship[] = [...riskLevers]
-    .filter((id) => !direct.has(id) && !(tr && selected === id) && outcome)
-    .map((id) => ({ from: id, to: outcome!, type: ce!.negative[0] ?? "lowers", synthetic: true }));
-  return [...drawn, ...synthetic];
-}
 
 export function buildEdges(args: {
   scope: Scope;
@@ -58,7 +35,7 @@ export function buildEdges(args: {
     const dim = (matches && !(matches.has(r.from) && matches.has(r.to))) || ((overlay ? lit : selected) && !on);
     // Cause & Effect carries the sign in colour: raises vs lowers. Elsewhere
     // the Relationship Type's colour (Expedition data) is used.
-    const color = ce ? (sign(ce, r.type) > 0 ? edgeColor.raises : edgeColor.lowers) : (t?.color ?? edgeColor.default);
+    const color = ce ? (sign(ce, r.type) > 0 ? edgeColor.raises : edgeColor.lowers) : (paletteColor(t?.color) ?? edgeColor.default);
     return {
       id: `${r.from}-${r.type}-${r.to}-${i}`,
       source: r.from,

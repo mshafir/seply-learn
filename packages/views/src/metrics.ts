@@ -5,6 +5,7 @@
 import { isCanvasView, type Expedition, type View } from "./model.ts";
 import { layout, nodeSize, type Point, type Visible } from "./layouts.ts";
 import { learningMap, scopeFor, topicRoots } from "./scope.ts";
+import { drawnRelationships } from "./drawn.ts";
 
 export type LayoutMetrics = {
   viewId: string;
@@ -54,8 +55,12 @@ export async function layoutMetrics(expedition: Expedition, view: View): Promise
   const isShown = (id: string) => !visible?.hidden.has(id);
   const { positions } = await layout(scope, view, visible);
   const shown = scope.concepts.filter((c) => positions.has(c.id) && isShown(c.id));
-  const segs: Seg[] = scope.relationships
-    .filter((r) => positions.has(r.from) && positions.has(r.to) && isShown(r.from) && isShown(r.to))
+  // Measure the lines the reader sees by default (nothing selected), from the
+  // same list the renderer draws: in risk mode, levers point at the outcome
+  // and their real edges stay hidden until traced.
+  const ce = view.viewType === "cause-and-effect" ? view.settings : undefined;
+  const segs: Seg[] = drawnRelationships(scope, ce, { shown: isShown })
+    .filter((r) => positions.has(r.from) && positions.has(r.to))
     .map((r) => ({ a: positions.get(r.from)!, b: positions.get(r.to)!, from: r.from, to: r.to }));
 
   let crossings = 0;
