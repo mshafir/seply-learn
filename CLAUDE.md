@@ -21,6 +21,11 @@ Umbel Learn (a placeholder name) is a collaborative, LLM-assisted tool for build
 ## Working
 
 - **Tools:** `mise` provides Node and pnpm (`mise exec -- pnpm …`).
+- **Resources (builders share one 14 GB laptop):**
+  - At most **two builder lanes run locally at once**, and only one of them runs Playwright at a time.
+  - While iterating, check only what you touch: `mise exec -- pnpm turbo typecheck lint test --filter=<package>...`. Run the full `pnpm check` once, before the PR. It already caps Turbo and Vitest at two workers each; locally Playwright uses one.
+  - Run e2e only for the screens you changed; CI runs the whole suite.
+  - Stop every dev server, `wrangler dev`, `vite preview` and watcher you start before you finish. Don't start Docker containers.
 - **Before every PR:** `pnpm check` (dependency rule, typecheck, lint, tests) and `pnpm check:private`.
 - **Branches:** `wp-<id>-<slug>` (e.g. `wp-0.4-domain`). One work package per PR, titled `WP-x.y: <title>`, with `Closes #<issue>` in the body.
 - **Owner review:** PRs that touch the data model or ops, auth or permissions, or AI prompts and the playbook get the `needs-owner` label.
