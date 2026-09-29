@@ -86,3 +86,17 @@ export {
   type MarkRecord,
   type ReaderStore,
 } from "./reader-store.ts"
+export {
+  fetchSnapshot,
+  IndexedDbOfflineCacheStore,
+  MemoryOfflineCacheStore,
+  OFFLINE_KEEP,
+  OfflineCache,
+  openCachedClient,
+  toEvict,
+  type IndexedDbOfflineCacheStoreOptions,
+  type OfflineCacheOptions,
+  type OfflineCacheStore,
+  type OfflineEntry,
+  type OfflineSnapshot,
+} from "./offline-cache.ts"

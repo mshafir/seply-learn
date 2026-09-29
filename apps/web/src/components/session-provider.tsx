@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { ApiError, getMe, signOut as apiSignOut, type User } from "@/lib/api.ts"
+import { clearOffline } from "@/lib/offline.ts"
 import { SessionContext, type Session } from "@/lib/session.ts"
 
 // The last signed-in user, so a reload without a connection still knows
@@ -55,6 +56,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = React.useCallback(async () => {
     await apiSignOut()
+    // A shared device: the Expeditions saved for offline reading go too.
+    const user = cachedUser()
+    if (user)
+      await clearOffline(user.id).catch((e) =>
+        console.warn("offline: clearing saved Expeditions failed", e)
+      )
     cacheUser(null)
     setSession({ status: "signed-out" })
   }, [])

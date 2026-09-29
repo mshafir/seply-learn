@@ -7,6 +7,10 @@
 //
 // Signed out, a public or unlisted Expedition opens read-only; a private one
 // is "not found", with a way to sign in.
+//
+// Offline (spec §2.9), an Expedition saved on this device opens from that
+// copy, read-only, with an "Offline, as of …" chip; without a copy the
+// screen says it can't reach the server. Either way it keeps retrying.
 import * as React from "react"
 import { RotateCwIcon, SearchXIcon } from "lucide-react"
 import { Link, useLocation } from "wouter"
@@ -35,6 +39,7 @@ import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { resumeFrom, samePlace, type Place } from "@/expedition/continue.ts"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
+import { OfflineChip } from "@/expedition/offline-chip.tsx"
 import { kindLabel } from "@/expedition/labels.ts"
 import {
   HEADER_HEIGHT,
@@ -99,16 +104,21 @@ export function ExpeditionScreen({
       style={frameStyle}
       className="h-svh min-h-0 flex-col overflow-hidden"
     >
-      {state.status === "ready" ? (
+      {state.status === "ready" || state.status === "cached" ? (
         <ExpeditionFrame
-          key={expeditionId}
+          // A new client (the saved copy, then the live one) starts afresh.
+          key={`${expeditionId}:${state.status}`}
           expeditionId={expeditionId}
           client={state.client}
           viewId={viewId}
           userId={actor}
-          canEdit={role === "owner" || role === "editor"}
+          canEdit={
+            state.status === "ready" && (role === "owner" || role === "editor")
+          }
           health={health}
           signInHref={signInHref}
+          offlineSince={state.status === "cached" ? state.savedAt : null}
+          onRetry={retry}
         />
       ) : (
         <>
@@ -214,6 +224,8 @@ function ExpeditionFrame({
   canEdit,
   health,
   signInHref,
+  offlineSince,
+  onRetry,
 }: {
   expeditionId: string
   client: SyncClient
@@ -222,6 +234,9 @@ function ExpeditionFrame({
   canEdit: boolean
   health: SyncHealth
   signInHref: string | null
+  /** Reading this device's saved copy, taken then (ms); null when live. */
+  offlineSince: number | null
+  onRetry: () => void
 }) {
   const [, navigate] = useLocation()
   const data = useExpeditionData(client.collections)
@@ -396,11 +411,16 @@ function ExpeditionFrame({
         health={health}
         signInHref={signInHref}
         search={
-          <ConceptSearch
-            query={query}
-            onQueryChange={setQuery}
-            matchCount={matches?.size}
-          />
+          <>
+            {offlineSince !== null && (
+              <OfflineChip savedAt={offlineSince} onRetry={onRetry} />
+            )}
+            <ConceptSearch
+              query={query}
+              onQueryChange={setQuery}
+              matchCount={matches?.size}
+            />
+          </>
         }
       />
       <div className="flex min-h-0 flex-1">

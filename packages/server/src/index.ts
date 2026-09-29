@@ -26,6 +26,9 @@ export {
   CreateExpedition,
   createExpedition,
   type ExpeditionSummary,
+  type CardCollaborator,
+  type LibraryCard,
+  libraryCards,
 } from "./expeditions.ts"
 export {
   importExpedition,

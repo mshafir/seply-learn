@@ -16,6 +16,26 @@ export type ExpeditionSummary = {
   role: Role
 }
 
+/** A Collaborator as a Library card shows them. */
+export type CardCollaborator = {
+  id: string
+  name: string
+  image: string | null
+  role: Role
+}
+
+/** One Library card (the server's `LibraryCard`). */
+export type LibraryCard = ExpeditionSummary & {
+  tags: string[]
+  /** Owner first, then editors, then viewers. */
+  collaborators: CardCollaborator[]
+  counts: { concepts: number; views: number }
+  /** The best View's View Type, for the fixed thumbnail (null: no Views). */
+  bestViewType: string | null
+  /** When it last changed, ISO 8601. */
+  updatedAt: string
+}
+
 export type ImportResult = {
   expedition: ExpeditionSummary
   counts: { concepts: number; relationships: number; views: number }
@@ -67,8 +87,9 @@ export async function getMe(): Promise<User | null> {
   }
 }
 
-export async function listExpeditions(): Promise<ExpeditionSummary[]> {
-  return (await call<{ expeditions: ExpeditionSummary[] }>("/expeditions"))
+/** Every Expedition I collaborate on, newest first, as Library cards. */
+export async function listExpeditions(): Promise<LibraryCard[]> {
+  return (await call<{ expeditions: LibraryCard[] }>("/expeditions"))
     .expeditions
 }
 

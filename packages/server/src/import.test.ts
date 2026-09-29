@@ -12,6 +12,7 @@ import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import type { Db } from "./db.ts"
+import type { LibraryCard } from "./expeditions.ts"
 import type { ImportResponse } from "./import.ts"
 import { loadState } from "./projection.ts"
 import type { Relay } from "./relay.ts"
@@ -210,5 +211,44 @@ describe("POST /import", () => {
       "content-type": "application/json",
     } as Record<string, string>)
     expect(res.status).toBe(401)
+  })
+})
+
+describe("GET /expeditions (Library cards)", () => {
+  it("lists the imported fixture with its counts, best View Type, Collaborators and date", async () => {
+    const { app, ada, importFile } = await setup()
+    const before = Date.now()
+    expect((await importFile(JSON.stringify(fixture("compute")))).status).toBe(
+      201
+    )
+    const empty = await app.request("/api/expeditions", {
+      method: "POST",
+      headers: { ...ada.headers, "content-type": "application/json" },
+      body: JSON.stringify({}),
+    })
+    expect(empty.status).toBe(201)
+
+    const res = await app.request("/api/expeditions", { headers: ada.headers })
+    const { expeditions } = (await res.json()) as {
+      expeditions: LibraryCard[]
+    }
+    const [blank, compute] = expeditions
+    expect(compute).toMatchObject({
+      title: "AI compute & model internals",
+      status: "ready",
+      role: "owner",
+      tags: [],
+      counts: { concepts: 201, views: 12 },
+      bestViewType: "outline",
+      collaborators: [{ name: "ada", role: "owner", image: null }],
+    })
+    expect(Date.parse(compute!.updatedAt)).toBeGreaterThanOrEqual(before - 1000)
+    expect(compute!.collaborators[0]).not.toHaveProperty("email")
+    expect(blank).toMatchObject({
+      status: "draft",
+      counts: { concepts: 0, views: 0 },
+      bestViewType: null,
+    })
+    expect(Number.isNaN(Date.parse(blank!.updatedAt))).toBe(false)
   })
 })
