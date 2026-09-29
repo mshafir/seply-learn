@@ -13,7 +13,8 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // WP-2.5: Reading status and Continue reading. A reader marks a Concept read
 // in one browser context and sees it in another (after a refresh), lands where
 // they left off, and finds it under Continue reading. An anonymous reader of
-// a public Expedition marks a Concept, signs in, and keeps the mark.
+// an unlisted Expedition (a link) marks a Concept, signs in, and keeps the
+// mark. Unlisted, not public, so it never shows in other tests' searches.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(
@@ -167,7 +168,7 @@ test("mark read on one device, see it on another; Continue reading lands where y
       }
       return st.viewSettings.map((v) => v.settings)
     })
-    .toEqual([{ hideRead: true, showAllSteps: false }])
+    .toEqual([{ hideRead: true }])
 
   await ctxA.close()
   await ctxB.close()
@@ -176,7 +177,7 @@ test("mark read on one device, see it on another; Continue reading lands where y
 test("an anonymous reader's marks are kept when they sign in", async ({
   browser,
 }, testInfo) => {
-  // An owner publishes the compute sample. There's no Visibility UI yet
+  // An owner shares the compute sample by link. There's no Visibility UI yet
   // (WP-5.2), so the test sets it directly.
   const [ownerCtx, owner] = await freshContext(browser)
   await signUp(owner, "Owner")
@@ -186,14 +187,14 @@ test("an anonymous reader's marks are kept when they sign in", async ({
   await db.connect()
   try {
     await db.query(
-      "update expeditions set visibility = 'public' where id = $1",
+      "update expeditions set visibility = 'unlisted' where id = $1",
       [exp]
     )
   } finally {
     await db.end()
   }
 
-  // Signed out, the public Expedition opens read-only.
+  // Signed out, the unlisted Expedition opens read-only from its link.
   const [ctx, page] = await freshContext(browser)
   await page.goto(`/e/${exp}`)
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible()
