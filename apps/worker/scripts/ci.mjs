@@ -22,7 +22,6 @@
 import { appendFileSync, chmodSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import ts from "typescript"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 
@@ -93,6 +92,8 @@ async function hyperdriveUpsert(name) {
   console.log(`hyperdrive ${existing ? "updated" : "created"}: ${name} (${id})`)
 
   // wrangler.jsonc has a placeholder id; write a deploy config with the real one.
+  // Imported here, not at the top: teardown runs this script without installing dependencies.
+  const { default: ts } = await import("typescript")
   const src = join(root, "wrangler.jsonc")
   const { config, error } = ts.parseConfigFileTextToJson(
     src,
