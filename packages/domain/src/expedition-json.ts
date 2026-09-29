@@ -601,6 +601,20 @@ export type ImportIdMap = {
 }
 
 /**
+ * Rewrites in-text Concept links (`#c/<id>`, spec §3.7) in markdown through
+ * an id map. Links to ids not in the map are left as they are.
+ */
+export function remapConceptLinks(
+  md: string,
+  conceptIds: ReadonlyMap<string, string>
+): string {
+  return md.replace(/#c\/([^\s|.()[\]<>"']+)/g, (link, id: string) => {
+    const next = conceptIds.get(id)
+    return next === undefined ? link : `#c/${next}`
+  })
+}
+
+/**
  * The op bodies that build an imported file as a first build, with every
  * entity id re-minted. Kinds, Relationship Types and Attributes are
  * Expedition-scoped vocabulary that View settings name, so they keep their
@@ -712,6 +726,9 @@ export function expeditionJsonToOpBodies(
       return source ? [{ ...ref, source }] : []
     })
 
+  // In-text links (`#c/<id>`) follow their Concept to its new id.
+  const links = (md: string) => remapConceptLinks(md, ids.concepts)
+
   for (const c of doc.concepts) {
     const id = ids.concepts.get(c.id)!
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -721,6 +738,9 @@ export function expeditionJsonToOpBodies(
       target: id,
       value: {
         ...rest,
+        ...(rest.overview !== undefined
+          ? { overview: links(rest.overview) }
+          : {}),
         kind: kindOf(kind),
         overviewProv: prov(overviewProv),
         prov: prov(cProv),
@@ -735,7 +755,7 @@ export function expeditionJsonToOpBodies(
           conceptId: id,
           orderKey: keys[i],
           heading: s.heading,
-          md: s.md,
+          md: links(s.md),
           prov: prov(s.prov),
         },
       })

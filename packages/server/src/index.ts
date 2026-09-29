@@ -35,6 +35,13 @@ export {
 } from "./import.ts"
 export { noopRelay, type Relay } from "./relay.ts"
 export {
+  readReaderState,
+  recentPositions,
+  saveReaderMarks,
+  type ContinueReadingItem,
+  type ReaderSnapshot,
+} from "./reader.ts"
+export {
   appendOps,
   readOps,
   PushError,
@@ -43,4 +50,18 @@ export {
   type OpResult,
 } from "./oplog.ts"
 export { loadState, writeState } from "./projection.ts"
+export {
+  buildSearchQueries,
+  parseQuery,
+  search,
+  searchableExpeditions,
+  SearchQuery,
+  SEARCH_MAX_LIMIT,
+  type ConceptHit,
+  type ExpeditionHit,
+  type ParsedQuery,
+  type SearchParams,
+  type SearchResults,
+  type TagHit,
+} from "./search.ts"
 export { PushBody, PullQuery, PUSH_LIMIT } from "./sync.ts"

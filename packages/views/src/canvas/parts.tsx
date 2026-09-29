@@ -1,4 +1,5 @@
 // The canvas's node and edge components.
+import { CircleCheckIcon } from "lucide-react";
 import { BaseEdge, Handle, Position, useInternalNode, type EdgeProps, type Node, type NodeProps } from "@xyflow/react";
 import type { Concept, KindDef } from "../model.ts";
 import { nodeSize } from "../layouts.ts";
@@ -8,6 +9,9 @@ import { paletteColor } from "./color.ts";
 
 export const cx = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join(" ");
 
+/** The check on a Concept the reader has read or knows, in every View. */
+export const ReadCheck = () => <CircleCheckIcon className="umbel-check" role="img" aria-label="Read" data-testid="read-check" />;
+
 export type ConceptData = {
   concept: Concept;
   kind?: KindDef;
@@ -16,6 +20,8 @@ export type ConceptData = {
   selected: boolean;
   /** Appearing in the current reflow: fades in as the others arrive. */
   entering?: boolean;
+  /** The reader has read or knows it: a check. */
+  covered?: boolean;
   badges: Badge[];
 };
 
@@ -24,7 +30,7 @@ const weightClass = (w: number) =>
   w > 1 ? "umbel-concept--focal" : w > 0.6 ? "umbel-concept--major" : w > 0.3 ? "umbel-concept--medium" : "umbel-concept--minor";
 
 export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
-  const { concept, kind, weight, dim, selected, entering, badges } = data;
+  const { concept, kind, weight, dim, selected, entering, covered, badges } = data;
   const size = nodeSize(weight, concept.title);
   return (
     <div
@@ -39,10 +45,12 @@ export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
         entering && "umbel-concept--entering",
       )}
       data-concept={concept.id}
+      data-covered={covered || undefined}
     >
       <Handle type="target" position={Position.Left} className="umbel-handle" />
       <KindIcon name={kind?.icon ?? kind?.id} className="umbel-concept__icon" style={{ color: paletteColor(kind?.color) }} />
       <span className="umbel-concept__title">{concept.title}</span>
+      {covered && <ReadCheck />}
       {badges.length > 0 && (
         <div className="umbel-concept__badges">
           {badges.map((b) => (

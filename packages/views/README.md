@@ -19,11 +19,19 @@ import { ExpeditionView } from "@umbel/views";
   matches={searchMatches} // optional: everything else is dimmed
   transitionMs={650} // optional: canvas tween length (0 jumps)
   onSettled={() => …} // optional: the View is drawn (canvas: layout settled and fitted)
+  personal={values} // optional: the reader's personal settings (View Type defaults filled in)
+  onPersonalChange={(key, value) => …} // optional: a View's own control changed one (e.g. "Show all steps")
+  onStatus={(status) => …} // optional: { text, clear } for the floating status chip, or null
+  covered={readIds} // optional: the reader's read or known Concepts (Reading status): a check in every View
+  onMarkKnown={(id) => …} // optional: the Learning path's "I know …" marks the reader's status
 />
 ```
 
+- **Reading status** (`covered`): every drawn Concept (canvas node, table row) that is read or known gets a check (`[data-covered]`, `data-testid="read-check"`). The Learning path skips covered Concepts in its step counts and target badges, counts them in its status chip ("k of n read"), and with `personal.hideRead` hides them (bridged over, never the selection or focus). Without `covered`, the Learning path keeps "I know this" as local state (the harness).
+
 - **Live:** every change to the collections (a local edit, or someone else's arriving by pull) re-derives the View. Canvas Views re-run their pure layout and tween each Concept to its new place: nothing is removed and redrawn, and the view isn't refitted for data alone. Concepts that appear in a reflow (say, the steps a Learning path focus shows) wait while the others glide, then fade in (`.umbel-concept--entering`, off under `prefers-reduced-motion`). A change that moves nothing just redraws; a title edit can move things, since titles order the layout's input and size the cards.
 - **Switching Views** (change `viewId`): the incoming View fades in (`.umbel-view`, off under `prefers-reduced-motion`), and a canvas View tweens each Concept from where the previous canvas View drew it, by Concept id, then fits. Positions live only in memory for that tween; they are never stored.
+- **Personal settings and status:** with `onPersonalChange`, a View's own controls (Learning path's "Show all steps") read and write the app's personal settings instead of local state. `onStatus` reports View-specific status for the app's floating chip: Learning path sends "Path to X · k of n read" while a tree is focused, and `clear()` unfocuses it.
 - **Drawn:** Learning path and Comparison Table (the first two Views on data), plus the other canvas View Types (Cause & Effect, Evidence, Lineage). Other View Types show a placeholder.
 - `useLiveExpedition(collections)` gives the same live Expedition (e.g. for the Views rail: `expedition.views` in rail order, and `bestViewId`). `ViewRenderer({ expedition, view, … })` draws one View of an Expedition you already have. `pickView(expedition, viewId)` is ExpeditionView's choice of View.
 

@@ -1,8 +1,8 @@
-// The Library (spec §3.2), basic for now: your Expeditions from the API,
-// New and Import. Continue reading, Shared with you, Drafts, the Tag filter,
-// thumbnails and global search come in later work packages.
+// The Library (spec §3.2), basic for now: Continue reading, your
+// Expeditions from the API, global search, New and Import. Shared with
+// you, Drafts, the Tag filter and thumbnails come in later work packages.
 import * as React from "react"
-import { CompassIcon, PlusIcon, UploadIcon } from "lucide-react"
+import { BookOpenIcon, CompassIcon, PlusIcon, UploadIcon } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import { Alert, AlertDescription, AlertTitle } from "@umbel/ui/components/alert"
@@ -29,11 +29,14 @@ import { Spinner } from "@umbel/ui/components/spinner"
 import { toast } from "@umbel/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
+import { GlobalSearch } from "@/components/global-search.tsx"
 import {
   ApiError,
+  continueReading,
   createExpedition,
   importExpedition,
   listExpeditions,
+  type ContinueReadingItem,
   type ExpeditionSummary,
 } from "@/lib/api.ts"
 
@@ -46,6 +49,66 @@ const STATUS_LABEL: Record<ExpeditionSummary["status"], string> = {
   draft: "Draft",
   building: "Building",
   ready: "Ready",
+}
+
+const lastRead = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+})
+
+/**
+ * Continue reading (spec §3.2): the three Expeditions I read most recently.
+ * Opening one lands where I left off (the Expedition screen resumes the
+ * saved position). Hidden until there is something to continue.
+ */
+function ContinueReading() {
+  const [items, setItems] = React.useState<ContinueReadingItem[]>([])
+  React.useEffect(() => {
+    let cancelled = false
+    continueReading(3).then(
+      (list) => {
+        if (!cancelled) setItems(list)
+      },
+      () => {}
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  if (!items.length) return null
+  return (
+    <section aria-label="Continue reading" className="flex flex-col gap-4">
+      <h2 className="font-reading text-2xl font-medium">Continue reading</h2>
+      <ul
+        data-testid="continue-reading"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {items.map(({ expedition: e, position }) => (
+          <li key={e.id}>
+            <Link
+              href={`/e/${e.id}`}
+              className="block h-full rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <Card
+                size="sm"
+                className="h-full transition-colors hover:bg-accent"
+              >
+                <CardHeader>
+                  <CardTitle className="font-reading text-lg font-medium">
+                    {e.title || "Untitled Expedition"}
+                  </CardTitle>
+                  <CardDescription className="flex items-center gap-1.5">
+                    <BookOpenIcon className="size-3.5" />
+                    Last read {lastRead.format(new Date(position.at))}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
 }
 
 export function LibraryScreen() {
@@ -123,7 +186,9 @@ export function LibraryScreen() {
         <Link href="/" aria-label="Library">
           <Wordmark />
         </Link>
-        <div className="flex-1" />
+        <div className="flex flex-1 justify-center">
+          <GlobalSearch />
+        </div>
         {actions}
         <AccountMenu />
         <input
@@ -142,6 +207,7 @@ export function LibraryScreen() {
       </header>
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
+        <ContinueReading />
         <h1 className="font-reading text-3xl font-medium">Your Expeditions</h1>
 
         {list.status === "loading" && (
@@ -199,7 +265,9 @@ export function LibraryScreen() {
                       )}
                     </CardHeader>
                     <CardFooter className="mt-auto gap-2">
-                      <Badge variant="secondary">{STATUS_LABEL[e.status]}</Badge>
+                      <Badge variant="secondary">
+                        {STATUS_LABEL[e.status]}
+                      </Badge>
                       {e.role !== "owner" && (
                         <Badge variant="outline">
                           {e.role === "editor" ? "Editor" : "Viewer"}

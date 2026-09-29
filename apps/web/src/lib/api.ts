@@ -79,6 +79,27 @@ export function createExpedition(title: string): Promise<ExpeditionSummary> {
   })
 }
 
+/** One entry of Continue reading: an Expedition and where I left off. */
+export type ContinueReadingItem = {
+  expedition: Omit<ExpeditionSummary, "role">
+  position: {
+    viewId: string | null
+    focusConceptId: string | null
+    at: string
+  }
+}
+
+/** My most recently read Expeditions (spec §3.2), newest first. */
+export async function continueReading(
+  limit = 3
+): Promise<ContinueReadingItem[]> {
+  return (
+    await call<{ items: ContinueReadingItem[] }>(
+      `/reader/recent?limit=${limit}`
+    )
+  ).items
+}
+
 /** Our JSON, as read from the file (the server validates it). */
 export function importExpedition(fileText: string): Promise<ImportResult> {
   return call("/import", { method: "POST", body: fileText })
@@ -99,4 +120,31 @@ export async function signInWithGoogle(callbackPath = "/"): Promise<void> {
 
 export async function signOut(): Promise<void> {
   await call("/auth/sign-out", { method: "POST", body: "{}" })
+}
+
+/** Global search results (the server's `SearchResults`), grouped. */
+export type SearchResults = {
+  expeditions: (Pick<
+    ExpeditionSummary,
+    "id" | "title" | "summary" | "visibility"
+  > & { role: Role | null })[]
+  concepts: {
+    id: string
+    expeditionId: string
+    expeditionTitle: string
+    title: string
+    kind: string
+    summary: string | null
+  }[]
+  tags: { tag: string; count: number }[]
+}
+
+/** Searches the Expeditions I collaborate on, plus public ones if asked. */
+export function searchAll(
+  q: string,
+  includePublic: boolean,
+  signal?: AbortSignal
+): Promise<SearchResults> {
+  const params = new URLSearchParams({ q, public: includePublic ? "1" : "0" })
+  return call(`/search?${params}`, { signal })
 }

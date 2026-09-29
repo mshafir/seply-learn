@@ -6,7 +6,7 @@
 
 The client op engine (confirmed + pending ops, rebase, Change coalescing), push/pull client, TanStack DB collections, and later the Relay client (partysocket), undo per Change, view-as-of and Proposal preview. Spec: docs/spec/v1/02-architecture.md §2.3–2.4.
 
-Built so far (WP-0.5 spike, WP-1.3):
+Built so far (WP-0.5 spike, WP-1.3, WP-2.5):
 
 | Export | Contract |
 |---|---|
@@ -20,10 +20,13 @@ Built so far (WP-0.5 spike, WP-1.3):
 | `PendingStore`, `IndexedDbPendingStore`, `MemoryPendingStore` | Where pending ops survive a reload. IndexedDB keeps one record per pending op (scoped by Expedition and user), plus the Changes' metadata and the open Change; writes are queued in order, and each tab only deletes ops it knew about, so two tabs don't lose each other's ops. |
 | `projectRows`, `rowOf`, `RowProjection`, `TABLES`, row types | The DomainState → table rows projection. |
 | `monotonicUlid(now?)` | Strictly increasing ULIDs (pending ops sort by id). |
+| `ReaderClient({ userId, transport?, store, channel?, saveDelayMs?, retryMs?, onError? })` | One reader's own state (WP-2.5, spec §1.7): Reading status, personal View settings and position, as `@umbel/domain` marks (never ops). `getState(expeditionId)` (a stable `ReaderState` until it changes) and `subscribe`; `markReading`, `setViewSettings`, `setPosition` apply at once with a strictly increasing `at`, go to the store flagged pending, reach other tabs on the channel (a `BroadcastChannel`, `umbel-reader`) and are saved after `saveDelayMs` (300). **Offline mark queue:** a failed save keeps them pending in the store (a reload keeps them) and retries with backoff (`retryMs`, doubling to a minute); `flush()` saves now; a 400 drops them. `refresh(expeditionId)` fetches the server's state (other devices' marks), newest winning. **Anonymous** (`userId: null`): marks stay in the store under `anon` and never reach a server; a signed-in client's `adoptAnonymous()` merges them into the account's queue (newest wins), clears them, and saves them. `pendingCount`, `readingCount` (for the "sign in to keep your progress" hint). |
+| `ReaderTransport`, `fetchReaderTransport(opts)` | The reader API (`GET /api/reader/expeditions/:id`, `POST /api/reader`; packages/server README). |
+| `ReaderStore`, `IndexedDbReaderStore`, `MemoryReaderStore`, `MarkRecord` | Where marks live in the browser: one record per row (a Concept's status, a View's settings, an Expedition's position) and whether it is pending, per scope (`user:<id>` or `anon`). IndexedDB database `umbel-reader`. |
 
 `@tanstack/db` is pinned exactly (pre-1.0); re-run `src/spike/flicker.test.ts` on every bump. `pnpm --filter @umbel/sync harness` opens the dev-only flicker harness page.
 
-**Tests:** `engine.test.ts` (rebase, coalescing, restore), `collections.test.ts` (every table's mutations → ops, refused edits), `client.test.ts` (a reload with pending ops over fake-indexeddb, last-writer-wins between two clients, 409/403 handling, auto push and retry, paging) against `src/test/fake-server.ts` (the WP-1.2 push/pull semantics in memory), `transport.test.ts`, and `src/spike/flicker.test.ts` (the WP-0.5 evidence, extended to other tables and to the `SyncClient` with its own push/pull timing). `apps/web/e2e/api/sync-client.spec.ts` runs the client against the real Worker and Postgres (CI).
+**Tests:** `engine.test.ts` (rebase, coalescing, restore), `collections.test.ts` (every table's mutations → ops, refused edits), `client.test.ts` (a reload with pending ops over fake-indexeddb, last-writer-wins between two clients, 409/403 handling, auto push and retry, paging) against `src/test/fake-server.ts` (the WP-1.2 push/pull semantics in memory), `transport.test.ts`, `reader.test.ts` (the reader client: save, the offline queue over a reload, retry, refresh with newest-wins, other tabs on the channel, anonymous marks adopted on sign-in, 400s dropped), and `src/spike/flicker.test.ts` (the WP-0.5 evidence, extended to other tables and to the `SyncClient` with its own push/pull timing). `apps/web/e2e/api/sync-client.spec.ts` runs the client against the real Worker and Postgres (CI).
 
 ## Allowed dependencies
 

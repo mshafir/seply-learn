@@ -30,6 +30,8 @@ export type CanvasProps = {
    * previous View had them. Held in memory only; positions are never stored.
    */
   memory?: PositionMemory;
+  /** Concepts the reader has read or knows: drawn with a check. */
+  covered?: ReadonlySet<string>;
 };
 
 /** The last drawn positions, by Concept id; kept by whoever switches Views. */
@@ -45,7 +47,7 @@ export function Canvas(props: CanvasProps) {
 
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
-function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory }: CanvasProps) {
+function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered }: CanvasProps) {
   // After a View switch, the Concepts the two Views share start where the
   // last one drew them, then glide.
   const [positions, setPositions] = useState<Positions>(() => memory?.current ?? new Map());
@@ -164,6 +166,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
           dim: (!!matches && !matches.has(c.id)) || (!!lit && !lit.has(c.id)),
           selected: c.id === selected,
           entering: entering.has(c.id),
+          covered: !!covered?.has(c.id),
           badges: overlay ? (overlay.badges.get(c.id) ?? []) : badgesFor(view, scope, c, tr),
         },
       };

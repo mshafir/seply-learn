@@ -1,23 +1,49 @@
 // The side panel (spec §3.6): 440 px on the right, opened by a selection; a
-// Sheet on narrow windows. It holds the Concept panel (reading arrives with
-// WP-1.7) or the View panel (a stub until the View renderers own settings).
-import { XIcon } from "lucide-react"
+// Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
+// see concept-panel.tsx) or the View panel (view-panel.tsx).
+import * as React from "react"
 
-import { Button } from "@umbel/ui/components/button"
 import { ScrollArea } from "@umbel/ui/components/scroll-area"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetTitle,
 } from "@umbel/ui/components/sheet"
-import type { ConceptRow, ViewRow } from "@umbel/sync"
+import type { ReadingState } from "@umbel/domain"
+import type { ConceptRow } from "@umbel/sync"
 
-import { viewTypeMeta } from "@/expedition/labels.ts"
+import {
+  ArticleContents,
+  BackBar,
+  ConceptArticle,
+  ConceptHeaderExtras,
+  ConceptOverview,
+  ReadingStatusControl,
+  type ConceptReading,
+} from "@/expedition/concept-panel.tsx"
+import { PanelHeader } from "@/expedition/panel-header.tsx"
+import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
+import {
+  articleSectionsOf,
+  conceptEyebrow,
+  readingMinutes,
+  type PanelDepth,
+} from "@/expedition/reading.ts"
 
 export type PanelContent =
-  | { type: "concept"; concept: ConceptRow; kindLabel: string }
-  | { type: "view"; view: ViewRow }
+  | {
+      type: "concept"
+      concept: ConceptRow
+      depth: PanelDepth
+      kindLabel: string
+      reading: ConceptReading
+      /** The reader's own Reading status of this Concept. */
+      status: ReadingState
+      onStatus: (state: ReadingState) => void
+      /** Anonymous and has marked something: where "Sign in" goes. */
+      signInHref: string | null
+    }
+  | ({ type: "view" } & ViewPanelProps)
 
 /** Inline beside the canvas on wide windows; a modal Sheet on narrow ones. */
 export function SidePanel({
@@ -64,69 +90,67 @@ function PanelBody({
   onClose: () => void
   inline?: boolean
 }) {
-  // Inside a Sheet the title and description label the dialog.
-  const Title = inline ? "h2" : SheetTitle
-  const Description = inline ? "p" : SheetDescription
+  if (content.type === "view") {
+    const { type: _type, ...view } = content
+    void _type
+    return <ViewPanel {...view} onClose={onClose} inline={inline} />
+  }
+  return <ConceptBody content={content} onClose={onClose} inline={inline} />
+}
 
-  const eyebrow =
-    content.type === "view"
-      ? `View · ${viewTypeMeta(content.view.viewType).name}`
-      : content.kindLabel
-  const title =
-    content.type === "view"
-      ? content.view.label || viewTypeMeta(content.view.viewType).name
-      : content.concept.title
-  const sub =
-    content.type === "view" ? content.view.question : content.concept.summary
-
+function ConceptBody({
+  content,
+  onClose,
+  inline,
+}: {
+  content: Extract<PanelContent, { type: "concept" }>
+  onClose: () => void
+  inline: boolean
+}) {
+  const { concept, depth, kindLabel, reading, status, onStatus, signInHref } =
+    content
+  const allSections = reading.data.articleSections
+  const sections = React.useMemo(
+    () => articleSectionsOf(concept.id, allSections),
+    [concept.id, allSections]
+  )
+  const minutes = readingMinutes(sections.map((s) => s.md))
   return (
     <>
-      <div className="flex flex-col gap-1.5 border-b px-6 py-4">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs tracking-wider text-primary uppercase">
-            {eyebrow}
-          </span>
-          <div className="flex-1" />
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Close"
-            onClick={onClose}
-          >
-            <XIcon />
-          </Button>
-        </div>
-        <Title className="font-reading text-2xl leading-tight font-medium text-foreground">
-          {title}
-        </Title>
-        {sub && (
-          <Description
-            className={
-              content.type === "view"
-                ? "font-reading text-lg text-muted-foreground"
-                : "text-base text-muted-foreground"
-            }
-          >
-            {sub}
-          </Description>
+      <BackBar reading={reading} concept={concept} />
+      <PanelHeader
+        eyebrow={conceptEyebrow(concept, kindLabel, depth, minutes)}
+        title={concept.title}
+        onClose={onClose}
+        inline={inline}
+      >
+        {!inline && (
+          <SheetDescription className="sr-only">
+            {concept.summary ?? kindLabel}
+          </SheetDescription>
         )}
-      </div>
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-4 px-6 py-4">
-          {content.type === "concept" ? (
-            content.concept.overview ? (
-              <p className="font-reading text-base leading-relaxed">
-                {content.concept.overview}
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No overview yet.
-              </p>
-            )
+        {depth === "overview" ? (
+          <ConceptHeaderExtras concept={concept} />
+        ) : (
+          <ArticleContents sections={sections} />
+        )}
+        <ReadingStatusControl
+          state={status}
+          onChange={onStatus}
+          signInHref={signInHref}
+        />
+      </PanelHeader>
+      {/* Keyed by place, so each new place starts at the top. */}
+      <ScrollArea key={`${concept.id}:${depth}`} className="min-h-0 flex-1">
+        <div className="px-6 py-5">
+          {depth === "overview" ? (
+            <ConceptOverview
+              concept={concept}
+              reading={reading}
+              sections={sections}
+            />
           ) : (
-            <p className="text-sm text-muted-foreground">
-              This View's description and settings appear here.
-            </p>
+            <ConceptArticle reading={reading} sections={sections} />
           )}
         </div>
       </ScrollArea>

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { CanvasView, Expedition } from "../model.ts";
+import type { ReaderInteraction, ViewStatusChip } from "../ExpeditionView.tsx";
 import { scopeFor } from "../scope.ts";
 import { Canvas, type PositionMemory } from "./Canvas.tsx";
 import { LearningPathCanvas } from "./LearningPathCanvas.tsx";
@@ -13,7 +14,10 @@ export type ViewCanvasProps = {
   transitionMs?: number;
   onSettled?: () => void;
   memory?: PositionMemory;
-};
+  personal?: Record<string, unknown>;
+  onPersonalChange?: (key: string, value: unknown) => void;
+  onStatus?: (status: ViewStatusChip | null) => void;
+} & ReaderInteraction;
 
 /** Any canvas View (Evidence, Cause & Effect, Lineage, Learning path), scoped from its settings. */
 export function ViewCanvas(props: ViewCanvasProps) {

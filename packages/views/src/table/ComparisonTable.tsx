@@ -12,7 +12,7 @@ import type { Expedition, View } from "../model.ts";
 import { comparisonTable, type TableCell } from "../table.ts";
 import { KindIcon } from "../canvas/KindIcon.tsx";
 import { paletteColor } from "../canvas/color.ts";
-import { cx } from "../canvas/parts.tsx";
+import { cx, ReadCheck } from "../canvas/parts.tsx";
 
 export type ComparisonTableProps = {
   expedition: Expedition;
@@ -21,9 +21,11 @@ export type ComparisonTableProps = {
   onSelect: (id?: string) => void;
   /** Search matches: other rows are dimmed, so the grid keeps its shape. */
   matches?: Set<string>;
+  /** Concepts the reader has read or knows: a check by the option's name. */
+  covered?: ReadonlySet<string>;
 };
 
-export function ComparisonTable({ expedition, view, selected, onSelect, matches }: ComparisonTableProps) {
+export function ComparisonTable({ expedition, view, selected, onSelect, matches, covered }: ComparisonTableProps) {
   const model = useMemo(() => comparisonTable(expedition, view.settings), [expedition, view.settings]);
   const kinds = useMemo(() => new Map(expedition.kinds.map((k) => [k.id, k])), [expedition]);
   const relTypes = useMemo(() => new Map(expedition.relationshipTypes.map((t) => [t.id, t])), [expedition]);
@@ -90,6 +92,7 @@ export function ComparisonTable({ expedition, view, selected, onSelect, matches 
                   <tr
                     key={row.concept.id}
                     data-concept={row.concept.id}
+                    data-covered={covered?.has(row.concept.id) || undefined}
                     onClick={() => onSelect(row.concept.id)}
                     data-selected={row.concept.id === selected}
                     className={cx(
@@ -104,6 +107,7 @@ export function ComparisonTable({ expedition, view, selected, onSelect, matches 
                       <span className="umbel-table__option-inner">
                         <KindIcon name={k?.icon ?? k?.id} className="umbel-table__icon" style={{ color: paletteColor(k?.color) }} />
                         <span className="umbel-table__title">{row.concept.title}</span>
+                        {covered?.has(row.concept.id) && <ReadCheck />}
                         {row.standing === "chosen" && <span className="umbel-badge umbel-badge--positive">chosen</span>}
                       </span>
                     </th>

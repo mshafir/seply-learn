@@ -67,3 +67,22 @@ export {
   type TableName,
   type ViewRow,
 } from "./rows.ts"
+export {
+  ANONYMOUS_SCOPE,
+  fetchReaderTransport,
+  ReaderClient,
+  type PositionInput,
+  type ReaderChannel,
+  type ReaderClientOptions,
+  type ReaderSaveResult,
+  type ReaderSnapshot,
+  type ReaderTransport,
+} from "./reader.ts"
+export {
+  IndexedDbReaderStore,
+  MemoryReaderStore,
+  recordKey,
+  type IndexedDbReaderStoreOptions,
+  type MarkRecord,
+  type ReaderStore,
+} from "./reader-store.ts"

@@ -1,7 +1,7 @@
 // Sign in (spec §3.1): Google, through Better Auth. The CI-only test
 // credentials have no UI; tests sign up through the API and share the cookie.
 import * as React from "react"
-import { Redirect } from "wouter"
+import { Redirect, useSearchParams } from "wouter"
 
 import { Wordmark } from "@umbel/ui/components/brand"
 import { Button } from "@umbel/ui/components/button"
@@ -21,12 +21,16 @@ import { useSession } from "@/lib/session.ts"
 export function SignInScreen() {
   const { session } = useSession()
   const [starting, setStarting] = React.useState(false)
+  // Where to go back to (e.g. the Expedition an anonymous reader was reading).
+  const [params] = useSearchParams()
+  const raw = params.get("next") ?? "/"
+  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/"
 
-  if (session.status === "signed-in") return <Redirect to="/" replace />
+  if (session.status === "signed-in") return <Redirect to={next} replace />
 
   const start = () => {
     setStarting(true)
-    signInWithGoogle("/").catch(() => {
+    signInWithGoogle(next).catch(() => {
       setStarting(false)
       toast.add({
         title: "Couldn't start sign-in",

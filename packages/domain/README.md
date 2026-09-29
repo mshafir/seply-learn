@@ -20,6 +20,7 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 | `permissions` | `PERMISSIONS` (the §1.8 matrix), `can`, `canPropose`, `actionForOp`. |
 | `sample` | `sampleToState`: converts the prototype sample-graph JSON into one import Change. |
 | `expedition-json` | Our JSON (§1.9). `ExpeditionJson` (v1, `EXPEDITION_JSON_VERSION`): the Zod schema with internal references checked (unique ids; Concept Kinds, Relationship ends and types, Attribute values, View settings and their Kind/Relationship Type refs). `stateToExpeditionJson` (export: live entities only, built-ins inlined, sections in order, Views in rail order). `parseExpeditionJson` (validates, upgrading older `schemaVersion`s first; a file without one is version 0, the prototype sample-graph format). `importExpeditionJson` → `{ ops, change, state, ids }`: one "Imported from file" Change (origin `import`) with every entity id re-minted. Throws `ImportError` (`message`, `issues`). |
+| `reader` | Per-reader state (§1.7) as **marks**, outside the log: `ReadingMark` (a Concept's Reading status), `ViewSettingsMark` (a View's personal settings: only the reader's own values; `{}` is "Reset"), `PositionMark` (View, focused Concept, step, panel depth), each with an ISO `at`; `ReaderBatch` (one save, across Expeditions, at most `READER_BATCH_LIMIT` of each). `isNewer` (the newest write wins; a tie keeps what is there), `applyMarks` → `ReaderState` (one Expedition, keyed by Concept and View), `stateToBatch`, `mergeBatches`, `coveredConcepts` (read or known). |
 | `ulid`, `order-key`, `common` | ULIDs, fractional index keys, shared enums and schemas (palette, Visibility, roles, provenance, …). |
 
 ### Fixtures
@@ -28,7 +29,7 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 
 ### Import: what is re-minted
 
-- **Re-minted** (fresh ULIDs, references remapped): the Expedition, Concepts, article sections, Views, Sources, and so Relationship keys. Provenance refs follow their Source; View settings follow their Concepts (the View Type's `refs.concepts` paths and the `placement`/`order`/`hide`/`fold` overrides).
+- **Re-minted** (fresh ULIDs, references remapped): the Expedition, Concepts, article sections, Views, Sources, and so Relationship keys. Provenance refs follow their Source; in-text links (`#c/<id>`) in overviews and article sections follow their Concept (`remapConceptLinks`); View settings follow their Concepts (the View Type's `refs.concepts` paths and the `placement`/`order`/`hide`/`fold` overrides).
 - **Kept:** custom Kind, Relationship Type and Attribute ids. They are Expedition-scoped vocabulary that View settings name (`x`, `colorBy`, columns), and every row is keyed by its Expedition. A `builtin:` id this server doesn't know becomes a custom definition from its inlined label and colour.
 - **Dropped:** references to things not in the file (provenance to a missing Source, View overrides naming a deleted Concept), a dangling best View (the first View is used). Structural references that don't resolve (a Relationship end, a Concept's Kind) reject the file.
 - Sources' `addedBy` becomes the importer; Views exported while `queued` or `building` arrive `failed`; the Expedition is `ready`.
