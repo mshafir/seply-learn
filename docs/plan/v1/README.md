@@ -63,7 +63,7 @@ Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/0
 - [ ] **Neon:** a project, plus an API key for CI branch creation.
 - [ ] **Google OAuth:** a client ID and secret (hosted login).
 - [ ] **Email:** a Resend account and API key (invites), or say which provider to use instead.
-- [ ] **AI keys** for development and for the instance-key mode on the hosted instance (e.g. Anthropic).
+- [x] **AI keys:** a Vercel AI Gateway key (`AI_GATEWAY_API_KEY`) for development and the hosted instance key mode. Set a spend limit on it in the Vercel dashboard; per-user caps are phase 2.
 
 ## Unlock order
 

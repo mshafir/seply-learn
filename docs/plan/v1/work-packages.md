@@ -217,7 +217,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - milestone: M3
 - depends: WP-1.1
 - spec: 05-ai.md#56-keys-cost-and-limits
-- **Build:** per-request providers; the instance-key vs bring-your-own-key mode from env; AES-GCM key storage under the master key with a Settings UI (last 4, Test, Delete); default models per provider and stage, overridable; token estimation and cost estimate; spending cap accounting per build and per ask.
+- **Build:** per-request providers; the instance-key vs bring-your-own-key mode from env (the hosted instance key is a Vercel AI Gateway key, `AI_GATEWAY_API_KEY`, already a repo secret; the deploy copies it into production and preview Workers, and the AI SDK's `gateway` provider reads it); AES-GCM key storage under the master key with a Settings UI (last 4, Test, Delete); default models per provider and stage, overridable; token estimation and cost estimate; spending cap accounting per build and per ask.
 - **Done when:** unit tests show keys are never returned by any API and round-trip encryption works; the estimate is within ±30% of actual on the fixtures.
 
 ### WP-3.4: Skim and the create flow screens

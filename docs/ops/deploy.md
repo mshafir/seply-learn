@@ -45,6 +45,8 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
     Previews are not listed: Google allows no wildcards, so previews sign in through production with Better Auth's OAuth proxy plugin (WP-1.1). Add a custom domain here when production moves to one.
   - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `BETTER_AUTH_SECRET` (session signing; generate it without seeing it: `openssl rand -base64 32 | gh secret set BETTER_AUTH_SECRET -R mshafir/umbel-learn`).
 
+- [ ] **`AI_GATEWAY_API_KEY`:** a Vercel AI Gateway key (_Vercel dashboard → AI Gateway → API keys_), the hosted instance key (spec §5.1, §5.7). Needed from WP-3.3. Set a spend limit in Vercel: previews use it too, and per-user caps are phase 2.
+
 When the four Cloudflare and Neon secrets exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
 ## How a preview works
