@@ -20,11 +20,14 @@ export function ExpeditionHeader({
   canEdit,
   onRename,
   health,
+  signInHref,
 }: {
   title: string
   canEdit: boolean
   onRename?: (title: string) => void
   health?: SyncHealth
+  /** Signed out (reading a public or unlisted link): where "Sign in" goes. */
+  signInHref?: string | null
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -92,6 +95,14 @@ export function ExpeditionHeader({
             </>
           )}
         </span>
+      )}
+      {signInHref && (
+        <Link
+          href={signInHref}
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          Sign in
+        </Link>
       )}
       <AccountMenu />
     </header>

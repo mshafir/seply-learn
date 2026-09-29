@@ -1,7 +1,8 @@
 // Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
 //   /sign-in            Google sign-in
 //   /                   the Library
-//   /e/:id(/:viewId)    the Expedition screen, on a View
+//   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
+//                       public and unlisted Expeditions need no login)
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
 
@@ -14,15 +15,23 @@ import { LibraryScreen } from "@/screens/library.tsx"
 import { SignInScreen } from "@/screens/sign-in.tsx"
 import { Showcase } from "@/showcase/Showcase.tsx"
 
+const Loading = () => (
+  <div className="flex min-h-svh items-center justify-center">
+    <Spinner className="size-6 text-muted-foreground" />
+  </div>
+)
+
+/** Renders its children once the session is known, signed in or not. */
+function WaitForSession({ children }: { children: React.ReactNode }) {
+  const { session } = useSession()
+  if (session.status === "loading") return <Loading />
+  return children
+}
+
 /** Renders its children only when signed in; otherwise sends to /sign-in. */
 function RequireUser({ children }: { children: React.ReactNode }) {
   const { session } = useSession()
-  if (session.status === "loading")
-    return (
-      <div className="flex min-h-svh items-center justify-center">
-        <Spinner className="size-6 text-muted-foreground" />
-      </div>
-    )
+  if (session.status === "loading") return <Loading />
   if (session.status === "error")
     return (
       <div className="flex min-h-svh items-center justify-center p-4">
@@ -43,12 +52,12 @@ export function App() {
       <Route path="/sign-in" component={SignInScreen} />
       <Route path="/e/:id/:viewId?">
         {(params) => (
-          <RequireUser>
+          <WaitForSession>
             <ExpeditionScreen
               expeditionId={params.id}
               viewId={params.viewId}
             />
-          </RequireUser>
+          </WaitForSession>
         )}
       </Route>
       <Route path="/">

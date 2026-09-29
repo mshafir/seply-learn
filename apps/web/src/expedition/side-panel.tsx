@@ -1,11 +1,13 @@
 // The side panel (spec §3.6): 440 px on the right, opened by a selection; a
 // Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
-// see concept-panel.tsx) or the View panel (a stub until the View renderers
-// own settings).
+// see concept-panel.tsx) or the View panel (the question and the reader's own
+// settings; the description and shared settings come later).
 import * as React from "react"
 import { XIcon } from "lucide-react"
 
+import type { ReadingState } from "@umbel/domain"
 import { Button } from "@umbel/ui/components/button"
+import { Label } from "@umbel/ui/components/label"
 import { ScrollArea } from "@umbel/ui/components/scroll-area"
 import {
   Sheet,
@@ -13,6 +15,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@umbel/ui/components/sheet"
+import { Switch } from "@umbel/ui/components/switch"
 import type { ConceptRow, ViewRow } from "@umbel/sync"
 
 import {
@@ -21,6 +24,7 @@ import {
   ConceptArticle,
   ConceptHeaderExtras,
   ConceptOverview,
+  ReadingStatusControl,
   type ConceptReading,
 } from "@/expedition/concept-panel.tsx"
 import { viewTypeMeta } from "@/expedition/labels.ts"
@@ -30,6 +34,7 @@ import {
   readingMinutes,
   type PanelDepth,
 } from "@/expedition/reading.ts"
+import { PERSONAL_SETTING_LABELS } from "@/lib/reader.ts"
 
 export type PanelContent =
   | {
@@ -38,8 +43,22 @@ export type PanelContent =
       depth: PanelDepth
       kindLabel: string
       reading: ConceptReading
+      /** The reader's own Reading status of this Concept. */
+      status: ReadingState
+      onStatus: (state: ReadingState) => void
+      /** Anonymous and has marked something: where "Sign in" goes. */
+      signInHref: string | null
     }
-  | { type: "view"; view: ViewRow }
+  | {
+      type: "view"
+      view: ViewRow
+      /** The reader's personal settings, with the View Type's defaults. */
+      personal: Record<string, unknown>
+      /** Whether the reader has set any (so "Reset" does something). */
+      personalSet: boolean
+      onPersonal: (settings: Record<string, unknown>) => void
+      onResetPersonal: () => void
+    }
 
 /** Inline beside the canvas on wide windows; a modal Sheet on narrow ones. */
 export function SidePanel({
@@ -87,7 +106,7 @@ function PanelBody({
   inline?: boolean
 }) {
   return content.type === "view" ? (
-    <ViewBody view={content.view} onClose={onClose} inline={inline} />
+    <ViewBody content={content} onClose={onClose} inline={inline} />
   ) : (
     <ConceptBody content={content} onClose={onClose} inline={inline} />
   )
@@ -139,14 +158,15 @@ function PanelHeader({
 }
 
 function ViewBody({
-  view,
+  content,
   onClose,
   inline,
 }: {
-  view: ViewRow
+  content: Extract<PanelContent, { type: "view" }>
   onClose: () => void
   inline: boolean
 }) {
+  const { view, personal, personalSet, onPersonal, onResetPersonal } = content
   const Description = inline ? "p" : SheetDescription
   const meta = viewTypeMeta(view.viewType)
   return (
@@ -165,9 +185,46 @@ function ViewBody({
       </PanelHeader>
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-4 px-6 py-4">
-          <p className="text-sm text-muted-foreground">
-            This View's description and settings appear here.
-          </p>
+          <section
+            aria-label="Your settings"
+            data-testid="personal-settings"
+            className="flex flex-col gap-3"
+          >
+            <div className="flex items-center gap-2">
+              <h3 className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
+                Your settings
+              </h3>
+              <div className="flex-1" />
+              {personalSet && (
+                <Button variant="ghost" size="xs" onClick={onResetPersonal}>
+                  Reset
+                </Button>
+              )}
+            </div>
+            {Object.keys(personal).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                This View has no settings of your own.
+              </p>
+            ) : (
+              Object.entries(personal).map(([key, value]) => {
+                const id = `personal-${key}`
+                return (
+                  <div key={key} className="flex items-center gap-3">
+                    <Switch
+                      id={id}
+                      checked={value === true}
+                      onCheckedChange={(checked: boolean) =>
+                        onPersonal({ ...personal, [key]: checked })
+                      }
+                    />
+                    <Label htmlFor={id}>
+                      {PERSONAL_SETTING_LABELS[key] ?? key}
+                    </Label>
+                  </div>
+                )
+              })
+            )}
+          </section>
         </div>
       </ScrollArea>
     </>
@@ -183,7 +240,8 @@ function ConceptBody({
   onClose: () => void
   inline: boolean
 }) {
-  const { concept, depth, kindLabel, reading } = content
+  const { concept, depth, kindLabel, reading, status, onStatus, signInHref } =
+    content
   const allSections = reading.data.articleSections
   const sections = React.useMemo(
     () => articleSectionsOf(concept.id, allSections),
@@ -209,6 +267,11 @@ function ConceptBody({
         ) : (
           <ArticleContents sections={sections} />
         )}
+        <ReadingStatusControl
+          state={status}
+          onChange={onStatus}
+          signInHref={signInHref}
+        />
       </PanelHeader>
       {/* Keyed by place, so each new place starts at the top. */}
       <ScrollArea key={`${concept.id}:${depth}`} className="min-h-0 flex-1">

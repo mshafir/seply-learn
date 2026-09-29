@@ -4,11 +4,19 @@
 // Each overview and section carries a provenance badge. In-text `#c/` links
 // and Relationship links push onto the back stack.
 import * as React from "react"
-import { ArrowLeftIcon, BookOpenIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  BookOpenIcon,
+  CheckCheckIcon,
+  CheckIcon,
+} from "lucide-react"
+import { Link } from "wouter"
 
+import type { ReadingState } from "@umbel/domain"
 import { AttributeList } from "@umbel/ui/components/attribute-list"
 import { Badge } from "@umbel/ui/components/badge"
 import { Button } from "@umbel/ui/components/button"
+import { ToggleGroup, ToggleGroupItem } from "@umbel/ui/components/toggle-group"
 import { kindColor } from "@umbel/ui/lib/kinds"
 import type { ArticleSectionRow, ConceptRow } from "@umbel/sync"
 
@@ -33,6 +41,59 @@ export type ConceptReading = {
   onBack: (() => void) | null
   /** Where Back goes, for its label. */
   previous: PanelEntry | null
+}
+
+/**
+ * Reading status (spec §3.7): Not read yet / Read / I knew this. It belongs
+ * to the reader, not the Expedition, and shows as a check in every View.
+ */
+export function ReadingStatusControl({
+  state,
+  onChange,
+  signInHref,
+}: {
+  state: ReadingState
+  onChange: (state: ReadingState) => void
+  /** Anonymous and has marked something: where "Sign in" goes. */
+  signInHref?: string | null
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <ToggleGroup
+        aria-label="Reading status"
+        data-testid="reading-status"
+        data-state={state}
+        variant="outline"
+        size="sm"
+        spacing={0}
+        value={[state]}
+        onValueChange={(value: unknown[]) => {
+          const next = value[0] as ReadingState | undefined
+          if (next && next !== state) onChange(next)
+        }}
+      >
+        <ToggleGroupItem value="unread">Not read yet</ToggleGroupItem>
+        <ToggleGroupItem value="read">
+          <CheckIcon />
+          Read
+        </ToggleGroupItem>
+        <ToggleGroupItem value="known">
+          <CheckCheckIcon />I knew this
+        </ToggleGroupItem>
+      </ToggleGroup>
+      {signInHref && (
+        <p data-testid="sign-in-hint" className="text-xs text-muted-foreground">
+          <Link
+            href={signInHref}
+            className="font-medium text-foreground underline underline-offset-2"
+          >
+            Sign in
+          </Link>{" "}
+          to keep your progress across devices.
+        </p>
+      )}
+    </div>
+  )
 }
 
 /** "← Back to overview" / "← Back to <Concept>", above the header. */
