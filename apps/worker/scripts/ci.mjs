@@ -217,6 +217,8 @@ function customDomain(hostname) {
   const path = join(root, "wrangler.ci.json")
   const config = JSON.parse(readFileSync(path, "utf8"))
   config.routes = [{ pattern: hostname, custom_domain: true }]
+  // With routes set, wrangler turns workers.dev off unless asked; keep the old URL working.
+  config.workers_dev = true
   writeFileSync(path, JSON.stringify(config, null, 2))
   console.log(`wrangler.ci.json: custom domain ${hostname}`)
 }
