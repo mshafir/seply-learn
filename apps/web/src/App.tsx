@@ -1,29 +1,64 @@
-import { Button } from "@umbel/ui/components/button"
-import { Wordmark } from "@umbel/ui/components/brand"
-import { ModeToggle } from "@umbel/ui/components/mode-toggle"
+// Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
+//   /sign-in            Google sign-in
+//   /                   the Library
+//   /e/:id(/:viewId)    the Expedition screen, on a View
+//   /showcase           the design system (WP-0.3)
+import { Redirect, Route, Switch } from "wouter"
 
+import { Alert, AlertDescription, AlertTitle } from "@umbel/ui/components/alert"
+import { Spinner } from "@umbel/ui/components/spinner"
+
+import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
+import { useSession } from "@/lib/session.ts"
+import { LibraryScreen } from "@/screens/library.tsx"
+import { SignInScreen } from "@/screens/sign-in.tsx"
 import { Showcase } from "@/showcase/Showcase.tsx"
 
-// Routing arrives with WP-1.5; until then the path picks the page.
-export function App() {
-  if (window.location.pathname.startsWith("/showcase")) return <Showcase />
+/** Renders its children only when signed in; otherwise sends to /sign-in. */
+function RequireUser({ children }: { children: React.ReactNode }) {
+  const { session } = useSession()
+  if (session.status === "loading")
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Spinner className="size-6 text-muted-foreground" />
+      </div>
+    )
+  if (session.status === "error")
+    return (
+      <div className="flex min-h-svh items-center justify-center p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertTitle>Can't reach the server</AlertTitle>
+          <AlertDescription>{session.error.message}</AlertDescription>
+        </Alert>
+      </div>
+    )
+  if (session.status === "signed-out") return <Redirect to="/sign-in" replace />
+  return children
+}
 
+export function App() {
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="flex items-center justify-between border-b px-6 py-3">
-        <Wordmark />
-        <ModeToggle />
-      </header>
-      <main className="flex flex-1 flex-col items-start gap-4 p-6">
-        <h1 className="font-reading text-3xl font-medium">
-          Nothing to read yet.
-        </h1>
-        <p className="text-muted-foreground">
-          Expeditions arrive in later work packages. The design system is on
-          the showcase page.
-        </p>
-        <Button nativeButton={false} render={<a href="/showcase" />}>Open the showcase</Button>
-      </main>
-    </div>
+    <Switch>
+      <Route path="/showcase" component={Showcase} />
+      <Route path="/sign-in" component={SignInScreen} />
+      <Route path="/e/:id/:viewId?">
+        {(params) => (
+          <RequireUser>
+            <ExpeditionScreen
+              expeditionId={params.id}
+              viewId={params.viewId}
+            />
+          </RequireUser>
+        )}
+      </Route>
+      <Route path="/">
+        <RequireUser>
+          <LibraryScreen />
+        </RequireUser>
+      </Route>
+      <Route>
+        <Redirect to="/" replace />
+      </Route>
+    </Switch>
   )
 }
