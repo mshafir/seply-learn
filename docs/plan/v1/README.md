@@ -59,9 +59,9 @@ Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/0
 ## Owner checklist before M0 (a task only the owner can do)
 
 - [x] **GitHub:** `mshafir/umbel-learn` (**public**), pushed 2026-09-28. Personal content is excluded by `.gitignore`, and family and health specifics in the docs were redacted. Keep new fixtures synthetic or public.
-- [ ] **Cloudflare:** a Workers Paid account, plus an API token for CI (Workers, R2, Durable Objects, Workflows, Hyperdrive).
-- [ ] **Neon:** a project, plus an API key for CI branch creation.
-- [ ] **Google OAuth:** a client ID and secret (hosted login).
+- [x] **Cloudflare:** a Workers Paid account, plus an API token for CI (Workers, R2, Durable Objects, Workflows, Hyperdrive).
+- [x] **Neon:** a project, plus an API key for CI branch creation.
+- [x] **Google OAuth:** a client ID and secret (hosted login).
 - [x] **Email:** Resend, sending from `mail.umbel.dev` (DNS in Cloud DNS, zone `umbel-dev`). `RESEND_API_KEY` is a sending-only key; `EMAIL_FROM` is a repo variable.
 - [x] **AI keys:** a Vercel AI Gateway key (`AI_GATEWAY_API_KEY`) for development and the hosted instance key mode. Set a spend limit on it in the Vercel dashboard; per-user caps are phase 2.
 
