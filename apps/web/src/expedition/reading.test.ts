@@ -137,6 +137,22 @@ describe("provenanceLabel", () => {
     ).toBe("From a Source")
   })
 
+  it("names PDF pages, and reads split segments as their whole", () => {
+    expect(
+      provenanceLabel([{ source: "doc", segment: "p2" }], sources).text
+    ).toBe("From notes.md, page 2")
+    expect(
+      provenanceLabel(
+        [
+          { source: "chat", segment: "t3a" },
+          { source: "chat", segment: "t3b" },
+          { source: "chat", segment: "t7" },
+        ],
+        sources
+      ).text
+    ).toBe("From the chat, turns 3 and 7")
+  })
+
   it("joins several Sources", () => {
     expect(
       provenanceLabel(

@@ -66,13 +66,16 @@ export function conceptLinkId(href: string | undefined): string | null {
 export type ProvenanceLabel = {
   kind: "source" | "background"
   text: string
-  /** The first ref, for the Source viewer to open at (a later work package). */
+  /** The first ref, for the Source viewer to open at. */
   ref?: { source: string; segment: string }
 }
 
+/** Segment numbers, when every id has this prefix; parts (t3a) count as their whole. */
 const numbered = (ids: string[], prefix: string) =>
-  ids.every((id) => new RegExp(`^${prefix}\\d+$`).test(id))
-    ? ids.map((id) => Number(id.slice(prefix.length))).sort((a, b) => a - b)
+  ids.every((id) => new RegExp(`^${prefix}\\d+[a-z]*$`).test(id))
+    ? ids
+        .map((id) => parseInt(id.slice(prefix.length), 10))
+        .sort((a, b) => a - b)
     : null
 
 /** "3", "3 and 14", "3, 9 and 14". */
@@ -85,7 +88,8 @@ function listNumbers(ns: number[]): string {
 /**
  * The badge for a provenance list (spec §3.7). An empty list is background
  * knowledge. Segment ids follow the seeding contract: `t14` is chat turn 14,
- * `s3` is document section 3.
+ * `s3` is document section 3, `p2` is PDF page 2; a part (`t3a`) reads as
+ * its whole.
  */
 export function provenanceLabel(
   prov: Prov,
@@ -106,10 +110,16 @@ export function provenanceLabel(
       if (!turns) return "From the chat"
       return `From the chat, ${turns.length > 1 ? "turns" : "turn"} ${listNumbers(turns)}`
     }
-    const name = source.kind === "prompt" ? "the prompt" : source.title
+    // A prompt is one segment; its number says nothing.
+    if (source.kind === "prompt") return "From the prompt"
+    const name = source.title
     const sections = numbered(segments, "s")
-    if (!sections) return `From ${name}`
-    return `From ${name}, ${sections.length > 1 ? "sections" : "section"} ${listNumbers(sections)}`
+    if (sections)
+      return `From ${name}, ${sections.length > 1 ? "sections" : "section"} ${listNumbers(sections)}`
+    const pages = numbered(segments, "p")
+    if (pages)
+      return `From ${name}, ${pages.length > 1 ? "pages" : "page"} ${listNumbers(pages)}`
+    return `From ${name}`
   })
   const first = prov[0]!
   return {

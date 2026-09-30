@@ -1,0 +1,141 @@
+[
+  {
+    "title": "How tides work",
+    "create_time": 1790000000.0,
+    "update_time": 1790000300.0,
+    "conversation_id": "synthetic-chatgpt-0001",
+    "current_node": "n6",
+    "mapping": {
+      "root": { "id": "root", "message": null, "parent": null, "children": ["n0"] },
+      "n0": {
+        "id": "n0",
+        "message": {
+          "id": "n0",
+          "author": { "role": "system", "name": null },
+          "content": { "content_type": "text", "parts": [""] },
+          "metadata": { "is_visually_hidden_from_conversation": true }
+        },
+        "parent": "root",
+        "children": ["n1"]
+      },
+      "n1": {
+        "id": "n1",
+        "message": {
+          "id": "n1",
+          "author": { "role": "user", "name": null },
+          "content": { "content_type": "text", "parts": ["Why are there two high tides a day?"] },
+          "metadata": {}
+        },
+        "parent": "n0",
+        "children": ["n2"]
+      },
+      "n2": {
+        "id": "n2",
+        "message": {
+          "id": "n2",
+          "author": { "role": "assistant", "name": null },
+          "content": {
+            "content_type": "text",
+            "parts": ["The Moon's gravity pulls hardest on the ocean facing it and weakest on the far side.\n\nThat difference stretches the oceans into two bulges, one toward the Moon and one away from it, and the Earth turns under both each day."]
+          },
+          "metadata": {}
+        },
+        "parent": "n1",
+        "children": ["n3", "n3b"]
+      },
+      "n3": {
+        "id": "n3",
+        "message": {
+          "id": "n3",
+          "author": { "role": "user", "name": null },
+          "content": { "content_type": "text", "parts": ["What about the Sun? (first draft of this question)"] },
+          "metadata": {}
+        },
+        "parent": "n2",
+        "children": []
+      },
+      "n3b": {
+        "id": "n3b",
+        "message": {
+          "id": "n3b",
+          "author": { "role": "user", "name": null },
+          "content": { "content_type": "text", "parts": ["Does the Sun matter too?"] },
+          "metadata": {}
+        },
+        "parent": "n2",
+        "children": ["n4"]
+      },
+      "n4": {
+        "id": "n4",
+        "message": {
+          "id": "n4",
+          "author": { "role": "tool", "name": "web" },
+          "content": { "content_type": "text", "parts": ["(search results)"] },
+          "metadata": {}
+        },
+        "parent": "n3b",
+        "children": ["n5"]
+      },
+      "n5": {
+        "id": "n5",
+        "message": {
+          "id": "n5",
+          "author": { "role": "assistant", "name": null },
+          "content": {
+            "content_type": "multimodal_text",
+            "parts": ["Yes. The Sun's tidal pull is a bit under half the Moon's.", { "content_type": "image_asset_pointer", "asset_pointer": "file-synthetic" }]
+          },
+          "metadata": {}
+        },
+        "parent": "n4",
+        "children": ["n6"]
+      },
+      "n6": {
+        "id": "n6",
+        "message": {
+          "id": "n6",
+          "author": { "role": "assistant", "name": null },
+          "content": {
+            "content_type": "text",
+            "parts": ["When the Sun and Moon line up (new and full moon) you get larger spring tides; at right angles, smaller neap tides."]
+          },
+          "metadata": {}
+        },
+        "parent": "n5",
+        "children": []
+      }
+    }
+  },
+  {
+    "title": "Sourdough starter basics",
+    "create_time": 1790100000.0,
+    "update_time": 1790100100.0,
+    "conversation_id": "synthetic-chatgpt-0002",
+    "current_node": "b2",
+    "mapping": {
+      "b0": { "id": "b0", "message": null, "parent": null, "children": ["b1"] },
+      "b1": {
+        "id": "b1",
+        "message": {
+          "id": "b1",
+          "author": { "role": "user", "name": null },
+          "content": { "content_type": "text", "parts": ["How often should I feed a sourdough starter?"] },
+          "metadata": {}
+        },
+        "parent": "b0",
+        "children": ["b2"]
+      },
+      "b2": {
+        "id": "b2",
+        "message": {
+          "id": "b2",
+          "author": { "role": "assistant", "name": null },
+          "content": { "content_type": "text", "parts": ["At room temperature, once or twice a day. In the fridge, about once a week."] },
+          "metadata": {}
+        },
+        "parent": "b1",
+        "children": []
+      }
+    }
+  }
+]

@@ -55,6 +55,7 @@ import {
   type BackStack,
 } from "@/expedition/reading.ts"
 import { SidePanel, type PanelContent } from "@/expedition/side-panel.tsx"
+import { SourceViewer, type SourceTarget } from "@/expedition/source-viewer.tsx"
 import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
@@ -248,6 +249,14 @@ function ExpeditionFrame({
   const [panel, setPanel] = React.useState<Panel>(() =>
     conceptParam ? { type: "concept", stack: openConcept(conceptParam) } : null
   )
+  // A provenance link opened in a new tab arrives as ?source=<id>&segment=<id>.
+  const [sourceTarget, setSourceTarget] = React.useState<SourceTarget | null>(
+    () => {
+      const params = new URLSearchParams(window.location.search)
+      const sourceId = params.get("source")
+      return sourceId ? { sourceId, segment: params.get("segment") } : null
+    }
+  )
   const [query, setQuery] = React.useState("")
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
@@ -360,6 +369,8 @@ function ExpeditionFrame({
             )
         : null,
     previous: stack.length > 1 ? stack[stack.length - 2]! : null,
+    onOpenSource: (ref) =>
+      setSourceTarget({ sourceId: ref.source, segment: ref.segment }),
   }
 
   const markKnown = (conceptId: string) =>
@@ -511,6 +522,12 @@ function ExpeditionFrame({
           }
         />
       </div>
+      <SourceViewer
+        expeditionId={expeditionId}
+        sources={data.sources}
+        target={sourceTarget}
+        onClose={() => setSourceTarget(null)}
+      />
     </>
   )
 }

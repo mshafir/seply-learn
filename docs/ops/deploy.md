@@ -23,7 +23,7 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
 - [X] **`CLOUDFLARE_API_TOKEN`:** an account-owned token (_Manage Account → Account API Tokens → Create Token → Custom token_). Under **Account Resources**, include this account; a zones scope fails with _"Failed common permission check"_. **Account** permissions (the dashboard may say _Write_ for _Edit_):
   - Workers Scripts: Edit
   - Hyperdrive: Edit
-  - Workers R2 Storage: Edit (not used yet; added now so the token doesn't need re-issuing when WP-1.x adds buckets)
+  - Workers R2 Storage: Edit (the Sources buckets: `seply-sources` for production, `seply-sources-preview` shared by previews; `scripts/ci.mjs r2-bucket` creates them on first deploy. R2 must be enabled on the account first (Dashboard → R2); until it is, deploys go ahead without the binding, with a warning, and Source uploads answer 503)
   - Account Settings: Read
   - Durable Objects and Workflows have no permission of their own; they deploy under Workers Scripts.
   - No **User** permissions: wrangler only needs them to discover the account, and CI always sets `CLOUDFLARE_ACCOUNT_ID`. `scripts/ci.mjs` calls only `/accounts/<id>/…` endpoints.

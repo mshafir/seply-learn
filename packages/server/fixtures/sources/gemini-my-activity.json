@@ -1,0 +1,29 @@
+[
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted What is a KV cache in a transformer?",
+    "time": "2026-09-02T09:00:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"],
+    "safeHtmlItem": [
+      { "html": "<p>A <strong>KV cache</strong> stores the keys and values of tokens already processed, so decoding a new token doesn't recompute them.</p><ul><li>Saves compute</li><li>Costs memory</li></ul>" }
+    ]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Prompted How big does it get?",
+    "time": "2026-09-02T09:02:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"],
+    "safeHtmlItem": [
+      { "html": "<p>It grows linearly with sequence length, layers and heads.</p>" }
+    ]
+  },
+  {
+    "header": "Gemini Apps",
+    "title": "Used Gemini Apps",
+    "time": "2026-09-02T08:59:00.000Z",
+    "products": ["Gemini Apps"],
+    "activityControls": ["Gemini Apps Activity"]
+  }
+]

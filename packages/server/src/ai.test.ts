@@ -69,7 +69,7 @@ async function byok(fetchSeen: { url: string; key: string | null }[] = []) {
     fetchSeen.push({ url, key: h.get("x-api-key") ?? h.get("authorization") })
     return new Response("{}", { status: 200 })
   }) as typeof globalThis.fetch
-  const app = testApp(BYOK_ENV, db, undefined, { fetch })
+  const app = testApp(BYOK_ENV, db, undefined, { ai: { fetch } })
   const ada = await signUp(app, "ada")
   const ed = await signUp(app, "ed")
   const call = async (user: { headers: Record<string, string> }, method: string, path: string, body?: unknown) => {
