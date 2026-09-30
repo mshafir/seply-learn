@@ -62,6 +62,8 @@ test("clicking a risk-mode lever lights its real path", async ({ page }) => {
   const lever = card("Distillation");
   await expect(lever).toContainText("acts on Serving cost per token");
   const edges = page.locator(".react-flow__edge");
+  // Edges can draw after the layout settles; count them once they're there.
+  await expect.poll(() => edges.count()).toBeGreaterThan(0);
   const before = await edges.count();
   await lever.click();
   await expect(lever).toHaveClass(/seply-concept--selected/);
