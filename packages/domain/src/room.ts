@@ -6,10 +6,15 @@
 import { z } from "zod"
 import { ViewStatus } from "./common.ts"
 
-/** A job's lifecycle (spec §2.5). Terminal: complete, failed, cancelled. */
+/**
+ * A job's lifecycle (spec §2.5). Terminal: complete, failed, cancelled.
+ * `paused`: the attempt stopped at the spending cap; Continue starts the next
+ * attempt with a raised cap, Stop cancels it.
+ */
 export const JobStatus = z.enum([
   "queued",
   "running",
+  "paused",
   "complete",
   "failed",
   "cancelled",

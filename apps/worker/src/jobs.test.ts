@@ -30,6 +30,7 @@ const payload: JobPayload = {
   input: {},
   startedBy: "U",
   attempt: 2,
+  capRaises: 0,
 }
 
 describe("the Workflows engine", () => {

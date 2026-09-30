@@ -19,6 +19,7 @@ const toJob = (r: Row): Job => ({
   progress: r.progress,
   error: r.error,
   attempt: r.attempt,
+  capRaises: r.capRaises,
   createdAt: new Date(r.createdAt).toISOString(),
   updatedAt: new Date(r.updatedAt).toISOString(),
 })
@@ -83,10 +84,19 @@ export async function updateOpenJob(
   return r ? toJob(r) : null
 }
 
-/** Reopens an ended job as its next attempt. Null if it is still open. */
-export async function reopenJob(db: Db, id: string): Promise<Job | null> {
+/**
+ * Reopens an ended job as its next attempt (or, with `capRaise`, a paused
+ * one, raising its cap). Null if it isn't in that state.
+ */
+export async function reopenJob(
+  db: Db,
+  id: string,
+  opts: { capRaise?: boolean } = {}
+): Promise<Job | null> {
   const current = await getJob(db, id)
-  if (!current || !isEnded(current.status)) return null
+  if (!current) return null
+  if (opts.capRaise ? current.status !== "paused" : !isEnded(current.status))
+    return null
   const [r] = await db
     .update(jobs)
     .set({
@@ -95,9 +105,16 @@ export async function reopenJob(db: Db, id: string): Promise<Job | null> {
       progress: 0,
       error: null,
       attempt: current.attempt + 1,
+      capRaises: current.capRaises + (opts.capRaise ? 1 : 0),
       updatedAt: new Date().toISOString(),
     })
-    .where(and(eq(jobs.id, id), eq(jobs.attempt, current.attempt)))
+    .where(
+      and(
+        eq(jobs.id, id),
+        eq(jobs.attempt, current.attempt),
+        eq(jobs.status, current.status)
+      )
+    )
     .returning()
   return r ? toJob(r) : null
 }

@@ -37,6 +37,7 @@ const jobs: JobRunner = {
   start: (db, req) => runner().start(db, req),
   cancel: (db, id) => runner().cancel(db, id),
   retry: (db, id) => runner().retry(db, id),
+  continue: (db, id) => runner().continue(db, id),
   wake: (db) => runner().wake(db),
 }
 

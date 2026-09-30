@@ -79,7 +79,12 @@ export {
   type StepOptions,
   type Steps,
 } from "./jobs/types.ts"
-export { failureReason, runJob } from "./jobs/host.ts"
+export {
+  failureReason,
+  isJobPaused,
+  JobPaused,
+  runJob,
+} from "./jobs/host.ts"
 export { createJobRunner, JobError } from "./jobs/runner.ts"
 export { createInlineEngine, type InlineEngine } from "./jobs/inline.ts"
 export { fakeJob, fakeViewLabel, FakeJobInput } from "./jobs/fake.ts"

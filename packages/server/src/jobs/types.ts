@@ -26,6 +26,8 @@ export type Job = {
   progress: number
   error: string | null
   attempt: number
+  /** How many times the reader chose Continue at the spending cap. */
+  capRaises: number
   createdAt: string
   updatedAt: string
 }
@@ -38,6 +40,11 @@ export type JobPayload = {
   input: unknown
   startedBy: string
   attempt: number
+  /**
+   * How many times the reader chose Continue at the spending cap: a job's
+   * SpendMeter calls `raise()` this many times.
+   */
+  capRaises: number
 }
 
 /** The engine's id for one attempt of a job (a Workflow instance id). */
@@ -141,7 +148,14 @@ export interface JobContext<Input> {
 
 export type JobDefinition<Input = unknown> = {
   kind: string
-  /** Validates `input` when the job is started through the API. */
+  /**
+   * Validates `input` when the job is started through the API.
+   *
+   * A job pauses at the spending cap by throwing @seply/ai's
+   * `SpendingCapReached` from a step: the attempt ends `paused` (not failed,
+   * no retries). Continue starts the next attempt with `capRaises` one
+   * higher; Stop cancels it.
+   */
   input: z.ZodType<Input>
   /** Only startable where test credentials are on (a localhost Worker). */
   testOnly?: boolean
@@ -191,10 +205,12 @@ export interface JobRunner {
       startedBy: string
     }
   ): Promise<Job>
-  /** Stops a queued or running job; it ends `cancelled`. */
+  /** Stops a queued, running or paused job; it ends `cancelled`. */
   cancel(db: Db, jobId: string): Promise<Job>
   /** Starts a failed or cancelled job again, as its next attempt, from its first step. */
   retry(db: Db, jobId: string): Promise<Job>
+  /** Continues a job paused at the spending cap: its next attempt, with `capRaises` + 1. */
+  continue(db: Db, jobId: string): Promise<Job>
   /** Wakes every running job (see `JobEngine.wake`). Returns how many. */
   wake(db: Db): Promise<number>
 }
