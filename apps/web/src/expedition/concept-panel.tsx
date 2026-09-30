@@ -10,6 +10,7 @@ import {
   BookOpenIcon,
   CheckCheckIcon,
   CheckIcon,
+  PenLineIcon,
 } from "lucide-react"
 import { Link } from "wouter"
 
@@ -17,6 +18,7 @@ import type { ReadingState } from "@seply/domain"
 import { AttributeList } from "@seply/ui/components/attribute-list"
 import { Badge } from "@seply/ui/components/badge"
 import { Button } from "@seply/ui/components/button"
+import { Spinner } from "@seply/ui/components/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
 import { kindColor } from "@seply/ui/lib/kinds"
 import type { ArticleSectionRow, ConceptRow } from "@seply/sync"
@@ -30,7 +32,18 @@ import {
   type PanelEntry,
   type RelationshipGroup,
 } from "@/expedition/reading.ts"
+import type { ArticleAsk } from "@/expedition/build-state.ts"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
+
+/**
+ * The "Write the article" Concept action (spec §3.7, §5.5): runs the article
+ * writer for this Concept. What it writes is a Proposal (a suggestion) for
+ * an editor to review, never written straight into the Expedition.
+ */
+export type ArticleAction = {
+  ask: ArticleAsk | null
+  onWrite: () => void
+}
 
 /** What the Concept panel reads from, and how it moves. */
 export type ConceptReading = {
@@ -270,10 +283,12 @@ export function ConceptOverview({
   concept,
   reading,
   sections,
+  articleAction,
 }: {
   concept: ConceptRow
   reading: ConceptReading
   sections: readonly ArticleSectionRow[]
+  articleAction?: ArticleAction
 }) {
   const { data, conceptById, onNavigate } = reading
   const attributes = attributeItems(concept, data.attributeDefs)
@@ -333,6 +348,9 @@ export function ConceptOverview({
           </span>
         </Button>
       )}
+      {sections.length === 0 && articleAction && (
+        <WriteArticle action={articleAction} />
+      )}
       <RelationshipList
         heading="Links to"
         groups={relationships.out}
@@ -343,6 +361,55 @@ export function ConceptOverview({
         groups={relationships.in}
         onNavigate={onNavigate}
       />
+    </div>
+  )
+}
+
+/** The "Write the article" button, and where its ask stands. */
+function WriteArticle({ action }: { action: ArticleAction }) {
+  const { ask, onWrite } = action
+  if (ask?.status === "suggested")
+    return (
+      <p
+        data-testid="write-article"
+        data-state="suggested"
+        className="text-sm text-muted-foreground"
+      >
+        Article suggested. It's waiting for review in Suggestions.
+      </p>
+    )
+  const writing = ask?.status === "writing"
+  return (
+    <div
+      data-testid="write-article"
+      data-state={ask?.status ?? "idle"}
+      className="flex flex-col gap-1.5"
+    >
+      <Button
+        variant="outline"
+        className="h-auto justify-start gap-3 px-3.5 py-3 text-left"
+        disabled={writing}
+        onClick={onWrite}
+      >
+        {writing ? (
+          <Spinner className="size-5! text-suggested-text" />
+        ) : (
+          <PenLineIcon className="size-5! text-primary" />
+        )}
+        <span className="flex flex-col">
+          <span className="font-semibold">
+            {writing ? ask.step : "Write the article"}
+          </span>
+          <span className="text-xs font-normal text-muted-foreground">
+            Suggested for review before it's added
+          </span>
+        </span>
+      </Button>
+      {ask?.status === "failed" && (
+        <p role="alert" className="text-sm text-destructive">
+          {ask.reason}
+        </p>
+      )}
     </div>
   )
 }

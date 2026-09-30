@@ -1,0 +1,3740 @@
+{
+  "schemaVersion": 1,
+  "id": "01M3T6P0Y5JKEXQQ8EAC5XJXDF",
+  "title": "E-bike for the commute",
+  "summary": "",
+  "tags": [],
+  "bestViewId": "01M3T6P0YKY0NFW6VE8HMBY2E0",
+  "kinds": [
+    {
+      "id": "builtin:idea",
+      "label": "Idea",
+      "color": "blue",
+      "icon": "lightbulb"
+    },
+    {
+      "id": "builtin:topic",
+      "label": "Topic",
+      "color": "slate",
+      "icon": "folder"
+    },
+    {
+      "id": "builtin:question",
+      "label": "Question",
+      "color": "amber",
+      "icon": "circle-help"
+    },
+    {
+      "id": "builtin:person",
+      "label": "Person",
+      "color": "violet",
+      "icon": "user"
+    },
+    {
+      "id": "builtin:place",
+      "label": "Place",
+      "color": "teal",
+      "icon": "map-pin"
+    },
+    {
+      "id": "builtin:thing",
+      "label": "Thing",
+      "color": "orange",
+      "icon": "box"
+    },
+    {
+      "id": "builtin:claim",
+      "label": "Claim",
+      "color": "amber",
+      "icon": "message-square-quote"
+    },
+    {
+      "id": "builtin:criterion",
+      "label": "Criterion",
+      "color": "olive",
+      "icon": "list-checks"
+    },
+    {
+      "id": "builtin:decision",
+      "label": "Decision",
+      "color": "pink",
+      "icon": "git-branch"
+    },
+    {
+      "id": "builtin:action",
+      "label": "Action",
+      "color": "green",
+      "icon": "play"
+    },
+    {
+      "id": "builtin:measurement",
+      "label": "Measurement",
+      "color": "teal",
+      "icon": "ruler"
+    }
+  ],
+  "relationshipTypes": [
+    {
+      "id": "builtin:part-of",
+      "label": "is part of",
+      "inverseLabel": "has part",
+      "color": "violet",
+      "dashed": true
+    },
+    {
+      "id": "builtin:prerequisite",
+      "label": "is needed to understand",
+      "inverseLabel": "needs",
+      "color": "blue",
+      "dashed": false
+    },
+    {
+      "id": "builtin:led-to",
+      "label": "led to",
+      "inverseLabel": "came from",
+      "color": "teal",
+      "dashed": false
+    },
+    {
+      "id": "builtin:uses",
+      "label": "uses",
+      "inverseLabel": "is used by",
+      "color": "orange",
+      "dashed": false
+    },
+    {
+      "id": "builtin:raises",
+      "label": "raises",
+      "inverseLabel": "is raised by",
+      "color": "red",
+      "dashed": false
+    },
+    {
+      "id": "builtin:lowers",
+      "label": "lowers",
+      "inverseLabel": "is lowered by",
+      "color": "green",
+      "dashed": false
+    },
+    {
+      "id": "builtin:causes",
+      "label": "causes",
+      "inverseLabel": "is caused by",
+      "color": "orange",
+      "dashed": false
+    },
+    {
+      "id": "builtin:supports",
+      "label": "supports",
+      "inverseLabel": "is supported by",
+      "color": "indigo",
+      "dashed": false
+    },
+    {
+      "id": "builtin:challenges",
+      "label": "challenges",
+      "inverseLabel": "is challenged by",
+      "color": "amber",
+      "dashed": true
+    },
+    {
+      "id": "builtin:corrects",
+      "label": "corrects",
+      "inverseLabel": "is corrected by",
+      "color": "brown",
+      "dashed": false
+    },
+    {
+      "id": "builtin:alternative-to",
+      "label": "is an alternative to",
+      "inverseLabel": "is an alternative to",
+      "color": "slate",
+      "dashed": true
+    },
+    {
+      "id": "builtin:meets",
+      "label": "meets",
+      "inverseLabel": "is met by",
+      "color": "green",
+      "dashed": false
+    },
+    {
+      "id": "builtin:partly-meets",
+      "label": "partly meets",
+      "inverseLabel": "is partly met by",
+      "color": "amber",
+      "dashed": false
+    },
+    {
+      "id": "builtin:fails",
+      "label": "fails",
+      "inverseLabel": "is failed by",
+      "color": "red",
+      "dashed": false
+    }
+  ],
+  "attributes": [
+    {
+      "id": "torque",
+      "label": "Motor torque",
+      "type": "number",
+      "unit": "Nm"
+    },
+    {
+      "id": "battery-wh",
+      "label": "Battery capacity",
+      "type": "number",
+      "unit": "Wh"
+    },
+    {
+      "id": "weight",
+      "label": "Bike weight",
+      "type": "number",
+      "unit": "kg"
+    },
+    {
+      "id": "price",
+      "label": "Price (approx.)",
+      "type": "money"
+    },
+    {
+      "id": "motor",
+      "label": "Motor",
+      "type": "text"
+    },
+    {
+      "id": "drivetrain",
+      "label": "Drivetrain",
+      "type": "text"
+    },
+    {
+      "id": "priority",
+      "label": "Priority",
+      "type": "enum",
+      "enumValues": [
+        "dropped",
+        "nice",
+        "hard"
+      ]
+    },
+    {
+      "id": "standing",
+      "label": "Standing",
+      "type": "enum",
+      "enumValues": [
+        "ruled-out",
+        "in-play",
+        "chosen"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "01M3T6P0YK6BH4HRCJG54A0B7J",
+      "kind": "chat",
+      "title": "E-bike chat",
+      "mime": "text/plain; charset=utf-8",
+      "size": 6452,
+      "addedAt": "2026-09-30T21:09:51.064Z"
+    }
+  ],
+  "concepts": [
+    {
+      "title": "App motor lock",
+      "aliases": [
+        "Bosch eBike Lock",
+        "Flow app"
+      ],
+      "tags": [],
+      "summary": "Bosch's eBike Lock (Flow app) disables the motor when you walk away; the Alder supports it, the Cedar doesn't.",
+      "weightPin": "core",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "can disable the motor when you walk away; the Alder supports that"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "can disable the motor when you walk away; the Alder supports that"
+        }
+      ],
+      "id": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "overview": "The app motor lock is a Bosch feature, the eBike Lock used through the Flow app, that disables the motor when you walk away. It doesn't stop someone carrying the bike off, but it makes a stolen bike far less useful and adds a deterrent on top of a physical lock. For a commuter who will leave the bike at a rack at work, it is the feature that separates the shortlisted bikes on [theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q): the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) supports it and the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) does not. That gives the Alder its edge on this criterion. The [test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3) includes trying the lock in the app before you buy.",
+      "attributes": {},
+      "sections": [
+        {
+          "id": "01M3T6W8JWVASJ7HVBTE685CXV",
+          "heading": "What does it actually do?",
+          "md": "The lock is Bosch's **eBike Lock**, managed through the **Flow app**. When you walk away from the bike, it can disable the motor. The bike can still be pushed or carried, but without assist it is a heavy, awkward machine to ride away, which takes much of the value out of stealing it.\n\nThe Sources describe it only at this level. They don't say how the bike detects that you have left, or what happens if the phone is out of range.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t14",
+              "quote": "can disable the motor when you walk away"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWQG9PHRAVBQ5JF0QQ",
+          "heading": "Why does it matter for this commute?",
+          "md": "The reader will leave the bike at a rack at work, so [theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q) is one of the four stated priorities. Other measures help, but the motor lock is the one that separates the shortlisted bikes.\n\n- The [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) supports it.\n- The [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) doesn't.\n\nThe assistant's scoring names the Alder best on theft protection because of the motor lock. The other bikes rely on locks alone. This is part of why the Alder came out as the best all-rounder.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t14"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t17"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18",
+              "quote": "Alder best (motor lock through the app), the others rely on locks alone."
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWFAEH4ETF8T4JFC5Q",
+          "heading": "How does it fit with the other theft measures?",
+          "md": "The motor lock is one layer among several in [Theft & security](#c/01M3T6P0YKQF040RM3NSF4BW32), not a replacement for the others:\n\n- A removable battery, which all four bikes have, so it can be taken inside.\n- A Sold Secure Gold or Diamond D-lock plus a cable for the front wheel; see [D-lock plus front-wheel cable](#c/01M3T6P0YKP6NJWSC84AT206Q1).\n- Insurance, at around 100 to 150 a year for a 3,000 bike.\n\nThe app lock is an extra deterrent on top of a physical lock, not a substitute for one.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t14"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JW12J0A78MS9GP7BJP",
+          "heading": "What should I check before buying?",
+          "md": "The last step of the [test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3) is to try the motor-lock feature in the app before you buy. That confirms it works as expected with your phone and the shop's setup.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t20",
+              "quote": "Try the motor-lock feature in the app before you buy."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Bike insurance",
+      "aliases": [],
+      "tags": [],
+      "summary": "Around 100–150 a year for a 3,000 bike. Not yet arranged.",
+      "kind": "builtin:measurement",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "around 100 to 150 a year for a 3,000 bike"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "around 100 to 150 a year for a 3,000 bike"
+        }
+      ],
+      "id": "01M3T6P0YK4Y25PZD4TXP7B4V3",
+      "overview": "Insurance is part of the cost of leaving a bike at a rack at work. The chat put it at around 100 to 150 a year for a 3,000 bike, which is a recurring cost on top of the purchase price and the servicing and battery costs. It sits under [Theft & security](#c/01M3T6P0YKQF040RM3NSF4BW32) next to the locking and motor-lock measures, because insurance covers what those fail to prevent. It also pushes up the [Three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG): over three years it adds roughly 300 to 450. The figure is an estimate for a bike at about your budget, and you haven't arranged cover yet.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Test ride checklist",
+      "aliases": [],
+      "tags": [],
+      "summary": "Ride the hill (or similar) in middle assist mode, check frame fit, carry it up stairs with the battery out, ask about first service and battery warranty, and try the app motor lock.",
+      "kind": "builtin:action",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "id": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "overview": "Once the reader chose the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N), the assistant gave a five-point test ride to confirm the choice. Ride [the hill](#c/01M3T6P0YK17X3J2D1RX5XY1YZ), or a similar one, in middle assist mode and see whether you would arrive sweaty. Check the frame fit: stand over it with a few centimetres of clearance and reach the bars without locking your elbows ([Check frame size](#c/01M3T6P0YKNX6EEEJF8ZPR02JT)). Carry it up a flight of stairs with the battery out. Ask about the first service, usually free after 500 km, and the battery warranty, usually 2 years. Try the [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59) before buying. If stairs or sizing go badly, [Cedar is the fallback](#c/01M3T6P0YKEPKRSKQ011V1947J).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Check frame size",
+      "aliases": [],
+      "tags": [],
+      "summary": "Stand over the frame with a few centimetres clearance and reach the bars without locking your elbows.",
+      "kind": "builtin:action",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20",
+          "quote": "stand over it with a few centimetres clearance"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20",
+          "quote": "stand over it with a few centimetres clearance"
+        }
+      ],
+      "id": "01M3T6P0YKNX6EEEJF8ZPR02JT",
+      "overview": "A bike that doesn't fit is miserable however good its motor is, so the test ride includes a fit check. The advice is to stand over the frame with a few centimetres of clearance and to reach the handlebars without locking your elbows. It is one step of the [Test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3). It also connects to the open question [Step-through or diamond frame?](#c/01M3T6P0YKZDKKN2F08E14Q4XJ), since standover height and reach differ between frame styles, and you need to feel that on the actual bike rather than judge it from a spec sheet.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "My commute & needs",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "The reader's ride, body, budget, home and workplace constraints, and what they care about most.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t15"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "hill climbing, low maintenance, weight for the stairs, and theft protection. Price second."
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        }
+      ],
+      "id": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "overview": "This topic collects what the choice has to fit. [Me](#c/01M3T6P0YK8DV9HNFQX62VBFER) and [My commute](#c/01M3T6P0YKF5C9G2VNH2GDY921) set the facts: 14 km each way, one real hill, about 80 kg, a laptop bag, a budget up to 3,500, and a second-floor flat with no lift. On top of that the reader named their priorities: [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR), [low maintenance](#c/01M3T6P0YKV299T34JVENPH1HM), [weight for the stairs](#c/01M3T6P0YK28F35F7D5RFDFM5X) and [theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q), with [price](#c/01M3T6P0YKY4Y6R2G7G97ZHM6R) second. These criteria are what every bike in the Expedition is scored against.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Motors & torque",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "Mid-drive versus hub motors, torque figures, and how the motor brands (Bosch, Shimano, Bafang) compare.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ],
+      "id": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "overview": "This topic gathers everything about what drives the bike. The core split is between the [mid-drive motor](#c/01M3T6P0YK2NA0DWG2GY30EC7N), which sits at the pedals and works through the gears, and the [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) in the wheel, which is cheaper and quieter but weaker on long climbs. [Torque](#c/01M3T6P0YK61ETMECKKRKQ2JJ2) is the number that separates them: 60 to 85 Nm for mid-drives against 40 to 50 Nm for typical hub motors. For a reader with an 800 m hill at about 8 percent who doesn't want to arrive sweaty, this led to [Go mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY). The topic also covers the brands: [Bosch and Shimano systems](#c/01M3T6P0YKTBCA586AAMSYPRST) against [Bafang](#c/01M3T6P0YKX2MGJ6H8RBZVVSJ6), where the [dealer network](#c/01M3T6P0YK867AVZ1FN5C5XWPX) matters most.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Battery & range",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "How big a battery the commute needs and how long it lasts before losing capacity.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ],
+      "id": "01M3T6P0YKQSDCS7QY2G99BS9C",
+      "overview": "This topic covers two questions about the battery: how big it needs to be, and how long it lasts. On size, 400 to 500 Wh covers the 28 km daily [commute](#c/01M3T6P0YKF5C9G2VNH2GDY921) with a couple of days between charges, as set out under [battery size](#c/01M3T6P0YK0F27CYR8Z7YZYKNX). On longevity, [battery lifespan](#c/01M3T6P0YK8KNBKKQ7PTJ0G3QD) puts capacity at about 80 percent after 500 to 800 cycles, which may mean a replacement near year three or four. It also holds the brand debate: the idea that [Bosch batteries beat Bafang](#c/01M3T6P0YK394FYAD9D0KSYP9B) is only partly true, because [cells matter, not the brand](#c/01M3T6P0YK0CAY5WR503K636RR), and most makers buy from the same few suppliers.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Drivetrain, frame & maintenance",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "Chain versus belt drive, internal gear hubs, frame style, and the upkeep each needs.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ],
+      "id": "01M3T6P0YKA0BS5V7GG7HP8GK9",
+      "overview": "This topic gathers everything about how the bike turns pedalling into motion and what it costs to keep it working. The central contrast is the [chain and cassette](#c/01M3T6P0YKRYVZKA4MYR6KHHH4), which offers more gears but needs regular cleaning and replacement, versus the [belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P) paired with an [internal gear hub](#c/01M3T6P0YKAC18NNM4VFG7J8VQ), which needs almost no upkeep but has fewer gears, slightly more friction and fiddlier tyre repairs. For a commuter who rides in rain and covers about 6,000 km a year, this choice decides how much time and money goes into maintenance. The topic also holds the [frame question](#c/01M3T6P0YKZDKKN2F08E14Q4XJ), step-through or diamond, which affects comfort with a bag and work clothes.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "The bikes compared",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "The four shortlisted e-bikes, how they score on the reader's priorities, and the final choice.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "id": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "overview": "This topic holds the shortlist and how it was judged. Four bikes in the budget were proposed: the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N), [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R), [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) and the hub-motor [Dogwood Hub](#c/01M3T6P0YKRY9PC6C5WK4H7XT5), included for contrast. The first three were worth comparing closely, and were scored on the reader's priorities: hill climbing, low maintenance, weight, theft protection, then price. The result is [No bike wins everything](#c/01M3T6P0YKD4TPK5C4T6NE5EB7), and the reader picked the Alder, which answers [Which e-bike should I buy?](#c/01M3T6P0YKPDE8C5KV7TJWAE30).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Costs over three years",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "Running costs beyond the purchase: chains, belts, servicing, battery replacement and insurance.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "So the belt saves maybe 200 over three years, not a huge amount."
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ],
+      "id": "01M3T6P0YKK9S6JQFK8TBVESWJ",
+      "overview": "The purchase price is only part of what an e-bike costs. This hub gathers the running costs over three years at your 6,000 km a year: chains, cassettes, brake pads and services on the chain bikes (about 850), a belt and internal hub service on the Birch (about 650), and a possible battery replacement of 600 to 800 near the end. The [Three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG) holds the numbers. The main finding, in [Belt saves little](#c/01M3T6P0YKQY8D4SS36JE5PH9Y), is that the belt drive saves only around 200 over the period, so it is not a strong reason on cost alone. Insurance is a further cost to add.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Theft & security",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "Protecting a bike left at an outdoor work rack: removable battery, locks, motor lock app, insurance.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t13"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ],
+      "id": "01M3T6P0YKQF040RM3NSF4BW32",
+      "overview": "Theft worries the rider because the bike would be left at a rack at work. The chat offers four layers of defence. A [removable battery](#c/01M3T6P0YKTH7Q44G78ZXEG9GH) can be taken inside, and all four bikes have one. A Sold Secure Gold or Diamond [D-lock plus a front-wheel cable](#c/01M3T6P0YKP6NJWSC84AT206Q1) makes the bike harder to steal. An [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59) can disable the motor when the rider walks away, which the Alder supports and the Cedar doesn't. Finally, [insurance](#c/01M3T6P0YK4Y25PZD4TXP7B4V3) runs around 100 to 150 a year for a 3,000 bike. Together these feed the theft protection criterion that favours the Alder.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Next steps",
+      "aliases": [],
+      "tags": [
+        "topic"
+      ],
+      "summary": "What's left to do after choosing: the test ride, fit, warranty, and a fallback if it goes badly.",
+      "kind": "builtin:topic",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "id": "01M3T6P0YK7225YPYGRJSWF5XK",
+      "overview": "Once you chose the Alder, the conversation turned to what to do before you pay. This hub collects those steps. The main one is the [Test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3): ride your hill in the middle assist mode to see whether you'd arrive sweaty, check that the frame fits, carry the bike up a flight of stairs with the battery out, ask about the first service and battery warranty, and try the app's motor lock. It also holds the [Cedar as a fallback](#c/01M3T6P0YKEPKRSKQ011V1947J), so you know where to turn if the Alder disappoints in practice.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Me",
+      "aliases": [],
+      "tags": [],
+      "summary": "The reader: about 80 kg, commutes with a laptop bag, budget up to 3,500, lives on a second floor with no lift, parks at an outdoor rack at work.",
+      "kind": "builtin:person",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1",
+          "quote": "I'm about 80 kg, and I'd carry a laptop bag. Budget up to 3500."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t13"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t15"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1",
+          "quote": "I'm about 80 kg, and I'd carry a laptop bag. Budget up to 3500"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t13"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t15"
+        }
+      ],
+      "id": "01M3T6P0YK8DV9HNFQX62VBFER",
+      "overview": "This is the rider whose needs drive the whole Expedition: about 80 kg, carrying a laptop bag, with a budget up to 3,500. Two details shape the choice most. The flat is on the second floor with no lift, so the bike's weight matters on the stairs, and the bike will be left at a rack at work, which makes theft a worry. The rider also doesn't want to arrive sweaty, and rides in work clothes. These facts raise the central question, [which e-bike should I buy?](#c/01M3T6P0YKPDE8C5KV7TJWAE30), and the narrower one of [step-through or diamond frame](#c/01M3T6P0YKZDKKN2F08E14Q4XJ). They all rest on [the commute](#c/01M3T6P0YKF5C9G2VNH2GDY921) described in the first turn.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "My commute",
+      "aliases": [],
+      "tags": [],
+      "summary": "14 km each way, 28 km a day, roughly 6,000 km a year, with one real hill; the reader doesn't want to arrive sweaty.",
+      "kind": "builtin:idea",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1",
+          "quote": "14 km each way, one real hill"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "your 6,000 km a year"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1",
+          "quote": "14 km each way, one real hill"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "your 6,000 km a year"
+        }
+      ],
+      "id": "01M3T6P0YKF5C9G2VNH2GDY921",
+      "overview": "The commute is the use case every other choice is measured against: 14 km each way, so 28 km a day and about 6,000 km a year, with one real [hill](#c/01M3T6P0YK17X3J2D1RX5XY1YZ). The rider also doesn't want to arrive sweaty. Distance sets the [battery size](#c/01M3T6P0YK0F27CYR8Z7YZYKNX) needed, and the yearly mileage underlies the running-cost estimates for chains, belts and batteries. The hill pushes the choice toward a mid-drive motor. Everything is drawn from the first turns of the chat, and it is the practical half of the picture that [the rider](#c/01M3T6P0YK8DV9HNFQX62VBFER) completes.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "The hill",
+      "aliases": [],
+      "tags": [],
+      "summary": "The one climb on the commute: about 800 m long, peaking near an 8 percent grade.",
+      "kind": "builtin:place",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3",
+          "quote": "About 800 metres long, maybe 8 percent at the steepest"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3",
+          "quote": "About 800 metres long, maybe 8 percent at the steepest"
+        }
+      ],
+      "id": "01M3T6P0YK17X3J2D1RX5XY1YZ",
+      "overview": "The hill is the single serious climb on [the commute](#c/01M3T6P0YKF5C9G2VNH2GDY921): about 800 metres long and roughly 8 percent at its steepest. It matters because it is what pushed the chat toward a mid-drive rather than a hub motor. Wait, link check below. Seen another way, a good hub motor could manage 8 percent at moderate speed, but a mid-drive lets the rider shift down and keep cadence, which means less effort and, importantly for this reader, less sweat. The hill is therefore the real test for the [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR) criterion, and the test ride should include riding it in the middle assist mode.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Hill climbing",
+      "aliases": [
+        "Arrive without sweating"
+      ],
+      "tags": [],
+      "summary": "Climb the 800 m, 8 percent hill easily enough to arrive at work without sweating; judged mainly by motor type and torque.",
+      "kind": "builtin:criterion",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3",
+          "quote": "I really don't want to arrive sweaty"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3",
+          "quote": "I really don't want to arrive sweaty"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        }
+      ],
+      "id": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "overview": "Hill climbing is the reader's hardest requirement: get up one 800 m hill, at up to 8 percent, and still arrive at work without being sweaty. It is judged mainly by motor type and [torque](#c/01M3T6P0YK61ETMECKKRKQ2JJ2). A [mid-drive motor](#c/01M3T6P0YK2NA0DWG2GY30EC7N) lets you shift down and keep your cadence, so it is the safer choice, while a hub motor would cope at moderate speed but struggles on long steep climbs. Among the bikes compared, the Birch (85 Nm) and Cedar (80 Nm) are strongest, and the Alder (75 Nm) is plenty for this gradient. The [Dogwood Hub](#c/01M3T6P0YKRY9PC6C5WK4H7XT5), at 45 Nm, only partly meets the criterion. It ranks first among the four priorities the reader listed.",
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "title": "Low maintenance",
+      "aliases": [],
+      "tags": [],
+      "summary": "Little cleaning, oiling and part replacement for a daily all-weather commuter.",
+      "kind": "builtin:criterion",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "low maintenance"
+        }
+      ],
+      "id": "01M3T6P0YKV299T34JVENPH1HM",
+      "overview": "For a daily commuter who rides in rain, low maintenance means not having to clean, oil or replace much. It is one of the reader's four stated priorities. The [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) meets it clearly, thanks to a [belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P) and internal gear hub: no oil, no rust, and a belt lasting 2 to 3 times as long as a chain. The [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) and [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) use chains that need cleaning and replacing, so they only partly meet it. The belt has trade-offs, though, and it saves only a modest amount in running costs, so this criterion competes with weight and price in [No bike wins everything](#c/01M3T6P0YKD4TPK5C4T6NE5EB7).",
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "title": "Weight for the stairs",
+      "aliases": [],
+      "tags": [],
+      "summary": "Light enough to carry up two flights daily; 23–24 kg is noticeably easier than 26 kg, and removing the battery saves about 2.5–3 kg.",
+      "kind": "builtin:criterion",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t15",
+          "quote": "My flat is on the second floor with no lift."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t15",
+          "quote": "My flat is on the second floor with no lift."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        }
+      ],
+      "id": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "overview": "The reader lives on the second floor with no lift, so they must carry the bike up two flights every day. That makes weight a hard criterion. Carrying 26 kg is hard, while 23 to 24 kg is noticeably easier, and taking out the [removable battery](#c/01M3T6P0YKTH7Q44G78ZXEG9GH) first removes about 2.5 to 3 kg. The [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) at 23 kg is lightest and the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) at 24 kg is close behind. The [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) at 26 kg is the heaviest mid-drive and fails here. This is the main reason the Birch's maintenance advantage doesn't win in [No bike wins everything](#c/01M3T6P0YKD4TPK5C4T6NE5EB7).",
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "title": "Theft protection",
+      "aliases": [],
+      "tags": [],
+      "summary": "How well the bike can be secured at an outdoor work rack, beyond just a lock.",
+      "kind": "builtin:criterion",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t13",
+          "quote": "Theft worries me. I'd leave it at a rack at work."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t13",
+          "quote": "Theft worries me."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        }
+      ],
+      "id": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "overview": "The reader would leave the bike at a rack at work, so theft protection is one of their four stated priorities, not an afterthought. A good lock is the baseline: a Sold Secure Gold or Diamond D-lock plus a cable for the front wheel ([D-lock plus front-wheel cable](#c/01M3T6P0YKP6NJWSC84AT206Q1)). A [removable battery](#c/01M3T6P0YKTH7Q44G78ZXEG9GH), which all four bikes have, lets you take the most valuable part inside. What separates the bikes is the [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59), which disables the motor when you walk away. The [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) supports it and the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) doesn't, so the Alder scores best here. Insurance of about 100 to 150 a year for a 3,000 bike is the other safeguard to weigh.",
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "title": "Price",
+      "aliases": [
+        "Budget up to 3,500"
+      ],
+      "tags": [],
+      "summary": "Purchase price within a 3,500 budget; a secondary concern after the four main priorities.",
+      "kind": "builtin:criterion",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "Price second."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "Price second."
+        }
+      ],
+      "id": "01M3T6P0YKY4Y6R2G7G97ZHM6R",
+      "overview": "Price is the purchase cost of the bike, and the reader set a ceiling of 3,500. After the four main priorities were listed, the reader said price comes second, so it works as a tiebreaker and a limit, not the main driver. The three serious candidates all fit the budget: the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) is cheapest at about 2,300, roughly 1,000 below the rest; the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) sits at about 3,200; and the [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) at about 3,400 is close to the ceiling. Purchase price is only part of the picture, since running costs and insurance add to it over time.",
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "title": "Torque",
+      "aliases": [],
+      "tags": [],
+      "summary": "The key number for hill climbing: 60–85 Nm for mid-drives (Bosch Performance Line CX 85, Shimano EP8 85, Bosch Performance Line 75) versus 40–50 Nm for typical hub motors.",
+      "weightPin": "core",
+      "kind": "builtin:measurement",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "Torque is the number to look at"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "Torque is the number to look at"
+        }
+      ],
+      "id": "01M3T6P0YK61ETMECKKRKQ2JJ2",
+      "overview": "Torque, measured in newton-metres (Nm), is the number to look at when judging how well an e-bike motor will climb. It describes how hard the motor can push at the cranks or wheel, which matters most on a steady gradient like the reader's 800 m, 8 percent hill. [Mid-drive motors](#c/01M3T6P0YK2NA0DWG2GY30EC7N) typically deliver 60 to 85 Nm: Bosch Performance Line CX and Shimano EP8 both reach 85 Nm, and the Bosch Performance Line 75 Nm. Typical hub motors give 40 to 50 Nm. Torque alone isn't the whole story, since a mid-drive also multiplies its effect through the gears, but it explains why the shortlist runs from 75 Nm on the Alder to 85 Nm on the Birch.",
+      "attributes": {},
+      "sections": [
+        {
+          "id": "01M3T6W8JWSCSSBEZ72SN6P09R",
+          "heading": "What numbers should I expect?",
+          "md": "The Sources give these ranges:\n\n- **Mid-drive motors:** 60 to 85 Nm. Examples are the Bosch Performance Line CX (85 Nm), Shimano EP8 (85 Nm) and Bosch Performance Line (75 Nm).\n- **Typical hub motors:** 40 to 50 Nm.\n\nOn the shortlist, the [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) has 85 Nm (Shimano EP6), the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) 80 Nm (Bafang M400), the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) 75 Nm (Bosch Performance Line), and the [Dogwood Hub](#c/01M3T6P0YKRY9PC6C5WK4H7XT5) 45 Nm from its rear hub.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t4",
+              "quote": "Torque is the number to look at"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t6"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWEK0X3HF2H61G15R1",
+          "heading": "How much torque does this hill need?",
+          "md": "The hill is 800 m long with a steepest grade of about 8 percent, and the rider weighs about 80 kg and carries a laptop bag. The assistant judged that a good hub motor could manage this at moderate speed. A [mid-drive](#c/01M3T6P0YK2NA0DWG2GY30EC7N) is the safer bet because the rider can shift down and keep cadence, which means less effort and less sweat, and the rider specifically wants to avoid arriving sweaty.\n\nBy the assistant's scoring, the Birch (85 Nm) and Cedar (80 Nm) are strongest on [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR), while the Alder's 75 Nm is plenty for 8 percent.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t3"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t4"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWTNCS8EXFTF0S5QM6",
+          "heading": "Is higher always better?",
+          "md": "Not necessarily. Torque is only one input. A mid-drive drives the chain, so the gears multiply its effect on a climb, and that is part of why the Alder's 75 Nm is enough for this hill. Beyond a sufficient figure, the extra 5 to 10 Nm on the Birch and Cedar has to be weighed against the other priorities: maintenance, weight for the stairs, theft protection and price. That trade-off is why the Alder was chosen despite having the lowest torque of the three.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Go mid-drive",
+      "aliases": [],
+      "tags": [],
+      "summary": "For the 8 percent hill, a mid-drive is the safer bet: shifting down keeps cadence, meaning less effort and less sweat. A good hub motor would cope at moderate speed.",
+      "kind": "builtin:decision",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "Then a mid-drive is the safer bet."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "Then a mid-drive is the safer bet."
+        }
+      ],
+      "id": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "overview": "This decision settles the motor type: go with a mid-drive. It follows from [the hill](#c/01M3T6P0YK17X3J2D1RX5XY1YZ), 800 m at up to 8 percent, and the reader's wish not to arrive sweaty. A good hub motor could manage that grade at moderate speed, but a [mid-drive motor](#c/01M3T6P0YK2NA0DWG2GY30EC7N) lets you shift down and keep cadence, so you put in less effort and sweat less. The [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) remains the cheaper, quieter, lower-maintenance alternative, but it is the weaker climber. The decision narrows the field to the Alder, Birch and Cedar, which are compared on [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR) and the reader's other priorities.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Bosch & Shimano systems",
+      "aliases": [
+        "Bosch",
+        "Shimano"
+      ],
+      "tags": [],
+      "summary": "Rated more refined by independent tests: smoother power, better sensors and software, and a larger dealer network for warranty repairs.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Independent tests generally rate Bosch and Shimano systems as more refined"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Independent tests generally rate Bosch and Shimano systems as more refined"
+        }
+      ],
+      "id": "01M3T6P0YKTBCA586AAMSYPRST",
+      "overview": "Bosch and Shimano are the two big-name motor systems on the shortlist: Bosch powers the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) and Shimano the [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R). Independent tests generally rate them as more refined than [Bafang](#c/01M3T6P0YKX2MGJ6H8RBZVVSJ6), with smoother power, better sensors and software. Their strongest advantage for a daily commuter is the larger dealer network for warranty repairs, which is the core of the claim that the [dealer network is the real point](#c/01M3T6P0YK867AVZ1FN5C5XWPX). The case for Bafang is price and openness, since its parts are cheaper and more shops can work on them. The advantage is not the battery cells, which mostly come from the same few makers.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Which e-bike should I buy?",
+      "aliases": [],
+      "tags": [],
+      "summary": "Answer: the Alder C5, the best all-rounder for hill climbing, weight, maintenance and theft protection, chosen over the Birch Metro 8 and Cedar Urban.",
+      "weightPin": "core",
+      "kind": "builtin:question",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19",
+          "quote": "I'll go with the Alder."
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19",
+          "quote": "I'll go with the Alder."
+        }
+      ],
+      "id": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "overview": "This is the question the whole Expedition serves: which e-bike suits a 14 km each-way commute with one real hill, an 80 kg rider carrying a laptop bag, and a budget up to 3,500? The conversation narrows it by first fixing the motor type, battery size and frame style, then comparing three shortlisted mid-drives against four priorities: hill climbing, low maintenance, weight for the stairs and theft protection, with price second. The answer is the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N), the best all-rounder. The reasoning rests on [no bike winning everything](#c/01M3T6P0YKD4TPK5C4T6NE5EB7): the Birch wins on maintenance and the Cedar on weight and price. Frame style, [step-through or diamond](#c/01M3T6P0YKZDKKN2F08E14Q4XJ), stays open until the test ride.",
+      "attributes": {},
+      "sections": [
+        {
+          "id": "01M3T6W8JW428JNRRJ9DZP1SV0",
+          "heading": "What was the starting point?",
+          "md": "The rider commutes 14 km each way with one real hill, weighs about 80 kg, carries a laptop bag and has a budget up to 3,500. The assistant suggested starting with three choices that shape everything else: motor type, battery size and frame style. Then shortlist a few bikes and compare them on what matters.\n\nThe hill is about 800 m long and about 8 percent at the steepest, and the rider doesn't want to arrive sweaty. That pointed to a [mid-drive](#c/01M3T6P0YK2NA0DWG2GY30EC7N). A 400 to 500 Wh battery suits 28 km a day with a hill (see [battery size](#c/01M3T6P0YK0F27CYR8Z7YZYKNX)).",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t1"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t2"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t3"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t4"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWG2G151DS4Y3CD1Y6",
+          "heading": "Which bikes were compared?",
+          "md": "Four bikes were offered, three of them closely compared:\n\n- [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N): Bosch Performance Line 75 Nm, 500 Wh, 24 kg, around 3,200.\n- [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R): Shimano EP6 85 Nm, 504 Wh, belt drive with internal hub, 26 kg, around 3,400.\n- [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8): Bafang M400 80 Nm, 460 Wh, 23 kg, around 2,300.\n- [Dogwood Hub](#c/01M3T6P0YKRY9PC6C5WK4H7XT5): a hub-motor bike included for contrast, 45 Nm, 21 kg, around 1,700.\n\nThe assistant recommended comparing the first three closely.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t6"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWRHED5SK14CA31171",
+          "heading": "How did they score on the rider's priorities?",
+          "md": "The rider named four priorities, [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR), [low maintenance](#c/01M3T6P0YKV299T34JVENPH1HM), [weight for the stairs](#c/01M3T6P0YK28F35F7D5RFDFM5X) and [theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q), with [price](#c/01M3T6P0YKY4Y6R2G7G97ZHM6R) second. The scoring:\n\n- **Hill climbing:** Birch (85 Nm) and Cedar (80 Nm) strongest; Alder (75 Nm) plenty for 8 percent.\n- **Low maintenance:** Birch clearly, thanks to belt and internal hub.\n- **Weight:** Cedar best, Alder close, Birch worst. Weight mattered because the flat is on the second floor with no lift.\n- **Theft protection:** Alder best, with its [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59).\n- **Price:** Cedar cheapest by about 1,000.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t15"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t16"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t17"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWPT5Y3A4H5SPD04AC",
+          "heading": "Why the Alder?",
+          "md": "[No bike wins everything](#c/01M3T6P0YKD4TPK5C4T6NE5EB7). The assistant called the Alder the best all-rounder for this list, the Birch the choice if maintenance matters more than the stairs, and the Cedar the choice if the rider would rather save 1,000. The rider chose the Alder. The belt's running-cost saving was modest, about 200 over three years, which weakened the case for the Birch.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t10"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t19",
+              "quote": "I'll go with the Alder."
+            }
+          ]
+        },
+        {
+          "id": "01M3T6W8JWYESFG47G0JRXZNRC",
+          "heading": "What is still open?",
+          "md": "The decision isn't fully closed until the [test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3) is done. [Step-through or diamond frame?](#c/01M3T6P0YKZDKKN2F08E14Q4XJ) wasn't explicitly settled, though the assistant noted that a step-through is easier with a bag and work clothes. The test ride covers:\n\n- Riding the hill in the middle assist mode to see whether you'd arrive sweaty.\n- Checking the [frame size](#c/01M3T6P0YKNX6EEEJF8ZPR02JT).\n- Carrying it up a flight of stairs with the battery out.\n- Asking about the first service and battery warranty.\n- Trying the motor lock in the app.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t2"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Bafang",
+      "aliases": [],
+      "tags": [],
+      "summary": "Motor maker whose strengths are price and openness (cheaper parts, more shops can work on them); weaker on polished power delivery, with more variation between bike makers' setups.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Bafang's advantage is price and openness"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Bafang's advantage is price and openness"
+        }
+      ],
+      "id": "01M3T6P0YKX2MGJ6H8RBZVVSJ6",
+      "overview": "Bafang is a motor maker whose systems are an alternative to [Bosch & Shimano systems](#c/01M3T6P0YKTBCA586AAMSYPRST). Its advantage is price and openness: parts are cheaper and more shops can work on them. The downsides are less polished power delivery and more variation between bike makers' setups. In this Expedition it matters through the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8), which uses the Bafang M400 at 80 Nm, a torque close to the mid-drive leaders. The reader's question about whether Bosch batteries beat Bafang was answered mostly on dealer support, not on cells, so Bafang's case rests on cost against a thinner network for warranty work.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Bosch batteries beat Bafang",
+      "aliases": [],
+      "tags": [],
+      "summary": "The reader's claim that Bosch batteries are better than Bafang's; only partly true, since most brands use the same few cell makers.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t11",
+          "quote": "I read that Bosch batteries are better than Bafang."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t11",
+          "quote": "I read that Bosch batteries are better than Bafang."
+        }
+      ],
+      "id": "01M3T6P0YK394FYAD9D0KSYP9B",
+      "overview": "This is something you read and brought to the chat: that Bosch batteries are better than Bafang's. The answer was \"partly\". Independent tests generally rate Bosch and Shimano systems as more refined, with smoother power, better sensors and software, and a larger dealer network for warranty repairs. But on the battery itself the claim is weaker, because most brands use cells from the same few makers, as laid out in [Cells matter, not the brand](#c/01M3T6P0YK0CAY5WR503K636RR). Bafang's strengths are price and openness, with cheaper parts and more shops able to work on them, though its power delivery is less polished. For a daily commuter the assistant concluded that the dealer network is the real point, more than the battery. The claim is part of [Battery & range](#c/01M3T6P0YKQSDCS7QY2G99BS9C).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Cells matter, not the brand",
+      "aliases": [],
+      "tags": [],
+      "summary": "Most brands use cells from Samsung, LG or Panasonic; battery life depends more on the cells and charging habits than on the brand on the case.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Battery life depends more on the cells and how you charge them than on the brand"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "Battery life depends more on the cells and how you charge them than on the brand"
+        }
+      ],
+      "id": "01M3T6P0YK0CAY5WR503K636RR",
+      "overview": "This claim says the name on the battery case matters less than you might think. Most e-bike brands buy their cells from the same few makers (Samsung, LG and Panasonic), so how long a battery lasts depends more on those cells and on how you charge it than on the brand. That matters for your choice because it takes the air out of the idea that one brand's battery is simply better. It is the correction to [Bosch batteries beat Bafang](#c/01M3T6P0YK394FYAD9D0KSYP9B), which is only partly true. Bosch and Shimano systems are more refined, but that refinement is in the power delivery, sensors, software and dealer network rather than in the cells. It belongs with the rest of [Battery & range](#c/01M3T6P0YKQSDCS7QY2G99BS9C).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Dealer network is the real point",
+      "aliases": [],
+      "tags": [],
+      "summary": "For a daily commuter where downtime matters, Bosch/Shimano's dealer network for warranty repairs matters more than any battery difference.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "the dealer network is the real point, more than the battery"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12",
+          "quote": "the dealer network is the real point, more than the battery"
+        }
+      ],
+      "id": "01M3T6P0YK867AVZ1FN5C5XWPX",
+      "overview": "This claim is the assistant's conclusion when the reader asked whether Bosch batteries beat Bafang. The battery itself is a weak argument, since most brands use cells from the same few makers and life depends more on cells and charging habits. The stronger argument for [Bosch & Shimano systems](#c/01M3T6P0YKTBCA586AAMSYPRST) is the larger dealer network for warranty repairs. For a daily commuter, a bike stuck waiting for service costs more than a marginal difference in battery quality, so downtime is what matters. The point shapes how to read the [First service & battery warranty](#c/01M3T6P0YKMK0R0YHJZYSG71DM) step, because warranty help is only useful if a dealer is nearby and capable of doing the work.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Battery size",
+      "aliases": [
+        "Battery capacity"
+      ],
+      "tags": [],
+      "summary": "For 28 km a day with a hill, 400–500 Wh gives a couple of days between charges, even in winter.",
+      "kind": "builtin:measurement",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "400 to 500 Wh gives a couple of days between charges in winter"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "400 to 500 Wh gives a couple of days between charges in winter"
+        }
+      ],
+      "id": "01M3T6P0YK0F27CYR8Z7YZYKNX",
+      "overview": "Battery size is the capacity of the pack in watt-hours, and it is one of the three choices the chat says shape everything else, alongside motor type and frame style. It is tied to [your commute](#c/01M3T6P0YKF5C9G2VNH2GDY921): 14 km each way makes 28 km a day, and with a hill in the route, 400 to 500 Wh gives a couple of days between charges even in winter. All the shortlisted bikes fall in that range, from 418 Wh on the hub-motor bike to 504 Wh on the Birch, so size does little to separate them. It also connects to [battery lifespan](#c/01M3T6P0YK8KNBKKQ7PTJ0G3QD): a larger pack sees fewer full cycles for the same distance, so it lasts more years before its capacity fades.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Battery lifespan",
+      "aliases": [],
+      "tags": [],
+      "summary": "A 500 Wh battery keeps about 80% capacity after 500–800 full cycles; at one cycle every two days that's 3–4 years, so a 600–800 replacement may come near the end of three years.",
+      "kind": "builtin:measurement",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "keeps about 80 percent of its capacity after 500 to 800 full cycles"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "keeps about 80 percent of its capacity after 500 to 800 full cycles"
+        }
+      ],
+      "id": "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+      "overview": "Battery lifespan is how long a pack keeps useful capacity. The chat's figure is that a 500 Wh battery holds about 80 percent of its capacity after 500 to 800 full cycles. At 28 km a day, a full cycle comes roughly every two days, so that works out to 3 to 4 years, and a replacement costing 600 to 800 could arrive near the end of the three-year window. That makes it the largest single uncertainty in the [three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG). It depends on [battery size](#c/01M3T6P0YK0F27CYR8Z7YZYKNX), since a bigger pack needs fewer cycles for the same distance. It is also why the [battery warranty](#c/01M3T6P0YKMK0R0YHJZYSG71DM), usually two years, is worth asking about.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Belt drive",
+      "aliases": [],
+      "tags": [],
+      "summary": "A carbon-reinforced rubber belt replacing the chain: no oil, no rust, lasts 2–3× as long (about 15,000–20,000 km). Needs an internal gear hub. Worth it for a rain-riding daily commuter.",
+      "weightPin": "core",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8",
+          "quote": "A belt drive replaces the chain with a carbon-reinforced rubber belt."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8",
+          "quote": "A belt drive replaces the chain with a carbon-reinforced rubber belt."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ],
+      "id": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "overview": "A belt drive swaps the bicycle chain for a carbon-reinforced rubber belt. It needs no oil, doesn't rust, and lasts two to three times as long as a chain; the running-cost estimate assumes about 15,000 to 20,000 km. The catch is that a belt can't shift across cassette cogs, so it only works with an [internal gear hub](#c/01M3T6P0YKAC18NNM4VFG7J8VQ). That means fewer gears, slightly more friction, repairs that need a shop familiar with hubs, and a fiddlier flat rear tyre. For a daily rider in the rain who dislikes cleaning a chain it is attractive, and it is why the [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) scores best on low maintenance. But over three years it saves only about 200 against a chain, so the benefit is convenience rather than money.",
+      "attributes": {},
+      "sections": [
+        {
+          "id": "01M3T6WYJATMNV9SZ2JTENMV19",
+          "heading": "How does a belt drive work, and why only with an internal hub?",
+          "md": "A belt drive replaces the metal chain with a carbon-reinforced rubber belt. It needs no oil and does not rust, and it lasts two to three times as long as a chain.\n\nThe limit is in how gears work. A chain can move sideways across the cogs of a cassette, but a belt cannot. So a belt only works with an [internal gear hub](#c/01M3T6P0YKAC18NNM4VFG7J8VQ), where the gears sit inside the rear hub and the belt runs on a single fixed sprocket. The [chain and cassette](#c/01M3T6P0YKRYVZKA4MYR6KHHH4) setup is the alternative.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t8",
+              "quote": "It only works with an internal gear hub (the gears sit inside the rear hub), because a belt can't shift across cassette cogs."
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJAE2TMVF98JA70FNZC",
+          "heading": "What are the trade-offs?",
+          "md": "The benefits come with real costs, all tied to the internal hub it depends on:\n\n- Internal hubs have fewer gears than a cassette.\n- They add slightly more friction.\n- Repairs need a shop that knows them.\n- A flat rear tyre is fiddlier to fix.\n\nThe belt is therefore best seen as a convenience choice for a particular kind of rider rather than a pure upgrade. It is worth it for a daily commuter who rides in rain and does not want to clean a chain, which is why it scores well on [low maintenance](#c/01M3T6P0YKV299T34JVENPH1HM).",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t8"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJAHT2T1DH3QXYQDM84",
+          "heading": "How much does it actually save?",
+          "md": "In the chat's three-year estimate, at 6,000 km a year, the chain bikes (Alder and Cedar) come to about 850. That covers roughly 5 chains at 30 each, 2 to 3 cassettes at 50, brake pads and two services a year.\n\nThe belt bike, the [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R), comes to about 650. A belt lasts about 15,000 to 20,000 km, so perhaps one belt (90) is needed, plus brake pads, one internal hub service (60) and yearly services.\n\nThe [three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG) is lower, but only by around 200. The assistant's own verdict was that this is \"not a huge amount\", which is the point behind the claim that the [belt saves little](#c/01M3T6P0YKQY8D4SS36JE5PH9Y). The real appeal is less cleaning and fewer parts to replace, not money.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t10"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJA0R0C1VZ1WPD1ESDR",
+          "heading": "Where does it fit in this decision?",
+          "md": "The belt drive is what sets the Birch apart on maintenance, and the Birch is the maintenance-first choice on the shortlist. It is also part of why that bike is the heaviest of the mid-drives, at 26 kg. The reader valued weight for the stairs highly and chose the Alder, which keeps a chain. The belt drive therefore remains a considered option that was weighed and set aside rather than adopted.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t6"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t16"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Internal gear hub",
+      "aliases": [
+        "IGH",
+        "Nexus 5"
+      ],
+      "tags": [],
+      "summary": "Gears sealed inside the rear hub; required for a belt. Trade-offs: fewer gears, slightly more friction, needs a knowledgeable shop, and rear flats are fiddlier.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8",
+          "quote": "It only works with an internal gear hub"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8",
+          "quote": "It only works with an internal gear hub"
+        }
+      ],
+      "id": "01M3T6P0YKAC18NNM4VFG7J8VQ",
+      "overview": "An internal gear hub puts the gearing inside a sealed rear hub instead of on exposed cogs, so there is no derailleur or cassette to clean or wear out. Its main role here is enabling [Belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P): a belt cannot shift across cassette cogs, so it only works with this kind of hub. The Birch Metro 8 pairs a Nexus 5 hub with a belt, which is why it scores best on maintenance. The trade-offs are fewer gears, slightly more friction, repairs that need a shop that knows these hubs, and a rear flat tyre that is fiddlier to fix. For this commuter it is the price of lower upkeep.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Chain and cassette",
+      "aliases": [
+        "Chain drive",
+        "Derailleur gears"
+      ],
+      "tags": [],
+      "summary": "Conventional drivetrain with more gears; chains wear out every 3,000–4,000 km and cassettes every other chain, and need cleaning and oiling.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "chains every 3,000 to 4,000 km"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "chains every 3,000 to 4,000 km"
+        }
+      ],
+      "id": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "overview": "The chain and cassette is the conventional way a bike turns pedalling into motion: a steel chain runs over a stack of rear cogs, and a derailleur shifts between them. It matters here because it is the baseline against which the [belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P) is judged. The [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) and [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) both use it, and it gives more gears than an internal hub. The price is upkeep: at about 6,000 km a year, the chat estimates a chain every 3,000 to 4,000 km and a cassette every other chain, plus cleaning and oiling. That adds up to roughly 850 over three years, against about 650 for the belt bike, so it feeds directly into the [three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG). A mid-drive also turns this chain, so it [drives through the gears](#c/01M3T6P0YKZ5G6RP8WJZE12QTT).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Step-through or diamond frame?",
+      "aliases": [
+        "Frame style"
+      ],
+      "tags": [],
+      "summary": "Still open. Step-through is easier with a bag and work clothes; a diamond frame is stiffer and lighter.",
+      "kind": "builtin:question",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "step-through is easier with a bag and in work clothes; a diamond frame is stiffer and lighter"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "step-through is easier with a bag and in work clothes"
+        }
+      ],
+      "id": "01M3T6P0YKZDKKN2F08E14Q4XJ",
+      "overview": "This is one of the three choices the assistant said shape everything else, alongside motor and battery, and it is still unresolved. A step-through frame has a low opening, which makes it easier to mount in work clothes and with a laptop bag; a diamond frame is stiffer and lighter. The question is raised by [Me](#c/01M3T6P0YK8DV9HNFQX62VBFER), who commutes with a bag, but the chat never settles it. It sits with the rest of [Drivetrain, frame & maintenance](#c/01M3T6P0YKA0BS5V7GG7HP8GK9), and it links to the test-ride step [Check frame size](#c/01M3T6P0YKNX6EEEJF8ZPR02JT): whichever style is chosen, the rider should stand over the frame with a few centimetres of clearance. It also feeds the larger decision in [Which e-bike should I buy?](#c/01M3T6P0YKPDE8C5KV7TJWAE30).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "First service & battery warranty",
+      "aliases": [],
+      "tags": [],
+      "summary": "Ask the shop about the first service (usually free after 500 km) and the battery warranty (usually 2 years).",
+      "kind": "builtin:action",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20",
+          "quote": "usually free after 500 km"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20",
+          "quote": "usually free after 500 km"
+        }
+      ],
+      "id": "01M3T6P0YKMK0R0YHJZYSG71DM",
+      "overview": "This is one step of the test-ride routine, to be done at the shop before buying. It means asking two things: what the first service involves, which is usually free after 500 km, and what the battery warranty covers, usually 2 years. Both matter because they set the terms of ownership after the sale. Warranty cover is only as good as the shop that honours it, which ties the step to [Dealer network is the real point](#c/01M3T6P0YK867AVZ1FN5C5XWPX). The battery part also connects to [Battery lifespan](#c/01M3T6P0YK8KNBKKQ7PTJ0G3QD), since a 500 Wh battery is expected to last around 3 to 4 years, so the warranty may expire before a replacement is needed.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Dogwood Hub",
+      "aliases": [],
+      "tags": [],
+      "summary": "Hub-motor contrast option: 45 Nm rear hub, 418 Wh, 7-speed, 21 kg, about 1,700; not worth close comparison. Name may be illustrative.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "The ones worth comparing closely are the first three."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "The ones worth comparing closely are the first three."
+        }
+      ],
+      "id": "01M3T6P0YKRY9PC6C5WK4H7XT5",
+      "overview": "The Dogwood Hub was included as the contrast option: every other bike in the list has a mid-drive, while this one uses a 45 Nm rear [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP). It is the lightest at 21 kg and the cheapest at about 1,700, with a 418 Wh battery and a 7-speed chain drivetrain. On the reader's hill of 800 m at up to 8 percent, it copes at moderate speed but has no gear advantage, so it only partly meets [Hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR). The assistant advised comparing the first three bikes closely, so the Dogwood is effectively ruled out. Its name may be illustrative.",
+      "attributes": {
+        "motor": "Rear hub motor",
+        "price": 1700,
+        "torque": 45,
+        "weight": 21,
+        "standing": "ruled-out",
+        "battery-wh": 418,
+        "drivetrain": "7-speed chain"
+      },
+      "sections": []
+    },
+    {
+      "title": "No bike wins everything",
+      "aliases": [],
+      "tags": [],
+      "summary": "Alder is the best all-rounder for the reader's list; Birch if maintenance matters more than stairs; Cedar to save about 1,000.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "No bike wins everything. The Alder is the best all-rounder for your list"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "No bike wins everything. The Alder is the best all-rounder for your list"
+        }
+      ],
+      "id": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "overview": "This is the conclusion of the comparison: none of the shortlisted bikes is best on every one of the reader's priorities. The [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) is the best all-rounder for their list, leading on [theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q) through its app motor lock and close to the lightest on [weight for the stairs](#c/01M3T6P0YK28F35F7D5RFDFM5X). The [Birch Metro 8](#c/01M3T6P0YK8W597PTYEB86T81R) wins clearly on [low maintenance](#c/01M3T6P0YKV299T34JVENPH1HM) but is the heaviest. The [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) is the pick if saving about 1,000 matters most. The claim frames the final decision in [Which e-bike should I buy?](#c/01M3T6P0YKPDE8C5KV7TJWAE30) as a trade-off between priorities rather than a search for a perfect bike.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Three-year running cost",
+      "aliases": [],
+      "tags": [],
+      "summary": "At 6,000 km/year: chain bikes about 850 (≈5 chains, 2–3 cassettes, 4 sets of pads, two services a year); belt bike quoted at about 650, though its listed items sum nearer 730. Excludes a possible battery replacement.",
+      "kind": "builtin:measurement",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "About 850 over three years."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "About 850 over three years."
+        }
+      ],
+      "id": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "overview": "This measurement estimates what maintenance costs over three years at the reader's 6,000 km a year. Chain bikes come to about 850, from roughly five chains, two to three cassettes, four sets of brake pads and two services a year. The belt bike is quoted at about 650, using one belt, brake pads, one internal hub service and yearly services, although the listed items sum closer to 730. It leaves out a possible battery replacement of 600 to 800 near the end (see [Battery lifespan](#c/01M3T6P0YK8KNBKKQ7PTJ0G3QD)), and [insurance](#c/01M3T6P0YK4Y25PZD4TXP7B4V3) is extra. The gap of roughly 200 is why [Belt saves little](#c/01M3T6P0YKQY8D4SS36JE5PH9Y), even though the [belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P) needs far less care.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Belt saves little",
+      "aliases": [],
+      "tags": [],
+      "summary": "Over three years the belt saves maybe 200 (likely closer to 100–150 when the figures are summed); not a big factor either way.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "the belt saves maybe 200 over three years, not a huge amount"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10",
+          "quote": "the belt saves maybe 200 over three years, not a huge amount"
+        }
+      ],
+      "id": "01M3T6P0YKQY8D4SS36JE5PH9Y",
+      "overview": "This claim answers the reader's question about whether a belt drive is worth paying for. Comparing three-year running costs at 6,000 km a year, chain bikes come to about 850 and the belt bike to about 650, so the belt saves roughly 200. The assistant called that \"not a huge amount.\" The summed line items actually suggest a slightly smaller gap, so the real figure may be nearer 100 to 150. See [Three-year running cost](#c/01M3T6P0YKBCNMHWE9371W5ETG). The benefit of [Belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P) is therefore mostly convenience, with no oiling, cleaning or rust, which suits a rainy-weather commuter, not a big money saver.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Removable battery",
+      "aliases": [],
+      "tags": [],
+      "summary": "All four bikes have one: take it inside at work to deter theft, and remove it (about 2.5–3 kg) before carrying the bike upstairs.",
+      "kind": "builtin:idea",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "A removable battery (all four have one) so you can take it inside."
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "A removable battery (all four have one)"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        }
+      ],
+      "id": "01M3T6P0YKTH7Q44G78ZXEG9GH",
+      "overview": "A removable battery lifts out of the frame so it can be carried separately, and all four bikes in the comparison have one. It does two jobs for this commuter. At work, where the bike would sit at a rack, taking the battery inside leaves a thief with a bike that has no power and is a much less attractive target, which feeds straight into [Theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q) and the wider [Theft & security](#c/01M3T6P0YKQF040RM3NSF4BW32) topic. At home, the flat is on the second floor with no lift, so pulling the battery first takes roughly 2.5 to 3 kg off what has to be carried, which helps with [Weight for the stairs](#c/01M3T6P0YK28F35F7D5RFDFM5X). Because every candidate has the feature, it does not separate the bikes; it is a baseline to rely on, not a deciding factor.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "D-lock plus front-wheel cable",
+      "aliases": [
+        "Sold Secure Gold/Diamond D-lock"
+      ],
+      "tags": [],
+      "summary": "Buy a Sold Secure Gold or Diamond rated D-lock plus a cable for the front wheel. Not yet bought.",
+      "kind": "builtin:action",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "a Sold Secure Gold or Diamond D-lock plus a cable for the front wheel"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "a Sold Secure Gold or Diamond D-lock plus a cable for the front wheel"
+        }
+      ],
+      "id": "01M3T6P0YKP6NJWSC84AT206Q1",
+      "overview": "Since you would leave the bike at a rack at work, the lock matters as much as the bike's own features. The advice was a D-lock rated Sold Secure Gold or Diamond, plus a cable through the front wheel so that the wheel can't be taken on its own. You haven't bought one yet. It is the most direct way to meet your [Theft protection](#c/01M3T6P0YK6QN24QPQNZM3WW0Q) criterion for any of the bikes, because the Alder's app motor lock is an extra and the other bikes rely on locks alone. It is part of [Theft & security](#c/01M3T6P0YKQF040RM3NSF4BW32), alongside a removable battery and insurance.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Cedar is the fallback",
+      "aliases": [],
+      "tags": [],
+      "summary": "If the Alder's test ride goes badly (stairs, sizing), the lighter, cheaper Cedar Urban is the natural alternative.",
+      "kind": "builtin:claim",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "the Cedar if you'd rather save 1,000"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "the Cedar if you'd rather save 1,000"
+        }
+      ],
+      "id": "01M3T6P0YKEPKRSKQ011V1947J",
+      "overview": "This claim sets out the plan B. The reader has chosen the Alder, but the test ride may reveal problems, especially with stairs or sizing. If so, the natural alternative is the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8). It is the lightest of the candidates at 23 kg, which helps on the second-floor stairs, and it is about 1,000 cheaper, in line with the reader's secondary priority on price. It has a strong 80 Nm motor, although it lacks the app motor lock that gave the Alder its edge on theft protection. The claim belongs to [Next steps](#c/01M3T6P0YK7225YPYGRJSWF5XK) and depends on how the [Test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3) turns out.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Hub motor",
+      "aliases": [],
+      "tags": [
+        "motor-choice"
+      ],
+      "summary": "Motor in the rear (or front) wheel: cheaper, quieter, lower maintenance, but struggles on long steep climbs. Typically 40–50 Nm.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "it's cheaper, quieter, and needs less maintenance, but struggles on long steep climbs"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "it's cheaper, quieter, and needs less maintenance, but struggles on long steep climbs"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ],
+      "id": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "overview": "A hub motor is built into the rear (or sometimes front) wheel and pushes the bike directly, without using the gears. That makes it cheaper, quieter and lower on maintenance than a [mid-drive motor](#c/01M3T6P0YK2NA0DWG2GY30EC7N), and typical units give 40 to 50 Nm of [torque](#c/01M3T6P0YK61ETMECKKRKQ2JJ2). The weakness is hills: it handles 800 m at 8 percent at moderate speed, but struggles on long, steep climbs because you can't shift down to keep cadence. Here it is the contrast option, used by the [Dogwood Hub](#c/01M3T6P0YKRY9PC6C5WK4H7XT5), and the alternative the decision [Go mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY) weighs against, since the reader wants good [hill climbing](#c/01M3T6P0YK7Q97XAE9WCC76HNR) without getting sweaty.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Mid-drive motor",
+      "aliases": [
+        "Mid-drive"
+      ],
+      "tags": [
+        "motor-choice"
+      ],
+      "summary": "Motor at the pedals that drives the chain and uses the bike's gears; climbs far better and feels natural. Typically 60–85 Nm.",
+      "weightPin": "core",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "a mid-drive motor sits at the pedals and drives the chain"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "a mid-drive motor sits at the pedals and drives the chain"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ],
+      "id": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "overview": "A mid-drive motor sits at the pedals and drives the chain, so it works through the bike's own gears. That is why it climbs hills far better than a [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) and feels natural to ride: on a steep section you shift down, keep your cadence, and put in less effort, which means less sweat. Mid-drives typically deliver 60 to 85 Nm of [torque](#c/01M3T6P0YK61ETMECKKRKQ2JJ2), against 40 to 50 Nm for typical hub motors. For this commuter, with one 800 m hill at up to 8 percent and a dislike of arriving sweaty, it is the basis of the [decision to go mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY). All three bikes on the close shortlist use one.",
+      "attributes": {},
+      "sections": [
+        {
+          "id": "01M3T6WYJB893A7RD5DPYN2P3Y",
+          "heading": "How is a mid-drive different from a hub motor?",
+          "md": "A mid-drive motor sits at the pedals and drives the chain, so it uses the bike's own gears. A [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) sits in the rear or front wheel instead and pushes the wheel directly, independent of the gearing.\n\nThe chat's comparison:\n\n- **Mid-drive**: climbs hills far better and feels natural.\n- **Hub motor**: cheaper, quieter and needs less maintenance, but struggles on long steep climbs.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t2"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJB81SSMR4JZRA08NP3",
+          "heading": "Why does it climb better?",
+          "md": "Two things combine: higher [torque](#c/01M3T6P0YK61ETMECKKRKQ2JJ2) and access to the gears. Mid-drives typically give 60 to 85 Nm. Examples given were the Bosch Performance Line CX and the Shimano EP8 at 85 Nm, and the Bosch Performance Line at 75 Nm. Typical hub motors give 40 to 50 Nm.\n\nBecause the motor drives through the gears, you can shift down on a steep section and keep your cadence. That means less effort and less sweat. An 8 percent grade over 800 m is manageable for a good hub motor at moderate speed, but the mid-drive is the safer bet.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t4"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJBC47AJWVVFTX030V5",
+          "heading": "What does it mean for this commute?",
+          "md": "The reader has one hill, about 800 m long and up to 8 percent, and does not want to arrive sweaty. That is why the assistant recommended a mid-drive, and why the reader [went mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY). The close shortlist (Alder, Birch and Cedar) is all mid-drive, with the hub-motor Dogwood included only for contrast.\n\nThe chain-driven design also has a practical consequence. Driving through the gears puts extra load on the drivetrain, which is one reason the chain and cassette remain a maintenance item on the chain bikes.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t3"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t4"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Motor drives through the gears",
+      "aliases": [],
+      "tags": [],
+      "summary": "A mid-drive turns the chain, so you can shift down on a climb and keep your cadence: less effort, less sweat.",
+      "kind": "builtin:idea",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "drives the chain, so it uses the bike's gears"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "lets you shift down and keep cadence, which means less effort and less sweat"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "drives the chain, so it uses the bike's gears"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "lets you shift down and keep cadence, which means less effort and less sweat"
+        }
+      ],
+      "id": "01M3T6P0YKZ5G6RP8WJZE12QTT",
+      "overview": "A mid-drive motor sits at the pedals and pushes the chain, so its power passes through the bike's own gears. That is the practical difference from a hub motor. On your 800 m, 8 percent hill you can shift down and keep a steady, easy cadence instead of grinding, which means less effort and less sweat, and you told the assistant that arriving sweaty was a real worry. This is the main reason the chat concluded a mid-drive was the safer bet, and it underpins the [Go mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY) decision. It also has a cost: the motor works the [chain and cassette](#c/01M3T6P0YKRYVZKA4MYR6KHHH4), which wear faster. It sits within the wider discussion of [Motors & torque](#c/01M3T6P0YKFRADPHP7N5QJ175P).",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Motor noise",
+      "aliases": [
+        "How quiet the ride is"
+      ],
+      "tags": [],
+      "summary": "How much sound the motor makes on the ride; hub motors are the quieter kind.",
+      "kind": "builtin:idea",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "it's cheaper, quieter, and needs less maintenance"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "it's cheaper, quieter, and needs less maintenance"
+        }
+      ],
+      "id": "01M3T6P0YK81EEFMHMXX1KF6Q9",
+      "overview": "Motor noise is how much sound the motor makes while you ride. The chat listed quietness as one of the hub motor's advantages, together with lower price and less maintenance. A [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) sits in the wheel and is quieter than a mid-drive. Noise did not make your list of priorities, which were hill climbing, low maintenance, weight for the stairs and theft protection, so it counts for little against the mid-drive's hill climbing. It is worth listening for on the test ride, but it is a minor consideration here.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Motor maintenance needs",
+      "aliases": [
+        "Maintenance you face"
+      ],
+      "tags": [],
+      "summary": "How much upkeep the motor system asks for; hub motors need less than mid-drives.",
+      "kind": "builtin:idea",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "needs less maintenance"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "I care most about: hill climbing, low maintenance"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "needs less maintenance"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "I care most about: hill climbing, low maintenance"
+        }
+      ],
+      "id": "01M3T6P0YK2YWF9XJ2Z2TE294A",
+      "overview": "Motor maintenance needs describe how much upkeep the motor system asks of you. The chat said a hub motor needs less maintenance than a mid-drive, which is one of its attractions along with lower cost and quiet running. A mid-drive works through the chain and gears, so wear falls on the drivetrain. Low maintenance became one of your four main priorities, which is why this matters here. It is one reason the Birch, with its belt and internal gear hub, scored best on that criterion. Choosing a [hub motor](#c/01M3T6P0YKH4AEGPF7Q4JPHQFP) lowers these needs, but at the cost of weaker hill climbing.",
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "title": "Birch Metro 8",
+      "aliases": [],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "summary": "Shimano EP6 85 Nm, 504 Wh, Nexus 5 internal hub with belt drive, 26 kg, about 3,400. Lowest maintenance but heaviest mid-drive. Name may be illustrative.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "id": "01M3T6P0YK8W597PTYEB86T81R",
+      "overview": "The Birch Metro 8 is the low-maintenance pick: a Shimano EP6 mid-drive (85 Nm), a 504 Wh battery, a Nexus 5 internal hub with a [belt drive](#c/01M3T6P0YKK4A2E6K9SKJ1JZ2P), 26 kg, and about 3,400. The belt and sealed hub mean almost no chain upkeep, and its 85 Nm makes it the strongest climber on the list. The price is weight: at 26 kg it is the heaviest mid-drive, which is hard to carry up two flights daily, and it sits near the top of the budget. It also lacks a motor lock, relying on locks and the removable battery. It is the right choice only if maintenance matters more than the stairs; the reader judged the Alder the better all-rounder.",
+      "attributes": {
+        "motor": "Shimano EP6 (mid-drive)",
+        "price": 3400,
+        "torque": 85,
+        "weight": 26,
+        "standing": "in-play",
+        "battery-wh": 504,
+        "drivetrain": "Belt + Nexus 5 internal hub"
+      },
+      "sections": []
+    },
+    {
+      "title": "Alder C5",
+      "aliases": [],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "summary": "The chosen bike: Bosch Performance Line 75 Nm, 500 Wh, 10-speed chain, mudguards and rack, 24 kg, about 3,200; supports Bosch's app motor lock. Name may be illustrative.",
+      "weightPin": "core",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19",
+          "quote": "I'll go with the Alder."
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19",
+          "quote": "I'll go with the Alder."
+        }
+      ],
+      "id": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "overview": "The Alder C5 is the bike the reader settled on: a Bosch Performance Line mid-drive (75 Nm) with a 500 Wh battery, a 10-speed chain, mudguards and a rack, at 24 kg and around 3,200, inside the 3,500 budget. It wins not by topping every column but by being the best all-rounder against the reader's four priorities. Its 75 Nm is plenty for the 800 m, 8 percent hill once you [go mid-drive](#c/01M3T6P0YK0E2NMTS3JKV4XHEY). At 24 kg it is nearly as easy to carry upstairs as the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8). Its decisive edge is theft protection, through the [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59). Its weakness is the chain, which needs more upkeep than the belt on the Birch. The test ride is where the choice gets confirmed, and the Cedar remains the fallback.",
+      "attributes": {
+        "motor": "Bosch Performance Line (mid-drive)",
+        "price": 3200,
+        "torque": 75,
+        "weight": 24,
+        "standing": "chosen",
+        "battery-wh": 500,
+        "drivetrain": "10-speed chain"
+      },
+      "sections": [
+        {
+          "id": "01M3T6WYJBYAD2X433ZBR61SDS",
+          "heading": "What is the bike, exactly?",
+          "md": "The Alder C5 was the first of four options suggested in the chat. Its specification:\n\n- Motor: Bosch Performance Line, 75 Nm, mid-drive\n- Battery: 500 Wh\n- Drivetrain: 10-speed chain\n- Equipment: mudguards and rack\n- Weight: 24 kg\n- Price: around 3,200\n\nThe name and figures are illustrative, as the chat presented them as common options in the reader's budget rather than a specific catalogue listing. It uses the [Bosch system](#c/01M3T6P0YKTBCA586AAMSYPRST) and a [chain and cassette](#c/01M3T6P0YKRYVZKA4MYR6KHHH4).",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t6"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJB7MZ8R3V1VP3KA28E",
+          "heading": "How did it score against the reader's priorities?",
+          "md": "After the reader named their priorities (hill climbing, low maintenance, weight for the stairs and theft protection, with price second), the assistant scored the bikes:\n\n- **Hill climbing**: 75 Nm is plenty for 8 percent, though the Birch (85 Nm) and Cedar (80 Nm) are stronger.\n- **Low maintenance**: the chain needs cleaning and replacing, so the Alder only partly meets this. The Birch is clearly better here.\n- **Weight**: 24 kg, close to the Cedar (23 kg) and easier to carry than the 26 kg Birch. The battery can be removed first, about 2.5 to 3 kg.\n- **Theft protection**: best of the three, because it supports the [app motor lock](#c/01M3T6P0YKDPT5M3F5NDJ5VC59), which the Cedar does not.\n- **Price**: around 3,200, within the 3,500 budget but about 1,000 more than the Cedar.\n\nThe verdict was that no bike wins everything, and the Alder is the best all-rounder for this list.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t14"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t16"
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJBYAHMXNTET1FE4AG4",
+          "heading": "What would change the choice?",
+          "md": "The assistant framed the alternatives by what the reader values most. The Birch is better if maintenance matters more than the stairs, and the [Cedar Urban](#c/01M3T6P0YKSRD0NAXR64Y33DE8) is better if the reader would rather save 1,000. The Cedar is also the fallback if the Alder disappoints on the test ride.",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t18"
+            }
+          ]
+        },
+        {
+          "id": "01M3T6WYJB65TKQVS0MRD7174K",
+          "heading": "What should be checked before buying?",
+          "md": "The reader chose the Alder in the chat, and the assistant then gave a test-ride list for confirming it:\n\n1. Ride the hill, or a similar one, in the middle assist mode and see whether you arrive sweaty.\n2. Check the frame size: stand over it with a few centimetres of clearance and reach the bars without locking your elbows.\n3. Carry it up a flight of stairs with the battery out.\n4. Ask about the first service (usually free after 500 km) and the battery warranty (usually 2 years).\n5. Try the motor lock in the app before buying.\n\nThe full list is in the [test ride checklist](#c/01M3T6P0YKX8CSJ7451KXV5YQ3).",
+          "prov": [
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t19",
+              "quote": "I'll go with the Alder."
+            },
+            {
+              "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+              "segment": "t20"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Cedar Urban",
+      "aliases": [],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "summary": "Bafang M400 80 Nm, 460 Wh, 9-speed chain, 23 kg, about 2,300. Lightest and about 1,000 cheaper, but no motor lock. Name may be illustrative.",
+      "kind": "builtin:thing",
+      "overviewProv": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ],
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ],
+      "id": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "overview": "The Cedar Urban is the budget option among the mid-drives: a Bafang M400 (80 Nm), a 460 Wh battery, a 9-speed chain, 23 kg and about 2,300, roughly 1,000 less than the others. It is the lightest bike on the list, which matters for carrying it up two flights of stairs, and its 80 Nm is among the strongest for the hill. Its weaknesses are a chain drivetrain that needs upkeep and the lack of an app motor lock, so it leans on physical locks alone for theft protection. The Bafang system is also cheaper to repair, though less polished than Bosch or Shimano. It is the fallback if the [Alder C5](#c/01M3T6P0YKAPP0H5Z8ZPDHW87N) disappoints on the test ride, or if saving money matters more.",
+      "attributes": {
+        "motor": "Bafang M400 (mid-drive)",
+        "price": 2300,
+        "torque": 80,
+        "weight": 23,
+        "standing": "in-play",
+        "battery-wh": 460,
+        "drivetrain": "9-speed chain"
+      },
+      "sections": []
+    }
+  ],
+  "relationships": [
+    {
+      "from": "01M3T6P0YK8DV9HNFQX62VBFER",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKF5C9G2VNH2GDY921",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK17X3J2D1RX5XY1YZ",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKF5C9G2VNH2GDY921",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKV299T34JVENPH1HM",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKY4Y6R2G7G97ZHM6R",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK6BWFFV4A0A6C61EN",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK61ETMECKKRKQ2JJ2",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKTBCA586AAMSYPRST",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKX2MGJ6H8RBZVVSJ6",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK394FYAD9D0KSYP9B",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQSDCS7QY2G99BS9C",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK0CAY5WR503K636RR",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQSDCS7QY2G99BS9C",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK867AVZ1FN5C5XWPX",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK0F27CYR8Z7YZYKNX",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQSDCS7QY2G99BS9C",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQSDCS7QY2G99BS9C",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKA0BS5V7GG7HP8GK9",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKAC18NNM4VFG7J8VQ",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKA0BS5V7GG7HP8GK9",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKA0BS5V7GG7HP8GK9",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKZDKKN2F08E14Q4XJ",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKA0BS5V7GG7HP8GK9",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKRY9PC6C5WK4H7XT5",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFTD2T2G2XPR72WM8",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKK9S6JQFK8TBVESWJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKQY8D4SS36JE5PH9Y",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKK9S6JQFK8TBVESWJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKTH7Q44G78ZXEG9GH",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQF040RM3NSF4BW32",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKP6NJWSC84AT206Q1",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQF040RM3NSF4BW32",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQF040RM3NSF4BW32",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK4Y25PZD4TXP7B4V3",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKQF040RM3NSF4BW32",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK7225YPYGRJSWF5XK",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKNX6EEEJF8ZPR02JT",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKMK0R0YHJZYSG71DM",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKEPKRSKQ011V1947J",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YK7225YPYGRJSWF5XK",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "75 Nm mid-drive is plenty for 8 percent",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "85 Nm, strongest",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "80 Nm, among the strongest",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKRY9PC6C5WK4H7XT5",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "45 Nm hub motor; copes at moderate speed but no gear advantage",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YKV299T34JVENPH1HM",
+      "note": "Clearly best: belt and internal hub",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YKV299T34JVENPH1HM",
+      "note": "Chain needs cleaning and replacing",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YKV299T34JVENPH1HM",
+      "note": "Chain drivetrain",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "note": "23 kg, lightest",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "note": "24 kg, close to the Cedar",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:fails",
+      "to": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "note": "26 kg, heaviest mid-drive; hard up two flights daily",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "Best: app motor lock",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "Relies on locks and removable battery alone",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "No motor lock; locks alone",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YKY4Y6R2G7G97ZHM6R",
+      "note": "About 2,300, cheapest by about 1,000",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YKY4Y6R2G7G97ZHM6R",
+      "note": "About 3,200, within budget",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YKY4Y6R2G7G97ZHM6R",
+      "note": "About 3,400, near the top of the budget",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0CAY5WR503K636RR",
+      "type": "builtin:corrects",
+      "to": "01M3T6P0YK394FYAD9D0KSYP9B",
+      "note": "Only partly true: Bosch systems are more refined, but cells come from the same makers",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKTBCA586AAMSYPRST",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YK867AVZ1FN5C5XWPX",
+      "note": "Larger dealer network for warranty repairs",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKX2MGJ6H8RBZVVSJ6",
+      "type": "builtin:alternative-to",
+      "to": "01M3T6P0YKTBCA586AAMSYPRST",
+      "note": "Cheaper and more open, less polished",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "type": "builtin:alternative-to",
+      "to": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "Shift down and keep cadence: less effort, less sweat",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:partly-meets",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "Fine at moderate speed, struggles on long steep climbs",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK17X3J2D1RX5XY1YZ",
+      "type": "builtin:led-to",
+      "to": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK17X3J2D1RX5XY1YZ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKAC18NNM4VFG7J8VQ",
+      "note": "A belt can't shift across cassette cogs",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:alternative-to",
+      "to": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:meets",
+      "to": "01M3T6P0YKV299T34JVENPH1HM",
+      "note": "No oil, no rust, lasts 2–3× a chain",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKTBCA586AAMSYPRST",
+      "note": "Bosch Performance Line 75 Nm",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKTBCA586AAMSYPRST",
+      "note": "Shimano EP6 85 Nm",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKX2MGJ6H8RBZVVSJ6",
+      "note": "Bafang M400 80 Nm",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKRY9PC6C5WK4H7XT5",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "note": "About 850 vs about 650 for belt",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:lowers",
+      "to": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "note": "One belt in three years",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YKQY8D4SS36JE5PH9Y",
+      "note": "Totals overstate the gap slightly (Birch items sum ~730)",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKQY8D4SS36JE5PH9Y",
+      "type": "builtin:challenges",
+      "to": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "note": "Cost saving is small; the benefit is convenience",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "note": "Possible 600–800 replacement near year 3–4",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0F27CYR8Z7YZYKNX",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKF5C9G2VNH2GDY921",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK0F27CYR8Z7YZYKNX",
+      "note": "28 km a day sets the size",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK4Y25PZD4TXP7B4V3",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YKBCNMHWE9371W5ETG",
+      "note": "100–150 a year on top",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKTH7Q44G78ZXEG9GH",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "Take it inside at work",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKTH7Q44G78ZXEG9GH",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "note": "Removing it saves 2.5–3 kg on the stairs",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t16"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKP6NJWSC84AT206Q1",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "Disables the motor when you walk away",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8DV9HNFQX62VBFER",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8DV9HNFQX62VBFER",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YKZDKKN2F08E14Q4XJ",
+      "note": "Carries a laptop bag, rides in work clothes",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8DV9HNFQX62VBFER",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKF5C9G2VNH2GDY921",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t1"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "type": "builtin:led-to",
+      "to": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "note": "The answer: Alder chosen",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "note": "Alder is the best all-rounder",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:alternative-to",
+      "to": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "note": "Fallback if the Alder's test ride goes badly",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:led-to",
+      "to": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t19"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "type": "builtin:led-to",
+      "to": "01M3T6P0YKEPKRSKQ011V1947J",
+      "note": "If stairs or sizing go badly",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YKEPKRSKQ011V1947J",
+      "note": "Lightest and about 1,000 cheaper",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "note": "Try the motor lock before buying",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKX8CSJ7451KXV5YQ3",
+      "type": "builtin:uses",
+      "to": "01M3T6P0YK17X3J2D1RX5XY1YZ",
+      "note": "Ride it in middle assist mode",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKNX6EEEJF8ZPR02JT",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKZDKKN2F08E14Q4XJ",
+      "note": "Fit is checked alongside the still-open frame style",
+      "prov": []
+    },
+    {
+      "from": "01M3T6P0YK867AVZ1FN5C5XWPX",
+      "type": "builtin:supports",
+      "to": "01M3T6P0YKMK0R0YHJZYSG71DM",
+      "note": "Warranty repairs depend on dealer access",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKMK0R0YHJZYSG71DM",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:lowers",
+      "to": "01M3T6P0YK81EEFMHMXX1KF6Q9",
+      "note": "Quieter than a mid-drive",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "cheaper, quieter"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:lowers",
+      "to": "01M3T6P0YK2YWF9XJ2Z2TE294A",
+      "note": "Needs less maintenance than a mid-drive",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "needs less maintenance"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "type": "builtin:raises",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "60–85 Nm and drives through the bike's gears: shift down, keep cadence, less sweat on the 8% hill",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "shift down and keep cadence, which means less effort and less sweat"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "It climbs hills far better"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:lowers",
+      "to": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "note": "40–50 Nm, no gear advantage: fine for 800 m at 8% at moderate speed, struggles on long steep climbs",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "fine for a good hub motor at moderate speed"
+        },
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "struggles on long steep climbs"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "Then a mid-drive is the safer bet"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKH4AEGPF7Q4JPHQFP",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "note": "The alternative the decision weighs against",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "fine for a good hub motor at moderate speed"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK7Q97XAE9WCC76HNR",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "note": "The hill and not wanting to sweat drive the motor choice",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t3",
+          "quote": "I really don't want to arrive sweaty"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAC18NNM4VFG7J8VQ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "note": "A belt only works with an internal gear hub",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t8",
+          "quote": "It only works with an internal gear hub"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK8W597PTYEB86T81R",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "The belt drive on the Birch means almost no chain maintenance"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "all with mid-drives except one for contrast"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK8W597PTYEB86T81R",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "all with mid-drives except one for contrast"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t6",
+          "quote": "all with mid-drives except one for contrast"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKAPP0H5Z8ZPDHW87N",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "No bike wins everything"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK8W597PTYEB86T81R",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "No bike wins everything"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKSRD0NAXR64Y33DE8",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "No bike wins everything"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK28F35F7D5RFDFM5X",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "weight for the stairs"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "theft protection"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKV299T34JVENPH1HM",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t17",
+          "quote": "low maintenance"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKD4TPK5C4T6NE5EB7",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "The Alder is the best all-rounder for your list"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKTH7Q44G78ZXEG9GH",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t14",
+          "quote": "A removable battery (all four have one)"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKV299T34JVENPH1HM",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "Birch clearly (belt and internal hub)"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKZDKKN2F08E14Q4XJ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "note": "One of the three shaping choices, still open",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "the motor type, the battery size, and the frame style"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKDPT5M3F5NDJ5VC59",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK6QN24QPQNZM3WW0Q",
+      "note": "The motor lock is what separates the bikes on theft",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t18",
+          "quote": "Alder best (motor lock through the app)"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK0F27CYR8Z7YZYKNX",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKPDE8C5KV7TJWAE30",
+      "note": "One of the three shaping choices; all shortlisted bikes sit in the 400–500 Wh range",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "the motor type, the battery size, and the frame style"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKRYVZKA4MYR6KHHH4",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YKZ5G6RP8WJZE12QTT",
+      "note": "A mid-drive turns the chain and uses its gears",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t2",
+          "quote": "drives the chain, so it uses the bike's gears"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YK61ETMECKKRKQ2JJ2",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK2NA0DWG2GY30EC7N",
+      "note": "Mid-drives are typically 60–85 Nm",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "60 to 85 Nm for mid-drives"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKZ5G6RP8WJZE12QTT",
+      "type": "builtin:prerequisite",
+      "to": "01M3T6P0YK0E2NMTS3JKV4XHEY",
+      "note": "Shifting down to keep cadence is why a mid-drive means less sweat",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4",
+          "quote": "a mid-drive lets you shift down and keep cadence"
+        }
+      ]
+    },
+    {
+      "from": "01M3T6P0YKZ5G6RP8WJZE12QTT",
+      "type": "builtin:part-of",
+      "to": "01M3T6P0YKFRADPHP7N5QJ175P",
+      "prov": [
+        {
+          "source": "01M3T6P0YK6BH4HRCJG54A0B7J",
+          "segment": "t4"
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "01M3T6P0YKY0NFW6VE8HMBY2E0",
+      "viewType": "comparison-table",
+      "label": "Compare the bikes",
+      "question": "How do these bikes stack up on what matters to me: hill climbing, maintenance, weight, theft protection, and price?",
+      "settings": {
+        "rows": {
+          "tags": [
+            "shortlist"
+          ],
+          "kinds": [
+            "builtin:thing"
+          ]
+        },
+        "sortBy": "price",
+        "columns": [
+          {
+            "criteria": "auto"
+          },
+          {
+            "attribute": "torque"
+          },
+          {
+            "attribute": "weight"
+          },
+          {
+            "attribute": "price"
+          },
+          {
+            "attribute": "drivetrain"
+          },
+          {
+            "attribute": "standing"
+          }
+        ],
+        "priority": "priority",
+        "standing": "standing"
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T6P0YKYP2YFK6977FSG3W5",
+      "viewType": "cause-and-effect",
+      "label": "Mid-drive or hub",
+      "question": "If I pick mid-drive vs hub, what follows: how steep can I climb, how quiet is the ride, what maintenance do I face?",
+      "settings": {
+        "hide": [
+          "01M3T6P0YK8DV9HNFQX62VBFER",
+          "01M3T6P0YKPDE8C5KV7TJWAE30",
+          "01M3T6P0YKZDKKN2F08E14Q4XJ",
+          "01M3T6P0YKRYVZKA4MYR6KHHH4",
+          "01M3T6P0YKK4A2E6K9SKJ1JZ2P",
+          "01M3T6P0YK8KNBKKQ7PTJ0G3QD",
+          "01M3T6P0YK4Y25PZD4TXP7B4V3",
+          "01M3T6P0YKBCNMHWE9371W5ETG"
+        ],
+        "mode": "mechanism",
+        "levers": {
+          "tags": [
+            "motor-choice"
+          ]
+        },
+        "negative": [
+          "builtin:lowers"
+        ],
+        "outcomes": [
+          "01M3T6P0YK7Q97XAE9WCC76HNR",
+          "01M3T6P0YK81EEFMHMXX1KF6Q9",
+          "01M3T6P0YK2YWF9XJ2Z2TE294A"
+        ],
+        "positive": [
+          "builtin:raises",
+          "builtin:causes"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T6P0YK5T7AYCEZDSCJ8PMG",
+      "viewType": "learning-path",
+      "label": "What to learn first",
+      "question": "What do I need to understand first: motor types, battery size, frame style, or the bikes themselves?",
+      "settings": {
+        "targets": {
+          "tags": [
+            "path-target"
+          ]
+        },
+        "minSteps": 4,
+        "relationshipTypes": [
+          "builtin:prerequisite"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T6P0YKZPEP0GPWQPN5AFCM",
+      "viewType": "timeline",
+      "label": "Running costs over time",
+      "question": "When do batteries, chains, and servicing cost kick in, and how much for each bike?",
+      "settings": {
+        "lanes": []
+      },
+      "settingsVersion": 1,
+      "status": "failed",
+      "failReason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000–4,000 km\" or \"battery after 3–4 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better."
+    }
+  ]
+}

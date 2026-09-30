@@ -166,3 +166,27 @@ export function meteredModel(
   }
   return wrapLanguageModel({ model, middleware })
 }
+
+/**
+ * The meter after steps that ran side by side from the same `base` (the
+ * writers' parallel batches): the base plus what each step added. The cap
+ * is the base's, so a Continue raised before them is kept.
+ */
+export function combineSpend(base: SpendState, after: readonly SpendState[]): SpendState {
+  let out = { ...base }
+  for (const a of after) {
+    out = {
+      ...out,
+      spentUsd: out.spentUsd + (a.spentUsd - base.spentUsd),
+      calls: out.calls + (a.calls - base.calls),
+      estimatedCalls: out.estimatedCalls + (a.estimatedCalls - base.estimatedCalls),
+      usage: {
+        input: out.usage.input + (a.usage.input - base.usage.input),
+        cacheRead: out.usage.cacheRead + (a.usage.cacheRead - base.usage.cacheRead),
+        cacheWrite: out.usage.cacheWrite + (a.usage.cacheWrite - base.usage.cacheWrite),
+        output: out.usage.output + (a.usage.output - base.usage.output),
+      },
+    }
+  }
+  return out
+}

@@ -28,6 +28,8 @@ export type Builds = {
   log: BuildLog
   /** Cancel (or Stop), Retry or Continue a job; resolves with its row. */
   act: (jobId: string, action: JobAction) => Promise<Job>
+  /** A job this screen started (e.g. "Write the article"), before the room reports it. */
+  track: (job: Job) => void
 }
 
 /** Job-level statuses after which the list is fetched again. */
@@ -102,5 +104,9 @@ export function useBuilds({
     return job
   }, [])
 
-  return { log, act }
+  const track = React.useCallback((job: Job) => {
+    setLog((l) => withJob(l, job))
+  }, [])
+
+  return { log, act, track }
 }

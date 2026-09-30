@@ -4,8 +4,15 @@
 // with a plain reason, a restart mid-build and a Retry (nothing logged twice,
 // no duplicate Views), the spending-cap pause, and chunk mode.
 import type { ViewReader } from "@seply/ai"
-import { idsFrom, scriptedModel, type ScriptTurn } from "@seply/ai/testing"
-import { isLive, schema, type BuildEvent, type DomainState } from "@seply/domain"
+import {
+  idsFrom,
+  scriptedModel,
+  writerScript,
+  type ScriptReply,
+  type ScriptTurn,
+} from "@seply/ai/testing"
+import { applyBodies } from "@seply/ai"
+import { findSegments, isLive, schema, type BuildEvent, type DomainState } from "@seply/domain"
 import { asc, eq } from "drizzle-orm"
 import { describe, expect, it } from "vitest"
 import { memoryBlobStore } from "../blobs.ts"
@@ -13,7 +20,7 @@ import type { Db } from "../db.ts"
 import { loadState } from "../projection.ts"
 import type { Relay } from "../relay.ts"
 import { parsePaste } from "../sources/parse.ts"
-import { addSource } from "../sources/store.ts"
+import { addSource, readSegments } from "../sources/store.ts"
 import { signUp, testApp, testDb, TEST_ENV, type TestUser } from "../test-harness.ts"
 import { BuildJobInput } from "./build.ts"
 import { createInlineEngine, type InlineEngine } from "./inline.ts"
@@ -40,6 +47,8 @@ type Hooks = {
   onView?: (viewType: string) => void
   /** View Types the script fails with view_fail. */
   fail?: Set<string>
+  /** Answers a writer call instead of the default writer (return undefined to fall through). */
+  writer?: (t: ScriptTurn) => ScriptReply | undefined
 }
 
 const prov = (source: string, segment: string) => [{ source, segment }]
@@ -48,6 +57,8 @@ const prov = (source: string, segment: string) => [{ source, segment }]
 function script(hooks: Hooks) {
   return (t: ScriptTurn) => {
     const source = /<source(?:-index)? id="([^"]+)"/.exec(t.user)?.[1] ?? "?"
+    if (t.system.includes("# Write summaries, overviews and articles"))
+      return hooks.writer?.(t) ?? writerScript()(t)
     if (!t.tools.length) return { text: "They want an enclosed printer; they ordered the Orbit P2." }
     if (!t.tools.includes("view_build")) {
       // The Concept set (whole, a chunk, or the merge pass).
@@ -57,7 +68,7 @@ function script(hooks: Hooks) {
         return {
           calls: [
             ...(hub ? [] : [{ tool: "concept_create", input: { title: "Choosing a printer", kind: "builtin:topic", tags: ["topic"], prov: prov(source, "t1") } }]),
-            { tool: "concept_create", input: { title: "Orbit P2", kind: "builtin:thing", prov: prov(source, "t2") } },
+            { tool: "concept_create", input: { title: "Orbit P2", kind: "builtin:thing", weightPin: "core", prov: prov(source, "t2") } },
             { tool: "concept_create", input: { title: "Kite", kind: "builtin:thing", prov: prov(source, "t4") } },
           ],
         }
@@ -108,10 +119,15 @@ type Setup = {
   source: string
   hooks: Hooks
   model: ReturnType<typeof scriptedModel>
+  blobs: ReturnType<typeof memoryBlobStore>
 }
 
 async function setup(
-  opts: { usage?: { input: number; output: number }; curator?: JobServices["curator"] } = {}
+  opts: {
+    usage?: { input: number; output: number }
+    curator?: JobServices["curator"]
+    writers?: JobServices["writers"]
+  } = {}
 ): Promise<Setup> {
   const db = await testDb()
   const events: BuildEvent[] = []
@@ -127,6 +143,7 @@ async function setup(
     views: stubViews,
     model: () => model,
     curator: opts.curator,
+    writers: opts.writers,
   }
   const deps = { connect: async () => ({ db, close: async () => {} }), relay, services }
   const engine = createInlineEngine({ deps, registry: JOB_KINDS })
@@ -145,7 +162,7 @@ async function setup(
     parsed: parsePaste(CHAT, "Printer chat"),
     raw: CHAT,
   })
-  return { db, app, engine, events, ada, exp, source: added.source.id, hooks, model }
+  return { db, app, engine, events, ada, exp, source: added.source.id, hooks, model, blobs }
 }
 
 const VIEWS = [
@@ -216,6 +233,8 @@ describe("the build job", () => {
       "Found 3 Concepts in 1 Source",
       "Built Built outline",
       "Built Built learning-path",
+      "Wrote overviews for Orbit P2, Choosing a printer and Kite",
+      "Wrote the article for Orbit P2",
     ])
     // Provenance points at the real Source and its segments.
     const orbit = Object.values(st.concepts).find((c) => c.title === "Orbit P2")!
@@ -226,7 +245,7 @@ describe("the build job", () => {
     expect(v1.at(-1)!.status).toBe("ready")
     expect(s.events.at(-1)).toMatchObject({ status: "complete", progress: 1 })
     // The understanding note went to the model once, and into every later stage.
-    const noteCalls = s.model.turns.filter((t) => !t.tools.length)
+    const noteCalls = s.model.turns.filter((t) => !t.tools.length && !t.system.includes("# Write summaries"))
     expect(noteCalls).toHaveLength(1)
     expect(s.model.turns.filter((t) => t.tools.length).every((t) => t.user.includes("they ordered the Orbit P2"))).toBe(true)
   })
@@ -358,5 +377,216 @@ describe("the build job", () => {
     const titles = Object.values(st.concepts).filter(isLive).map((c) => c.title).sort()
     expect(titles).toEqual(["Choosing a printer", "Kite", "Orbit P2"])
     expect((await changes(s)).filter((l) => l.startsWith("Found"))).toEqual(["Found 3 Concepts in 1 Source"])
+  })
+})
+
+describe("the writers (WP-3.6)", () => {
+  /** Every provenance ref in the state, with where it is. */
+  function refs(st: DomainState) {
+    const out: { where: string; source: string; segment: string }[] = []
+    for (const c of Object.values(st.concepts).filter(isLive))
+      for (const r of c.overviewProv) out.push({ where: `${c.title} overview`, ...r })
+    for (const x of Object.values(st.sections).filter(isLive))
+      for (const r of x.prov) out.push({ where: `section ${x.heading}`, ...r })
+    return out
+  }
+
+  async function segmentsOf(s: Setup) {
+    const r = await readSegments(s.db, s.blobs, s.exp, s.source)
+    return r!.segments
+  }
+
+  const sectionsOf = (st: DomainState, conceptId: string) =>
+    Object.values(st.sections).filter((x) => isLive(x) && x.conceptId === conceptId)
+
+  it("gives every Concept an overview and core Concepts articles, each ref resolving to a real segment", async () => {
+    const s = await setup()
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("complete")
+    const st = await state(s)
+    const concepts = Object.values(st.concepts).filter(isLive)
+    for (const c of concepts) {
+      expect(c.overview, c.title).toBeTruthy()
+      expect(c.summary, c.title).toBeTruthy()
+    }
+    const orbit = concepts.find((c) => c.title === "Orbit P2")!
+    expect(orbit.weightPin).toBe("core")
+    expect(sectionsOf(st, orbit.id).length).toBeGreaterThanOrEqual(2)
+    for (const c of concepts.filter((c) => c.id !== orbit.id)) expect(sectionsOf(st, c.id)).toEqual([])
+    const doc = await segmentsOf(s)
+    const all = refs(st)
+    expect(all.length).toBeGreaterThan(0)
+    for (const r of all) {
+      expect(r.source, r.where).toBe(s.source)
+      expect(findSegments(doc, r.segment).length, `${r.where}: ${r.segment}`).toBeGreaterThan(0)
+    }
+    // Progress streams per batch: "Writing overviews · 3 of 3".
+    const steps = s.events.filter((e) => !e.viewId).map((e) => e.step)
+    expect(steps).toContain("Writing overviews · 0 of 3")
+    expect(steps).toContain("Writing overviews · 3 of 3")
+    expect(steps).toContain("Writing articles · 1 of 1")
+  })
+
+  it("writes batches side by side, each committed as its own Change", async () => {
+    const s = await setup({ writers: { overviews: 1 } })
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("complete")
+    expect((await changes(s)).filter((l) => l.startsWith("Wrote"))).toEqual([
+      "Wrote overviews for Orbit P2",
+      "Wrote overviews for Choosing a printer",
+      "Wrote overviews for Kite",
+      "Wrote the article for Orbit P2",
+    ])
+    const recorded = s.engine.recorded(inst(j))
+    expect(recorded.filter((n) => /^write \d+$/.test(n))).toEqual(["write 1", "write 2", "write 3", "write 4"])
+    const steps = s.events.filter((e) => !e.viewId).map((e) => e.step)
+    expect(steps).toContain("Writing overviews · 3 of 3")
+  })
+
+  it("repairs refs that don't resolve before committing", async () => {
+    const s = await setup()
+    s.hooks.writer = (t) => writerScript({ bad: true })(t) as ScriptReply
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("complete")
+    const doc = await segmentsOf(s)
+    const all = refs(await state(s))
+    expect(all.length).toBeGreaterThan(0)
+    for (const r of all) {
+      expect(r.source).toBe(s.source)
+      expect(findSegments(doc, r.segment).length, r.segment).toBeGreaterThan(0)
+    }
+  })
+
+  it("resumes after a restart mid-writing without writing anything twice", async () => {
+    const s = await setup()
+    let crashed = false
+    s.hooks.writer = (t) => {
+      if (t.user.includes("Write the **article**") && !crashed) {
+        crashed = true
+        s.engine.crash()
+      }
+      return undefined
+    }
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(j))
+    expect(crashed).toBe(true)
+    await s.engine.wake!(inst(j))
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("complete")
+    const labels = await changes(s)
+    expect(labels.filter((l) => l.startsWith("Wrote overviews"))).toHaveLength(1)
+    expect(labels.filter((l) => l.startsWith("Wrote the article"))).toHaveLength(1)
+    const st = await state(s)
+    const orbit = Object.values(st.concepts).find((c) => c.title === "Orbit P2")!
+    expect(sectionsOf(st, orbit.id)).toHaveLength(2)
+  })
+
+  it("fails naming what it couldn't write, and a Retry writes only that", async () => {
+    const s = await setup()
+    // The model leaves Kite out, twice (the batch and its follow-up).
+    s.hooks.writer = (t) =>
+      writerScript({ skip: (id) => t.user.includes(`## Kite (${id})`) })(t) as ScriptReply
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(j))
+    const failed = await job(s, j.id)
+    expect(failed.status).toBe("failed")
+    expect(failed.error).toBe("Couldn't write 1 overview. Retry to write them.")
+    let st = await state(s)
+    expect(Object.values(st.concepts).find((c) => c.title === "Kite")!.overview).toBeUndefined()
+    expect(liveViews(st).map((v) => v.status)).toEqual(["ready"])
+
+    s.hooks.writer = undefined
+    const before = s.model.turns.length
+    const res = await s.app.request(`/api/jobs/${j.id}/retry`, { method: "POST", headers: s.ada.headers })
+    expect(res.status).toBe(200)
+    await s.engine.settled(inst(j, 2))
+    expect((await job(s, j.id)).status).toBe("complete")
+    st = await state(s)
+    expect(Object.values(st.concepts).filter(isLive).every((c) => c.overview)).toBe(true)
+    const writes = s.model.turns.slice(before).filter((t) => t.system.includes("# Write summaries"))
+    expect(writes).toHaveLength(1)
+    expect(writes[0]!.user).toContain("## Kite (")
+    expect(writes[0]!.user).not.toContain("## Orbit P2 (")
+    expect((await changes(s)).at(-1)).toBe("Wrote overviews for Kite")
+  })
+
+  it("pauses at the spending cap while writing, keeping what it wrote; Continue finishes", async () => {
+    // $0.60 a call (see above). The note, the Concept set's 3 calls and the
+    // View's 2 come to $3.60; the overviews pass the $4.00 cap, so the article waits.
+    const s = await setup({ usage: { input: 100_000, output: 10_000 } })
+    const j = await start(s, { views: [VIEWS[0]], capUsd: 4 })
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("paused")
+    let st = await state(s)
+    expect(Object.values(st.concepts).filter(isLive).every((c) => c.overview)).toBe(true)
+    expect(Object.values(st.sections).filter(isLive)).toHaveLength(0)
+    const res = await s.app.request(`/api/jobs/${j.id}/continue`, { method: "POST", headers: s.ada.headers })
+    expect(res.status).toBe(200)
+    await s.engine.settled(inst(j, 2))
+    expect((await job(s, j.id)).status).toBe("complete")
+    st = await state(s)
+    expect(Object.values(st.sections).filter(isLive).length).toBeGreaterThan(0)
+    expect((await changes(s)).filter((l) => l.startsWith("Wrote overviews"))).toHaveLength(1)
+  })
+
+  it("puts the \"Write the article\" action's article in one Proposal and leaves the Expedition as it was", async () => {
+    const s = await setup()
+    const b = await start(s, { views: [VIEWS[0]], capUsd: 50 })
+    await s.engine.settled(inst(b))
+    const st = await state(s)
+    const kite = Object.values(st.concepts).find((c) => c.title === "Kite")!
+    const head = (await changes(s)).length
+    const res = await s.app.request(`/api/expeditions/${s.exp}/jobs`, {
+      method: "POST",
+      headers: s.ada.headers,
+      body: JSON.stringify({ kind: "article", input: { conceptId: kite.id } }),
+    })
+    expect(res.status).toBe(201)
+    const { job: j } = (await res.json()) as { job: Job }
+    await s.engine.settled(inst(j))
+    expect((await job(s, j.id)).status).toBe("complete")
+
+    // Nothing written to the Expedition: no Change, no sections.
+    expect(await changes(s)).toHaveLength(head)
+    expect(sectionsOf(await state(s), kite.id)).toEqual([])
+
+    const proposals = await s.db
+      .select()
+      .from(schema.proposals)
+      .where(eq(schema.proposals.expeditionId, s.exp))
+    expect(proposals).toHaveLength(1)
+    expect(proposals[0]).toMatchObject({
+      author: s.ada.id,
+      origin: "ai",
+      status: "pending",
+      rationale: "Write the article for Kite",
+    })
+    const items = await s.db
+      .select()
+      .from(schema.proposalItems)
+      .where(eq(schema.proposalItems.proposalId, proposals[0]!.id))
+    expect(items).toHaveLength(1)
+    const ops = items[0]!.ops
+    expect(ops.every((o) => o.kind === "section.create")).toBe(true)
+    expect(ops.length).toBeGreaterThanOrEqual(2)
+    // Accepting it would apply cleanly, with provenance that resolves.
+    const accepted = applyBodies(await state(s), ops)
+    expect(sectionsOf(accepted, kite.id)).toHaveLength(ops.length)
+    const doc = await segmentsOf(s)
+    for (const r of refs(accepted)) expect(findSegments(doc, r.segment).length).toBeGreaterThan(0)
+    expect(s.events.filter((e) => e.jobId === j.id).map((e) => e.step)).toContain("Writing the article for Kite")
+
+    // A Concept that doesn't exist fails with a plain reason.
+    const bad = await s.app.request(`/api/expeditions/${s.exp}/jobs`, {
+      method: "POST",
+      headers: s.ada.headers,
+      body: JSON.stringify({ kind: "article", input: { conceptId: "nope" } }),
+    })
+    const { job: k } = (await bad.json()) as { job: Job }
+    await s.engine.settled(inst(k))
+    expect(await job(s, k.id)).toMatchObject({ status: "failed", error: "That Concept is gone" })
   })
 })

@@ -18,10 +18,13 @@
 //   --summarize <expeditionId>  no build: inspect and export it again
 //   --model <id>         override the curator model (AI_MODEL_CURATOR)
 //
+// The build ends with the writers (WP-3.6): the summary counts overviews and
+// articles and lists any provenance ref that doesn't resolve.
+//
 // Writes packages/ai/fixtures/builds/<fixture>.json (the Expedition, our JSON)
 // and <fixture>.summary.json (Views, counts, inspect results, cost, time).
 import { createGateway } from "ai"
-import { inspectView, memorySourceReader, type Segment } from "@seply/ai"
+import { coreConcepts, inspectView, memorySourceReader, unresolvedProv, type Segment } from "@seply/ai"
 import {
   addSource,
   connectPg,
@@ -254,13 +257,13 @@ async function writeSummary(run: "ran" | "killed" | null) {
   if (run) {
     await new Promise((r) => setTimeout(r, 5000)) // the gateway's usage settles
     const cost = Number(await credits()) - usedBefore
-    const recorded = engine.recorded(id).filter((n) => /^(note|concepts|View \d+: build)/.test(n))
+    const recorded = engine.recorded(id).filter((n) => /^(note|concepts|View \d+: build|write \d+$)/.test(n))
     const these = Object.fromEntries(
       recorded.map((n) => {
         const r = (engine.result(id, n) ?? {}) as Record<string, unknown>
         return [
           `attempt ${job.attempt}: ${n}`,
-          { summary: r.summary ?? r.note ?? null, review: r.review ?? null, reason: r.reason ?? null, warnings: r.warnings ?? null, steps: r.steps ?? null, toolCalls: r.toolCalls ?? null, spentUsdSoFar: (r.meter as { spentUsd?: number } | undefined)?.spentUsd ?? null },
+          { summary: r.summary ?? r.note ?? null, written: r.written ?? null, missing: r.missing ?? null, repairs: r.repairs ?? null, review: r.review ?? null, reason: r.reason ?? null, warnings: r.warnings ?? null, steps: r.steps ?? null, toolCalls: r.toolCalls ?? null, spentUsdSoFar: (r.meter as { spentUsd?: number } | undefined)?.spentUsd ?? null },
         ]
       })
     )
@@ -292,7 +295,20 @@ async function writeSummary(run: "ran" | "killed" | null) {
       views: views.length,
       coreConcepts: live(state.concepts).filter((c) => c.weightPin === "core").length,
       backgroundConcepts: live(state.concepts).filter((c) => c.prov.length === 0).length,
+      // The writers (WP-3.6)
+      withOverview: live(state.concepts).filter((c) => c.overview?.trim()).length,
+      coreWithArticle: coreConcepts(state).filter((id) => live(state.sections).some((x) => x.conceptId === id)).length,
+      core: coreConcepts(state).length,
+      sections: live(state.sections).length,
     },
+    // Done when (WP-3.6): every provenance ref resolves to a real segment.
+    unresolvedProv: unresolvedProv(
+      [
+        ...live(state.concepts).map((c) => ({ kind: "concept.set" as const, target: c.id, path: "overviewProv", value: c.overviewProv })),
+        ...live(state.sections).map((x) => ({ kind: "section.create" as const, target: x.id, value: { conceptId: x.conceptId, orderKey: x.orderKey, heading: x.heading, md: x.md, prov: x.prov } })),
+      ],
+      Object.entries(segs).map(([id, segments]) => ({ id, title: id, segments }))
+    ),
     changes: changes.map((c) => c.label),
     views: inspected,
     stages,

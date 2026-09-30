@@ -80,6 +80,8 @@ export function BuildActivity({
   const job = summary.job
   if (!job) return null
   const paused = job.status === "paused"
+  // Every View is done: the writers are writing overviews and articles.
+  const writing = !paused && summary.pending === 0
   const run = (fn: () => Promise<unknown>) => {
     setBusy(true)
     fn().finally(() => setBusy(false))
@@ -105,7 +107,7 @@ export function BuildActivity({
             <Spinner className="text-suggested-text" />
           )}
           <span className="truncate">
-            {paused ? "Paused" : "Building"}
+            {paused ? "Paused" : writing ? "Writing" : "Building"}
             <span className="hidden text-muted-foreground sm:inline">
               {" · "}
               {readyLabel(summary)}
@@ -115,7 +117,11 @@ export function BuildActivity({
         <PopoverContent align="end" className="w-80" data-testid="build-panel">
           <PopoverHeader>
             <PopoverTitle>
-              {paused ? "Paused at the spending cap" : "Building"}
+              {paused
+                ? "Paused at the spending cap"
+                : writing
+                  ? "Writing overviews and articles"
+                  : "Building"}
             </PopoverTitle>
             <PopoverDescription>
               {paused

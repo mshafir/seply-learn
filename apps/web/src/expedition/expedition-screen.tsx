@@ -56,6 +56,7 @@ import type { ViewStatusChip } from "@seply/views"
 
 import { BuildActivity } from "@/expedition/build-activity.tsx"
 import {
+  articleAsk,
   buildSummary,
   retryableJob,
   startViewOf,
@@ -89,7 +90,7 @@ import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsRail } from "@/expedition/views-rail.tsx"
-import { ApiError, listExpeditions, type Role } from "@/lib/api.ts"
+import { ApiError, listExpeditions, startJob, type Role } from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 import {
   useCovered,
@@ -460,6 +461,21 @@ function ExpeditionFrame({
             onStatus: (state) =>
               reader?.markReading(expeditionId, selectedConcept.id, state),
             signInHref: hintHref,
+            ...(canEdit &&
+              offlineSince === null &&
+              signInHref === null && {
+                articleAction: {
+                  ask: articleAsk(builds.log, selectedConcept.id),
+                  onWrite: () => {
+                    startJob(expeditionId, "article", {
+                      conceptId: selectedConcept.id,
+                    }).then(
+                      builds.track,
+                      failed("Couldn't start writing the article")
+                    )
+                  },
+                },
+              }),
           }
         : null
 
@@ -750,6 +766,21 @@ function announce(
   const once = `${evt.jobId}/${evt.viewId ?? ""}/${evt.status}`
   if (announced.has(once)) return
   announced.add(once)
+  if (!evt.viewId && evt.kind === "article") {
+    if (evt.status === "complete")
+      toast.add({
+        title: "Article suggested",
+        description: "It's waiting for review in Suggestions.",
+        type: "success",
+      })
+    else if (evt.status === "failed")
+      toast.add({
+        title: "Couldn't write the article",
+        description: evt.reason,
+        type: "error",
+      })
+    return
+  }
   if (!evt.viewId) {
     // A pause shows on the canvas (Continue, Stop) rather than as a toast.
     if (evt.status === "complete")

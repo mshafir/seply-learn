@@ -1,0 +1,105 @@
+{
+  "fixture": "ebike-chat",
+  "model": "anthropic/claude-sonnet-5.5",
+  "stopped": null,
+  "seconds": 227,
+  "costUsd": {
+    "meter": 0.41,
+    "gatewayBilled": 0.41
+  },
+  "checks": {
+    "everyConceptHasAnOverview": true,
+    "coreConceptsHaveArticles": true,
+    "everyRefResolves": true
+  },
+  "counts": {
+    "concepts": 50,
+    "withOverview": 50,
+    "overviewsFromSources": 50,
+    "core": 6,
+    "coreWithArticle": 6,
+    "sections": 23,
+    "sectionsFromSources": 23,
+    "provRefs": 162,
+    "overviewWords": {
+      "min": 76,
+      "max": 133
+    },
+    "articleWords": [
+      281,
+      258,
+      413,
+      383,
+      250,
+      386
+    ],
+    "linksInText": 201,
+    "unlinked": 1
+  },
+  "repairs": [],
+  "batches": [
+    {
+      "n": 1,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 43326,
+      "usd": 0.0834
+    },
+    {
+      "n": 2,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 31279,
+      "usd": 0.063
+    },
+    {
+      "n": 3,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 40734,
+      "usd": 0.0552
+    },
+    {
+      "n": 4,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 36396,
+      "usd": 0.0506
+    },
+    {
+      "n": 5,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 24193,
+      "usd": 0.0433
+    },
+    {
+      "n": 6,
+      "mode": "articles",
+      "concepts": 3,
+      "written": 3,
+      "missing": [],
+      "ms": 28145,
+      "usd": 0.0692
+    },
+    {
+      "n": 7,
+      "mode": "articles",
+      "concepts": 3,
+      "written": 3,
+      "missing": [],
+      "ms": 22509,
+      "usd": 0.0453
+    }
+  ]
+}

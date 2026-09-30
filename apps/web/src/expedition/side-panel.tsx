@@ -28,6 +28,7 @@ import {
 } from "@/expedition/concept-panel.tsx"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
+import type { ArticleAction } from "@/expedition/concept-panel.tsx"
 import {
   articleSectionsOf,
   conceptEyebrow,
@@ -47,6 +48,8 @@ export type PanelContent =
       onStatus: (state: ReadingState) => void
       /** Anonymous and has marked something: where "Sign in" goes. */
       signInHref: string | null
+      /** "Write the article" (editors, online, no article yet); absent otherwise. */
+      articleAction?: ArticleAction
     }
   | ({ type: "view" } & ViewPanelProps)
 
@@ -169,8 +172,16 @@ function ConceptBody({
   onClose: () => void
   inline: boolean
 }) {
-  const { concept, depth, kindLabel, reading, status, onStatus, signInHref } =
-    content
+  const {
+    concept,
+    depth,
+    kindLabel,
+    reading,
+    status,
+    onStatus,
+    signInHref,
+    articleAction,
+  } = content
   const allSections = reading.data.articleSections
   const sections = React.useMemo(
     () => articleSectionsOf(concept.id, allSections),
@@ -210,6 +221,7 @@ function ConceptBody({
               concept={concept}
               reading={reading}
               sections={sections}
+              articleAction={articleAction}
             />
           ) : (
             <ConceptArticle reading={reading} sections={sections} />
