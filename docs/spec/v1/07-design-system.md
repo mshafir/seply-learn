@@ -24,7 +24,7 @@ Decided in:
 
 ## 7.2 Tokens and palette
 
-shadcn `:root` / `.dark` pairs in oklch, exposed via `@theme inline`. Our own tokens are `--suggested`, `--suggested-text`, `--success`, `--calyx`, `--font-reading` and `--kind-<name>`. The dark mode is **warm charcoal**. Every pair was checked for WCAG contrast on both the ground and surface colours:
+shadcn `:root` / `.dark` pairs in oklch, exposed via `@theme inline`. Our own tokens are `--suggested`, `--suggested-text`, `--success`, `--calyx`, `--sprout`, `--font-reading` and `--kind-<name>`. The dark mode is **warm charcoal**. Every pair was checked for WCAG contrast on both the ground and surface colours:
 
 | Token | Light | Dark | Lowest text contrast |
 |---|---|---|---|
@@ -37,7 +37,8 @@ shadcn `:root` / `.dark` pairs in oklch, exposed via `@theme inline`. Our own to
 | suggested: fills, dashes, borders | #B7791F | #E3B25C | 3.34 light (non-text only, needs ≥ 3:1) |
 | suggested-text | #8F5C14 | #E3B25C | 5.19 |
 | success | #1F6B45 | #6FCF9A | 5.93 |
-| calyx (brand green, the glyph's sepals) | #2D5C3F | #8FC7A0 | 7.09 |
+| calyx (brand green, the glyph's tile) | #2D5C3F | #8FC7A0 | 7.09 |
+| sprout (the glyph's leaves on calyx) | #DFE9D8 | #26352B | 6.18 on calyx (non-text) |
 
 - **Amber** marks suggested, in progress and "from the source". Proposals are drawn **dashed** in `--suggested`.
 - **Kind and Relationship Type colours:** a fixed palette of **12 named hues** (blue, teal, green, amber, orange, red, pink, violet, indigo, slate, brown, olive), each with a contrast-checked light and dark value. Expeditions store the **name**, never a hex value.
@@ -61,9 +62,9 @@ shadcn `:root` / `.dark` pairs in oklch, exposed via `@theme inline`. Our own to
 ## 7.5 Branding
 
 - **Name:** Seply is the umbrella for agent-first, visual, multiplayer tools; each product is **Seply** + a verb: **Seply Learn** (this repo), **Seply Plan**, **Seply Work**. See [ADR 0002](../../adr/0002-rename-to-seply.md).
-- **Glyph:** five sepals in a slight whorl holding a bud. The sepals are always `--calyx`; the bud is the product's colour, which is `--primary` inside the product (gentian, #3A45B5 / #8E97F2, for Learn). A ring around the bud is cut out, so the glyph sits on any surface. It holds at 16px.
+- **Glyph:** five pale leaves (`--sprout`) in a whorl on a rounded calyx tile (`--calyx`, corner radius 14/64). It is the same for every product; the product name next to it tells them apart. The app icon is the tile full-bleed, since platforms round the corners. It holds at 16px.
 - **Wordmark:** the glyph, "Seply" in Newsreader Medium (optical size 72) in ink, then "Learn" in IBM Plex Sans Regular at 0.77× in muted ink.
-- **Suite colours:** each product has one bud colour: Learn gentian, Plan heather (#8B3A76 / #E39ACB), Work cedar (#8C4A22 / #E0A176). Only Learn's is a token today; the others become `--primary` in their own apps. None is amber, which stays reserved for suggestions.
+- **Suite colours:** each product has one accent colour: Learn gentian, Plan heather (#8B3A76 / #E39ACB), Work cedar (#8C4A22 / #E0A176). Only Learn's is a token today (`--primary`); the others become `--primary` in their own apps. None is amber, which stays reserved for suggestions.
 - **Tagline:** "Shared perspective for people and agents."
 - **Voice:** plain, calm and specific, in sentence case, with no emoji. Say when an agent did something ("Suggested by the agent"). The outdoors theme lives in the names of big objects (Expedition), never in jokes or ornament.
 - Used for the favicon, the PWA icons and the header, from one swappable folder: `packages/ui/brand`. `SeplyGlyph` and `Wordmark` in `packages/ui/src/components/brand.tsx` draw the same marks from tokens.

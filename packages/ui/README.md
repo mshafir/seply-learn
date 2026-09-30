@@ -67,10 +67,10 @@ IBM Plex Sans (`font-sans`, the interface), IBM Plex Mono (`font-mono`, labels) 
 
 | File | Use |
 |---|---|
-| `glyph.svg` | The Seply glyph: five calyx-green sepals holding a gentian bud (Learn). Follows `prefers-color-scheme`. |
+| `glyph.svg` | The Seply glyph: five pale leaves on a rounded calyx-green tile. Follows `prefers-color-scheme`. |
 | `wordmark.svg` | Glyph + "Seply" (Newsreader) + "Learn" (Plex Sans), with the text as outlines, so it needs no fonts. In the app use `<Wordmark>`. |
 | `favicon.svg`, `favicon-32.png` | The glyph for browser tabs (it holds at 16px). |
-| `icon.svg` | App icon source: the glyph on the ground colour, inside the maskable safe zone. |
+| `icon.svg` | App icon source: the calyx tile full-bleed, leaves inside the maskable safe zone. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | PWA and iOS icons, rasterised from `icon.svg` (they work as `any` and `maskable`). The manifest arrives with WP-2.7. |
 
 These files use literal colours, because they render outside the app's CSS.
