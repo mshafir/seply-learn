@@ -32,7 +32,7 @@ import { checkExpedition, type Finding } from "./checks/index.ts"
 import { inspectView, type ViewInspection } from "./inspect.ts"
 import type { Segment, SourceReader, ViewReader } from "./ports.ts"
 import { searchExisting, type SearchHit } from "./search.ts"
-import { Stage } from "./stage.ts"
+import { StagingArea } from "./stage.ts"
 
 export type CuratorTool<I = never, O = unknown> = {
   description: string
@@ -95,7 +95,7 @@ export const TOOL_NAMES = {
 const MAX_SEGMENTS = 40
 
 export function createCuratorTools(opts: CuratorToolsOptions) {
-  const stage = new Stage(opts.state, { nextOpId: opts.nextOpId })
+  const stage = new StagingArea(opts.state, { nextOpId: opts.nextOpId })
   const newId = opts.newId ?? (() => ulid(Date.now()))
   const ports = { views: opts.views, sources: opts.sources }
 

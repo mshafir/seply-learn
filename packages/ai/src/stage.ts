@@ -13,9 +13,9 @@ import {
   type OpBody,
 } from "@seply/domain"
 
-export type StageResult = { ok: true } | { ok: false; error: string }
+export type StagingResult = { ok: true } | { ok: false; error: string }
 
-export class Stage {
+export class StagingArea {
   #base: DomainState
   #state: DomainState
   #staged: OpBody[] = []
@@ -44,7 +44,7 @@ export class Stage {
    * Validates and applies op bodies, all or none: when one fails, nothing is
    * staged and the error names it.
    */
-  stage(bodies: readonly OpBody[]): StageResult {
+  stage(bodies: readonly OpBody[]): StagingResult {
     let next = this.#state
     for (const b of bodies) {
       const parsed = parseOpBody(b)

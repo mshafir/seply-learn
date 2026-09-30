@@ -11,3 +11,17 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # "1" enables email + password sign-in for tests. Ignored on non-localhost URLs.
 AUTH_TEST_CREDENTIALS=
+
+# --- AI (spec §5.6; packages/server README, "AI") ---
+# Key mode: "instance" (default; the key below serves everyone) or "byok"
+# (each reader adds their own key in Settings).
+AI_KEY_MODE=
+# Instance key: a Vercel AI Gateway key (the hosted instance uses one).
+# Self-host alternatives, used when it's unset: ANTHROPIC_API_KEY,
+# OPENAI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, or OPENAI_COMPATIBLE_BASE_URL
+# (+ OPENAI_COMPATIBLE_API_KEY and AI_MODEL_SKIM/CURATOR/WRITER).
+AI_GATEWAY_API_KEY=
+# BYOK mode: the master key readers' keys are encrypted under. 32 random
+# bytes, base64: `openssl rand -base64 32`. Changing it makes stored keys
+# unreadable (readers add them again).
+AI_KEYS_MASTER_KEY=

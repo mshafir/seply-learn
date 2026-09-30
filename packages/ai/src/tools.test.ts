@@ -541,7 +541,7 @@ describe("view.inspect and commit", () => {
   })
 })
 
-describe("Stage", () => {
+describe("StagingArea", () => {
   it("discard drops staged ops and returns to the last commit", async () => {
     const t = printerTools()
     made(

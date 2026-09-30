@@ -1,0 +1,181 @@
+{
+  "measuredAt": "2026-09-30T19:25:06.295Z",
+  "rows": [
+    {
+      "fixture": "research-doc",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 2,
+        "cacheRead": 0,
+        "cacheWrite": 10080,
+        "output": 756
+      },
+      "costUsd": 0.016382
+    },
+    {
+      "fixture": "compute",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 488560
+      },
+      "usage": {
+        "input": 3,
+        "cacheRead": 0,
+        "cacheWrite": 127165,
+        "output": 844
+      },
+      "costUsd": 0.16317925
+    },
+    {
+      "fixture": "research-doc",
+      "model": "anthropic/claude-sonnet-5.5",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 4,
+        "cacheRead": 0,
+        "cacheWrite": 13608,
+        "output": 872
+      },
+      "costUsd": 0.042748
+    },
+    {
+      "fixture": "research-doc",
+      "model": "anthropic/claude-sonnet-5.5",
+      "run": 1,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 4,
+        "cacheRead": 13608,
+        "cacheWrite": 0,
+        "output": 953
+      },
+      "costUsd": 0.0122596
+    },
+    {
+      "fixture": "compute",
+      "model": "anthropic/claude-sonnet-5.5",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 488560
+      },
+      "usage": {
+        "input": 4,
+        "cacheRead": 0,
+        "cacheWrite": 173371,
+        "output": 1211
+      },
+      "costUsd": 0.4455455
+    },
+    {
+      "fixture": "compute",
+      "model": "anthropic/claude-sonnet-5.5",
+      "run": 1,
+      "chars": {
+        "system": 269,
+        "source": 488560
+      },
+      "usage": {
+        "input": 4,
+        "cacheRead": 173371,
+        "cacheWrite": 0,
+        "output": 1173
+      },
+      "costUsd": 0.0464122
+    },
+    {
+      "fixture": "research-doc",
+      "model": "anthropic/claude-opus-5.5",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 4,
+        "cacheRead": 0,
+        "cacheWrite": 13608,
+        "output": 1016
+      },
+      "costUsd": 0.088376
+    },
+    {
+      "fixture": "research-doc",
+      "model": "openai/gpt-6-luna",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 3,
+        "cacheRead": 0,
+        "cacheWrite": 8546,
+        "output": 322
+      },
+      "costUsd": 0.00122955
+    },
+    {
+      "fixture": "compute",
+      "model": "openai/gpt-6-luna",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 488560
+      },
+      "usage": {
+        "input": 3,
+        "cacheRead": 0,
+        "cacheWrite": 114755,
+        "output": 413
+      },
+      "costUsd": 0.014551175
+    },
+    {
+      "fixture": "research-doc",
+      "model": "google/gemini-3.5-flash-lite",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 31954
+      },
+      "usage": {
+        "input": 9291,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 239
+      },
+      "costUsd": 0.0033848
+    },
+    {
+      "fixture": "compute",
+      "model": "google/gemini-3.5-flash-lite",
+      "run": 0,
+      "chars": {
+        "system": 269,
+        "source": 488560
+      },
+      "usage": {
+        "input": 119851,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 193
+      },
+      "costUsd": 0.0364378
+    }
+  ]
+}
