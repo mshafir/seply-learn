@@ -36,12 +36,12 @@ importers:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@types/node':
-        specifier: ^24
-        version: 24.13.3
       '@seply/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/node':
+        specifier: ^24
+        version: 24.13.3
       eslint:
         specifier: ^10
         version: 10.10.0(jiti@2.7.0)
@@ -60,9 +60,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@tanstack/react-db':
-        specifier: 0.4.1
-        version: 0.4.1(react@19.2.8)(typescript@6.0.3)
       '@seply/domain':
         specifier: workspace:*
         version: link:../../packages/domain
@@ -75,6 +72,9 @@ importers:
       '@seply/views':
         specifier: workspace:*
         version: link:../../packages/views
+      '@tanstack/react-db':
+        specifier: 0.4.1
+        version: 0.4.1(react@19.2.8)(typescript@6.0.3)
       '@xyflow/react':
         specifier: ^12.12.0
         version: 12.12.0(@types/react-dom@19.2.7(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -103,6 +103,9 @@ importers:
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
+      '@seply/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@tailwindcss/vite':
         specifier: ^4
         version: 4.3.3(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
@@ -118,9 +121,6 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.7(@types/react@19.2.18)
-      '@seply/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@vitejs/plugin-react':
         specifier: ^6
         version: 6.1.1(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
@@ -173,12 +173,12 @@ importers:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@types/node':
-        specifier: ^24
-        version: 24.13.3
       '@seply/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/node':
+        specifier: ^24
+        version: 24.13.3
       eslint:
         specifier: ^10
         version: 10.10.0(jiti@2.7.0)
@@ -200,19 +200,40 @@ importers:
 
   packages/ai:
     dependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^4.0.70
+        version: 4.0.70(zod@4.5.4)
+      '@ai-sdk/google':
+        specifier: ^4.0.87
+        version: 4.0.87(zod@4.5.4)
+      '@ai-sdk/openai':
+        specifier: ^4.0.83
+        version: 4.0.83(zod@4.5.4)
+      '@ai-sdk/openai-compatible':
+        specifier: ^3.0.61
+        version: 3.0.61(zod@4.5.4)
+      '@ai-sdk/provider':
+        specifier: ^4.0.21
+        version: 4.0.21
       '@seply/domain':
         specifier: workspace:*
         version: link:../domain
+      ai:
+        specifier: ^7.0.124
+        version: 7.0.124(zod@4.5.4)
+      zod:
+        specifier: ^4.5.4
+        version: 4.5.4
     devDependencies:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@types/node':
-        specifier: ^24
-        version: 24.13.3
       '@seply/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^24
+        version: 24.13.3
       eslint:
         specifier: ^10
         version: 10.10.0(jiti@2.7.0)
@@ -246,12 +267,12 @@ importers:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@types/node':
-        specifier: ^24
-        version: 24.13.3
       '@seply/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^24
+        version: 24.13.3
       eslint:
         specifier: ^10
         version: 10.10.0(jiti@2.7.0)
@@ -298,15 +319,15 @@ importers:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
+      '@seply/config':
+        specifier: workspace:*
+        version: link:../config
       '@types/node':
         specifier: ^24
         version: 24.13.3
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
-      '@seply/config':
-        specifier: workspace:*
-        version: link:../config
       drizzle-kit:
         specifier: ^0.31.11
         version: 0.31.11
@@ -328,12 +349,12 @@ importers:
 
   packages/sync:
     dependencies:
-      '@tanstack/db':
-        specifier: 0.9.2
-        version: 0.9.2(typescript@6.0.3)
       '@seply/domain':
         specifier: workspace:*
         version: link:../domain
+      '@tanstack/db':
+        specifier: 0.9.2
+        version: 0.9.2(typescript@6.0.3)
     devDependencies:
       '@eslint/js':
         specifier: ^10
@@ -496,6 +517,12 @@ importers:
       '@playwright/test':
         specifier: 1.62.1
         version: 1.62.1
+      '@seply/config':
+        specifier: workspace:*
+        version: link:../config
+      '@seply/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@tailwindcss/vite':
         specifier: ^4
         version: 4.3.3(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
@@ -526,12 +553,6 @@ importers:
       '@types/topojson-specification':
         specifier: ^1.0.5
         version: 1.0.5
-      '@seply/config':
-        specifier: workspace:*
-        version: link:../config
-      '@seply/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@vitejs/plugin-react':
         specifier: ^6.1.1
         version: 6.1.1(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
@@ -573,6 +594,46 @@ importers:
         version: 4.1.11(@types/node@24.13.3)(jsdom@30.1.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))
 
 packages:
+
+  '@ai-sdk/anthropic@4.0.70':
+    resolution: {integrity: sha512-uCuMH4CCL3DXOL0mXyyzfV7KSIPc+ka6X7qiq5HT9hkBdMMJF9SLzfSKOshoLHiSc/xSnFYWLHwlBxMMlaITrg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/gateway@4.0.102':
+    resolution: {integrity: sha512-kAVldt8D2AVSs7BjBZTRWHcFF71lPH8ouS6/QVlFCnKcUsShjXMdRwW6es5BfxyGewHbXfSirSc8j6efKSkIdA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/google@4.0.87':
+    resolution: {integrity: sha512-s0tWc+QeSce7O2ZLm+VWSRQy16dGfqEcMIUxEWh+LFvXX3h0TLH8jxCQ2H1qhiBgTta+6A97eHPhBlRFu1xy+g==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai-compatible@3.0.61':
+    resolution: {integrity: sha512-0Hjbq3aoIDWYEbHN5uoKoIG3lblAlh8wtEDCB1RNSrWZmpQ6EnBP7IVZnT9m4Rl3fKbTetvtys1MkS9DBduVZA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/openai@4.0.83':
+    resolution: {integrity: sha512-NgqZVWoya7hfmtLkWyIjX9THbyYMLfxFqpShdAmvMnkoT+R9AZbdULGan8+4BiBWIZ1aHiAsc90l3SL8QU/0+Q==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@5.0.53':
+    resolution: {integrity: sha512-VVe6UDd0y0/B4TfauuKKzcppqvhTmSluwwUVT4WG2/8h7gFbyFm7PM4UGM+ZXe3/RI6bv+Vl1cw/7aiBoQqdxg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider@4.0.21':
+    resolution: {integrity: sha512-UpbC9C1oht8dhfKPbVXSLRZS3DI8uk8n5v2uMjBPNIYGsC2kL045ywq7D8Hh9KgnH9rP5W/GxQdYtWScRouqlA==}
+    engines: {node: '>=22'}
 
   '@apideck/better-ajv-errors@0.3.7':
     resolution: {integrity: sha512-TajUJwGWbDwkCx/CZi7tRE8PVB7simCvKJfHUsSdvps+aTM/PDPP4gkLmKnc+x3CE//y9i/nj74GqdL/hwk7Iw==}
@@ -3284,6 +3345,10 @@ packages:
   '@ungap/structured-clone@1.4.0':
     resolution: {integrity: sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ==}
 
+  '@vercel/oidc@3.2.0':
+    resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
+    engines: {node: '>= 20'}
+
   '@vitejs/plugin-react@6.1.1':
     resolution: {integrity: sha512-yxLaQV9gkhS8ezJqCM6+ndU7mDY6gqAg75NQ+0IjwEI8IYOmQCgkRwHKVSfWXW076DsqMo0Dk+0FK1U+M5RgFw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -3329,6 +3394,9 @@ packages:
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
 
+  '@workflow/serde@4.1.0':
+    resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
+
   '@xyflow/react@12.12.0':
     resolution: {integrity: sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ==}
     peerDependencies:
@@ -3358,6 +3426,12 @@ packages:
     resolution: {integrity: sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  ai@7.0.124:
+    resolution: {integrity: sha512-FdzSxCXE+tlkD9texj2EO8QvJvCHoqWjdOTM3EWL6CBDtJXMe0/aYul9e31Q+P7zABmRAXrc3+XFSrmawqQOcA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
@@ -4827,6 +4901,9 @@ packages:
 
   json-schema-typed@8.0.2:
     resolution: {integrity: sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA==}
+
+  json-schema@0.4.0:
+    resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
@@ -6721,6 +6798,50 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@ai-sdk/anthropic@4.0.70(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      zod: 4.5.4
+
+  '@ai-sdk/gateway@4.0.102(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      '@vercel/oidc': 3.2.0
+      zod: 4.5.4
+
+  '@ai-sdk/google@4.0.87(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      zod: 4.5.4
+
+  '@ai-sdk/openai-compatible@3.0.61(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      zod: 4.5.4
+
+  '@ai-sdk/openai@4.0.83(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      zod: 4.5.4
+
+  '@ai-sdk/provider-utils@5.0.53(zod@4.5.4)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.21
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      undici: 7.30.0
+      zod: 4.5.4
+
+  '@ai-sdk/provider@4.0.21':
+    dependencies:
+      json-schema: 0.4.0
 
   '@apideck/better-ajv-errors@0.3.7(ajv@8.20.0)':
     dependencies:
@@ -9069,6 +9190,8 @@ snapshots:
 
   '@ungap/structured-clone@1.4.0': {}
 
+  '@vercel/oidc@3.2.0': {}
+
   '@vitejs/plugin-react@6.1.1(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
@@ -9115,6 +9238,8 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
+  '@workflow/serde@4.1.0': {}
+
   '@xyflow/react@12.12.0(@types/react-dom@19.2.7(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@xyflow/system': 0.0.83
@@ -9150,6 +9275,13 @@ snapshots:
       acorn: 8.18.0
 
   acorn@8.18.0: {}
+
+  ai@7.0.124(zod@4.5.4):
+    dependencies:
+      '@ai-sdk/gateway': 4.0.102(zod@4.5.4)
+      '@ai-sdk/provider': 4.0.21
+      '@ai-sdk/provider-utils': 5.0.53(zod@4.5.4)
+      zod: 4.5.4
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
@@ -10637,6 +10769,8 @@ snapshots:
   json-schema-typed@7.0.3: {}
 
   json-schema-typed@8.0.2: {}
+
+  json-schema@0.4.0: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 

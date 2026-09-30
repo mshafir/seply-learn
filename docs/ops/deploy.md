@@ -55,6 +55,8 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **Previous domain:** the product was Umbel Learn on `learn.umbel.dev` ([ADR 0002](../adr/0002-rename-to-seply.md)). It was switched off on 2026-09-30 with no redirect: the old Worker, its Hyperdrive config, the Resend domain `mail.umbel.dev` and its DNS records are deleted. Browser storage and sessions don't carry across origins, so readers sign in on the new domain.
 
 - [X] **`AI_GATEWAY_API_KEY`:** a Vercel AI Gateway key (_Vercel dashboard → AI Gateway → API keys_), the hosted instance key (spec §5.1, §5.7). Needed from WP-3.3. Set a spend limit in Vercel: previews use it too, and per-user caps are phase 2.
+  - From WP-3.3 the deploy uploads it to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists). The hosted instance runs in **instance-key mode** (`AI_KEY_MODE` unset), so this key pays for everyone's builds and asks.
+- [ ] **`AI_KEYS_MASTER_KEY`** (optional until the hosted instance switches to bring-your-own-key mode): the master key readers' own API keys are AES-GCM encrypted under (spec §2.6). Generate it without seeing it: `openssl rand -base64 32 | gh secret set AI_KEYS_MASTER_KEY -R mshafir/seply-learn`. The deploy uploads it when it exists. Never rotate it casually: keys stored under the old one become unreadable, and readers add them again.
 
 - [X] **Email (Resend):** needed from WP-5.2. The domain `mail.seply.app` is verified in Resend; its DKIM, SPF (MX and TXT on `send.mail`) and `_dmarc.seply.app` records live in the Cloudflare zone `seply.app`.
   - **`RESEND_API_KEY`:** a _Sending access_ key restricted to `mail.seply.app`.
@@ -70,7 +72,7 @@ On every PR push (`opened`, `synchronize`, `reopened`):
 2. **Neon branch** `preview/pr-<n>`, created from the default branch by `neondatabase/create-branch-action` (reused if it exists). Each PR gets its own copy of the data, so parallel agents never share a database.
 3. **Migrations:** `pnpm --filter @seply/server db:migrate` applies the committed drizzle-kit migrations (`packages/server/drizzle`) to the branch's direct (non-pooled) connection string. Already-applied migrations are skipped.
 4. **Hyperdrive config** `seply-pr-<n>`, created or updated to point at that branch's direct connection string, with caching off. `apps/worker/scripts/ci.mjs hyperdrive-upsert` does this through the Cloudflare API, then writes `apps/worker/wrangler.ci.json`: `wrangler.jsonc` with the real Hyperdrive id in place of the placeholder.
-5. **URLs and secrets:** `ci.mjs worker-urls` reads the account's workers.dev subdomain, so the preview's URL (`https://seply-pr-<n>.<subdomain>.workers.dev`) and production's are known before deploying. `ci.mjs secrets-file` writes `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` from the repo secrets to a mode-0600 JSON file in `$RUNNER_TEMP`. Their values are never printed.
+5. **URLs and secrets:** `ci.mjs worker-urls` reads the account's workers.dev subdomain, so the preview's URL (`https://seply-pr-<n>.<subdomain>.workers.dev`) and production's are known before deploying. `ci.mjs secrets-file` writes `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, plus `AI_GATEWAY_API_KEY` and `AI_KEYS_MASTER_KEY` when they exist, from the repo secrets to a mode-0600 JSON file in `$RUNNER_TEMP`. Their values are never printed.
 6. **Deploy** `wrangler deploy --config wrangler.ci.json --name seply-pr-<n> --secrets-file … --var DB_BRANCH:preview/pr-<n> --var BETTER_AUTH_URL:<preview URL> --var AUTH_PROXY_URL:<production URL> --var AUTH_TRUSTED_ORIGINS:https://seply-pr-*.<subdomain>.workers.dev`. This is a separate Worker per PR, with its own bindings. The secrets upload with the deploy, and the file is deleted when the step ends.
 7. **Check** `GET /api/health` until it answers. It returns `{"ok":true,"db":"neondb","branch":"preview/pr-<n>"}`: `db` comes from `select current_database()` through Hyperdrive, and `branch` names the Neon branch.
 8. **Check sign-in:** `apps/worker/scripts/check-signin.mjs` starts a Google sign-in and checks that it redirects to Google with **production's** callback as `redirect_uri` (the OAuth proxy, below).
@@ -94,6 +96,14 @@ Workers get these, in addition to `DB_BRANCH`:
 | `AUTH_PROXY_URL` | var | production URL (`https://$PRODUCTION_DOMAIN` when set) | its own URL | unset |
 | `AUTH_TRUSTED_ORIGINS` | var | `https://seply-pr-*.<subdomain>.workers.dev` | same | unset |
 | `AUTH_TEST_CREDENTIALS` | var | never set | never set | `1` only for API tests |
+
+AI (WP-3.3; see the server README, "AI"):
+
+| Name | Kind | Preview | Production | Local (`apps/worker/.dev.vars`) |
+|---|---|---|---|---|
+| `AI_GATEWAY_API_KEY` | secret | repo secret | repo secret | a gateway key, or unset |
+| `AI_KEYS_MASTER_KEY` | secret | repo secret, if set | repo secret, if set | `openssl rand -base64 32` (BYOK mode only) |
+| `AI_KEY_MODE` | var | unset (`instance`) | unset (`instance`) | `byok` to try Settings → AI |
 
 **Previews sign in through production.** Google allows no wildcard redirect URIs, and the Google client lists only production and localhost. Better Auth's [OAuth proxy plugin](https://www.better-auth.com/docs/plugins/oauth-proxy) handles this:
 
