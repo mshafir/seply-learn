@@ -274,6 +274,68 @@ export function getSourceSegments(
 export const sourceFileHref = (expeditionId: string, sourceId: string) =>
   `/api/sources/${encodeURIComponent(expeditionId)}/${encodeURIComponent(sourceId)}/file`
 
+// --- Jobs (WP-3.2's API; packages/server README) ---------------------------
+
+export type JobStatus =
+  | "queued"
+  | "running"
+  | "paused"
+  | "complete"
+  | "failed"
+  | "cancelled"
+
+/** A job row (the server's `Job`). */
+export type Job = {
+  id: string
+  expeditionId: string
+  kind: string
+  input: unknown
+  startedBy: string
+  status: JobStatus
+  step: string | null
+  progress: number
+  error: string | null
+  attempt: number
+  capRaises: number
+  createdAt: string
+  updatedAt: string
+}
+
+/** An Expedition's 20 most recent jobs, newest first. */
+export async function listJobs(expeditionId: string): Promise<Job[]> {
+  return (
+    await call<{ jobs: Job[] }>(
+      `/expeditions/${encodeURIComponent(expeditionId)}/jobs`
+    )
+  ).jobs
+}
+
+export async function startJob(
+  expeditionId: string,
+  kind: string,
+  input: unknown
+): Promise<Job> {
+  return (
+    await call<{ job: Job }>(
+      `/expeditions/${encodeURIComponent(expeditionId)}/jobs`,
+      { method: "POST", body: JSON.stringify({ kind, input }) }
+    )
+  ).job
+}
+
+/** Cancel (or Stop, at the spending cap), Retry, or Continue past the cap. */
+export async function jobAction(
+  jobId: string,
+  action: "cancel" | "retry" | "continue"
+): Promise<Job> {
+  return (
+    await call<{ job: Job }>(
+      `/jobs/${encodeURIComponent(jobId)}/${action}`,
+      { method: "POST" }
+    )
+  ).job
+}
+
 // ─── The create flow (WP-3.4; the server's src/create.ts) ─────────────────
 
 /** The goal chips on the Sources screen. */

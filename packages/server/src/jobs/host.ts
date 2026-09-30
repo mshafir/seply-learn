@@ -6,6 +6,11 @@
 // Engines replay `run` from the top after a restart, skipping steps that
 // already returned. So everything with a side effect that must not repeat is
 // a step; code between steps must be deterministic.
+//
+// A step that throws @seply/ai's `SpendingCapReached` is not retried: it is
+// recorded as a cap hit, `ctx.step` throws `JobPaused`, and the attempt ends
+// `paused` (spec §3.5: Continue or Stop).
+import { SpendingCapReached } from "@seply/ai"
 import { makeOps, ulid, type BuildEvent, type Op } from "@seply/domain"
 import type { Db } from "../db.ts"
 import { appendOps } from "../oplog.ts"
@@ -24,6 +29,26 @@ import {
 
 /** The longest failure reason kept. */
 const REASON_MAX = 300
+
+/** The attempt stopped at the spending cap. Let it propagate out of `run`. */
+export class JobPaused extends Error {
+  constructor(
+    readonly spentUsd: number,
+    readonly capUsd: number
+  ) {
+    super(`Spent $${spentUsd.toFixed(2)} of the $${capUsd.toFixed(2)} cap`)
+    this.name = "JobPaused"
+  }
+}
+
+export const isJobPaused = (err: unknown): err is JobPaused =>
+  err instanceof JobPaused
+
+/** How a step that hit the cap is recorded (so a replay pauses again). */
+const CAP_HIT = "__spendingCapReached"
+type CapHit = { [CAP_HIT]: { spentUsd: number; capUsd: number } }
+const isCapHit = (v: unknown): v is CapHit =>
+  typeof v === "object" && v !== null && CAP_HIT in v
 
 /** A plain failure reason for readers: the error's message, trimmed. */
 export function failureReason(err: unknown): string {
@@ -44,7 +69,8 @@ export async function runJob(
   if (!def) throw new Error(`unknown job kind: ${payload.kind}`)
   const input = def.input.parse(payload.input)
   const { jobId, expeditionId, kind, startedBy, attempt } = payload
-  const job = { jobId, expeditionId, kind, startedBy, attempt }
+  const capRaises = payload.capRaises ?? 0
+  const job = { jobId, expeditionId, kind, startedBy, attempt, capRaises }
   const now = deps.now ?? Date.now
   let lastProgress = 0
 
@@ -57,8 +83,29 @@ export async function runJob(
     }
   }
 
-  const step: JobContext<unknown>["step"] = (name, fn, options) =>
-    steps.do(name, { ...STEP_DEFAULTS, ...options }, fn)
+  const step: JobContext<unknown>["step"] = async (name, fn, options) => {
+    const out: unknown = await steps.do(
+      name,
+      { ...STEP_DEFAULTS, ...options },
+      async (info): Promise<Json> => {
+        try {
+          return await fn(info)
+        } catch (err) {
+          if (!(err instanceof SpendingCapReached)) throw err
+          const hit: CapHit = {
+            [CAP_HIT]: { spentUsd: err.spentUsd, capUsd: err.capUsd },
+          }
+          return hit
+        }
+      }
+    )
+    if (isCapHit(out)) {
+      const { spentUsd, capUsd } = out[CAP_HIT]
+      throw new JobPaused(spentUsd, capUsd)
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return out as any
+  }
 
   const progress = async (evt: Progress) => {
     const full: BuildEvent = {
@@ -162,6 +209,24 @@ export async function runJob(
     await def.run(ctx)
   } catch (err) {
     failure = err
+  }
+
+  if (isJobPaused(failure)) {
+    const reason = failure.message
+    const paused = await mark("job: paused", {
+      status: "paused",
+      step: "Paused at the spending cap",
+      progress: lastProgress,
+      error: reason,
+    })
+    if (paused)
+      await progress({
+        status: "paused",
+        step: "Paused at the spending cap",
+        progress: lastProgress,
+        reason,
+      })
+    return
   }
 
   const outcome = failure ? "failed" : "complete"

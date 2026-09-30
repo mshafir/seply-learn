@@ -29,6 +29,13 @@
       "when": 1790798684284,
       "tag": "0003_jobs_and_push",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790800728862,
+      "tag": "0004_job_pause",
+      "breakpoints": true
     }
   ]
 }

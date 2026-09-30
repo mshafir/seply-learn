@@ -39,6 +39,7 @@ export const payloadOf = (j: Job): JobPayload => ({
   input: j.input,
   startedBy: j.startedBy,
   attempt: j.attempt,
+  capRaises: j.capRaises,
 })
 
 export function createJobRunner(opts: {
@@ -122,6 +123,15 @@ export function createJobRunner(opts: {
         throw new JobError(409, `the job is ${j.status}`)
       const reopened = await reopenJob(db, id)
       if (!reopened) throw new JobError(409, "the job was retried already")
+      return launch(db, reopened)
+    },
+
+    async continue(db, id) {
+      const j = await mustGet(db, id)
+      if (j.status !== "paused")
+        throw new JobError(409, `the job is ${j.status}`)
+      const reopened = await reopenJob(db, id, { capRaise: true })
+      if (!reopened) throw new JobError(409, "the job was continued already")
       return launch(db, reopened)
     },
 

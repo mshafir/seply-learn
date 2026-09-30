@@ -8,11 +8,21 @@
 // Signed out, a public or unlisted Expedition opens read-only; a private one
 // is "not found", with a way to sign in.
 //
+// Building (spec §3.5, WP-3.7): the rail shows each View's build status, a
+// View still building shows its skeleton (view-skeleton.tsx) and a failed one
+// its card (failed-view-card.tsx); the first View to finish opens by itself
+// (opened without a View in the URL, the screen shows the best View once it
+// is ready, else the first ready one; `startViewOf`); a toast announces each View as it
+// finishes; the header's activity indicator (build-activity.tsx) holds
+// Cancel and "Leave it building"; the spending cap pauses with Continue or
+// Stop. Builds come from the room (use-builds.ts); signed out or offline
+// there is no room, and Views show their logged status only.
+//
 // Offline (spec §2.9), an Expedition saved on this device opens from that
 // copy, read-only, with an "Offline, as of …" chip; without a copy the
 // screen says it can't reach the server. Either way it keeps retrying.
 import * as React from "react"
-import { RotateCwIcon, SearchXIcon } from "lucide-react"
+import { CirclePauseIcon, RotateCwIcon, SearchXIcon } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import {
@@ -32,15 +42,34 @@ import {
 } from "@seply/ui/components/empty"
 import { SidebarProvider } from "@seply/ui/components/sidebar"
 import { Skeleton } from "@seply/ui/components/skeleton"
-import { SyncHttpError, type SyncClient } from "@seply/sync"
+import { toast } from "@seply/ui/components/toast"
+import {
+  keyBetween,
+  parseSharedSettings,
+  ulid,
+  VIEW_TYPES,
+  type BuildEvent,
+  type ViewTypeId,
+} from "@seply/domain"
+import { SyncHttpError, type SyncClient, type ViewRow } from "@seply/sync"
 import type { ViewStatusChip } from "@seply/views"
 
+import { BuildActivity } from "@/expedition/build-activity.tsx"
+import {
+  buildSummary,
+  retryableJob,
+  startViewOf,
+  viewBuild,
+} from "@/expedition/build-state.ts"
+import { FailedViewCard } from "@/expedition/failed-view-card.tsx"
+import { useBuilds } from "@/expedition/use-builds.ts"
+import { ViewSkeleton } from "@/expedition/view-skeleton.tsx"
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { resumeFrom, samePlace, type Place } from "@/expedition/continue.ts"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
 import { OfflineChip } from "@/expedition/offline-chip.tsx"
-import { kindLabel } from "@/expedition/labels.ts"
+import { kindLabel, VIEW_TYPE_META, viewTypeMeta } from "@/expedition/labels.ts"
 import {
   HEADER_HEIGHT,
   INLINE_PANEL_QUERY,
@@ -60,7 +89,7 @@ import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsRail } from "@/expedition/views-rail.tsx"
-import { listExpeditions, type Role } from "@/lib/api.ts"
+import { ApiError, listExpeditions, type Role } from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 import {
   useCovered,
@@ -266,12 +295,40 @@ function ExpeditionFrame({
   const { loaded: readerLoaded } = useReaderSync(expeditionId)
 
   const expedition = data.expedition
-  // The URL's View, else the best View, else the first.
-  const startView =
-    data.views.find((v) => v.id === expedition?.bestViewId) ??
-    data.views[0] ??
-    null
+
+  // Builds: live over the room while signed in and online.
+  const latest = React.useRef({
+    views: data.views,
+    viewId: null as string | null,
+  })
+  const onBuildEvent = React.useCallback(
+    (evt: BuildEvent) =>
+      announce(evt, latest.current, (id) =>
+        navigate(`/e/${expeditionId}/${id}`)
+      ),
+    [expeditionId, navigate]
+  )
+  const builds = useBuilds({
+    expeditionId,
+    client,
+    enabled: offlineSince === null && signInHref === null,
+    onEvent: onBuildEvent,
+  })
+  const buildOf = (v: ViewRow) => viewBuild(v, builds.log)
+  const summary = buildSummary(data.views, builds.log)
+
+  // The URL's View, else the best View once ready, else the first ready one
+  // (so the first View to finish building opens by itself), else the first.
+  const startView = startViewOf(
+    data.views,
+    expedition?.bestViewId,
+    (v) => buildOf(v).status === "ready"
+  )
   const view = data.views.find((v) => v.id === viewId) ?? startView
+  const build = view ? buildOf(view) : null
+  React.useEffect(() => {
+    latest.current = { views: data.views, viewId: view?.id ?? null }
+  })
 
   // Personal settings live with the reader's other state (per reader, saved
   // through the reader API; an anonymous reader's stay in this browser).
@@ -406,6 +463,80 @@ function ExpeditionFrame({
           }
         : null
 
+  const failed = (title: string) => (e: unknown) => {
+    toast.add({
+      title,
+      description: e instanceof ApiError ? e.message : String(e),
+      type: "error",
+    })
+  }
+  const job = summary.job
+  const cancelJob = () =>
+    job
+      ? builds.act(job.id, "cancel").then(
+          () =>
+            toast.add({
+              title:
+                job.status === "paused" ? "Build stopped" : "Build cancelled",
+              description: "The finished Views are kept.",
+            }),
+          failed("Couldn't stop the build")
+        )
+      : Promise.resolve()
+  const continueJob = () =>
+    job
+      ? builds
+          .act(job.id, "continue")
+          .catch(failed("Couldn't continue the build"))
+      : Promise.resolve()
+  const retryable = retryableJob(builds.log)
+  const retryJob = retryable
+    ? () =>
+        builds
+          .act(retryable.id, "retry")
+          .catch(failed("Couldn't retry the build"))
+    : undefined
+
+  /** Try another View: this one's place and question, another View Type, built next. */
+  const tryAnother = async (failedView: ViewRow, viewType: ViewTypeId) => {
+    const at = data.views.findIndex((v) => v.id === failedView.id)
+    const id = ulid(Date.now())
+    const settings = parseSharedSettings(viewType, {})
+    try {
+      client.collections.views.insert({
+        id,
+        viewType,
+        label: VIEW_TYPE_META[viewType].name,
+        ...(failedView.question ? { question: failedView.question } : {}),
+        orderKey: keyBetween(
+          failedView.orderKey,
+          data.views[at + 1]?.orderKey ?? null
+        ),
+        settings: settings.success ? settings.data : {},
+        settingsVersion: VIEW_TYPES[viewType].version,
+        status: "queued",
+        deletedAt: null,
+      })
+      client.collections.views.delete(failedView.id)
+    } catch (e) {
+      failed("Couldn't change the View")(e)
+      return
+    }
+    navigate(`/e/${expeditionId}/${id}`)
+    if (retryJob) await retryJob()
+  }
+
+  const removeView = (v: ViewRow) => {
+    try {
+      client.collections.views.delete(v.id)
+    } catch (e) {
+      failed("Couldn't remove the View")(e)
+      return
+    }
+    toast.add({ title: `Removed ${v.label || viewTypeMeta(v.viewType).name}` })
+    navigate(`/e/${expeditionId}`)
+  }
+
   const rename = (title: string) => {
     if (!expedition) return
     client.collections.expeditions.update(expedition.id, (draft) => {
@@ -421,6 +552,16 @@ function ExpeditionFrame({
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        activity={
+          <BuildActivity
+            summary={summary}
+            views={data.views}
+            buildOf={buildOf}
+            canEdit={canEdit}
+            onCancel={cancelJob}
+            onContinue={continueJob}
+          />
+        }
         search={
           <>
             {offlineSince !== null && (
@@ -438,6 +579,7 @@ function ExpeditionFrame({
         <ViewsRail
           views={data.views}
           selectedViewId={view?.id ?? null}
+          buildOf={buildOf}
           onSelectView={(id) => {
             setResumed(false)
             navigate(`/e/${expeditionId}/${id}`)
@@ -454,7 +596,41 @@ function ExpeditionFrame({
               aria-label="Canvas"
               className="relative h-full overflow-hidden bg-background"
             >
-              {view ? (
+              {view && build && build.status !== "ready" ? (
+                <>
+                  {build.status === "failed" || build.status === "stopped" ? (
+                    <FailedViewCard
+                      key={view.id}
+                      view={view}
+                      status={build.status}
+                      reason={build.reason}
+                      canEdit={canEdit}
+                      onRetry={retryJob}
+                      onTryAnother={(t) => tryAnother(view, t)}
+                      onRemove={() => removeView(view)}
+                    />
+                  ) : (
+                    <ViewSkeleton
+                      view={view}
+                      building={build.status === "building"}
+                      step={build.step}
+                      previewNodes={
+                        build.status === "building" ? build.previewNodes : []
+                      }
+                    />
+                  )}
+                  <ViewButton
+                    view={view}
+                    open={panel?.type === "view"}
+                    onClick={() =>
+                      setPanel((p) =>
+                        p?.type === "view" ? null : { type: "view" }
+                      )
+                    }
+                    className="absolute top-4 left-4 z-10"
+                  />
+                </>
+              ) : view ? (
                 <>
                   <CanvasSlot
                     collections={client.collections}
@@ -518,6 +694,30 @@ function ExpeditionFrame({
                   </EmptyHeader>
                 </Empty>
               )}
+              {job?.status === "paused" && (
+                <div className="absolute top-4 right-4 z-20 w-[min(26rem,calc(100%-2rem))]">
+                  <Alert data-testid="cap-paused" className="shadow-md">
+                    <CirclePauseIcon />
+                    <AlertTitle>Paused at the spending cap</AlertTitle>
+                    <AlertDescription>
+                      {job.reason ?? "The build reached its spending cap"}.{" "}
+                      {canEdit
+                        ? "Continue to spend as much again, or stop and keep the finished Views."
+                        : "An editor can continue it."}
+                    </AlertDescription>
+                    {canEdit && (
+                      <AlertAction className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={cancelJob}>
+                          Stop
+                        </Button>
+                        <Button size="sm" onClick={continueJob}>
+                          Continue
+                        </Button>
+                      </AlertAction>
+                    )}
+                  </Alert>
+                </div>
+              )}
             </main>
           }
         />
@@ -530,4 +730,48 @@ function ExpeditionFrame({
       />
     </>
   )
+}
+
+/** Toast keys already shown: events can arrive twice (a restart replays). */
+const announced = new Set<string>()
+
+/** The toasts for a build event (spec §3.5: each View as it finishes). */
+function announce(
+  evt: BuildEvent,
+  current: { views: ViewRow[]; viewId: string | null },
+  open: (viewId: string) => void
+) {
+  if (!evt.viewId && evt.status === "queued") {
+    // A retry or Continue: its Views may finish (or fail) again.
+    for (const k of [...announced])
+      if (k.startsWith(`${evt.jobId}/`)) announced.delete(k)
+    return
+  }
+  const once = `${evt.jobId}/${evt.viewId ?? ""}/${evt.status}`
+  if (announced.has(once)) return
+  announced.add(once)
+  if (!evt.viewId) {
+    // A pause shows on the canvas (Continue, Stop) rather than as a toast.
+    if (evt.status === "complete")
+      toast.add({ title: "Every View is built", type: "success" })
+    return
+  }
+  const view = current.views.find((v) => v.id === evt.viewId)
+  const name = view ? view.label || viewTypeMeta(view.viewType).name : "A View"
+  if (evt.status === "ready")
+    toast.add({
+      title: `${name} is ready`,
+      description: view?.question,
+      type: "success",
+      actionProps:
+        current.viewId === evt.viewId
+          ? undefined
+          : { children: "Open", onClick: () => open(evt.viewId!) },
+    })
+  else if (evt.status === "failed")
+    toast.add({
+      title: `Couldn't build ${name}`,
+      description: evt.reason,
+      type: "error",
+    })
 }

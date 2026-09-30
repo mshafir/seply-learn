@@ -292,6 +292,7 @@ describe("POST /expeditions/:id/build (the hand-off to the build job)", () => {
       },
       cancel: async () => ({}) as Job,
       retry: async () => ({}) as Job,
+      continue: async () => ({}) as Job,
       wake: async () => 0,
     }
     const { call, ada, id, paste, db } = await setup({ jobs })

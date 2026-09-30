@@ -6,8 +6,9 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // a prompt, a goal chip, the estimate, remove a Source) → Choose Views (the
 // skim's cards, Suggest more, Ask for a specific View, the Concept counter,
 // the title) → Save draft → the Library's Drafts → reopen → Create (the build
-// hand-off answers 501 until WP-3.5b). The skim is stubbed in the browser, so
-// no model is called. Light and dark.
+// job starts on the saved Views and the Expedition opens). The skim is stubbed
+// in the browser; the build's model calls fail on the fake key, which is fine:
+// only the hand-off is under test here. Light and dark.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 // A synthetic chat (never a real one).
@@ -175,13 +176,20 @@ test("Sources → Choose Views → Save draft, then reopen and Create", async ({
   await expect(cards).toHaveCount(7)
   expect(skims.length).toBe(skimsBefore)
 
-  // Create hands the saved draft to the build; until WP-3.5b it stays a draft.
+  // Create hands the saved draft to the build job and opens the Expedition.
   await create.click()
-  await expect(page.getByRole("heading", { name: "Your draft is saved" })).toBeVisible()
-  await expect(page).toHaveURL(/\/$/)
+  await expect(page).toHaveURL(new RegExp(`/e/${id}$`))
   const after = (await (await page.request.get(`/api/expeditions/${id}/draft`)).json()) as {
+    expedition: { status: string }
     views: { id: string }[]
   }
+  expect(after.expedition.status).not.toBe("draft")
   // Saving again updated the same Views rather than adding more.
   expect(after.views.map((v) => v.id)).toEqual(draft.views.map((v) => v.id))
+  const jobs = (await (await page.request.get(`/api/expeditions/${id}/jobs`)).json()) as {
+    jobs: { kind: string; input: { viewIds: string[] } }[]
+  }
+  expect(jobs.jobs).toHaveLength(1)
+  expect(jobs.jobs[0]!.kind).toBe("build")
+  expect(new Set(jobs.jobs[0]!.input.viewIds)).toEqual(new Set(draft.views.map((v) => v.id)))
 })

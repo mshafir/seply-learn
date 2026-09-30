@@ -300,6 +300,58 @@ describe("the fake job on the inline engine", () => {
       "ready",
     ])
   })
+
+  it("pauses at the spending cap; Continue raises it and goes on, Stop cancels", async () => {
+    const job = await start(s, { views: 3, capAt: 2 })
+    await s.engine.settled(instanceId({ jobId: job.id, attempt: 1 }))
+
+    expect(await getJob(s, job.id)).toMatchObject({
+      status: "paused",
+      step: "Paused at the spending cap",
+      error: "Spent $0.50 of the $0.50 cap",
+      capRaises: 0,
+    })
+    expect(s.events.at(-1)).toMatchObject({
+      jobId: job.id,
+      status: "paused",
+      reason: "Spent $0.50 of the $0.50 cap",
+    })
+    expect((await liveViews(s)).map((v) => v.status)).toEqual([
+      "ready",
+      "queued",
+      "queued",
+    ])
+    // Not failed: no notification, and Retry is refused.
+    expect(s.notes).toEqual([])
+    const post = (path: string) =>
+      s.app.request(path, { method: "POST", headers: s.ada.headers })
+    expect((await post(`/api/jobs/${job.id}/retry`)).status).toBe(409)
+
+    const res = await post(`/api/jobs/${job.id}/continue`)
+    expect(res.status).toBe(200)
+    expect(((await res.json()) as { job: Job }).job).toMatchObject({
+      status: "queued",
+      attempt: 2,
+      capRaises: 1,
+    })
+    await s.engine.settled(instanceId({ jobId: job.id, attempt: 2 }))
+    expect(await getJob(s, job.id)).toMatchObject({ status: "complete" })
+    expect((await liveViews(s)).map((v) => v.status)).toEqual([
+      "ready",
+      "ready",
+      "ready",
+    ])
+    expect((await post(`/api/jobs/${job.id}/continue`)).status).toBe(409)
+
+    // Stop: a paused job cancels, keeping what it built (Views 1-3 are
+    // ready already; View 4 is past the cap).
+    const other = await start(s, { views: 4, capAt: 4 })
+    await s.engine.settled(instanceId({ jobId: other.id, attempt: 1 }))
+    expect(await getJob(s, other.id)).toMatchObject({ status: "paused" })
+    const stop = await post(`/api/jobs/${other.id}/cancel`)
+    expect(stop.status).toBe(200)
+    expect(((await stop.json()) as { job: Job }).job.status).toBe("cancelled")
+  })
 })
 
 describe("job routes", () => {

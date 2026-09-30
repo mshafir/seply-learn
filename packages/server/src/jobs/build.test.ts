@@ -15,7 +15,7 @@ import type { Relay } from "../relay.ts"
 import { parsePaste } from "../sources/parse.ts"
 import { addSource } from "../sources/store.ts"
 import { signUp, testApp, testDb, TEST_ENV, type TestUser } from "../test-harness.ts"
-import { BuildJobInput, isCapPause } from "./build.ts"
+import { BuildJobInput } from "./build.ts"
 import { createInlineEngine, type InlineEngine } from "./inline.ts"
 import { JOB_KINDS } from "./registry.ts"
 import { createJobRunner } from "./runner.ts"
@@ -293,21 +293,26 @@ describe("the build job", () => {
     expect((await changes(s)).filter((l) => l.startsWith("Found"))).toHaveLength(1)
   })
 
-  it("pauses at the spending cap, and Continue (a Retry) picks up where it stopped", async () => {
-    // $4/M in, $20/M out: each call costs 0.1 × 4 + 0.01 × 20 = $0.60.
+  it("pauses at the spending cap with what it built kept, and Continue builds the rest", async () => {
+    // $4/M in, $20/M out: each call costs 0.1 × 4 + 0.01 × 20 = $0.60. The
+    // note and the Concept set's three calls reach the $2 cap.
     const s = await setup({ usage: { input: 100_000, output: 10_000 } })
     const j = await start(s, { views: VIEWS, capUsd: 2 })
     await s.engine.settled(inst(j))
     const paused = await job(s, j.id)
-    expect(paused.status).toBe("failed")
-    expect(isCapPause(paused.error)).toBe(true)
-    expect(paused.error).toMatch(/^Paused at the spending cap: \$2\.\d\d of \$2\.00/)
-    const res = await s.app.request(`/api/jobs/${j.id}/retry`, { method: "POST", headers: s.ada.headers })
+    expect(paused).toMatchObject({ status: "paused", error: "Spent $2.40 of the $2.00 cap" })
+    expect(s.events.at(-1)).toMatchObject({ status: "paused" })
+    let st = await state(s)
+    expect(Object.values(st.concepts).filter(isLive)).toHaveLength(3)
+    expect(liveViews(st).map((v) => v.status)).toEqual(["queued", "queued"])
+
+    // Continue: the next attempt, with the cap raised once ($4).
+    const res = await s.app.request(`/api/jobs/${j.id}/continue`, { method: "POST", headers: s.ada.headers })
     expect(res.status).toBe(200)
     await s.engine.settled(inst(j, 2))
-    // A new attempt gets the cap again; it may pause again, but never duplicates.
-    const st = await state(s)
-    expect(liveViews(st)).toHaveLength(2)
+    expect((await job(s, j.id)).status).toBe("complete")
+    st = await state(s)
+    expect(liveViews(st).map((v) => v.status)).toEqual(["ready", "ready"])
     expect((await changes(s)).filter((l) => l.startsWith("Found"))).toHaveLength(1)
   })
 

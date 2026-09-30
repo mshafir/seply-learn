@@ -215,7 +215,7 @@ export function ChooseViewsStep({ flow }: { flow: Flow }) {
         writeCache(expeditionId, null)
         navigate(`/e/${expeditionId}`)
       } catch (e) {
-        // TODO(WP-3.5b): the build route answers 501 until the build exists.
+        // 501: this server runs no jobs (the draft stays a draft).
         if (e instanceof ApiError && e.status === 501) {
           toast.add({
             title: "Your draft is saved",

@@ -56,7 +56,7 @@ import { resolveAi } from "../ai.ts"
 import type { Db } from "../db.ts"
 import { loadState } from "../projection.ts"
 import { readSegments } from "../sources/store.ts"
-import { failureReason } from "./host.ts"
+import { failureReason, isJobPaused } from "./host.ts"
 import type { JobContext, JobDefinition, JobServices, Json } from "./types.ts"
 
 /** One View the reader chose (the skim's proposal, spec §5.2 step 2). */
@@ -91,13 +91,6 @@ export const BuildJobInput = z.strictObject({
 })
 export type BuildJobInput = z.infer<typeof BuildJobInput>
 
-/** The job's failure reason when the spending cap paused it (spec §5.6). Continue is a Retry. */
-export const CAP_PAUSE_PREFIX = "Paused at the spending cap"
-export const isCapPause = (reason: string | null | undefined) =>
-  !!reason?.startsWith(CAP_PAUSE_PREFIX)
-const capPause = (m: SpendState) =>
-  `${CAP_PAUSE_PREFIX}: $${m.spentUsd.toFixed(2)} of $${m.capUsd.toFixed(2)}. Continue to allow the same again, or Stop to keep what's built.`
-
 /** Step options for AI stages: retried twice (spec §5.6), with room for a long tool loop. */
 const AI_STEP = { retries: 2, retryDelayMs: 5_000, timeoutMs: 30 * 60_000 }
 
@@ -124,7 +117,7 @@ type Plan = {
 }
 
 /** What an AI step returns: its outcome and the meter after it. */
-type Metered<T> = ({ paused: true } | ({ paused: false } & T)) & { meter: SpendState }
+type Metered<T> = T & { meter: SpendState }
 
 export const buildJob: JobDefinition<BuildJobInput> = {
   kind: "build",
@@ -211,7 +204,12 @@ export const buildJob: JobDefinition<BuildJobInput> = {
     }))
 
     // --- the understanding note --------------------------------------------
-    let meter: SpendState = new SpendMeter({ kind: "build", capUsd: plan.capUsd }).toJSON()
+    // The cap (spec §5.6), raised once for each Continue. A stage that
+    // reaches it throws SpendingCapReached out of its step: the attempt ends
+    // `paused`, and Continue starts the next one from the log.
+    const start = new SpendMeter({ kind: "build", capUsd: plan.capUsd })
+    for (let i = 0; i < ctx.job.capRaises; i++) start.raise()
+    let meter: SpendState = start.toJSON()
     const whole = plan.sourcePlan.mode === "whole"
     await ctx.progress({ status: "running", step: "Understanding the Sources", progress: 0.02 })
     const note = (await ctx.step(
@@ -224,7 +222,6 @@ export const buildJob: JobDefinition<BuildJobInput> = {
       AI_STEP
     )) as unknown as Metered<{ note: string }>
     meter = note.meter
-    if (note.paused) throw new Error(capPause(meter))
 
     // --- the Concept set -----------------------------------------------------
     if (!plan.conceptsDone) {
@@ -232,7 +229,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
         const n = conceptCount(state)
         await ctx.progress({
           status: "running",
-          step: `Found ${n} Concept${n === 1 ? "" : "s"}`,
+          step: `Finding Concepts · ${n} so far`,
           progress: 0.05,
         })
       })
@@ -265,7 +262,6 @@ export const buildJob: JobDefinition<BuildJobInput> = {
           AI_STEP
         )) as unknown as Metered<{ bodies: OpBody[] }>
         meter = r.meter
-        if (r.paused) throw new Error(capPause(meter))
         bodies.push(...r.bodies)
       }
       if (plan.sourcePlan.mode === "chunks") {
@@ -291,7 +287,6 @@ export const buildJob: JobDefinition<BuildJobInput> = {
           AI_STEP
         )) as unknown as Metered<{ bodies: OpBody[] }>
         meter = r.meter
-        if (r.paused) throw new Error(capPause(meter))
         bodies.push(...r.bodies)
       }
       await ctx.commit("commit Concept set", async () => {
@@ -369,10 +364,11 @@ export const buildJob: JobDefinition<BuildJobInput> = {
           AI_STEP
         )) as unknown as typeof r
       } catch (err) {
-        r = { paused: false, status: "failed", reason: failureReason(err), meter }
+        // The spending cap pauses the whole job; anything else fails this View.
+        if (isJobPaused(err)) throw err
+        r = { status: "failed", reason: failureReason(err), meter }
       }
       meter = r.meter
-      if (r.paused) throw new Error(capPause(meter))
 
       if (r.status === "failed") {
         const reason = r.reason
@@ -507,8 +503,8 @@ async function load(
 }
 
 /**
- * Runs an AI stage with the meter restored from the last step. The cap
- * pauses the job instead of failing the step (a cap is never retried).
+ * Runs an AI stage with the meter restored from the last step. A cap
+ * reached inside it propagates (the host pauses the job; never retried).
  */
 async function metered<T extends object>(
   state: SpendState,
@@ -517,21 +513,19 @@ async function metered<T extends object>(
   const m = SpendMeter.from(state)
   try {
     const out = await fn(m)
-    return { paused: false, ...out, meter: m.toJSON() } as unknown as Json
+    return { ...out, meter: m.toJSON() } as unknown as Json
   } catch (err) {
-    if (err instanceof SpendingCapReached || causeIs(err, SpendingCapReached))
-      return { paused: true, meter: m.toJSON() } as unknown as Json
-    throw err
+    // The AI SDK may wrap it; the host pauses on the bare error.
+    throw capReached(err) ?? err
   }
 }
 
-function causeIs(err: unknown, cls: new (...a: never[]) => Error): boolean {
+function capReached(err: unknown): SpendingCapReached | null {
   for (let e: unknown = err, i = 0; e && i < 5; i++) {
-    if (e instanceof cls) return true
-    const inner = (e as { cause?: unknown; lastError?: unknown }).lastError ?? (e as { cause?: unknown }).cause
-    e = inner
+    if (e instanceof SpendingCapReached) return e
+    e = (e as { lastError?: unknown }).lastError ?? (e as { cause?: unknown }).cause
   }
-  return false
+  return null
 }
 
 /**
