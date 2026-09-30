@@ -214,7 +214,8 @@ const OPTIONAL_SECRETS = ["AI_GATEWAY_API_KEY", "AI_KEYS_MASTER_KEY"]
 
 function secretsFile(path) {
   const secrets = Object.fromEntries(AUTH_SECRETS.map((n) => [n, env(n)]))
-  for (const n of OPTIONAL_SECRETS) if (process.env[n]) secrets[n] = process.env[n]
+  for (const n of OPTIONAL_SECRETS)
+    if (process.env[n]) secrets[n] = process.env[n]
   writeFileSync(path, JSON.stringify(secrets), { mode: 0o600 })
   chmodSync(path, 0o600)
   console.log(`wrote ${Object.keys(secrets).join(", ")} to ${path}`)
@@ -234,17 +235,29 @@ function customDomain(hostname) {
 
 // Source files (spec §2.7): previews share seply-sources-preview, production
 // uses seply-sources. Run after hyperdrive-upsert, which writes wrangler.ci.json.
+// Until R2 is enabled on the account (Cloudflare error 10042), deploys go
+// ahead without the binding and the Source routes answer 503.
 async function r2Bucket(name) {
-  const existing = await cf("GET", `/r2/buckets/${encodeURIComponent(name)}`)
-  if (existing) console.log(`r2 bucket ${name}: exists`)
-  else {
-    await cf("POST", "/r2/buckets", { name })
-    console.log(`r2 bucket created: ${name}`)
-  }
   const path = join(root, "wrangler.ci.json")
   const config = JSON.parse(readFileSync(path, "utf8"))
   const binding = config.r2_buckets?.find((b) => b.binding === "SOURCES")
   if (!binding) throw new Error("wrangler.jsonc has no SOURCES binding")
+  try {
+    const existing = await cf("GET", `/r2/buckets/${encodeURIComponent(name)}`)
+    if (existing) console.log(`r2 bucket ${name}: exists`)
+    else {
+      await cf("POST", "/r2/buckets", { name })
+      console.log(`r2 bucket created: ${name}`)
+    }
+  } catch (err) {
+    if (!/"code":10042\b/.test(err.message)) throw err
+    config.r2_buckets = config.r2_buckets.filter((b) => b !== binding)
+    writeFileSync(path, JSON.stringify(config, null, 2))
+    console.log(
+      "::warning title=R2 not enabled::Deploying without the SOURCES bucket: Source uploads answer 503 until R2 is enabled in the Cloudflare dashboard (docs/ops/deploy.md)."
+    )
+    return
+  }
   binding.bucket_name = name
   writeFileSync(path, JSON.stringify(config, null, 2))
   console.log(`wrangler.ci.json: SOURCES → ${name}`)
