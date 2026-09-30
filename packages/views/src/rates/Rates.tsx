@@ -4,7 +4,7 @@
 // the log axis on the right: falls left of 1×, rises right. Ranges are bars,
 // points are dots, coloured by how independent the source is. Hovering shows
 // the method and source; clicking selects the estimate. Every colour is a
-// --umbel-* token (rates.css).
+// --seply-* token (rates.css).
 import { useMemo, type CSSProperties } from "react";
 import type { View, Expedition } from "../model.ts";
 import { cx, ReadCheck } from "../canvas/parts.tsx";
@@ -25,10 +25,10 @@ export type RatesProps = {
 const POINT = 0.004;
 const pct = (f: number) => `${(f * 100).toFixed(3)}%`;
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-/** The independence tone: a --umbel-rates-<value> token, or the neutral one for any other value. */
+/** The independence tone: a --seply-rates-<value> token, or the neutral one for any other value. */
 const tone = (independence?: string): CSSProperties =>
   ({
-    "--umbel-rate-tone": independence ? `var(--umbel-rates-${slug(independence)}, var(--umbel-rates-other))` : "var(--umbel-rates-other)",
+    "--seply-rate-tone": independence ? `var(--seply-rates-${slug(independence)}, var(--seply-rates-other))` : "var(--seply-rates-other)",
   }) as CSSProperties;
 
 export function Rates({ expedition, view, selected, onSelect, matches, covered }: RatesProps) {
@@ -52,9 +52,9 @@ export function Rates({ expedition, view, selected, onSelect, matches, covered }
       <div
         key={c.id}
         className={cx(
-          "umbel-rates__estimate",
-          c.id === selected && "umbel-rates__estimate--selected",
-          !!matches && !matches.has(c.id) && "umbel-rates__estimate--dim",
+          "seply-rates__estimate",
+          c.id === selected && "seply-rates__estimate--selected",
+          !!matches && !matches.has(c.id) && "seply-rates__estimate--dim",
         )}
         style={tone(e.independence)}
         data-concept={c.id}
@@ -62,18 +62,18 @@ export function Rates({ expedition, view, selected, onSelect, matches, covered }
         title={tip}
         onClick={() => onSelect(c.id)}
       >
-        <span className="umbel-rates__label">
-          <span className="umbel-rates__title">{c.title}</span>
+        <span className="seply-rates__label">
+          <span className="seply-rates__title">{c.title}</span>
           {covered?.has(c.id) && <ReadCheck />}
-          {e.source && <span className="umbel-rates__source"> · {e.source.title}</span>}
+          {e.source && <span className="seply-rates__source"> · {e.source.title}</span>}
         </span>
-        <svg className="umbel-rates__plot" aria-label={`${c.title}: ${e.direction === "fall" ? "falls" : "rises"} ${span(e)} per year`}>
+        <svg className="seply-rates__plot" aria-label={`${c.title}: ${e.direction === "fall" ? "falls" : "rises"} ${span(e)} per year`}>
           <Grid axis={axis} />
-          <line className="umbel-rates__one" x1={pct(one)} x2={pct(one)} y1="0" y2="100%" />
+          <line className="seply-rates__one" x1={pct(one)} x2={pct(one)} y1="0" y2="100%" />
           {x1 - x0 > POINT ? (
-            <rect className="umbel-rates__range" x={pct(x0)} width={pct(x1 - x0)} y="8" height="12" rx="6" />
+            <rect className="seply-rates__range" x={pct(x0)} width={pct(x1 - x0)} y="8" height="12" rx="6" />
           ) : (
-            <circle className="umbel-rates__point" cx={pct(x0)} cy="14" r="6" />
+            <circle className="seply-rates__point" cx={pct(x0)} cy="14" r="6" />
           )}
         </svg>
       </div>
@@ -81,43 +81,43 @@ export function Rates({ expedition, view, selected, onSelect, matches, covered }
   };
 
   return (
-    <div className="umbel-rates" data-view-type="rates">
-      <div className="umbel-rates__legend">
+    <div className="seply-rates" data-view-type="rates">
+      <div className="seply-rates__legend">
         <span>Per year, log scale. Left of 1× falls, right of it rises. Colour is how independent the source is:</span>
         {model.independence.map((v) => (
-          <span key={v} className="umbel-rates__key" style={tone(v)}>
-            <span className="umbel-rates__swatch" aria-hidden /> {v}
+          <span key={v} className="seply-rates__key" style={tone(v)}>
+            <span className="seply-rates__swatch" aria-hidden /> {v}
           </span>
         ))}
       </div>
-      <div className="umbel-rates__table">
-        <div className="umbel-rates__axis">
-          <span className="umbel-rates__axis-name">Quantity</span>
-          <span className="umbel-rates__axis-name">Estimate · source</span>
-          <span className="umbel-rates__ticks" aria-hidden>
+      <div className="seply-rates__table">
+        <div className="seply-rates__axis">
+          <span className="seply-rates__axis-name">Quantity</span>
+          <span className="seply-rates__axis-name">Estimate · source</span>
+          <span className="seply-rates__ticks" aria-hidden>
             {axis.ticks.map((t) => (
-              <span key={t.value} className={cx("umbel-rates__tick", t.value === 1 && "umbel-rates__tick--one")} style={{ left: pct(axis.at(t.value)) }}>
+              <span key={t.value} className={cx("seply-rates__tick", t.value === 1 && "seply-rates__tick--one")} style={{ left: pct(axis.at(t.value)) }}>
                 {t.label}
               </span>
             ))}
           </span>
         </div>
         {groups.map((g) => (
-          <div key={g.quantity} className="umbel-rates__group">
-            <div className="umbel-rates__quantity">{g.quantity}</div>
-            <div className="umbel-rates__estimates">{g.estimates.map(row)}</div>
+          <div key={g.quantity} className="seply-rates__group">
+            <div className="seply-rates__quantity">{g.quantity}</div>
+            <div className="seply-rates__estimates">{g.estimates.map(row)}</div>
           </div>
         ))}
-        {groups.length === 0 && <p className="umbel-rates__note">No estimates in this View yet.</p>}
+        {groups.length === 0 && <p className="seply-rates__note">No estimates in this View yet.</p>}
       </div>
-      <p className="umbel-rates__note">Dashed line: no change (1×).</p>
+      <p className="seply-rates__note">Dashed line: no change (1×).</p>
     </div>
   );
 }
 
 function Grid({ axis }: { axis: LogAxis }) {
   return (
-    <g className="umbel-rates__grid">
+    <g className="seply-rates__grid">
       {axis.ticks.map((t) => (
         <line key={t.value} x1={pct(axis.at(t.value))} x2={pct(axis.at(t.value))} y1="0" y2="100%" />
       ))}

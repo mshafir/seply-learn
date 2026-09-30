@@ -6,7 +6,7 @@ import {
   type AttributeValue,
   type PaletteColor,
   type Prov,
-} from "@umbel/domain"
+} from "@seply/domain"
 import type {
   ArticleSectionRow,
   AttributeDefRow,
@@ -14,7 +14,7 @@ import type {
   RelationshipRow,
   RelTypeDefRow,
   SourceRow,
-} from "@umbel/sync"
+} from "@seply/sync"
 
 // ─── Back stack ────────────────────────────────────────────────────────────
 

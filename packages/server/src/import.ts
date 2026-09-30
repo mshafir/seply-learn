@@ -4,7 +4,7 @@
 //     → 201 { expedition: ExpeditionSummary, counts: { concepts, relationships, views } }
 //
 // The file is validated and upgraded by `schemaVersion`, every entity id is
-// re-minted (@umbel/domain's `importExpeditionJson`), and the ops are logged
+// re-minted (@seply/domain's `importExpeditionJson`), and the ops are logged
 // as one "Imported from file" Change through the same op-log path push uses,
 // in one transaction, with the importer as owner.
 import {
@@ -14,7 +14,7 @@ import {
   ulid,
   type ImportResult,
   type LoggedOp,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { Hono } from "hono"
 import { bodyLimit } from "hono/body-limit"
 import type { AppEnv } from "./app.ts"

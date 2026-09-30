@@ -1,6 +1,6 @@
 // Kind and Relationship Type colours are Expedition data: a palette hue's
-// name (spec 7.2), drawn as the @umbel/ui token for the current theme.
-import { PALETTE, type PaletteColor } from "@umbel/domain";
+// name (spec 7.2), drawn as the @seply/ui token for the current theme.
+import { PALETTE, type PaletteColor } from "@seply/domain";
 
 const hues = new Set<string>(PALETTE);
 

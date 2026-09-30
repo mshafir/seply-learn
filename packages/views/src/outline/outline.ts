@@ -10,7 +10,7 @@
 //
 // Reading status: counts skip covered Concepts, and `hideRead` leaves them
 // out (their unread children move up), never the one to keep (the selection).
-import type { ViewOverrides } from "@umbel/domain";
+import type { ViewOverrides } from "@seply/domain";
 import type { Concept, Expedition, OutlineSettings } from "../model.ts";
 
 export type OutlineViewSettings = OutlineSettings & ViewOverrides;

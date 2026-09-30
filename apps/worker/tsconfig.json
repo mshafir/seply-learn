@@ -1,5 +1,5 @@
 {
-  "extends": "@umbel/config/tsconfig.base.json",
+  "extends": "@seply/config/tsconfig.base.json",
   "compilerOptions": {
     // Workers runtime types come from `wrangler types` (worker-configuration.d.ts), not DOM.
     "lib": ["ES2023"],

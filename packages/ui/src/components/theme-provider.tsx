@@ -4,7 +4,7 @@ export type Theme = "system" | "light" | "dark"
 export type ResolvedTheme = "light" | "dark"
 
 /** localStorage key. The no-flash script in apps/web/index.html reads the same key. */
-export const THEME_STORAGE_KEY = "umbel-theme"
+export const THEME_STORAGE_KEY = "seply-theme"
 
 const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)"
 const THEMES: readonly Theme[] = ["system", "light", "dark"]

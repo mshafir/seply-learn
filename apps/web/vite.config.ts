@@ -19,8 +19,8 @@ export default defineConfig({
       injectRegister: "script-defer",
       includeAssets: ["favicon.svg", "favicon-32.png", "apple-touch-icon.png"],
       manifest: {
-        name: "Umbel Learn",
-        short_name: "Umbel",
+        name: "Seply Learn",
+        short_name: "Seply",
         description:
           "Build, curate and explore Expeditions: bodies of knowledge, read through Views.",
         start_url: "/",

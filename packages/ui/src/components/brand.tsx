@@ -13,8 +13,9 @@ const DOTS = [
 ] as const
 const ACCENT_DOT = [44, 15] as const
 
-/** The umbel: stalks radiating from one point to small dots, one in indigo. */
-export function UmbelGlyph({
+// Placeholder mark until branding lands.
+/** The old umbel glyph: stalks radiating from one point to small dots, one in indigo. */
+export function SeplyGlyph({
   className,
   ...props
 }: React.ComponentProps<"svg">) {
@@ -51,7 +52,7 @@ export function UmbelGlyph({
   )
 }
 
-/** "Umbel" in Newsreader and "Learn" in IBM Plex Sans, after the glyph. */
+/** "Seply" in Newsreader and "Learn" in IBM Plex Sans, after the glyph. */
 export function Wordmark({
   className,
   ...props
@@ -64,9 +65,9 @@ export function Wordmark({
       )}
       {...props}
     >
-      <UmbelGlyph className="size-[1.4em]" />
+      <SeplyGlyph className="size-[1.4em]" />
       <span className="leading-none">
-        <span className="font-reading font-medium">Umbel</span>{" "}
+        <span className="font-reading font-medium">Seply</span>{" "}
         <span className="font-sans text-[0.85em] font-normal text-muted-foreground">
           Learn
         </span>

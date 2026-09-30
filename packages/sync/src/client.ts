@@ -21,7 +21,7 @@ import {
   type DomainState,
   type LoggedOp,
   type Op,
-} from "@umbel/domain"
+} from "@seply/domain"
 import {
   createEngineCollections,
   type EngineCollections,
@@ -115,7 +115,7 @@ export class SyncClient {
       baseSeq
     )
     this.collections = createEngineCollections(this.engine, {
-      id: `umbel:${opts.expeditionId}`,
+      id: `seply:${opts.expeditionId}`,
       ...opts.collections,
     })
   }

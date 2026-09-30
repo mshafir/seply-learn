@@ -38,12 +38,12 @@ async function myId(page: Page): Promise<string> {
   }).user.id
 }
 
-/** Pinned ids in IndexedDB "umbel-offline". */
+/** Pinned ids in IndexedDB "seply-offline". */
 function pinned(page: Page): Promise<string[]> {
   return page.evaluate(
     () =>
       new Promise<string[]>((resolve, reject) => {
-        const open = indexedDB.open("umbel-offline")
+        const open = indexedDB.open("seply-offline")
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
           const db = open.result

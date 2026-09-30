@@ -4,7 +4,7 @@
 //
 //   POST /push  { expeditionId, ops, changes? } → { headSeq, results: [{ opId, serverSeq }] }
 //   GET  /pull?expedition=<id>&since=<seq>[&limit=<n>] → { headSeq, ops: LoggedOp[], more }
-import type { LoggedOp, Op } from "@umbel/domain"
+import type { LoggedOp, Op } from "@seply/domain"
 import type { ChangeMeta } from "./engine.ts"
 
 export type PushRequest = {

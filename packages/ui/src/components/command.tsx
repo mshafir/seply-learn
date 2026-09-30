@@ -10,8 +10,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@umbel/ui/components/dialog"
-import { InputGroup, InputGroupAddon } from "@umbel/ui/components/input-group"
+} from "@seply/ui/components/dialog"
+import { InputGroup, InputGroupAddon } from "@seply/ui/components/input-group"
 import { SearchIcon, CheckIcon } from "lucide-react"
 
 function Command({

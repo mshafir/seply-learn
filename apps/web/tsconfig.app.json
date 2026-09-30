@@ -22,7 +22,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@umbel/ui/*": ["../../packages/ui/src/*"]
+      "@seply/ui/*": ["../../packages/ui/src/*"]
     }
   },
   "include": ["src"]

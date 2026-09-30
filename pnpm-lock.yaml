@@ -23,13 +23,13 @@ importers:
 
   apps/server-node:
     dependencies:
-      '@umbel/ai':
+      '@seply/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@umbel/server':
+      '@seply/server':
         specifier: workspace:*
         version: link:../../packages/server
     devDependencies:
@@ -39,7 +39,7 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.13.3
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../../packages/config
       eslint:
@@ -63,16 +63,16 @@ importers:
       '@tanstack/react-db':
         specifier: 0.4.1
         version: 0.4.1(react@19.2.8)(typescript@6.0.3)
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@umbel/sync':
+      '@seply/sync':
         specifier: workspace:*
         version: link:../../packages/sync
-      '@umbel/ui':
+      '@seply/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@umbel/views':
+      '@seply/views':
         specifier: workspace:*
         version: link:../../packages/views
       '@xyflow/react':
@@ -118,7 +118,7 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.7(@types/react@19.2.18)
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@vitejs/plugin-react':
@@ -157,13 +157,13 @@ importers:
 
   apps/worker:
     dependencies:
-      '@umbel/ai':
+      '@seply/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@umbel/server':
+      '@seply/server':
         specifier: workspace:*
         version: link:../../packages/server
       hono:
@@ -176,7 +176,7 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.13.3
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../../packages/config
       eslint:
@@ -200,7 +200,7 @@ importers:
 
   packages/ai:
     dependencies:
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../domain
     devDependencies:
@@ -210,7 +210,7 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.13.3
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../config
       eslint:
@@ -249,7 +249,7 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.13.3
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../config
       eslint:
@@ -270,10 +270,10 @@ importers:
 
   packages/server:
     dependencies:
-      '@umbel/ai':
+      '@seply/ai':
         specifier: workspace:*
         version: link:../ai
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../domain
       better-auth:
@@ -304,7 +304,7 @@ importers:
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../config
       drizzle-kit:
@@ -331,14 +331,14 @@ importers:
       '@tanstack/db':
         specifier: 0.9.2
         version: 0.9.2(typescript@6.0.3)
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../domain
     devDependencies:
       '@eslint/js':
         specifier: ^10
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../config
       eslint:
@@ -453,10 +453,10 @@ importers:
       '@protomaps/basemaps':
         specifier: ^5.7.2
         version: 5.7.2
-      '@umbel/domain':
+      '@seply/domain':
         specifier: workspace:*
         version: link:../domain
-      '@umbel/sync':
+      '@seply/sync':
         specifier: workspace:*
         version: link:../sync
       '@xyflow/react':
@@ -526,10 +526,10 @@ importers:
       '@types/topojson-specification':
         specifier: ^1.0.5
         version: 1.0.5
-      '@umbel/config':
+      '@seply/config':
         specifier: workspace:*
         version: link:../config
-      '@umbel/ui':
+      '@seply/ui':
         specifier: workspace:*
         version: link:../ui
       '@vitejs/plugin-react':

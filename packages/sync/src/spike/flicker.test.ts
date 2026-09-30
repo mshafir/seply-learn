@@ -11,7 +11,7 @@ import {
   ulidSequence,
   type DomainState,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { afterEach, describe, expect, it } from "vitest"
 import type { ConceptRow } from "../rows.ts"
 import { openSyncClient } from "../client.ts"

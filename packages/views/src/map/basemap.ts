@@ -35,8 +35,8 @@ export const OPENFREEMAP_STYLES: Record<MapTheme, string> = {
 };
 
 export const TILES_SOURCE = "protomaps";
-export const COARSE_SOURCE = "umbel-coarse";
-export const COARSE_BORDERS_SOURCE = "umbel-coarse-borders";
+export const COARSE_SOURCE = "seply-coarse";
+export const COARSE_BORDERS_SOURCE = "seply-coarse-borders";
 
 const OSM = '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>';
 const PROTOMAPS = '<a href="https://protomaps.com">Protomaps</a>';
@@ -77,10 +77,10 @@ export function withCoarseWorld(base: StyleSpecification | undefined, world: Coa
     [COARSE_BORDERS_SOURCE]: { type: "geojson", data: world.borders },
   };
   const coarseLayers: LayerSpecification[] = [
-    { id: "umbel-coarse-water", type: "background", paint: { "background-color": colors.water } },
-    { id: "umbel-coarse-land", type: "fill", source: COARSE_SOURCE, paint: { "fill-color": colors.land } },
+    { id: "seply-coarse-water", type: "background", paint: { "background-color": colors.water } },
+    { id: "seply-coarse-land", type: "fill", source: COARSE_SOURCE, paint: { "fill-color": colors.land } },
     {
-      id: "umbel-coarse-borders",
+      id: "seply-coarse-borders",
       type: "line",
       source: COARSE_BORDERS_SOURCE,
       paint: { "line-color": colors.border, "line-width": 0.6 },

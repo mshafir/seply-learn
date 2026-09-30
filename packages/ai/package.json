@@ -1,5 +1,5 @@
 {
-  "name": "@umbel/ai",
+  "name": "@seply/ai",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -12,10 +12,10 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@umbel/domain": "workspace:*"
+    "@seply/domain": "workspace:*"
   },
   "devDependencies": {
-    "@umbel/config": "workspace:*",
+    "@seply/config": "workspace:*",
     "typescript": "~6",
     "vitest": "^4",
     "eslint": "^10",

@@ -2,7 +2,7 @@
 // (the View, the Concept in the side panel and its depth). Opening an
 // Expedition without a View in the URL lands there; "Back to the start"
 // returns to the best View. Pure functions, unit tested.
-import type { PositionMark } from "@umbel/domain"
+import type { PositionMark } from "@seply/domain"
 
 import type { BackStack, PanelEntry } from "@/expedition/reading.ts"
 

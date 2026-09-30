@@ -111,9 +111,9 @@ test("search inside an Expedition highlights matches on the canvas", async ({
     .click()
   const canvas = page.getByTestId("canvas-pane")
   await expect(canvas).toHaveAttribute("data-settled", "")
-  const nodes = canvas.locator(".umbel-concept")
+  const nodes = canvas.locator(".seply-concept")
   await expect(nodes.first()).toBeVisible()
-  await expect(canvas.locator(".umbel-concept--dim")).toHaveCount(0)
+  await expect(canvas.locator(".seply-concept--dim")).toHaveCount(0)
 
   const search = page.getByRole("searchbox", { name: "Search this Expedition" })
 
@@ -121,15 +121,15 @@ test("search inside an Expedition highlights matches on the canvas", async ({
   const total = await nodes.count()
   const title = (await nodes
     .first()
-    .locator(".umbel-concept__title")
+    .locator(".seply-concept__title")
     .textContent())!
   await search.fill(title)
   await expect(page.getByTestId("search-count")).toHaveText(/^\d+ match/)
   const found = nodes.filter({ hasText: title }).first()
-  await expect(found).not.toHaveClass(/umbel-concept--dim/)
-  await expect(canvas.locator(".umbel-concept--dim").first()).toBeVisible()
+  await expect(found).not.toHaveClass(/seply-concept--dim/)
+  await expect(canvas.locator(".seply-concept--dim").first()).toBeVisible()
   const litByTitle = await canvas
-    .locator(".umbel-concept:not(.umbel-concept--dim)")
+    .locator(".seply-concept:not(.seply-concept--dim)")
     .count()
   expect(litByTitle).toBeLessThan(total)
   await screenshot(page, testInfo, "search-canvas")
@@ -138,7 +138,7 @@ test("search inside an Expedition highlights matches on the canvas", async ({
   await search.fill("#economics")
   await expect(page.getByTestId("search-count")).toHaveText(/\d+ matches/)
   const lit = await canvas
-    .locator(".umbel-concept:not(.umbel-concept--dim)")
+    .locator(".seply-concept:not(.seply-concept--dim)")
     .count()
   expect(lit).toBeGreaterThan(1)
   expect(lit).toBeLessThan(total)
@@ -147,7 +147,7 @@ test("search inside an Expedition highlights matches on the canvas", async ({
   await search.press("Escape")
   await expect(search).toHaveValue("")
   await expect(page.getByTestId("search-count")).toHaveCount(0)
-  await expect(canvas.locator(".umbel-concept--dim")).toHaveCount(0)
+  await expect(canvas.locator(".seply-concept--dim")).toHaveCount(0)
 
   expect(errors).toEqual([])
 })

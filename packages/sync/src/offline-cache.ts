@@ -7,7 +7,7 @@
 //
 // Two object stores: small `meta` records (what the Library lists) and the
 // `states` themselves, so listing doesn't load every Expedition.
-import { emptyState, type DomainState } from "@umbel/domain"
+import { emptyState, type DomainState } from "@seply/domain"
 import { SyncClient, type SyncClientOptions } from "./client.ts"
 import { OpEngine } from "./engine.ts"
 import { MemoryPendingStore } from "./store.ts"
@@ -124,7 +124,7 @@ function done(tx: IDBTransaction): Promise<void> {
 }
 
 export type IndexedDbOfflineCacheStoreOptions = {
-  /** Database name (default "umbel-offline"). */
+  /** Database name (default "seply-offline"). */
   name?: string
   /** The IDBFactory (default `globalThis.indexedDB`; tests pass fake-indexeddb's). */
   indexedDB?: IDBFactory
@@ -137,7 +137,7 @@ export class IndexedDbOfflineCacheStore implements OfflineCacheStore {
 
   constructor(opts: IndexedDbOfflineCacheStoreOptions = {}) {
     const factory = opts.indexedDB ?? globalThis.indexedDB
-    const open = factory.open(opts.name ?? "umbel-offline", 1)
+    const open = factory.open(opts.name ?? "seply-offline", 1)
     open.onupgradeneeded = () => {
       const db = open.result
       if (!db.objectStoreNames.contains(META))

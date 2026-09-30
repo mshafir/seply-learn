@@ -5,7 +5,7 @@ import {
   schema,
   ulidSequence,
   type ReaderBatch,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { eq } from "drizzle-orm"
 import { describe, expect, it } from "vitest"
 import type { ReaderSnapshot } from "./reader.ts"

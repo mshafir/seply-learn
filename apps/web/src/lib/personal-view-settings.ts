@@ -10,7 +10,7 @@
 // see changes through the `storage` event) is the default for callers
 // without one.
 import * as React from "react"
-import { parsePersonalSettings, type ViewTypeId } from "@umbel/domain"
+import { parsePersonalSettings, type ViewTypeId } from "@seply/domain"
 
 export type PersonalValues = Record<string, unknown>
 
@@ -22,7 +22,7 @@ export interface PersonalViewSettingsStore {
   subscribe(listener: () => void): () => void
 }
 
-const PREFIX = "umbel:personal-view-settings:"
+const PREFIX = "seply:personal-view-settings:"
 
 type KeyValueStorage = Pick<Storage, "getItem" | "setItem">
 

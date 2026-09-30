@@ -1,4 +1,4 @@
-import type { ConceptRow } from "@umbel/sync"
+import type { ConceptRow } from "@seply/sync"
 import { describe, expect, it } from "vitest"
 
 import { matchConcepts, parseQuery, withTag } from "./search.ts"

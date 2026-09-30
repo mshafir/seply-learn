@@ -6,23 +6,23 @@ import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
-import { useIsMobile } from "@umbel/ui/hooks/use-mobile"
-import { Button } from "@umbel/ui/components/button"
-import { Input } from "@umbel/ui/components/input"
-import { Separator } from "@umbel/ui/components/separator"
+import { useIsMobile } from "@seply/ui/hooks/use-mobile"
+import { Button } from "@seply/ui/components/button"
+import { Input } from "@seply/ui/components/input"
+import { Separator } from "@seply/ui/components/separator"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@umbel/ui/components/sheet"
-import { Skeleton } from "@umbel/ui/components/skeleton"
+} from "@seply/ui/components/sheet"
+import { Skeleton } from "@seply/ui/components/skeleton"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@umbel/ui/components/tooltip"
+} from "@seply/ui/components/tooltip"
 import { PanelLeftIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"

@@ -3,8 +3,8 @@
 // Button, like the View status chip (DIVERGENCES.md, "Also listed").
 import { CloudOffIcon, RotateCwIcon } from "lucide-react"
 
-import { Badge } from "@umbel/ui/components/badge"
-import { Button } from "@umbel/ui/components/button"
+import { Badge } from "@seply/ui/components/badge"
+import { Button } from "@seply/ui/components/button"
 
 import { formatAsOf } from "@/lib/offline.ts"
 

@@ -1,8 +1,8 @@
 // The Views read from live collections: the compute fixture imported the way
-// a first build is (@umbel/domain), in an @umbel/sync op engine.
+// a first build is (@seply/domain), in an @seply/sync op engine.
 import { afterEach, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
-import { builtinId, relKey } from "@umbel/domain";
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
+import { builtinId, relKey } from "@seply/domain";
 import { compute, computeRiskView } from "../fixtures/index.ts";
 import { computeRiskViewOp, openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";

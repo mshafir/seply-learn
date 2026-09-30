@@ -12,13 +12,13 @@ import {
 } from "lucide-react"
 import { Link } from "wouter"
 
-import type { ReadingState } from "@umbel/domain"
-import { AttributeList } from "@umbel/ui/components/attribute-list"
-import { Badge } from "@umbel/ui/components/badge"
-import { Button } from "@umbel/ui/components/button"
-import { ToggleGroup, ToggleGroupItem } from "@umbel/ui/components/toggle-group"
-import { kindColor } from "@umbel/ui/lib/kinds"
-import type { ArticleSectionRow, ConceptRow } from "@umbel/sync"
+import type { ReadingState } from "@seply/domain"
+import { AttributeList } from "@seply/ui/components/attribute-list"
+import { Badge } from "@seply/ui/components/badge"
+import { Button } from "@seply/ui/components/button"
+import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
+import { kindColor } from "@seply/ui/lib/kinds"
+import type { ArticleSectionRow, ConceptRow } from "@seply/sync"
 
 import { Prose } from "@/expedition/prose.tsx"
 import {

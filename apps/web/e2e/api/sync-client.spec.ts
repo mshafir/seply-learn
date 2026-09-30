@@ -11,7 +11,7 @@ import {
   type PendingStore,
   type SyncClient,
   type SyncTransport,
-} from "@umbel/sync"
+} from "@seply/sync"
 import pg from "pg"
 
 // The sync client (WP-1.3) against the real Worker and database: its fetch

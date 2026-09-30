@@ -1,8 +1,8 @@
 // Comparison Table as data, from the synthetic options fixture (imported and
 // read live) and the compute sample's reference tables.
 import { afterEach, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
-import { builtinId, relKey } from "@umbel/domain";
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
+import { builtinId, relKey } from "@seply/domain";
 import optionsFile from "../fixtures/options.json" with { type: "json" };
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";

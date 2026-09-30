@@ -8,7 +8,7 @@ import {
   type DomainState,
   type LoggedOp,
   type Op,
-} from "@umbel/domain"
+} from "@seply/domain"
 import {
   createEngineCollections,
   type EngineCollections,

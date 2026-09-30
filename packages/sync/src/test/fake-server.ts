@@ -1,6 +1,6 @@
 // Test tooling: an in-memory server with the WP-1.2 push/pull semantics
 // (packages/server/src/oplog.ts): all-or-nothing pushes applied with
-// @umbel/domain's `apply`, idempotent by op id, 409 naming the op that
+// @seply/domain's `apply`, idempotent by op id, 409 naming the op that
 // doesn't apply, gap-free server_seq, Changes with one author. Each client
 // gets its own SyncTransport, which can be taken offline.
 import {
@@ -11,7 +11,7 @@ import {
   type DomainState,
   type LoggedOp,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import type { ChangeMeta } from "../engine.ts"
 import {
   SyncHttpError,

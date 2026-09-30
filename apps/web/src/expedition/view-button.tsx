@@ -3,9 +3,9 @@
 // two-line outline Button (the inventory's "Button (outline, lg, two-line)").
 import { SlidersHorizontalIcon } from "lucide-react"
 
-import { Button } from "@umbel/ui/components/button"
-import { cn } from "@umbel/ui/lib/utils"
-import type { ViewRow } from "@umbel/sync"
+import { Button } from "@seply/ui/components/button"
+import { cn } from "@seply/ui/lib/utils"
+import type { ViewRow } from "@seply/sync"
 
 import { viewTypeMeta } from "@/expedition/labels.ts"
 

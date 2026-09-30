@@ -1,108 +1,108 @@
 /*
  * Rates & estimates View (Rates.tsx). Imported by canvas.css; every colour is
- * an @umbel/ui token through a --umbel-* variable, so both themes follow.
+ * an @seply/ui token through a --seply-* variable, so both themes follow.
  */
 :where(:root, .light, .dark) {
-  --umbel-rates-bg: var(--background);
-  --umbel-rates-fg: var(--foreground);
-  --umbel-rates-muted: var(--muted-foreground);
-  --umbel-rates-rule: var(--border);
-  --umbel-rates-grid: color-mix(in oklch, var(--border) 60%, var(--background));
-  --umbel-rates-one: var(--muted-foreground);
-  --umbel-rates-hover: var(--accent);
-  --umbel-rates-selected: color-mix(in oklch, var(--primary) 10%, var(--background));
-  --umbel-rates-selected-edge: var(--primary);
+  --seply-rates-bg: var(--background);
+  --seply-rates-fg: var(--foreground);
+  --seply-rates-muted: var(--muted-foreground);
+  --seply-rates-rule: var(--border);
+  --seply-rates-grid: color-mix(in oklch, var(--border) 60%, var(--background));
+  --seply-rates-one: var(--muted-foreground);
+  --seply-rates-hover: var(--accent);
+  --seply-rates-selected: color-mix(in oklch, var(--primary) 10%, var(--background));
+  --seply-rates-selected-edge: var(--primary);
   /* Source independence (docs/view-types/rates.md): the tone of each estimate. */
-  --umbel-rates-independent: var(--kind-green);
-  --umbel-rates-academic: var(--kind-blue);
-  --umbel-rates-analyst: var(--kind-amber);
-  --umbel-rates-interested: var(--kind-red);
-  --umbel-rates-self-reported: var(--kind-violet);
-  --umbel-rates-other: var(--kind-slate);
+  --seply-rates-independent: var(--kind-green);
+  --seply-rates-academic: var(--kind-blue);
+  --seply-rates-analyst: var(--kind-amber);
+  --seply-rates-interested: var(--kind-red);
+  --seply-rates-self-reported: var(--kind-violet);
+  --seply-rates-other: var(--kind-slate);
 }
 
-.umbel-rates {
-  --umbel-rates-columns: 13rem 20rem minmax(24rem, 1fr);
+.seply-rates {
+  --seply-rates-columns: 13rem 20rem minmax(24rem, 1fr);
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
   padding: 1.5rem;
-  background: var(--umbel-rates-bg);
-  color: var(--umbel-rates-fg);
+  background: var(--seply-rates-bg);
+  color: var(--seply-rates-fg);
   font-family: var(--font-sans);
 }
-.umbel-rates__legend {
+.seply-rates__legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.375rem 0.875rem;
   margin-bottom: 0.75rem;
   font-size: 0.75rem;
-  color: var(--umbel-rates-muted);
+  color: var(--seply-rates-muted);
 }
-.umbel-rates__key {
+.seply-rates__key {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
-.umbel-rates__swatch {
+.seply-rates__swatch {
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 9999px;
-  background: var(--umbel-rate-tone);
+  background: var(--seply-rate-tone);
 }
-.umbel-rates__table {
+.seply-rates__table {
   min-width: 57rem;
 }
-.umbel-rates__axis {
+.seply-rates__axis {
   position: sticky;
   top: -1.5rem;
   z-index: 1;
   display: grid;
-  grid-template-columns: var(--umbel-rates-columns);
+  grid-template-columns: var(--seply-rates-columns);
   align-items: end;
   height: 2rem;
-  background: var(--umbel-rates-bg);
+  background: var(--seply-rates-bg);
 }
-.umbel-rates__axis-name {
+.seply-rates__axis-name {
   padding-bottom: 0.375rem;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--umbel-rates-muted);
+  color: var(--seply-rates-muted);
 }
-.umbel-rates__ticks {
+.seply-rates__ticks {
   position: relative;
   height: 100%;
   margin: 0 1rem;
 }
-.umbel-rates__tick {
+.seply-rates__tick {
   position: absolute;
   bottom: 0.375rem;
   transform: translateX(-50%);
   font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  color: var(--umbel-rates-muted);
+  color: var(--seply-rates-muted);
 }
-.umbel-rates__tick--one {
+.seply-rates__tick--one {
   font-weight: 600;
-  color: var(--umbel-rates-fg);
+  color: var(--seply-rates-fg);
 }
-.umbel-rates__group {
+.seply-rates__group {
   display: grid;
   grid-template-columns: 13rem 1fr;
-  border-top: 1px solid var(--umbel-rates-rule);
+  border-top: 1px solid var(--seply-rates-rule);
   padding: 0.25rem 0;
 }
-.umbel-rates__quantity {
+.seply-rates__quantity {
   padding: 0.375rem 1rem 0.375rem 0;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.3;
 }
-.umbel-rates__estimate {
+.seply-rates__estimate {
   display: grid;
   grid-template-columns: 20rem minmax(24rem, 1fr);
   align-items: center;
@@ -110,18 +110,18 @@
   cursor: pointer;
   transition: opacity 150ms;
 }
-.umbel-rates__estimate:hover {
-  background: var(--umbel-rates-hover);
+.seply-rates__estimate:hover {
+  background: var(--seply-rates-hover);
 }
-.umbel-rates__estimate--selected,
-.umbel-rates__estimate--selected:hover {
-  background: var(--umbel-rates-selected);
-  box-shadow: inset 3px 0 0 var(--umbel-rates-selected-edge);
+.seply-rates__estimate--selected,
+.seply-rates__estimate--selected:hover {
+  background: var(--seply-rates-selected);
+  box-shadow: inset 3px 0 0 var(--seply-rates-selected-edge);
 }
-.umbel-rates__estimate--dim {
+.seply-rates__estimate--dim {
   opacity: 0.2;
 }
-.umbel-rates__label {
+.seply-rates__label {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -130,14 +130,14 @@
   font-size: 0.8125rem;
   line-height: 1.3;
 }
-.umbel-rates__label .umbel-check {
+.seply-rates__label .seply-check {
   width: 0.875rem;
   height: 0.875rem;
 }
-.umbel-rates__source {
-  color: var(--umbel-rates-muted);
+.seply-rates__source {
+  color: var(--seply-rates-muted);
 }
-.umbel-rates__plot {
+.seply-rates__plot {
   display: block;
   box-sizing: border-box;
   width: calc(100% - 2rem);
@@ -145,22 +145,22 @@
   margin: 0 1rem;
   overflow: visible;
 }
-.umbel-rates__grid line {
-  stroke: var(--umbel-rates-grid);
+.seply-rates__grid line {
+  stroke: var(--seply-rates-grid);
 }
-.umbel-rates__one {
-  stroke: var(--umbel-rates-one);
+.seply-rates__one {
+  stroke: var(--seply-rates-one);
   stroke-dasharray: 3 3;
 }
-.umbel-rates__range {
-  fill: color-mix(in oklch, var(--umbel-rate-tone) 35%, transparent);
-  stroke: var(--umbel-rate-tone);
+.seply-rates__range {
+  fill: color-mix(in oklch, var(--seply-rate-tone) 35%, transparent);
+  stroke: var(--seply-rate-tone);
 }
-.umbel-rates__point {
-  fill: var(--umbel-rate-tone);
+.seply-rates__point {
+  fill: var(--seply-rate-tone);
 }
-.umbel-rates__note {
+.seply-rates__note {
   margin: 0.75rem 0 0;
   font-size: 0.75rem;
-  color: var(--umbel-rates-muted);
+  color: var(--seply-rates-muted);
 }

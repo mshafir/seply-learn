@@ -3,17 +3,17 @@
 import * as React from "react"
 import { Redirect, useSearchParams } from "wouter"
 
-import { Wordmark } from "@umbel/ui/components/brand"
-import { Button } from "@umbel/ui/components/button"
+import { Wordmark } from "@seply/ui/components/brand"
+import { Button } from "@seply/ui/components/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@umbel/ui/components/card"
-import { Spinner } from "@umbel/ui/components/spinner"
-import { toast } from "@umbel/ui/components/toast"
+} from "@seply/ui/components/card"
+import { Spinner } from "@seply/ui/components/spinner"
+import { toast } from "@seply/ui/components/toast"
 
 import { signInWithGoogle } from "@/lib/api.ts"
 import { useSession } from "@/lib/session.ts"

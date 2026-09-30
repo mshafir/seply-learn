@@ -1,13 +1,13 @@
 @import "../anatomy/anatomy.css";
 
 /*
- * Canvas styles for @umbel/views. Import alongside React Flow's own styles:
+ * Canvas styles for @seply/views. Import alongside React Flow's own styles:
  *   import "@xyflow/react/dist/style.css";
- *   import "@umbel/views/canvas.css";
+ *   import "@seply/views/canvas.css";
  *
- * Every colour is a --umbel-* variable pointing at an @umbel/ui token. This
- * package may not depend on @umbel/ui (dependency rule), so the tokens arrive
- * as CSS variables from the app, which imports "@umbel/ui/globals.css". There
+ * Every colour is a --seply-* variable pointing at an @seply/ui token. This
+ * package may not depend on @seply/ui (dependency rule), so the tokens arrive
+ * as CSS variables from the app, which imports "@seply/ui/globals.css". There
  * are no literal colours here: without the tokens the canvas is unstyled.
  *
  * Declared on :root and on .light/.dark too, so a themed island re-resolves
@@ -19,178 +19,178 @@
 @import "../rates/rates.css";
 
 :where(:root, .light, .dark) {
-  --umbel-canvas-bg: var(--background);
-  --umbel-canvas-grid: var(--border);
-  --umbel-canvas-label: var(--muted-foreground);
-  --umbel-canvas-muted: var(--muted-foreground);
+  --seply-canvas-bg: var(--background);
+  --seply-canvas-grid: var(--border);
+  --seply-canvas-label: var(--muted-foreground);
+  --seply-canvas-muted: var(--muted-foreground);
 
-  --umbel-concept-bg: var(--card);
-  --umbel-concept-fg: var(--card-foreground);
-  --umbel-concept-fg-minor: var(--muted-foreground);
-  --umbel-concept-border: var(--border);
-  --umbel-concept-selected: var(--foreground);
-  --umbel-concept-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
-  --umbel-concept-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 6%, transparent);
+  --seply-concept-bg: var(--card);
+  --seply-concept-fg: var(--card-foreground);
+  --seply-concept-fg-minor: var(--muted-foreground);
+  --seply-concept-border: var(--border);
+  --seply-concept-selected: var(--foreground);
+  --seply-concept-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
+  --seply-concept-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 6%, transparent);
 
   /* Cause & Effect carries the sign in colour: red raises, green lowers
      (docs/view-types/cause-and-effect.md). */
-  --umbel-edge: var(--muted-foreground);
-  --umbel-edge-raises: var(--kind-red);
-  --umbel-edge-lowers: var(--kind-green);
-  --umbel-edge-bridge: var(--muted-foreground);
+  --seply-edge: var(--muted-foreground);
+  --seply-edge-raises: var(--kind-red);
+  --seply-edge-lowers: var(--kind-green);
+  --seply-edge-bridge: var(--muted-foreground);
 
-  --umbel-band-bg: color-mix(in oklch, var(--kind-teal) 7%, var(--background));
-  --umbel-band-border: color-mix(in oklch, var(--kind-teal) 45%, var(--background));
-  --umbel-band-fg: var(--kind-teal);
+  --seply-band-bg: color-mix(in oklch, var(--kind-teal) 7%, var(--background));
+  --seply-band-border: color-mix(in oklch, var(--kind-teal) 45%, var(--background));
+  --seply-band-fg: var(--kind-teal);
 
-  --umbel-heading-supports: var(--kind-indigo);
-  --umbel-heading-claims: var(--kind-amber);
-  --umbel-heading-challenges: var(--kind-orange);
+  --seply-heading-supports: var(--kind-indigo);
+  --seply-heading-claims: var(--kind-amber);
+  --seply-heading-challenges: var(--kind-orange);
 
-  --umbel-badge-positive-bg: color-mix(in oklch, var(--success) 10%, var(--card));
-  --umbel-badge-positive-fg: var(--success);
-  --umbel-badge-positive-ring: color-mix(in oklch, var(--success) 35%, var(--card));
-  --umbel-badge-caution-bg: color-mix(in oklch, var(--suggested) 12%, var(--card));
-  --umbel-badge-caution-fg: var(--suggested-text);
-  --umbel-badge-caution-ring: color-mix(in oklch, var(--suggested) 40%, var(--card));
-  --umbel-badge-negative-bg: color-mix(in oklch, var(--destructive) 10%, var(--card));
-  --umbel-badge-negative-fg: var(--destructive);
-  --umbel-badge-negative-ring: color-mix(in oklch, var(--destructive) 35%, var(--card));
-  --umbel-badge-neutral-bg: var(--muted);
-  --umbel-badge-neutral-fg: var(--muted-foreground);
-  --umbel-badge-neutral-ring: var(--border);
-  --umbel-badge-accent-bg: color-mix(in oklch, var(--primary) 10%, var(--card));
-  --umbel-badge-accent-fg: var(--primary);
-  --umbel-badge-accent-ring: color-mix(in oklch, var(--primary) 30%, var(--card));
+  --seply-badge-positive-bg: color-mix(in oklch, var(--success) 10%, var(--card));
+  --seply-badge-positive-fg: var(--success);
+  --seply-badge-positive-ring: color-mix(in oklch, var(--success) 35%, var(--card));
+  --seply-badge-caution-bg: color-mix(in oklch, var(--suggested) 12%, var(--card));
+  --seply-badge-caution-fg: var(--suggested-text);
+  --seply-badge-caution-ring: color-mix(in oklch, var(--suggested) 40%, var(--card));
+  --seply-badge-negative-bg: color-mix(in oklch, var(--destructive) 10%, var(--card));
+  --seply-badge-negative-fg: var(--destructive);
+  --seply-badge-negative-ring: color-mix(in oklch, var(--destructive) 35%, var(--card));
+  --seply-badge-neutral-bg: var(--muted);
+  --seply-badge-neutral-fg: var(--muted-foreground);
+  --seply-badge-neutral-ring: var(--border);
+  --seply-badge-accent-bg: color-mix(in oklch, var(--primary) 10%, var(--card));
+  --seply-badge-accent-fg: var(--primary);
+  --seply-badge-accent-ring: color-mix(in oklch, var(--primary) 30%, var(--card));
 
-  --umbel-toolbar-bg: var(--card);
-  --umbel-toolbar-border: var(--border);
-  --umbel-toolbar-fg: var(--muted-foreground);
-  --umbel-toolbar-strong: var(--foreground);
+  --seply-toolbar-bg: var(--card);
+  --seply-toolbar-border: var(--border);
+  --seply-toolbar-fg: var(--muted-foreground);
+  --seply-toolbar-strong: var(--foreground);
 
   /* Comparison Table: verdicts carry their tone in colour and in words. */
-  --umbel-table-bg: var(--card);
-  --umbel-table-fg: var(--card-foreground);
-  --umbel-table-head-bg: var(--background);
-  --umbel-table-border: var(--border);
-  --umbel-table-muted: var(--muted-foreground);
-  --umbel-table-hover: var(--accent);
-  --umbel-table-selected: color-mix(in oklch, var(--primary) 8%, var(--card));
-  --umbel-table-chosen: color-mix(in oklch, var(--success) 8%, var(--card));
-  --umbel-table-chosen-edge: var(--success);
-  --umbel-table-fails: color-mix(in oklch, var(--destructive) 7%, var(--card));
-  --umbel-table-fails-cell: color-mix(in oklch, var(--destructive) 14%, var(--card));
-  --umbel-verdict-meets: var(--success);
-  --umbel-verdict-partly: var(--suggested-text);
-  --umbel-verdict-fails: var(--destructive);
-  --umbel-verdict-other: var(--muted-foreground);
-  --umbel-band-must: var(--destructive);
-  --umbel-band-nice: var(--success);
-  --umbel-band-other: var(--muted-foreground);
-  --umbel-table-scrollbar: var(--muted-foreground);
-  --umbel-table-more: color-mix(in oklch, var(--foreground) 14%, transparent);
+  --seply-table-bg: var(--card);
+  --seply-table-fg: var(--card-foreground);
+  --seply-table-head-bg: var(--background);
+  --seply-table-border: var(--border);
+  --seply-table-muted: var(--muted-foreground);
+  --seply-table-hover: var(--accent);
+  --seply-table-selected: color-mix(in oklch, var(--primary) 8%, var(--card));
+  --seply-table-chosen: color-mix(in oklch, var(--success) 8%, var(--card));
+  --seply-table-chosen-edge: var(--success);
+  --seply-table-fails: color-mix(in oklch, var(--destructive) 7%, var(--card));
+  --seply-table-fails-cell: color-mix(in oklch, var(--destructive) 14%, var(--card));
+  --seply-verdict-meets: var(--success);
+  --seply-verdict-partly: var(--suggested-text);
+  --seply-verdict-fails: var(--destructive);
+  --seply-verdict-other: var(--muted-foreground);
+  --seply-band-must: var(--destructive);
+  --seply-band-nice: var(--success);
+  --seply-band-other: var(--muted-foreground);
+  --seply-table-scrollbar: var(--muted-foreground);
+  --seply-table-more: color-mix(in oklch, var(--foreground) 14%, transparent);
 }
 
-.umbel-canvas {
-  background: var(--umbel-canvas-bg);
+.seply-canvas {
+  background: var(--seply-canvas-bg);
   /* React Flow's own chrome (background, zoom controls, edge labels) follows
      the tokens too, overriding its built-in light/dark defaults. */
-  --xy-background-color: var(--umbel-canvas-bg);
-  --xy-controls-button-background-color: var(--umbel-toolbar-bg);
+  --xy-background-color: var(--seply-canvas-bg);
+  --xy-controls-button-background-color: var(--seply-toolbar-bg);
   --xy-controls-button-background-color-hover: var(--accent);
-  --xy-controls-button-color: var(--umbel-toolbar-strong);
-  --xy-controls-button-color-hover: var(--umbel-toolbar-strong);
-  --xy-controls-button-border-color: var(--umbel-toolbar-border);
+  --xy-controls-button-color: var(--seply-toolbar-strong);
+  --xy-controls-button-color-hover: var(--seply-toolbar-strong);
+  --xy-controls-button-border-color: var(--seply-toolbar-border);
   --xy-controls-box-shadow: 0 0 2px 1px color-mix(in oklch, var(--foreground) 8%, transparent);
-  --xy-edge-label-background-color: var(--umbel-canvas-bg);
-  --xy-edge-label-color: var(--umbel-canvas-label);
+  --xy-edge-label-background-color: var(--seply-canvas-bg);
+  --xy-edge-label-color: var(--seply-canvas-label);
 }
-.umbel-canvas .react-flow__node {
+.seply-canvas .react-flow__node {
   cursor: pointer;
 }
 
 /* Concept card */
 /* Keep the font sizes, padding, borders and icon in step with nodeSize
    (layouts.ts), which sizes each card for its title. */
-.umbel-concept {
+.seply-concept {
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   box-sizing: border-box;
   padding: 0.375rem 0.625rem;
-  border: 1px solid var(--umbel-concept-border);
+  border: 1px solid var(--seply-concept-border);
   border-left-width: 4px;
   border-radius: 0.5rem;
-  background: var(--umbel-concept-bg);
-  color: var(--umbel-concept-fg);
-  box-shadow: var(--umbel-concept-shadow);
+  background: var(--seply-concept-bg);
+  color: var(--seply-concept-fg);
+  box-shadow: var(--seply-concept-shadow);
   transition: opacity 150ms;
 }
-.umbel-concept--focal {
+.seply-concept--focal {
   font-size: 20px;
   font-weight: 600;
 }
-.umbel-concept--major {
+.seply-concept--major {
   font-size: 15px;
   font-weight: 600;
 }
-.umbel-concept--medium {
+.seply-concept--medium {
   font-size: 13px;
   font-weight: 500;
 }
-.umbel-concept--minor {
+.seply-concept--minor {
   font-size: 12px;
-  color: var(--umbel-concept-fg-minor);
+  color: var(--seply-concept-fg-minor);
 }
-.umbel-concept--dim {
+.seply-concept--dim {
   opacity: 0.2;
 }
-.umbel-concept--selected {
-  border-color: var(--umbel-concept-selected);
-  box-shadow: 0 0 0 2px var(--umbel-concept-ring);
+.seply-concept--selected {
+  border-color: var(--seply-concept-selected);
+  box-shadow: 0 0 0 2px var(--seply-concept-ring);
 }
 /* A Concept (and its lines) appearing in a reflow, say when a Learning path
    focus shows more steps: it waits while the others glide, then fades in,
-   so nothing is drawn over a Concept still on its way. --umbel-enter-ms is
+   so nothing is drawn over a Concept still on its way. --seply-enter-ms is
    the tween length (Canvas.tsx). */
-.umbel-concept--entering,
-.umbel-canvas .umbel-edge--entering {
-  animation: umbel-concept-enter var(--umbel-enter-ms, 0ms) linear both;
+.seply-concept--entering,
+.seply-canvas .seply-edge--entering {
+  animation: seply-concept-enter var(--seply-enter-ms, 0ms) linear both;
 }
-@keyframes umbel-concept-enter {
+@keyframes seply-concept-enter {
   0%,
   60% {
     opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .umbel-concept--entering,
-  .umbel-canvas .umbel-edge--entering {
+  .seply-concept--entering,
+  .seply-canvas .seply-edge--entering {
     animation: none;
   }
 }
-.umbel-concept__icon {
+.seply-concept__icon {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
 }
-.umbel-concept__title {
+.seply-concept__title {
   line-height: 1.25;
 }
-.umbel-concept__badges {
+.seply-concept__badges {
   position: absolute;
   top: -0.625rem;
   right: 0.5rem;
   display: flex;
   gap: 0.25rem;
 }
-.umbel-handle {
+.seply-handle {
   opacity: 0 !important;
 }
 
 /* Badge */
-.umbel-badge {
+.seply-badge {
   white-space: nowrap;
   border-radius: 9999px;
   padding: 1px 0.375rem;
@@ -198,65 +198,65 @@
   font-weight: 600;
   line-height: 1.4;
 }
-.umbel-badge--positive {
-  background: var(--umbel-badge-positive-bg);
-  color: var(--umbel-badge-positive-fg);
-  box-shadow: inset 0 0 0 1px var(--umbel-badge-positive-ring);
+.seply-badge--positive {
+  background: var(--seply-badge-positive-bg);
+  color: var(--seply-badge-positive-fg);
+  box-shadow: inset 0 0 0 1px var(--seply-badge-positive-ring);
 }
 /* A Concept the reader has read or knows (Reading status), in every View. */
-.umbel-check {
+.seply-check {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  color: var(--umbel-badge-positive-fg);
+  color: var(--seply-badge-positive-fg);
 }
-.umbel-badge--caution {
-  background: var(--umbel-badge-caution-bg);
-  color: var(--umbel-badge-caution-fg);
-  box-shadow: inset 0 0 0 1px var(--umbel-badge-caution-ring);
+.seply-badge--caution {
+  background: var(--seply-badge-caution-bg);
+  color: var(--seply-badge-caution-fg);
+  box-shadow: inset 0 0 0 1px var(--seply-badge-caution-ring);
 }
-.umbel-badge--negative {
-  background: var(--umbel-badge-negative-bg);
-  color: var(--umbel-badge-negative-fg);
-  box-shadow: inset 0 0 0 1px var(--umbel-badge-negative-ring);
+.seply-badge--negative {
+  background: var(--seply-badge-negative-bg);
+  color: var(--seply-badge-negative-fg);
+  box-shadow: inset 0 0 0 1px var(--seply-badge-negative-ring);
 }
-.umbel-badge--neutral {
-  background: var(--umbel-badge-neutral-bg);
-  color: var(--umbel-badge-neutral-fg);
-  box-shadow: inset 0 0 0 1px var(--umbel-badge-neutral-ring);
+.seply-badge--neutral {
+  background: var(--seply-badge-neutral-bg);
+  color: var(--seply-badge-neutral-fg);
+  box-shadow: inset 0 0 0 1px var(--seply-badge-neutral-ring);
 }
-.umbel-badge--accent {
-  background: var(--umbel-badge-accent-bg);
-  color: var(--umbel-badge-accent-fg);
-  box-shadow: inset 0 0 0 1px var(--umbel-badge-accent-ring);
+.seply-badge--accent {
+  background: var(--seply-badge-accent-bg);
+  color: var(--seply-badge-accent-fg);
+  box-shadow: inset 0 0 0 1px var(--seply-badge-accent-ring);
 }
 
 /* Bands, ticks and headings drawn in canvas coordinates */
-.umbel-band {
+.seply-band {
   pointer-events: none;
   position: absolute;
   z-index: -10;
   box-sizing: border-box;
-  border: 1px dashed var(--umbel-band-border);
+  border: 1px dashed var(--seply-band-border);
   border-radius: 0.75rem;
-  background: var(--umbel-band-bg);
+  background: var(--seply-band-bg);
 }
-.umbel-band__label {
+.seply-band__label {
   padding: 0.25rem 0.75rem;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.025em;
   text-transform: uppercase;
-  color: var(--umbel-band-fg);
+  color: var(--seply-band-fg);
 }
-.umbel-tick {
+.seply-tick {
   pointer-events: none;
   position: absolute;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--umbel-canvas-muted);
+  color: var(--seply-canvas-muted);
 }
-.umbel-heading {
+.seply-heading {
   pointer-events: none;
   position: absolute;
   font-size: 0.875rem;
@@ -264,42 +264,42 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
-.umbel-heading--supports {
-  color: var(--umbel-heading-supports);
+.seply-heading--supports {
+  color: var(--seply-heading-supports);
 }
-.umbel-heading--claims {
-  color: var(--umbel-heading-claims);
+.seply-heading--claims {
+  color: var(--seply-heading-claims);
 }
-.umbel-heading--challenges {
-  color: var(--umbel-heading-challenges);
+.seply-heading--challenges {
+  color: var(--seply-heading-challenges);
 }
 
-/* Learning path toolbar. TODO(ui): swap for shadcn Button/Checkbox from @umbel/ui in the app. */
-.umbel-lp {
+/* Learning path toolbar. TODO(ui): swap for shadcn Button/Checkbox from @seply/ui in the app. */
+.seply-lp {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.umbel-lp__canvas {
+.seply-lp__canvas {
   flex: 1;
   min-height: 0;
 }
-.umbel-toolbar {
+.seply-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 0.5rem;
   padding: 0.375rem 1rem;
-  border-bottom: 1px solid var(--umbel-toolbar-border);
-  background: var(--umbel-toolbar-bg);
-  color: var(--umbel-toolbar-fg);
+  border-bottom: 1px solid var(--seply-toolbar-border);
+  background: var(--seply-toolbar-bg);
+  color: var(--seply-toolbar-fg);
   font-size: 0.875rem;
 }
-.umbel-toolbar b {
-  color: var(--umbel-toolbar-strong);
+.seply-toolbar b {
+  color: var(--seply-toolbar-strong);
 }
-.umbel-toolbar button {
-  border: 1px solid var(--umbel-toolbar-border);
+.seply-toolbar button {
+  border: 1px solid var(--seply-toolbar-border);
   border-radius: 0.25rem;
   background: transparent;
   padding: 0.125rem 0.5rem;
@@ -308,33 +308,33 @@
   color: inherit;
   cursor: pointer;
 }
-.umbel-toolbar button:disabled {
+.seply-toolbar button:disabled {
   opacity: 0.4;
   cursor: default;
 }
-.umbel-toolbar__accent {
-  background: var(--umbel-badge-accent-bg) !important;
-  color: var(--umbel-badge-accent-fg) !important;
+.seply-toolbar__accent {
+  background: var(--seply-badge-accent-bg) !important;
+  color: var(--seply-badge-accent-fg) !important;
 }
-.umbel-toolbar__muted {
-  color: var(--umbel-canvas-muted);
+.seply-toolbar__muted {
+  color: var(--seply-canvas-muted);
 }
-.umbel-toolbar__chips {
+.seply-toolbar__chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
 }
-.umbel-chip {
+.seply-chip {
   border-radius: 9999px !important;
-  background: var(--umbel-badge-neutral-bg) !important;
+  background: var(--seply-badge-neutral-bg) !important;
 }
-.umbel-chip--known {
-  background: var(--umbel-badge-positive-bg) !important;
-  color: var(--umbel-badge-positive-fg) !important;
+.seply-chip--known {
+  background: var(--seply-badge-positive-bg) !important;
+  color: var(--seply-badge-positive-fg) !important;
 }
-.umbel-toolbar__toggle {
+.seply-toolbar__toggle {
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -344,51 +344,51 @@
 
 /* Switching Views: the incoming View fades in. Canvas Views also tween every
    Concept from where the last View drew it (Canvas.tsx). */
-.umbel-view {
+.seply-view {
   height: 100%;
-  animation: umbel-view-in 220ms ease-out;
+  animation: seply-view-in 220ms ease-out;
 }
-@keyframes umbel-view-in {
+@keyframes seply-view-in {
   from {
     opacity: 0;
     transform: translateY(4px);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .umbel-view {
+  .seply-view {
     animation: none;
   }
 }
-.umbel-view-empty {
+.seply-view-empty {
   display: grid;
   place-items: center;
   height: 100%;
-  color: var(--umbel-canvas-muted);
+  color: var(--seply-canvas-muted);
   font-size: 0.875rem;
 }
 
 /* Comparison Table. TODO(ui): the app can swap in shadcn's Table; the
    structure (thead/tbody/th/td) matches it. */
-.umbel-table-view {
+.seply-table-view {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--umbel-canvas-bg);
-  color: var(--umbel-table-fg);
+  background: var(--seply-canvas-bg);
+  color: var(--seply-table-fg);
 }
 /* The table scrolls inside the View, both ways. Columns keep their natural
    widths (long text wraps at a cap, below), so a wide table scrolls
    sideways instead of squeezing every column to its longest word. The
    scrollbar stays visible and sits right under the rows, and a shade on the
    right edge says there are more columns. */
-.umbel-table__frame {
+.seply-table__frame {
   position: relative;
   display: flex;
   flex: 0 1 auto;
   flex-direction: column;
   min-height: 0;
 }
-.umbel-table__frame::after {
+.seply-table__frame::after {
   pointer-events: none;
   content: "";
   position: absolute;
@@ -397,14 +397,14 @@
   bottom: 0;
   z-index: 4;
   width: 2.5rem;
-  background: linear-gradient(to left, var(--umbel-table-more), transparent);
+  background: linear-gradient(to left, var(--seply-table-more), transparent);
   opacity: 0;
   transition: opacity 150ms;
 }
-.umbel-table__frame[data-more-right]::after {
+.seply-table__frame[data-more-right]::after {
   opacity: 1;
 }
-.umbel-table__scroll {
+.seply-table__scroll {
   flex: 0 1 auto;
   min-height: 0;
   overflow: auto;
@@ -412,115 +412,115 @@
 /* Styled WebKit scrollbars are always drawn, even where the system hides
    scrollbars until you scroll (macOS). Firefox gets the standard properties. */
 @supports not selector(::-webkit-scrollbar) {
-  .umbel-table__scroll {
+  .seply-table__scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--umbel-table-scrollbar) transparent;
+    scrollbar-color: var(--seply-table-scrollbar) transparent;
   }
 }
-.umbel-table__scroll::-webkit-scrollbar {
+.seply-table__scroll::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-.umbel-table__scroll::-webkit-scrollbar-thumb {
+.seply-table__scroll::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 9999px;
-  background: var(--umbel-table-scrollbar) padding-box;
+  background: var(--seply-table-scrollbar) padding-box;
 }
-.umbel-table {
+.seply-table {
   width: max-content;
   min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.875rem;
 }
-.umbel-table thead {
+.seply-table thead {
   position: sticky;
   top: 0;
   z-index: 2;
 }
-.umbel-table thead th {
-  background: var(--umbel-table-head-bg);
+.seply-table thead th {
+  background: var(--seply-table-head-bg);
 }
-.umbel-table__corner {
+.seply-table__corner {
   position: sticky;
   left: 0;
   z-index: 3;
 }
-.umbel-table__head {
+.seply-table__head {
   min-width: 7rem;
   padding: 0.5rem;
-  border-bottom: 1px solid var(--umbel-table-border);
+  border-bottom: 1px solid var(--seply-table-border);
   text-align: left;
   vertical-align: bottom;
   font-weight: 600;
 }
-.umbel-table__head-label {
+.seply-table__head-label {
   display: block;
   max-width: 14rem;
 }
-.umbel-table__corner.umbel-table__head {
+.seply-table__corner.seply-table__head {
   padding-left: 1.5rem;
 }
-.umbel-table__head--concept {
+.seply-table__head--concept {
   cursor: pointer;
 }
-.umbel-table__head--concept:hover,
-.umbel-table__head--concept[data-selected="true"] {
+.seply-table__head--concept:hover,
+.seply-table__head--concept[data-selected="true"] {
   text-decoration: underline;
 }
-.umbel-band-head {
+.seply-band-head {
   padding: 0.75rem 0.5rem 0;
   text-align: left;
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--umbel-band-other);
+  color: var(--seply-band-other);
 }
-.umbel-band-head__label {
+.seply-band-head__label {
   padding-bottom: 0.25rem;
   border-bottom: 2px solid currentColor;
 }
-.umbel-band-head--must-haves {
-  color: var(--umbel-band-must);
+.seply-band-head--must-haves {
+  color: var(--seply-band-must);
 }
-.umbel-band-head--nice-to-haves {
-  color: var(--umbel-band-nice);
+.seply-band-head--nice-to-haves {
+  color: var(--seply-band-nice);
 }
-.umbel-table__row {
+.seply-table__row {
   cursor: pointer;
-  background: var(--umbel-table-bg);
+  background: var(--seply-table-bg);
 }
-.umbel-table__row > * {
+.seply-table__row > * {
   background: inherit;
-  border-bottom: 1px solid var(--umbel-table-border);
+  border-bottom: 1px solid var(--seply-table-border);
 }
-.umbel-table__row:hover {
-  background: var(--umbel-table-hover);
+.seply-table__row:hover {
+  background: var(--seply-table-hover);
 }
-.umbel-table__row--chosen {
-  background: var(--umbel-table-chosen);
+.seply-table__row--chosen {
+  background: var(--seply-table-chosen);
 }
-.umbel-table__row--chosen .umbel-table__option {
-  box-shadow: inset 4px 0 0 var(--umbel-table-chosen-edge);
+.seply-table__row--chosen .seply-table__option {
+  box-shadow: inset 4px 0 0 var(--seply-table-chosen-edge);
 }
-.umbel-table__row--fails {
-  background: var(--umbel-table-fails);
+.seply-table__row--fails {
+  background: var(--seply-table-fails);
 }
-.umbel-table__row--selected {
-  background: var(--umbel-table-selected);
+.seply-table__row--selected {
+  background: var(--seply-table-selected);
 }
-.umbel-table__row--ruled-out .umbel-table__title {
-  color: var(--umbel-table-muted);
+.seply-table__row--ruled-out .seply-table__title {
+  color: var(--seply-table-muted);
   text-decoration: line-through;
 }
-.umbel-table__row--ruled-out .umbel-table__cell {
+.seply-table__row--ruled-out .seply-table__cell {
   opacity: 0.6;
 }
-.umbel-table__row--dim {
+.seply-table__row--dim {
   opacity: 0.2;
 }
-.umbel-table__option {
+.seply-table__option {
   position: sticky;
   left: 0;
   z-index: 1;
@@ -531,77 +531,77 @@
   font-weight: 500;
 }
 /* Every cell in a row starts on the same top line, the option name too. */
-.umbel-table__option-inner {
+.seply-table__option-inner {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
   max-width: 18rem;
   line-height: 1.25rem;
 }
-.umbel-table__icon {
+.seply-table__icon {
   width: 1rem;
   height: 1rem;
   margin-top: 0.125rem;
   flex-shrink: 0;
 }
-.umbel-table__cell {
+.seply-table__cell {
   padding: 0.5rem;
   vertical-align: top;
   line-height: 1.25rem;
 }
 /* Long text wraps at a readable width rather than stretching its column. */
-.umbel-table__cell-inner {
+.seply-table__cell-inner {
   display: block;
   max-width: 18rem;
 }
-.umbel-table__cell--fails {
-  background: var(--umbel-table-fails-cell);
+.seply-table__cell--fails {
+  background: var(--seply-table-fails-cell);
 }
-.umbel-table__num {
+.seply-table__num {
   font-variant-numeric: tabular-nums;
 }
-.umbel-table__none,
-.umbel-table__unknown {
-  color: var(--umbel-table-muted);
+.seply-table__none,
+.seply-table__unknown {
+  color: var(--seply-table-muted);
 }
-.umbel-table__unknown {
+.seply-table__unknown {
   font-weight: 600;
 }
-.umbel-verdict {
+.seply-verdict {
   display: inline-flex;
   align-items: baseline;
   gap: 0.375rem;
-  color: var(--umbel-verdict-other);
+  color: var(--seply-verdict-other);
 }
-.umbel-verdict--meets {
-  color: var(--umbel-verdict-meets);
+.seply-verdict--meets {
+  color: var(--seply-verdict-meets);
 }
-.umbel-verdict--partly {
-  color: var(--umbel-verdict-partly);
+.seply-verdict--partly {
+  color: var(--seply-verdict-partly);
 }
-.umbel-verdict--fails {
-  color: var(--umbel-verdict-fails);
+.seply-verdict--fails {
+  color: var(--seply-verdict-fails);
 }
-.umbel-verdict__dot {
+.seply-verdict__dot {
   width: 0.625rem;
   height: 0.625rem;
   flex-shrink: 0;
   border-radius: 9999px;
   background: currentColor;
 }
-.umbel-verdict__label {
+.seply-verdict__label {
   font-weight: 500;
 }
-.umbel-verdict__note {
-  color: var(--umbel-table-muted);
+.seply-verdict__note {
+  color: var(--seply-table-muted);
 }
-.umbel-table__empty,
-.umbel-table__dropped {
+.seply-table__empty,
+.seply-table__dropped {
   padding: 0.75rem 1.5rem;
   font-size: 0.75rem;
-  color: var(--umbel-table-muted);
+  color: var(--seply-table-muted);
 }
-.umbel-table__dropped button {
+.seply-table__dropped button {
   border: 0;
   background: none;
   padding: 0;

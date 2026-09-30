@@ -1,7 +1,7 @@
-// @umbel/worker: see README.md for this package's contract.
+// @seply/worker: see README.md for this package's contract.
 // Static assets (the SPA) are served by Cloudflare before this code runs;
 // only /api/* reaches the Worker (see run_worker_first in wrangler.jsonc).
-import { connectPg, createApp, type ServerEnv } from "@umbel/server"
+import { connectPg, createApp, type ServerEnv } from "@seply/server"
 import { Hono } from "hono"
 
 export type Bindings = ServerEnv & {

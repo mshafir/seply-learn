@@ -1,5 +1,5 @@
 {
-  "name": "@umbel/server",
+  "name": "@seply/server",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -16,8 +16,8 @@
     "db:check": "drizzle-kit check"
   },
   "dependencies": {
-    "@umbel/ai": "workspace:*",
-    "@umbel/domain": "workspace:*",
+    "@seply/ai": "workspace:*",
+    "@seply/domain": "workspace:*",
     "better-auth": "^1.7.6",
     "drizzle-orm": "^0.45.3",
     "hono": "^4.13.10",
@@ -29,7 +29,7 @@
     "@eslint/js": "^10",
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
-    "@umbel/config": "workspace:*",
+    "@seply/config": "workspace:*",
     "drizzle-kit": "^0.31.11",
     "eslint": "^10",
     "globals": "^17",

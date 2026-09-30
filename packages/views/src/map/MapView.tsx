@@ -61,7 +61,7 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
     let el = anchors.get(id);
     if (!el) {
       el = document.createElement("div");
-      el.className = "umbel-pin-anchor";
+      el.className = "seply-pin-anchor";
       anchors.set(id, el);
     }
     return el;
@@ -171,8 +171,8 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
   }, [map, selected]);
 
   return (
-    <div className="umbel-map" ref={frame} data-testid="map">
-      <div className="umbel-map__canvas" ref={host} />
+    <div className="seply-map" ref={frame} data-testid="map">
+      <div className="seply-map__canvas" ref={host} />
       {model.pins.map((p) =>
         createPortal(
           <MapPin
@@ -187,14 +187,14 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
           p.conceptId,
         ),
       )}
-      <div className="umbel-map__notes">
+      <div className="seply-map__notes">
         {unavailable && (
-          <p className="umbel-map__note" role="status" data-testid="map-note">
+          <p className="seply-map__note" role="status" data-testid="map-note">
             Detailed map unavailable: showing the coarse world map.
           </p>
         )}
         {model.unplaced.length > 0 && (
-          <p className="umbel-map__note">
+          <p className="seply-map__note">
             {model.unplaced.length} {model.unplaced.length === 1 ? "Concept has" : "Concepts have"} no location and{" "}
             {model.unplaced.length === 1 ? "isn't" : "aren't"} shown.
           </p>
@@ -224,14 +224,14 @@ function MapPin({
     <button
       type="button"
       className={cx(
-        "umbel-pin",
-        pin.home && "umbel-pin--home",
-        selected && "umbel-pin--selected",
-        dim && "umbel-pin--dim",
-        !label && !selected && "umbel-pin--quiet",
-        label === "left" && "umbel-pin--left",
+        "seply-pin",
+        pin.home && "seply-pin--home",
+        selected && "seply-pin--selected",
+        dim && "seply-pin--dim",
+        !label && !selected && "seply-pin--quiet",
+        label === "left" && "seply-pin--left",
       )}
-      style={{ "--umbel-pin-color": pin.color } as CSSProperties}
+      style={{ "--seply-pin-color": pin.color } as CSSProperties}
       data-concept-id={pin.conceptId}
       data-covered={read || undefined}
       aria-label={pin.title}
@@ -242,10 +242,10 @@ function MapPin({
         onSelect(pin.conceptId);
       }}
     >
-      <span className="umbel-pin__dot">
-        {pin.home ? <House className="umbel-pin__icon" aria-hidden /> : <KindIcon name={pin.icon ?? pin.kind} className="umbel-pin__icon" />}
+      <span className="seply-pin__dot">
+        {pin.home ? <House className="seply-pin__icon" aria-hidden /> : <KindIcon name={pin.icon ?? pin.kind} className="seply-pin__icon" />}
       </span>
-      <span className="umbel-pin__label">
+      <span className="seply-pin__label">
         {read && <ReadCheck />}
         {pin.title}
       </span>
@@ -277,14 +277,14 @@ async function styleFor(config: BasemapConfig, theme: MapTheme): Promise<{ base?
 const absolute = (url: string) => (/^[a-z]+:/i.test(url) ? url : new URL(url, location.href).href);
 
 /**
- * The coarse layer's colours: tokens, via the --umbel-map-* variables on the
+ * The coarse layer's colours: tokens, via the --seply-map-* variables on the
  * View (map.css), resolved to rgb for MapLibre, which can't read CSS
  * variables or oklch. Read again on every style change, so they follow the theme.
  */
 function coarseColors(el: HTMLElement): CoarseColors {
   const css = getComputedStyle(el);
   const read = (name: string) => toRgb(css.getPropertyValue(name).trim());
-  return { water: read("--umbel-map-water"), land: read("--umbel-map-land"), border: read("--umbel-map-border") };
+  return { water: read("--seply-map-water"), land: read("--seply-map-land"), border: read("--seply-map-border") };
 }
 
 let paint: CanvasRenderingContext2D | null | undefined;

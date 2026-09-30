@@ -10,7 +10,7 @@ import { paletteColor } from "./color.ts";
 export const cx = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join(" ");
 
 /** The check on a Concept the reader has read or knows, in every View. */
-export const ReadCheck = () => <CircleCheckIcon className="umbel-check" role="img" aria-label="Read" data-testid="read-check" />;
+export const ReadCheck = () => <CircleCheckIcon className="seply-check" role="img" aria-label="Read" data-testid="read-check" />;
 
 export type ConceptData = {
   concept: Concept;
@@ -27,7 +27,7 @@ export type ConceptData = {
 
 /** Size class by weight: focal (outcome), major, medium, minor. */
 const weightClass = (w: number) =>
-  w > 1 ? "umbel-concept--focal" : w > 0.6 ? "umbel-concept--major" : w > 0.3 ? "umbel-concept--medium" : "umbel-concept--minor";
+  w > 1 ? "seply-concept--focal" : w > 0.6 ? "seply-concept--major" : w > 0.3 ? "seply-concept--medium" : "seply-concept--minor";
 
 export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
   const { concept, kind, weight, dim, selected, entering, covered, badges } = data;
@@ -38,29 +38,29 @@ export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
       // The Kind's accent colour is Expedition data, not a UI colour.
       style={{ width: size.width, minHeight: size.height, borderLeftColor: paletteColor(kind?.color) }}
       className={cx(
-        "umbel-concept",
+        "seply-concept",
         weightClass(weight),
-        dim && "umbel-concept--dim",
-        selected && "umbel-concept--selected",
-        entering && "umbel-concept--entering",
+        dim && "seply-concept--dim",
+        selected && "seply-concept--selected",
+        entering && "seply-concept--entering",
       )}
       data-concept={concept.id}
       data-covered={covered || undefined}
     >
-      <Handle type="target" position={Position.Left} className="umbel-handle" />
-      <KindIcon name={kind?.icon ?? kind?.id} className="umbel-concept__icon" style={{ color: paletteColor(kind?.color) }} />
-      <span className="umbel-concept__title">{concept.title}</span>
+      <Handle type="target" position={Position.Left} className="seply-handle" />
+      <KindIcon name={kind?.icon ?? kind?.id} className="seply-concept__icon" style={{ color: paletteColor(kind?.color) }} />
+      <span className="seply-concept__title">{concept.title}</span>
       {covered && <ReadCheck />}
       {badges.length > 0 && (
-        <div className="umbel-concept__badges">
+        <div className="seply-concept__badges">
           {badges.map((b) => (
-            <span key={b.text} className={cx("umbel-badge", `umbel-badge--${b.tone}`)}>
+            <span key={b.text} className={cx("seply-badge", `seply-badge--${b.tone}`)}>
               {b.text}
             </span>
           ))}
         </div>
       )}
-      <Handle type="source" position={Position.Right} className="umbel-handle" />
+      <Handle type="source" position={Position.Right} className="seply-handle" />
     </div>
   );
 }
@@ -81,8 +81,8 @@ export function FloatingEdge({ id, source, target, markerEnd, style, label }: Ed
       label={label}
       labelX={(sx + tx) / 2}
       labelY={(sy + ty) / 2}
-      labelStyle={{ fontSize: 11, fill: "var(--umbel-canvas-label)" }}
-      labelBgStyle={{ fill: "var(--umbel-canvas-bg)" }}
+      labelStyle={{ fontSize: 11, fill: "var(--seply-canvas-label)" }}
+      labelBgStyle={{ fill: "var(--seply-canvas-bg)" }}
     />
   );
 }

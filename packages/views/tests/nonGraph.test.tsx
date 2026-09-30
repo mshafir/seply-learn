@@ -5,8 +5,8 @@
 // search dimming, selection, and a pull re-deriving the View.
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
-import { builtinId, relKey } from "@umbel/domain";
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
+import { builtinId, relKey } from "@seply/domain";
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { ExpeditionView } from "../src/ExpeditionView.tsx";
 
@@ -28,7 +28,7 @@ describe("Outline", () => {
   it("draws the topics, open one level, with summaries", () => {
     const f = live();
     const { container, getByText } = render(<ExpeditionView collections={f.collections} viewId={f.view("outline")} onSelect={noop} />);
-    expect(container.querySelector('.umbel-view[data-view-type="outline"]')).not.toBeNull();
+    expect(container.querySelector('.seply-view[data-view-type="outline"]')).not.toBeNull();
     expect(getByText("Compute economics")).toBeTruthy();
     // Topics are open: their Concepts show; deeper ones don't.
     expect(line(container, f.concept("capacity"))).not.toBeNull();
@@ -111,12 +111,12 @@ describe("Quadrant", () => {
         selected={mla}
       />,
     );
-    expect(container.querySelector(".umbel-quadrant--ladder")).not.toBeNull();
+    expect(container.querySelector(".seply-quadrant--ladder")).not.toBeNull();
     expect(getByText("Area ↓ · Maturity →")).toBeTruthy();
     const card = line(container, mla)!;
     expect(card.dataset.covered).toBe("true");
     expect(card.className).toContain("--selected");
-    expect(card.querySelector(".umbel-quadrant__uses")?.textContent).toBe("5");
+    expect(card.querySelector(".seply-quadrant__uses")?.textContent).toBe("5");
     expect(card.title).toMatch(/^.*\nUsed by /s);
     expect(line(container, f.concept("moe"))!.className).toContain("--dim");
   });
@@ -124,9 +124,9 @@ describe("Quadrant", () => {
   it("without progression it's a plain grid", () => {
     const f = live();
     const { container } = render(<ExpeditionView collections={f.collections} viewId={f.view("quadrant")} onSelect={noop} />);
-    expect(container.querySelector(".umbel-quadrant")).not.toBeNull();
-    expect(container.querySelector(".umbel-quadrant--ladder")).toBeNull();
-    expect(container.querySelectorAll(".umbel-quadrant__cell")).toHaveLength(9);
+    expect(container.querySelector(".seply-quadrant")).not.toBeNull();
+    expect(container.querySelector(".seply-quadrant--ladder")).toBeNull();
+    expect(container.querySelectorAll(".seply-quadrant__cell")).toHaveLength(9);
   });
 });
 
@@ -138,13 +138,13 @@ describe("Rates", () => {
     const { container, getByText } = render(
       <ExpeditionView collections={f.collections} viewId={f.view("rates")} onSelect={onSelect} covered={new Set([demand])} matches={new Set([demand])} />,
     );
-    expect(container.querySelectorAll(".umbel-rates__estimate")).toHaveLength(17);
+    expect(container.querySelectorAll(".seply-rates__estimate")).toHaveLength(17);
     expect(getByText("Inference price at fixed capability")).toBeTruthy();
     const row = line(container, demand)!;
     expect(row.dataset.covered).toBe("true");
     expect(row.title).toContain("Source: Nvidia");
-    expect(row.querySelector(".umbel-rates__point")).not.toBeNull();
-    expect(line(container, f.concept("e-price-all"))!.querySelector(".umbel-rates__range")).not.toBeNull();
+    expect(row.querySelector(".seply-rates__point")).not.toBeNull();
+    expect(line(container, f.concept("e-price-all"))!.querySelector(".seply-rates__range")).not.toBeNull();
     expect(line(container, f.concept("e-price-all"))!.className).toContain("--dim");
     fireEvent.click(row);
     expect(onSelect).toHaveBeenCalledWith(demand);

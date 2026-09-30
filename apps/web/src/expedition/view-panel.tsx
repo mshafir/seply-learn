@@ -11,10 +11,10 @@
 import * as React from "react"
 import { ArrowLeftIcon, BookOpenIcon, CopyIcon } from "lucide-react"
 
-import { Button } from "@umbel/ui/components/button"
-import { ScrollArea } from "@umbel/ui/components/scroll-area"
-import { Separator } from "@umbel/ui/components/separator"
-import { SheetDescription } from "@umbel/ui/components/sheet"
+import { Button } from "@seply/ui/components/button"
+import { ScrollArea } from "@seply/ui/components/scroll-area"
+import { Separator } from "@seply/ui/components/separator"
+import { SheetDescription } from "@seply/ui/components/sheet"
 import {
   BUILTIN_KINDS,
   BUILTIN_REL_TYPES,
@@ -22,8 +22,8 @@ import {
   parseSharedSettings,
   ulid,
   VIEW_TYPES,
-} from "@umbel/domain"
-import type { EngineCollections, ViewRow } from "@umbel/sync"
+} from "@seply/domain"
+import type { EngineCollections, ViewRow } from "@seply/sync"
 
 import { viewTypeMeta } from "@/expedition/labels.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"

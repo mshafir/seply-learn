@@ -1,6 +1,6 @@
 // Row mutations → ops. Any table, any mix of inserts, updates and deletes:
 // the mutations are written into a sketch of the wanted state, and
-// @umbel/domain's `opsToReach` (the same field-level machinery undo and
+// @seply/domain's `opsToReach` (the same field-level machinery undo and
 // restore use) produces the ops that get there: field by field (last writer
 // wins per field), per settings path for Views, tags as add/remove.
 //
@@ -18,7 +18,7 @@ import {
   type DomainState,
   type FlatState,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { ENTITY, rowOf, writeRow, type TableName } from "./rows.ts"
 
 export type RowMutation = {

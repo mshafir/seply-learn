@@ -20,7 +20,7 @@ import {
   type ReadingMark,
   type ViewSettingsMark,
   type ViewTypeId,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { and, desc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm"
 import type { PgColumn } from "drizzle-orm/pg-core"
 import { Hono } from "hono"

@@ -3,7 +3,7 @@
 // A fall is drawn as 1/rate, so falls sit left of 1× and rises right of it.
 // Each estimate carries its source (the `sourceRelationship`) and how
 // independent that source is.
-import type { ViewOverrides } from "@umbel/domain";
+import type { ViewOverrides } from "@seply/domain";
 import type { Concept, Expedition, RatesSettings } from "../model.ts";
 
 export type RatesViewSettings = RatesSettings & ViewOverrides;

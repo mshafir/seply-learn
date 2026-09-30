@@ -1,8 +1,8 @@
-// drizzle-kit config. The schema lives in @umbel/domain; the migrations it
+// drizzle-kit config. The schema lives in @seply/domain; the migrations it
 // generates are committed here (./drizzle) and CI applies them before each
 // deploy (docs/ops/deploy.md).
-//   pnpm --filter @umbel/server db:generate          after changing the schema
-//   DATABASE_URL=… pnpm --filter @umbel/server db:migrate
+//   pnpm --filter @seply/server db:generate          after changing the schema
+//   DATABASE_URL=… pnpm --filter @seply/server db:migrate
 import { defineConfig } from "drizzle-kit"
 
 export default defineConfig({

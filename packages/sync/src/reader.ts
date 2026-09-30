@@ -29,7 +29,7 @@ import {
   type ReadingMark,
   type ReadingState,
   type ViewSettingsMark,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { recordKey, type MarkRecord, type ReaderStore } from "./reader-store.ts"
 import { SyncHttpError, type FetchTransportOptions } from "./transport.ts"
 
@@ -117,7 +117,7 @@ export type ReaderClientOptions = {
 
 type Message = { scope: string; records: MarkRecord[] }
 
-const CHANNEL_NAME = "umbel-reader"
+const CHANNEL_NAME = "seply-reader"
 
 function defaultChannel(): ReaderChannel | null {
   return typeof BroadcastChannel === "undefined"

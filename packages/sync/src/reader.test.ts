@@ -7,7 +7,7 @@ import {
   stateToBatch,
   type ReaderBatch,
   type ReaderState,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { afterEach, describe, expect, it } from "vitest"
 import {
   ANONYMOUS_SCOPE,

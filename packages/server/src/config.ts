@@ -3,7 +3,7 @@
 
 /** The env vars the app reads. Every runtime passes these through. */
 export type ServerEnv = {
-  /** This deploy's own origin, e.g. https://umbel-pr-12.<subdomain>.workers.dev. */
+  /** This deploy's own origin, e.g. https://seply-pr-12.<subdomain>.workers.dev. */
   BETTER_AUTH_URL?: string
   /** Signs sessions and encrypts the OAuth proxy payload. Same on every deploy. */
   BETTER_AUTH_SECRET?: string

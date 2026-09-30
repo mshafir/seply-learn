@@ -3,7 +3,7 @@ import {
   fetchReaderTransport,
   IndexedDbReaderStore,
   ReaderClient,
-} from "@umbel/sync"
+} from "@seply/sync"
 
 import { ReaderContext } from "@/lib/reader.ts"
 import { useSession } from "@/lib/session.ts"

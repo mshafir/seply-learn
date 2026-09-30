@@ -121,8 +121,8 @@ export function LearningPathCanvas({
   const hiddenCount = scope.concepts.length - core.size;
 
   return (
-    <div className="umbel-lp">
-      <div className="umbel-toolbar">
+    <div className="seply-lp">
+      <div className="seply-toolbar">
         {focus ? (
           <>
             <span>
@@ -132,15 +132,15 @@ export function LearningPathCanvas({
               I know {canMark ? `"${byId.get(selected!)?.title}"` : "the selected step"}
             </button>
             {selected && selected !== focus && treeIds.has(selected) && (
-              <button className="umbel-toolbar__accent" onClick={() => setFocus(selected)}>
+              <button className="seply-toolbar__accent" onClick={() => setFocus(selected)}>
                 Focus on "{byId.get(selected)?.title}"
               </button>
             )}
             {unlocks.length > 0 && (
-              <span className="umbel-toolbar__chips">
+              <span className="seply-toolbar__chips">
                 Leads to:
                 {unlocks.map((id) => (
-                  <button key={id} className="umbel-chip" onClick={() => onSelect(id)}>
+                  <button key={id} className="seply-chip" onClick={() => onSelect(id)}>
                     {byId.get(id)?.title}
                   </button>
                 ))}
@@ -148,18 +148,18 @@ export function LearningPathCanvas({
             )}
           </>
         ) : (
-          <span className="umbel-toolbar__muted">
+          <span className="seply-toolbar__muted">
             {targets.size} techniques and the foundations they share. Click one to see what it takes, in order.
           </span>
         )}
         {!readingStatus && known.size > 0 && (
-          <span className="umbel-toolbar__chips">
+          <span className="seply-toolbar__chips">
             Known:
             {[...known].map((id) => (
               <button
                 key={id}
                 title="Forget"
-                className="umbel-chip umbel-chip--known"
+                className="seply-chip seply-chip--known"
                 onClick={() => {
                   const n = new Set(known);
                   n.delete(id);
@@ -171,12 +171,12 @@ export function LearningPathCanvas({
             ))}
           </span>
         )}
-        <label className="umbel-toolbar__toggle">
+        <label className="seply-toolbar__toggle">
           <input type="checkbox" checked={showAll} onChange={(e) => toggleShowAll(e.target.checked)} />
           Show all steps ({hiddenCount} more)
         </label>
       </div>
-      <div className="umbel-lp__canvas">
+      <div className="seply-lp__canvas">
         <Canvas
           expedition={expedition}
           view={view}

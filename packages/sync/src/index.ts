@@ -1,4 +1,4 @@
-// @umbel/sync: see README.md for this package's contract.
+// @seply/sync: see README.md for this package's contract.
 // The flicker tests' simulator and detector live in src/spike/ and are not
 // exported.
 export {

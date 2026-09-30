@@ -9,12 +9,12 @@ import { needsDatabase, signUp } from "./helpers.ts"
 // offline-reading.spec.ts.)
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
-/** Pending ops the sync client keeps in IndexedDB (@umbel/sync's store). */
+/** Pending ops the sync client keeps in IndexedDB (@seply/sync's store). */
 function pendingOps(page: Page): Promise<number> {
   return page.evaluate(
     () =>
       new Promise<number>((resolve, reject) => {
-        const open = indexedDB.open("umbel-sync")
+        const open = indexedDB.open("seply-sync")
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
           const db = open.result

@@ -1,5 +1,5 @@
 // The tables as a materialized projection of the op log (spec §1.1, §1.2).
-// `loadState` reads one Expedition's logged tables into @umbel/domain's
+// `loadState` reads one Expedition's logged tables into @seply/domain's
 // `DomainState`; `writeState` writes back what changed between two states.
 // `apply` is copy-on-write, so an entity whose object is unchanged (`===`)
 // was not touched and is not rewritten.
@@ -16,7 +16,7 @@ import {
   type RelTypeDefState,
   type Source,
   type View,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { and, eq, getTableColumns, inArray, sql, type SQL } from "drizzle-orm"
 import type { PgTable } from "drizzle-orm/pg-core"
 import type { Db } from "./db.ts"

@@ -2,7 +2,7 @@
 //
 // It keeps confirmed ops (server order) and pending ops (ours, not yet
 // confirmed). The visible state is `confirmed state + pending ops`, folded
-// with @umbel/domain's pure `apply`. When confirmed ops arrive it rebases:
+// with @seply/domain's pure `apply`. When confirmed ops arrive it rebases:
 // drop the pending ops the server acknowledged, apply the new confirmed ops,
 // re-apply the remaining pending ops on top (last writer wins per field, and
 // our unconfirmed edit is the latest writer we know of). Pending ops that no
@@ -28,7 +28,7 @@ import {
   type LoggedOp,
   type Op,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { monotonicUlid } from "./ids.ts"
 import { RowProjection, type RowDiff, type TableName } from "./rows.ts"
 

@@ -4,7 +4,7 @@ import {
   ulidSequence,
   type LoggedOp,
   type Op,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { describe, expect, it } from "vitest"
 import { OpEngine, type PendingSnapshot } from "./engine.ts"
 import type { RowDiff } from "./rows.ts"

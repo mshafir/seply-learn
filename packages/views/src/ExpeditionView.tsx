@@ -63,7 +63,7 @@ export type ReaderInteraction = {
 export type ViewStatusChip = { text: string; clear: () => void };
 
 export type ExpeditionViewProps = ViewInteraction & {
-  /** The Expedition's live collections (@umbel/sync `createEngineCollections`, or any with the same tables). */
+  /** The Expedition's live collections (@seply/sync `createEngineCollections`, or any with the same tables). */
   collections: ExpeditionCollections;
   /** The View to show. Missing or unknown (e.g. deleted in another tab): the best View, then the first. */
   viewId?: string;
@@ -97,9 +97,9 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
   useEffect(() => {
     if (drawnNow) settled();
   }, [drawnNow, view?.id]);
-  if (!view) return <div className="umbel-view-empty">This Expedition has no Views yet.</div>;
+  if (!view) return <div className="seply-view-empty">This Expedition has no Views yet.</div>;
   return (
-    <div className="umbel-view" key={view.id} data-view={view.id} data-view-type={view.viewType}>
+    <div className="seply-view" key={view.id} data-view={view.id} data-view-type={view.viewType}>
       {view.viewType === "comparison-table" ? (
         <ComparisonTable expedition={expedition} view={view} {...rest} />
       ) : view.viewType === "outline" ? (
@@ -109,7 +109,7 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
       ) : view.viewType === "rates" ? (
         <Rates expedition={expedition} view={view} {...rest} />
       ) : view.viewType === "map" || view.viewType === "timeline" ? (
-        <Suspense fallback={<div className="umbel-view-empty">Loading {view.label}…</div>}>
+        <Suspense fallback={<div className="seply-view-empty">Loading {view.label}…</div>}>
           {view.viewType === "map" ? <MapView expedition={expedition} view={view} {...rest} /> : <TimelineView expedition={expedition} view={view} {...rest} />}
         </Suspense>
       ) : view.viewType === "anatomy" ? (
@@ -117,7 +117,7 @@ export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
       ) : isCanvasView(view) ? (
         <ViewCanvas expedition={expedition} view={view} memory={memory} {...rest} />
       ) : (
-        <div className="umbel-view-empty">{(view as { label: string }).label}: this View Type isn't drawn yet.</div>
+        <div className="seply-view-empty">{(view as { label: string }).label}: this View Type isn't drawn yet.</div>
       )}
     </div>
   );

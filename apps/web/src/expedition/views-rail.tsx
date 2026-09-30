@@ -9,8 +9,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@umbel/ui/components/sidebar"
-import type { ViewRow } from "@umbel/sync"
+} from "@seply/ui/components/sidebar"
+import type { ViewRow } from "@seply/sync"
 
 import { viewTypeMeta } from "@/expedition/labels.ts"
 

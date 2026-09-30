@@ -3,7 +3,7 @@
 import type { Concept, Expedition, LearningPathSettings, View } from "./model.ts";
 import { learningScope, leversOf, readingOrder, type LearningMap, type Scope, type Trace } from "./scope.ts";
 
-/** Badge tones map to CSS classes `umbel-badge--<tone>` (see canvas.css). */
+/** Badge tones map to CSS classes `seply-badge--<tone>` (see canvas.css). */
 export type BadgeTone = "positive" | "caution" | "negative" | "neutral" | "accent";
 export type Badge = { text: string; tone: BadgeTone };
 

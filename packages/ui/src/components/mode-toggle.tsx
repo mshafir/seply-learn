@@ -1,6 +1,6 @@
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
 
-import { Button } from "@umbel/ui/components/button"
+import { Button } from "@seply/ui/components/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@umbel/ui/components/dropdown-menu"
-import { useTheme, type Theme } from "@umbel/ui/components/theme-provider"
+} from "@seply/ui/components/dropdown-menu"
+import { useTheme, type Theme } from "@seply/ui/components/theme-provider"
 
 /** System / Light / Dark, from shadcn's Vite dark-mode recipe (DropdownMenu + Button). */
 export function ModeToggle() {

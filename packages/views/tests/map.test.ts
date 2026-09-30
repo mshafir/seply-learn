@@ -1,6 +1,6 @@
 // The Map View as data: pins, labels and the basemap style, without WebGL.
 import { afterEach, describe, expect, it } from "vitest";
-import tripFile from "@umbel/domain/fixtures/trip.json" with { type: "json" };
+import tripFile from "@seply/domain/fixtures/trip.json" with { type: "json" };
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";
 import { mapModel, placeLabels, type Pin } from "../src/map/pins.ts";
@@ -94,13 +94,13 @@ describe("Basemap", () => {
   it("always draws the coarse world first, and drops the basemap's background so it shows through", () => {
     const base = protomapsStyle({ tiles: "x.pmtiles" }, "light");
     const style = withCoarseWorld(base, world, colors);
-    expect(style.layers.slice(0, 3).map((l) => l.id)).toEqual(["umbel-coarse-water", "umbel-coarse-land", "umbel-coarse-borders"]);
-    expect(style.layers.filter((l) => l.type === "background").map((l) => l.id)).toEqual(["umbel-coarse-water"]);
+    expect(style.layers.slice(0, 3).map((l) => l.id)).toEqual(["seply-coarse-water", "seply-coarse-land", "seply-coarse-borders"]);
+    expect(style.layers.filter((l) => l.type === "background").map((l) => l.id)).toEqual(["seply-coarse-water"]);
     expect(style.layers.length).toBe(base.layers.length - 1 + 3);
     expect(style.glyphs).toBe(base.glyphs);
     // With no basemap (it couldn't load), the coarse world alone.
     const alone = withCoarseWorld(undefined, world, colors);
-    expect(alone.layers.map((l) => l.id)).toEqual(["umbel-coarse-water", "umbel-coarse-land", "umbel-coarse-borders"]);
-    expect(Object.keys(alone.sources)).toEqual(["umbel-coarse", "umbel-coarse-borders"]);
+    expect(alone.layers.map((l) => l.id)).toEqual(["seply-coarse-water", "seply-coarse-land", "seply-coarse-borders"]);
+    expect(Object.keys(alone.sources)).toEqual(["seply-coarse", "seply-coarse-borders"]);
   });
 });

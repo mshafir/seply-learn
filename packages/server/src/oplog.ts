@@ -1,7 +1,7 @@
 // The op log (spec §1.3, §2.3): the one write path for shared content.
 // `appendOps` runs inside the caller's transaction: it locks the Expedition,
 // checks the role, skips ops already logged (idempotent by op id), folds the
-// new ones into the current state with @umbel/domain's `apply`, assigns
+// new ones into the current state with @seply/domain's `apply`, assigns
 // `server_seq`, appends them to `ops`, records their Changes and writes the
 // changed rows. Any failure throws, so the caller's transaction rolls back
 // and leaves nothing behind.
@@ -15,7 +15,7 @@ import {
   type LoggedOp,
   type Op,
   type Role,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { and, asc, eq, gt, inArray } from "drizzle-orm"
 import type { Db } from "./db.ts"
 import { loadState, writeState } from "./projection.ts"

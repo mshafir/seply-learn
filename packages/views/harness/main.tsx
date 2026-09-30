@@ -1,8 +1,8 @@
 // Dev harness: the Views an app would mount, on LIVE data. An Expedition file
-// is imported the way a first build is (@umbel/domain), loaded into an
-// @umbel/sync op engine, and drawn from its TanStack DB collections through
+// is imported the way a first build is (@seply/domain), loaded into an
+// @seply/sync op engine, and drawn from its TanStack DB collections through
 // <ExpeditionView>, with each canvas View's layout metrics.
-// `pnpm --filter @umbel/views dev`.
+// `pnpm --filter @seply/views dev`.
 //
 // URL: `?expedition=options` for the synthetic options table, `?expedition=trip`
 // for the synthetic trip (Map and Timeline; default: the compute sample); `#<viewId>[/<conceptId>]` with the ids as the file writes
@@ -10,15 +10,15 @@
 // in the dark theme; `?tiles=<url>` sets the Map's PMTiles (default: the
 // VITE_MAP_TILES_URL env, else the OpenFreeMap fallback). "Another tab's edit" pulls an edit as if another tab had
 // pushed it, so the View reflows. The harness stands in for the app: it loads
-// @umbel/ui's tokens, which every colour comes from.
+// @seply/ui's tokens, which every colour comes from.
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import "@umbel/ui/globals.css";
+import "@seply/ui/globals.css";
 import "@xyflow/react/dist/style.css";
 import "../src/canvas/canvas.css";
 import "./harness.css";
-import computeFile from "@umbel/domain/fixtures/compute.json";
-import { builtinId, relKey, type OpBody } from "@umbel/domain";
+import computeFile from "@seply/domain/fixtures/compute.json";
+import { builtinId, relKey, type OpBody } from "@seply/domain";
 import {
   anatomy,
   anatomyStats,
@@ -33,7 +33,7 @@ import {
 } from "../src/index.ts";
 import { computeRiskViewOp, openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import optionsFile from "../fixtures/options.json";
-import tripFile from "@umbel/domain/fixtures/trip.json";
+import tripFile from "@seply/domain/fixtures/trip.json";
 
 const params = new URLSearchParams(location.search);
 const instant = params.has("instant");
@@ -119,7 +119,7 @@ function Harness() {
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [edits, setEdits] = useState(0);
 
-  // As @umbel/ui's ThemeProvider does: only `.dark` goes on <html>.
+  // As @seply/ui's ThemeProvider does: only `.dark` goes on <html>.
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     const q = new URLSearchParams(location.search);

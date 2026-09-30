@@ -39,7 +39,7 @@ const icons: Record<string, LucideIcon> = {
   goal: Flag,
   outcome: BadgeCheck,
   topic: Folder,
-  // The built-in Kinds' `icon` names (@umbel/domain BUILTIN_KINDS), drawn
+  // The built-in Kinds' `icon` names (@seply/domain BUILTIN_KINDS), drawn
   // with the same icons as above.
   lightbulb: Lightbulb,
   folder: Folder,

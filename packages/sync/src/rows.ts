@@ -20,7 +20,7 @@ import {
   type Relationship,
   type Source,
   type View,
-} from "@umbel/domain"
+} from "@seply/domain"
 
 export type ExpeditionRow = ExpeditionState
 export type ConceptRow = Concept
@@ -70,7 +70,7 @@ const STATE_KEY: Record<Exclude<TableName, "expeditions">, StateKey> = {
   views: "views",
   sources: "sources",
 }
-/** The @umbel/domain field-level entity type of each table (for `opsToReach`). */
+/** The @seply/domain field-level entity type of each table (for `opsToReach`). */
 export const ENTITY: Record<TableName, EntityType> = {
   expeditions: "exp",
   concepts: "concept",

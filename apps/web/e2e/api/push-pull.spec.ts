@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test"
-import { makeOps, ulid, type LoggedOp, type OpBody } from "@umbel/domain"
+import { makeOps, ulid, type LoggedOp, type OpBody } from "@seply/domain"
 import pg from "pg"
 
 // Two people edit the same Expedition from two browsers, through /api/push,

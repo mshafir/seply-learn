@@ -1,5 +1,5 @@
-// Offline reading (spec §2.9): the page's one offline cache (@umbel/sync's
-// OfflineCache over IndexedDB, database "umbel-offline"). The Expedition
+// Offline reading (spec §2.9): the page's one offline cache (@seply/sync's
+// OfflineCache over IndexedDB, database "seply-offline"). The Expedition
 // screen saves what it reads (lib/sync.ts); the Library lists what is kept
 // and pins Expeditions ("Keep available offline"). The service worker only
 // caches the app itself; Expeditions live here.
@@ -10,7 +10,7 @@ import {
   IndexedDbOfflineCacheStore,
   OfflineCache,
   type OfflineEntry,
-} from "@umbel/sync"
+} from "@seply/sync"
 
 let shared: OfflineCache | null = null
 /** The page's offline cache (null where IndexedDB is missing). */

@@ -7,7 +7,7 @@ import * as React from "react"
 import { CompassIcon, HashIcon, LightbulbIcon, SearchIcon } from "lucide-react"
 import { useLocation } from "wouter"
 
-import { Button } from "@umbel/ui/components/button"
+import { Button } from "@seply/ui/components/button"
 import {
   Command,
   CommandDialog,
@@ -17,10 +17,10 @@ import {
   CommandItem,
   CommandList,
   CommandShortcut,
-} from "@umbel/ui/components/command"
-import { Label } from "@umbel/ui/components/label"
-import { Spinner } from "@umbel/ui/components/spinner"
-import { Switch } from "@umbel/ui/components/switch"
+} from "@seply/ui/components/command"
+import { Label } from "@seply/ui/components/label"
+import { Spinner } from "@seply/ui/components/spinner"
+import { Switch } from "@seply/ui/components/switch"
 
 import { searchAll, type SearchResults } from "@/lib/api.ts"
 import { withTag } from "@/lib/search.ts"

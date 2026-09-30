@@ -3,8 +3,8 @@
 import type * as React from "react"
 import { XIcon } from "lucide-react"
 
-import { Button } from "@umbel/ui/components/button"
-import { SheetTitle } from "@umbel/ui/components/sheet"
+import { Button } from "@seply/ui/components/button"
+import { SheetTitle } from "@seply/ui/components/sheet"
 
 export function PanelHeader({
   eyebrow,

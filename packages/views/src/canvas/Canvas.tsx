@@ -178,8 +178,8 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
     <ReactFlow
       ref={flowRef}
       colorMode={colorMode}
-      className="umbel-canvas"
-      style={{ "--umbel-enter-ms": `${transitionMs}ms` } as CSSProperties}
+      className="seply-canvas"
+      style={{ "--seply-enter-ms": `${transitionMs}ms` } as CSSProperties}
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
@@ -190,17 +190,17 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
       minZoom={0.05}
       proOptions={{ hideAttribution: true }}
     >
-      <Background gap={24} color="var(--umbel-canvas-grid)" />
+      <Background gap={24} color="var(--seply-canvas-grid)" />
       <Controls showInteractive={false} />
       {extras.bands && (
         <ViewportPortal>
           {extras.bands.map((b) => (
             <div
               key={b.label}
-              className="umbel-band"
+              className="seply-band"
               style={{ transform: `translate(${b.x}px, ${b.y}px)`, width: b.width, height: b.height }}
             >
-              <div className="umbel-band__label">{b.label}</div>
+              <div className="seply-band__label">{b.label}</div>
             </div>
           ))}
         </ViewportPortal>
@@ -209,7 +209,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
       {extras.ticks && positions.size > 0 && (
         <ViewportPortal>
           {extras.ticks.map((t) => (
-            <div key={t.label} className="umbel-tick" style={{ transform: `translate(${t.x}px, -40px) translateX(-50%)` }}>
+            <div key={t.label} className="seply-tick" style={{ transform: `translate(${t.x}px, -40px) translateX(-50%)` }}>
               {t.label}
             </div>
           ))}
@@ -241,7 +241,7 @@ function EvidenceHeadings({ positions }: { positions: Positions }) {
       {heads.map((h) => (
         <div
           key={h.label}
-          className={cx("umbel-heading", `umbel-heading--${h.tone}`)}
+          className={cx("seply-heading", `seply-heading--${h.tone}`)}
           style={{ transform: `translate(${h.x}px, ${top}px) translateX(-50%)` }}
         >
           {h.label}

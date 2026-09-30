@@ -2,7 +2,7 @@
 // millisecond (the random part is incremented), so pending ops sort by id in
 // the order they were made. The op engine relies on that when it reloads
 // pending ops from IndexedDB.
-import { ulid } from "@umbel/domain"
+import { ulid } from "@seply/domain"
 
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 

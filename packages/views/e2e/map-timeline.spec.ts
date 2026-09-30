@@ -28,7 +28,7 @@ for (const dark of [false, true]) {
 
   test(`map: the trip on our PMTiles${theme}`, async ({ page }) => {
     await open(page, "map", { expedition: "trip", dark, tiles: TEST_TILES });
-    await expect(page.locator(".umbel-pin")).toHaveCount(12);
+    await expect(page.locator(".seply-pin")).toHaveCount(12);
     await expect(page.getByTestId("map-note")).toHaveCount(0);
     await expect(page).toHaveScreenshot(`map-trip${theme}.png`);
   });
@@ -37,21 +37,21 @@ for (const dark of [false, true]) {
     await page.route((url) => url.pathname === TEST_TILES, (route) => route.abort());
     await open(page, "map", { expedition: "trip", dark, tiles: TEST_TILES });
     await expect(page.getByTestId("map-note")).toHaveText(/Detailed map unavailable/);
-    await expect(page.locator(".umbel-pin")).toHaveCount(12);
+    await expect(page.locator(".seply-pin")).toHaveCount(12);
     await expect(page).toHaveScreenshot(`map-trip-coarse${theme}.png`);
   });
 
   test(`timeline: the trip${theme}`, async ({ page }) => {
     await open(page, "timeline", { expedition: "trip", dark });
     // The week's items (the planning months are outside the opening window).
-    await expect(page.locator(".umbel-tl-label")).toHaveCount(13);
+    await expect(page.locator(".seply-tl-label")).toHaveCount(13);
     await expect(page).toHaveScreenshot(`timeline-trip${theme}.png`);
   });
 
   test(`timeline: the compute sample${theme}`, async ({ page }) => {
     await open(page, "timeline", { dark });
     await expect(page.locator(".vis-labelset .vis-label")).toHaveText(["Ideas", "Models", "Compute & market"]);
-    await expect(page.locator(".umbel-tl-label", { hasText: "Multi-head Latent Attention (MLA)" })).toBeVisible();
+    await expect(page.locator(".seply-tl-label", { hasText: "Multi-head Latent Attention (MLA)" })).toBeVisible();
     // Baselined outside CI's Chromium build: text antialiasing across this
     // dense, label-heavy shot differs by ~2.9% (as lineage-dark's does).
     // TODO: re-baseline it from CI's Chromium and drop the looser ratio.
@@ -65,26 +65,26 @@ test("map: with no tiles configured, the OpenFreeMap fallback is tried, and bloc
   await open(page, "map", { expedition: "trip" });
   expect(asked.some((u) => u.startsWith("https://tiles.openfreemap.org/styles/positron"))).toBe(true);
   await expect(page.getByTestId("map-note")).toBeVisible();
-  await expect(page.locator(".umbel-pin")).toHaveCount(12);
+  await expect(page.locator(".seply-pin")).toHaveCount(12);
 });
 
 test("map: clicking a pin selects its Concept; switching theme keeps the pins", async ({ page }) => {
   await open(page, "map", { expedition: "trip", tiles: TEST_TILES });
   await page.getByRole("button", { name: "Zermatt", exact: true }).click();
   await expect(page).toHaveURL(/#map\/zermatt$/);
-  await expect(page.locator(".umbel-pin--selected")).toHaveAttribute("aria-label", "Zermatt");
+  await expect(page.locator(".seply-pin--selected")).toHaveAttribute("aria-label", "Zermatt");
   await page.getByRole("button", { name: "Dark theme" }).click();
   await expect(page.locator("html")).toHaveClass(/dark/);
-  await expect(page.locator(".umbel-pin")).toHaveCount(12);
-  await expect(page.locator(".umbel-pin--selected")).toHaveAttribute("aria-label", "Zermatt");
+  await expect(page.locator(".seply-pin")).toHaveCount(12);
+  await expect(page.locator(".seply-pin--selected")).toHaveAttribute("aria-label", "Zermatt");
 });
 
 test("map and timeline: another tab's new place appears as a pin and an item", async ({ page }) => {
   await open(page, "map", { expedition: "trip", tiles: TEST_TILES });
   await page.getByRole("button", { name: /Another tab's edit/ }).click();
-  await expect(page.locator(".umbel-pin")).toHaveCount(13);
+  await expect(page.locator(".seply-pin")).toHaveCount(13);
   await page.getByRole("button", { name: "The week" }).click();
-  await expect(page.locator(".umbel-tl-label")).toHaveCount(14);
+  await expect(page.locator(".seply-tl-label")).toHaveCount(14);
 });
 
 test("timeline: clicking an item selects its Concept", async ({ page }) => {
