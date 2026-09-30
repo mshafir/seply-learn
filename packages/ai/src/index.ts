@@ -96,3 +96,28 @@ export {
   type ViewReader,
   type ViewReading,
 } from "./ports.ts"
+
+// The skim (spec §5.2 step 2) and the playbook it reads
+export {
+  GOAL_LABELS,
+  Goal,
+  GOALS,
+  normalizeSkim,
+  ProposedView,
+  runSkim,
+  SKIM_COUNTS,
+  SKIM_SAMPLE,
+  SKIM_VIEW_TYPES,
+  SkimOutput,
+  skimPrompt,
+  SkimResult,
+  skimSample,
+  skimSystem,
+  VIEW_TYPE_CATALOG,
+  type CatalogEntry,
+  type ExistingView,
+  type SkimRequest,
+  type SkimRun,
+  type SkimSource,
+} from "./skim.ts"
+export { startingSettings, UNSET_ATTRIBUTE } from "./plan.ts"

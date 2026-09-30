@@ -23,7 +23,12 @@ export {
   SourceError,
   type ParsedSource,
 } from "./sources/parse.ts"
-export { addSource, readSegments, type AddedSource } from "./sources/store.ts"
+export {
+  addSource,
+  readSegments,
+  removeSource,
+  type AddedSource,
+} from "./sources/store.ts"
 export { PasteBody } from "./sources/routes.ts"
 export { createAuth, AUTH_BASE_PATH, type Auth } from "./auth.ts"
 export {
@@ -108,3 +113,17 @@ export {
   type KeySummary,
   type Sealed,
 } from "./ai-keys.ts"
+export {
+  BuildBody,
+  createFlowRoutes,
+  MAX_PLAN_VIEWS,
+  PlanBody,
+  SkimBody,
+  SKIM_TIMEOUT_MS,
+  startBuild,
+  type BuildRequest,
+  type BuildStart,
+  type Draft,
+  type DraftSource,
+  type DraftView,
+} from "./create.ts"

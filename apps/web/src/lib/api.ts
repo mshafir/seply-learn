@@ -62,7 +62,9 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
       credentials: "include",
       ...init,
       headers: {
-        ...(init.body ? { "content-type": "application/json" } : {}),
+        ...(init.body && !(init.body instanceof FormData)
+          ? { "content-type": "application/json" }
+          : {}),
         ...(init.headers as Record<string, string> | undefined),
       },
     })
@@ -271,3 +273,196 @@ export function getSourceSegments(
 /** Where a Source's raw file downloads from. */
 export const sourceFileHref = (expeditionId: string, sourceId: string) =>
   `/api/sources/${encodeURIComponent(expeditionId)}/${encodeURIComponent(sourceId)}/file`
+
+// ─── The create flow (WP-3.4; the server's src/create.ts) ─────────────────
+
+/** The goal chips on the Sources screen. */
+export type Goal = "learn" | "decide" | "plan"
+
+/** A Source on the create screens (the server's `DraftSource`). */
+export type DraftSource = {
+  id: string
+  kind: "chat" | "file" | "prompt"
+  title: string
+  mime?: string
+  size?: number
+  addedAt: string
+  /** Its text, when stored. */
+  segments: {
+    kind: "chat" | "document"
+    format: string
+    count: number
+    chars: number
+  } | null
+}
+
+/** A View of the draft (the server's `DraftView`): queued until built. */
+export type DraftView = {
+  id: string
+  viewType: string
+  label: string
+  question: string | null
+  status: "queued" | "building" | "ready" | "failed"
+}
+
+/** GET /api/expeditions/:id/draft. */
+export type Draft = {
+  expedition: {
+    id: string
+    title: string
+    summary: string
+    status: "draft" | "building" | "ready"
+    role: Role
+    bestViewId: string | null
+  }
+  sources: DraftSource[]
+  views: DraftView[]
+  counts: { concepts: number; sources: number }
+}
+
+export function getDraft(
+  expeditionId: string,
+  signal?: AbortSignal
+): Promise<Draft> {
+  return call(`/expeditions/${encodeURIComponent(expeditionId)}/draft`, {
+    signal,
+  })
+}
+
+/** Adds a pasted chat or a prompt as a Source. */
+export function addTextSource(
+  expeditionId: string,
+  type: "paste" | "prompt",
+  text: string
+): Promise<unknown> {
+  return call(`/sources/${encodeURIComponent(expeditionId)}`, {
+    method: "POST",
+    body: JSON.stringify({ type, text }),
+  })
+}
+
+/** Uploads a file as a Source (25 MB cap: 413 above it; 400/415 unreadable). */
+export function uploadSource(expeditionId: string, file: File): Promise<unknown> {
+  const form = new FormData()
+  form.set("file", file)
+  return call(`/sources/${encodeURIComponent(expeditionId)}`, {
+    method: "POST",
+    body: form,
+  })
+}
+
+export async function removeSource(
+  expeditionId: string,
+  sourceId: string
+): Promise<void> {
+  await call(
+    `/sources/${encodeURIComponent(expeditionId)}/${encodeURIComponent(sourceId)}`,
+    { method: "DELETE" }
+  )
+}
+
+type TokenUsage = {
+  input: number
+  cacheRead: number
+  cacheWrite: number
+  output: number
+}
+
+/** The server's `BuildEstimate`. */
+export type BuildEstimate = {
+  sourceTokens: number
+  /** Over the source token cap: the reader picks which Sources to include. */
+  overCap: boolean
+  concepts: number
+  views: number
+  stages: Record<AiStage, { model: string; usage: TokenUsage; usd: number }>
+  usd: number
+  capUsd: number
+}
+
+export async function estimateBuild(
+  sourceChars: number,
+  views?: number
+): Promise<BuildEstimate> {
+  return (
+    await call<{ estimate: BuildEstimate }>("/ai/estimate", {
+      method: "POST",
+      body: JSON.stringify({ sourceChars, ...(views ? { views } : {}) }),
+    })
+  ).estimate
+}
+
+/** A View the skim proposes (the server's `ProposedView`). */
+export type ProposedView = {
+  id: string
+  viewType: string
+  label: string
+  question: string
+  why: string
+  on: boolean
+  confidence: "high" | "medium"
+}
+
+export type SkimAnswer = {
+  skim: { title: string; summary: string; views: ProposedView[] }
+  run: { ms: number; usd: number; model: string }
+}
+
+type Existing = { viewType: string; question: string }
+
+export type SkimAsk =
+  | { mode: "propose"; goals: Goal[] }
+  | { mode: "more"; goals: Goal[]; existing: Existing[]; takenIds: string[] }
+  | {
+      mode: "ask"
+      goals: Goal[]
+      request: string
+      existing: Existing[]
+      takenIds: string[]
+    }
+
+/** Runs the skim: propose Views, suggest more, or one the reader asked for. */
+export function runSkim(
+  expeditionId: string,
+  ask: SkimAsk,
+  signal?: AbortSignal
+): Promise<SkimAnswer> {
+  return call(`/expeditions/${encodeURIComponent(expeditionId)}/skim`, {
+    method: "POST",
+    body: JSON.stringify(ask),
+    signal,
+  })
+}
+
+export type PlanView = {
+  /** A View already queued in the draft. */
+  id?: string
+  viewType: string
+  label: string
+  question: string
+}
+
+/** Saves the title and the chosen Views (queued), best first. */
+export function savePlan(
+  expeditionId: string,
+  plan: { title: string; summary?: string; views: PlanView[] }
+): Promise<Draft> {
+  return call(`/expeditions/${encodeURIComponent(expeditionId)}/plan`, {
+    method: "PUT",
+    body: JSON.stringify(plan),
+  })
+}
+
+/**
+ * Starts building a saved draft: the hand-off to the build (WP-3.5b). Until
+ * the build exists the server answers 501 (`build-unavailable`).
+ */
+export function startBuild(
+  expeditionId: string,
+  goals: Goal[]
+): Promise<{ jobId: string }> {
+  return call(`/expeditions/${encodeURIComponent(expeditionId)}/build`, {
+    method: "POST",
+    body: JSON.stringify({ goals }),
+  })
+}

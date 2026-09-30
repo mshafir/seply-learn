@@ -48,7 +48,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **Proposed Views as cards:** the View Type thumbnail, the question in the reader's words, and why it was proposed ("You kept asking 'what is…'"). The 3–4 best are pre-selected.
 - **Also on the page:** "Suggest more Views", "Ask for a specific View" (a free-text request), and a live "N Concepts found across M Sources" counter.
 - **There is no Concept review step.** Concepts are curated inside Views afterwards.
-- **"Create Expedition with N Views"** queues the chosen Views. "Save draft" keeps the Sources for later.
+- **"Create Expedition with N Views"** queues the chosen Views. "Save draft" keeps the Sources, the title and the chosen Views (queued, not built) for later; a draft reopens in the create flow.
 
 ## 3.5 Building (canvas 02c, 02d, 02e)
 
