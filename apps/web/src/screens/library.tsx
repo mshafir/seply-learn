@@ -102,6 +102,12 @@ function when(iso: string): string {
     : dateFormat.format(d)
 }
 
+/** A draft I can edit opens in the create flow; anything else opens to read. */
+const cardHref = (card: LibraryCard) =>
+  card.status === "draft" && card.role !== "viewer"
+    ? `/new/${card.id}`
+    : `/e/${card.id}`
+
 const cardLink =
   "outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-3 focus-visible:after:ring-ring/50"
 
@@ -253,7 +259,7 @@ function ExpeditionCard({
       </div>
       <CardHeader>
         <CardTitle className="font-reading text-xl font-medium">
-          <Link href={`/e/${card.id}`} className={cardLink}>
+          <Link href={cardHref(card)} className={cardLink}>
             {card.title || "Untitled Expedition"}
           </Link>
         </CardTitle>
@@ -448,7 +454,7 @@ export function LibraryScreen() {
     setBusy("new")
     try {
       const created = await createExpedition("Untitled Expedition")
-      navigate(`/e/${created.id}`)
+      navigate(`/new/${created.id}`)
     } catch (e) {
       setBusy(null)
       toast.add({

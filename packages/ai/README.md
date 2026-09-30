@@ -65,6 +65,23 @@ The build estimate's step shapes (tool steps per Concept and View, output per st
 - **`commit({ label, views? })`:** takes everything staged as one Change. It inspects every View the staged ops create or change, plus `views`, and checks the Expedition; with any problem it returns `{ ok: false, blocked }` and keeps the staged ops. Otherwise it marks those Views `ready`, returns `{ ok: true, label, bodies, views }`, calls `onCommit`, and makes the state the new base.
 - **Ports:** the app that runs the job fills them. `views` is `@seply/views/inspect`'s `readView` (`{ read: readView }`); `sources` is WP-3.1's segment store (`memorySourceReader` meanwhile). This package never imports `@seply/views` (spec §2.1).
 
+### The skim and the playbook (spec §5.2 step 2; WP-3.4)
+
+| Export | What it is |
+|---|---|
+| `runSkim({ model, sources, goals?, request?, takenIds?, abortSignal? })` → `SkimRun` | Reads a sample of the Sources on the fast model (pass `modelFor(setup, "skim", meter)`) and returns `{ result: SkimResult, usage, ms, sample }`. Throws when the model fails or answers with something unusable, or `SpendingCapReached`. Writes nothing. |
+| `SkimRequest` | `{ mode: "propose" }` (4–8 Views, 3–4 on, and the Expedition's title and summary), `{ mode: "more", existing }` (2–4 more, none on, no repeats), `{ mode: "ask", request, existing }` (exactly one, on). `SKIM_COUNTS` holds the numbers. |
+| `SkimResult`, `ProposedView` | `{ title, summary, views }`, ranked (the first is the proposed best View). A View: `id` (`v-` plus a kebab name, unique in one answer; not a View id), `viewType`, `label` (≤ 6 words), `question`, `why`, `on`, `confidence`. |
+| `skimSample(sources)` | The sample (spec §5.2): each Source's first and last 3 segments, every reader turn (`speaker === "user"`), and each document section's heading with a little text, labelled with Source and segment ids. Per-segment limits shrink until it fits `SKIM_SAMPLE.budgetChars` (48k characters). |
+| `skimSystem()`, `skimPrompt({ sample, goals, request })`, `SkimOutput`, `normalizeSkim(raw, request, takenIds)` | The system prompt (the playbook's `skim.md`, then the catalog), the user message (the task, the goals, the sample), the shape asked of the model (`viewType` is a string, so one bad View Type doesn't fail the answer), and settling the answer: catalog View Types only, unique kebab ids, no repeats, the mode's counts and number on. |
+| `GOALS`, `Goal`, `GOAL_LABELS` | The goal chips: `learn` ("learn it"), `decide`, `plan`. |
+| `VIEW_TYPE_CATALOG`, `SKIM_VIEW_TYPES`, `CatalogEntry` | The View Types the skim may propose: every proven and experimental one in `docs/view-types/` (candidates never), with its `answers`, "Draws on" and "Building it from a source". |
+| `startingSettings(viewType)`, `UNSET_ATTRIBUTE` | A queued View's settings: valid for its View Type's schema and naming only built-in Kinds and Relationship Types (Quadrant's and Rates' Attributes are `"unset"`). The create flow saves chosen Views with them; the curator replaces them when it builds the View (`view_build` with the View's id). |
+
+**The playbook** lives in `playbook/` (`skim.md` now; WP-3.5b moves the other seeding prompts in). Workers have no file system, so `pnpm --filter @seply/ai playbook` (`scripts/build-playbook.ts`) copies the prompts, and the catalog parsed from `docs/view-types/*.md`, into `src/playbook/generated.ts`; `src/playbook/playbook.test.ts` fails while it is stale. Re-run it after editing a playbook file or a View Type definition.
+
+**Measured** (`scripts/measure-skim.ts`, real calls through the AI Gateway on the default skim model, Claude Haiku 4.5; results in `src/skim-actuals.json`; not part of `pnpm test`: `node --env-file=../../apps/worker/.dev.vars --experimental-transform-types scripts/measure-skim.ts [runs]`). On three synthetic chats (`fixtures/skim/`: learning sourdough, choosing an e-bike, a rail trip; written for WP-3.4) and the research doc, 3 runs each: every run returned 4–8 Views with valid ids and View Types, in 6.2–10.9 s, for $0.008–0.011 a run.
+
 ## Allowed dependencies
 
 @seply/domain (and `zod`). See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.
