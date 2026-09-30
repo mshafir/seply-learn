@@ -25,6 +25,20 @@
       "id": "00000000000000000000000000000000",
     },
   ],
+  // The Expedition room (spec §2.4): one Durable Object per Expedition.
+  "durable_objects": {
+    "bindings": [{ "name": "EXPEDITION_ROOM", "class_name": "ExpeditionRoom" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ExpeditionRoom"] }],
+  // Jobs (spec §2.5): one Workflow runs every job kind. Workflow names are
+  // unique per account; CI renames it per Worker (scripts/ci.mjs).
+  "workflows": [
+    {
+      "name": "seply-learn-jobs",
+      "binding": "JOBS",
+      "class_name": "JobWorkflow",
+    },
+  ],
   "vars": {
     // The Neon branch this deploy reads from; CI overrides it with --var.
     "DB_BRANCH": "local",

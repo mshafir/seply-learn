@@ -87,6 +87,13 @@ export {
   type ReaderStore,
 } from "./reader-store.ts"
 export {
+  RoomClient,
+  roomUrl,
+  type RoomClientOptions,
+  type RoomListener,
+  type RoomStatus,
+} from "./room.ts"
+export {
   fetchSnapshot,
   IndexedDbOfflineCacheStore,
   MemoryOfflineCacheStore,

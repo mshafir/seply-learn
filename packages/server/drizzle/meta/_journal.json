@@ -15,6 +15,13 @@
       "when": 1790711983350,
       "tag": "0001_search",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790796134500,
+      "tag": "0002_jobs_and_push",
+      "breakpoints": true
     }
   ]
 }

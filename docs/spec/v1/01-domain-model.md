@@ -48,6 +48,9 @@ reading_status   user_id, concept_id, state (unread|read|known), at    (per read
 personal_view_settings  user_id, view_id, settings{}, at               (per reader)
 reader_position  user_id, expedition_id, view_id, focus_concept_id, step, panel_depth, at  (per reader)
 trash            expedition_id, deleted_by, purge_after                (30 days)
+jobs             id, exp, kind, input{}, started_by, status (queued|running|complete|failed|cancelled),
+                 step, progress, error, attempt, created_at, updated_at   (plain rows, not logged; §2.5)
+push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; web push, §2.5)
 ```
 
 **Field notes:**

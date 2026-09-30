@@ -25,6 +25,14 @@ export type ServerEnv = {
   AUTH_TEST_CREDENTIALS?: string
   /** The Neon branch this deploy reads from (reported by /api/health). */
   DB_BRANCH?: string
+  /**
+   * Our VAPID key pair for web push (base64url: the 65-byte public point and
+   * the 32-byte private scalar) and a contact for push services
+   * (`mailto:` or `https:`). Web push is off without the keys.
+   */
+  VAPID_PUBLIC_KEY?: string
+  VAPID_PRIVATE_KEY?: string
+  VAPID_SUBJECT?: string
 }
 
 export type ServerConfig = {

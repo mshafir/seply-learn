@@ -3,9 +3,11 @@
 //
 //   node scripts/ci.mjs hyperdrive-upsert <name>   create/update a Hyperdrive config for
 //                                                  $DATABASE_URL, then write wrangler.ci.json
-//                                                  (wrangler.jsonc with that config's id)
+//                                                  (wrangler.jsonc with that config's id,
+//                                                  and Workflows named <name>-<binding>)
 //   node scripts/ci.mjs hyperdrive-delete <name>   delete a Hyperdrive config (no-op if absent)
-//   node scripts/ci.mjs worker-delete <name>       delete a Worker script (no-op if absent)
+//   node scripts/ci.mjs worker-delete <name>       delete a Worker script and its Workflows
+//                                                  (no-op if absent)
 //   node scripts/ci.mjs neon-default-branch        print name=, and write the default branch's
 //                                                  connection string to $GITHUB_OUTPUT as db_url
 //   node scripts/ci.mjs neon-branch-delete <name>  delete a Neon branch by name (no-op if absent)
@@ -107,6 +109,8 @@ async function hyperdriveUpsert(name) {
   const binding = config.hyperdrive?.find((h) => h.binding === "HYPERDRIVE")
   if (!binding) throw new Error("wrangler.jsonc has no HYPERDRIVE binding")
   binding.id = id
+  // Workflow names are unique per account: each Worker gets its own.
+  for (const wf of config.workflows ?? []) wf.name = workflowName(name, wf)
   writeFileSync(join(root, "wrangler.ci.json"), JSON.stringify(config, null, 2))
   console.log("wrote wrangler.ci.json")
 }
@@ -119,6 +123,15 @@ async function hyperdriveDelete(name) {
   console.log(`hyperdrive deleted: ${name}`)
 }
 
+// The Workflow bindings in wrangler.jsonc. Teardown runs without the config
+// parser, so they are listed here too.
+const WORKFLOW_BINDINGS = ["JOBS"]
+
+/** A Worker's own name for one of its Workflows: `<worker>-<binding>`, lowercase. */
+function workflowName(worker, wf) {
+  return `${worker}-${wf.binding.toLowerCase()}`
+}
+
 async function workerDelete(name) {
   const res = await cf(
     "DELETE",
@@ -129,6 +142,16 @@ async function workerDelete(name) {
       ? `worker deleted: ${name}`
       : `worker ${name}: not found, nothing to delete`
   )
+  // Its Workflows outlive the script; delete them too, instances included.
+  for (const binding of WORKFLOW_BINDINGS) {
+    const wf = workflowName(name, { binding })
+    const gone = await cf("DELETE", `/workflows/${encodeURIComponent(wf)}`)
+    console.log(
+      gone
+        ? `workflow deleted: ${wf}`
+        : `workflow ${wf}: not found, nothing to delete`
+    )
+  }
 }
 
 async function neonDefaultBranch() {
@@ -204,11 +227,20 @@ const AUTH_SECRETS = [
   "GOOGLE_CLIENT_SECRET",
 ]
 
+// Copied when set: web push is off without them (WP-3.2).
+const OPTIONAL_SECRETS = [
+  "VAPID_PUBLIC_KEY",
+  "VAPID_PRIVATE_KEY",
+  "VAPID_SUBJECT",
+]
+
 function secretsFile(path) {
-  const secrets = Object.fromEntries(AUTH_SECRETS.map((n) => [n, env(n)]))
+  const optional = OPTIONAL_SECRETS.filter((n) => process.env[n])
+  const names = [...AUTH_SECRETS, ...optional]
+  const secrets = Object.fromEntries(names.map((n) => [n, env(n)]))
   writeFileSync(path, JSON.stringify(secrets), { mode: 0o600 })
   chmodSync(path, 0o600)
-  console.log(`wrote ${AUTH_SECRETS.join(", ")} to ${path}`)
+  console.log(`wrote ${names.join(", ")} to ${path}`)
 }
 
 // Attaches the production Worker to its own hostname. Only the production job calls

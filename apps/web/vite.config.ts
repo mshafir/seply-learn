@@ -1,14 +1,31 @@
+import { readFileSync } from "fs"
 import path from "path"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import { defineConfig, type Plugin } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+
+/**
+ * Emits sw/push-sw.js as /push-sw.js: the service worker's web push handlers,
+ * imported by Workbox's generated worker (spec §2.5).
+ */
+const pushWorker = (): Plugin => ({
+  name: "seply-push-sw",
+  generateBundle() {
+    this.emitFile({
+      type: "asset",
+      fileName: "push-sw.js",
+      source: readFileSync(path.resolve(__dirname, "sw/push-sw.js"), "utf8"),
+    })
+  },
+})
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    pushWorker(),
     // Installable PWA (spec §2.9). The service worker precaches the app
     // shell: the built HTML, JS, CSS, the self-hosted fonts and the brand
     // icons. It caches no API responses: Expeditions for offline reading
@@ -49,6 +66,8 @@ export default defineConfig({
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        // Web push: show a job's notification, open its Expedition on click.
+        importScripts: ["push-sw.js"],
       },
     }),
   ],

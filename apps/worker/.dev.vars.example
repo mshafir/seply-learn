@@ -11,3 +11,9 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # "1" enables email + password sign-in for tests. Ignored on non-localhost URLs.
 AUTH_TEST_CREDENTIALS=
+# "1": wake running jobs after a restart (wrangler dev doesn't resume Workflows).
+JOBS_WAKE_ON_START=1
+# Web push (optional): a VAPID key pair, base64url. Off when empty.
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=
