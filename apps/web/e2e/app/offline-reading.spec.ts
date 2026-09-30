@@ -37,8 +37,7 @@ function savedOffline(
   )
 }
 
-// Blocked by #76: offline, the Learning path Concepts are never measured and stay hidden.
-test.fixme("an opened Expedition reads offline after a reload, read-only, with the chip", async ({
+test("an opened Expedition reads offline after a reload, read-only, with the chip", async ({
   page,
   context,
 }, testInfo) => {
