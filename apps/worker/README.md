@@ -23,4 +23,4 @@ See [docs/ops/deploy.md](../../docs/ops/deploy.md) for previews, production, sig
 
 ## Allowed dependencies
 
-@seply/server, @seply/ai, @seply/domain. See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.
+@seply/server, @seply/ai, @seply/domain, and @seply/views only for `@seply/views/inspect` (the curator's ViewReader; spec §2.1). See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.

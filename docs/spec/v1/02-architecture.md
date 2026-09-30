@@ -11,7 +11,7 @@ Decided in:
 
 ## 2.1 Monorepo
 
-pnpm + Turborepo, TypeScript throughout. Tools come from mise: Node LTS and pnpm. Wrangler, Turbo and drizzle-kit are dev dependencies, and Docker is used only to build the self-host image. Dependencies run one way: `domain ← sync ← views/ui ← web`, and `domain ← server/ai`.
+pnpm + Turborepo, TypeScript throughout. Tools come from mise: Node LTS and pnpm. Wrangler, Turbo and drizzle-kit are dev dependencies, and Docker is used only to build the self-host image. Dependencies run one way: `domain ← sync ← views/ui ← web`, and `domain ← server/ai`. Apps compose packages. The apps that run the curator job (`worker`, `server-node`) may also take `views`, only for `@seply/views/inspect`: the pure, React-free reading of a View (as text) and its layout metrics, which they hand to `ai`'s `ViewReader` port for `view.inspect` ([AI §5.3](05-ai.md#53-tools-and-checks)). `ai` itself never imports `views`.
 
 ```
 apps/

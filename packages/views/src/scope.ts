@@ -59,7 +59,7 @@ function evidenceScope(expedition: Expedition, s: EvidenceSettings): Scope {
 }
 
 // Mechanism mode shows every signed influence; risk mode only what flows
-// into the outcomes. Folded Relationship Types collapse into their target.
+// into the outcomes. A lever's explicit folds collapse into it.
 function causeEffectScope(expedition: Expedition, s: CauseEffectSettings): Scope {
   const signed = expedition.relationships.filter((r) => sign(s, r.type) !== 0);
   let ids: Set<string>;
@@ -77,15 +77,17 @@ function causeEffectScope(expedition: Expedition, s: CauseEffectSettings): Scope
   } else {
     ids = new Set(signed.flatMap((r) => [r.from, r.to]));
   }
-  const relationships = signed.filter((r) => ids.has(r.from) && ids.has(r.to));
+  // Explicit folds (the View's `fold` override): a lever's build steps are
+  // drawn inside it ("+2 build steps"), never as cards of their own.
   const byId = new Map(expedition.concepts.map((c) => [c.id, c]));
   const folded = new Map<string, Concept[]>();
-  for (const r of expedition.relationships) {
-    const from = byId.get(r.from);
-    if (from && s.fold?.includes(r.type) && ids.has(r.to) && !ids.has(r.from)) {
-      folded.set(r.to, [...(folded.get(r.to) ?? []), from]);
-    }
+  for (const [host, kids] of Object.entries(s.fold ?? {})) {
+    if (!ids.has(host)) continue;
+    const inside = kids.filter((k) => k !== host && byId.has(k));
+    for (const k of inside) ids.delete(k);
+    if (inside.length) folded.set(host, inside.map((k) => byId.get(k)!));
   }
+  const relationships = signed.filter((r) => ids.has(r.from) && ids.has(r.to));
   const concepts = expedition.concepts.filter((c) => ids.has(c.id));
   const weights = computeWeights(concepts, relationships);
   // In risk mode the outcome is the point of the View: draw it largest.
