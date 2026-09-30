@@ -132,6 +132,7 @@ export async function runJob(
     commit,
     progress,
     withDb,
+    services: deps.services ?? {},
   }
 
   /** Moves the job's row; false when it had ended or moved on (cancel, retry). */

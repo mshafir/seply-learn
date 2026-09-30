@@ -74,6 +74,7 @@ export {
   type JobPayload,
   type JobRegistry,
   type JobRunner,
+  type JobServices,
   type Json,
   type Progress,
   type StepOptions,
@@ -83,6 +84,13 @@ export { failureReason, runJob } from "./jobs/host.ts"
 export { createJobRunner, JobError } from "./jobs/runner.ts"
 export { createInlineEngine, type InlineEngine } from "./jobs/inline.ts"
 export { fakeJob, fakeViewLabel, FakeJobInput } from "./jobs/fake.ts"
+export {
+  buildJob,
+  BuildJobInput,
+  BuildViewChoice,
+  CAP_PAUSE_PREFIX,
+  isCapPause,
+} from "./jobs/build.ts"
 export { JOB_KINDS } from "./jobs/registry.ts"
 export {
   encryptPayload,

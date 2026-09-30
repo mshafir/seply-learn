@@ -57,7 +57,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
 **Field notes:**
 - **Provenance** (`prov`, `overview_prov`, section `prov`) is a list of refs `{source, segment, quote?}`. An empty list means **background knowledge**.
 - **Dates:** precision comes from the string (`"1987"`, `"2026-11"`, `"2026-11-03"`). `date_end` can be `"ongoing"`. `date_approx` marks relative or fuzzy dates. BCE, eras and "circa" are phase 2.
-- **Built-in Kinds and Relationship Types** live in app code, with stable ids (`builtin:prerequisite`). An Expedition refers to them, adds its own, and can hide a built-in. The v1 set is the one in the [seeding contract](../../../prototypes/seeding/prompts/_contract.md):
+- **Built-in Kinds and Relationship Types** live in app code, with stable ids (`builtin:prerequisite`). An Expedition refers to them, adds its own, and can hide a built-in. The v1 set is the one in the [seeding contract](../../../packages/ai/playbook/_contract.md):
   - **16 Kinds:** idea, topic, question, goal, person, place, thing, claim, evidence, criterion, decision, action, event, source, measurement, risk.
   - **~18 Relationship Types**, each with a forward and an inverse label, including `corrects` for self-corrections.
 - **Colours** are stored as palette names (blue, teal, green, amber, orange, red, pink, violet, indigo, slate, brown, olive), never hex values, so dark mode works.

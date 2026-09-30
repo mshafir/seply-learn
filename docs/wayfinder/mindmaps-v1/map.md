@@ -33,7 +33,7 @@ A **build-ready v1 spec plus an implementation game plan** for **Umbel Learn** (
 - **Settled from the fog (2026-09-28):**
   - *Weight and the default View:* Weight is computed from structure, with curator pins. Each Expedition opens on a curator-chosen best View (default: the first to finish building).
   - *Corrections:* the built-in `corrects` Relationship Type links the correction to what it corrects.
-  - *Built-in default set:* the Kinds and Relationship Types listed in the seeding contract ([`prototypes/seeding/prompts/_contract.md`](../../../prototypes/seeding/prompts/_contract.md)).
+  - *Built-in default set:* the Kinds and Relationship Types listed in the seeding contract ([`prototypes/seeding/prompts/_contract.md`](../../../packages/ai/playbook/_contract.md)).
   - *Concept time (v1):* a point or span, precision taken from the string, an approximate flag, a lane. BCE, eras and "circa" are phase 2.
   - *Snapshot compare / restore:* dissolved into Changes.
 - **Tracker:** local markdown. See [`docs/wayfinder/README.md`](../README.md).

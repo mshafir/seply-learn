@@ -19,6 +19,7 @@
     "@seply/ai": "workspace:*",
     "@seply/domain": "workspace:*",
     "@seply/server": "workspace:*",
+    "@seply/views": "workspace:*",
     "hono": "^4.13.10"
   },
   "devDependencies": {

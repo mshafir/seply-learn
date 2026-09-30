@@ -96,3 +96,38 @@ export {
   type ViewReader,
   type ViewReading,
 } from "./ports.ts"
+
+// The curator's build stages (spec §5.2) and the playbook (spec §5.4)
+export {
+  applyBodies,
+  autoMerge,
+  buildView,
+  conceptCount,
+  conceptSetLabel,
+  describeConcepts,
+  duplicateCandidates,
+  extractConcepts,
+  MAX_STEPS,
+  mergeConceptSet,
+  placeholderSettings,
+  previewNodes,
+  understand,
+  type ConceptStageResult,
+  type StageOptions,
+  type ViewPlan,
+  type ViewStageResult,
+} from "./curator/curator.ts"
+export {
+  CHUNK_TOKENS,
+  chunkFilter,
+  planSources,
+  renderSourceIndex,
+  renderSources,
+  WHOLE_SOURCE_MAX_TOKENS,
+  type CuratorSource,
+  type SourcePlan,
+} from "./curator/sources.ts"
+export { rollCache, runLoop, type LoopOptions, type LoopResult } from "./curator/loop.ts"
+export { playbook, viewTypeDoc } from "./curator/playbook.ts"
+export { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "./playbook.gen.ts"
+export type { LanguageModelV4 } from "@ai-sdk/provider"

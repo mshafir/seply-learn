@@ -32,6 +32,15 @@ importers:
       '@seply/server':
         specifier: workspace:*
         version: link:../../packages/server
+      '@seply/views':
+        specifier: workspace:*
+        version: link:../../packages/views
+      ai:
+        specifier: ^7.0.124
+        version: 7.0.124(zod@4.5.4)
+      drizzle-orm:
+        specifier: ^0.45.3
+        version: 0.45.3(@electric-sql/pglite@0.5.8)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.0)
     devDependencies:
       '@eslint/js':
         specifier: ^10
@@ -166,6 +175,9 @@ importers:
       '@seply/server':
         specifier: workspace:*
         version: link:../../packages/server
+      '@seply/views':
+        specifier: workspace:*
+        version: link:../../packages/views
       hono:
         specifier: ^4.13.10
         version: 4.13.10

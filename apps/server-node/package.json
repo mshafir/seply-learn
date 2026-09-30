@@ -14,7 +14,10 @@
   "dependencies": {
     "@seply/server": "workspace:*",
     "@seply/ai": "workspace:*",
-    "@seply/domain": "workspace:*"
+    "@seply/domain": "workspace:*",
+    "@seply/views": "workspace:*",
+    "ai": "^7.0.124",
+    "drizzle-orm": "^0.45.3"
   },
   "devDependencies": {
     "@seply/config": "workspace:*",

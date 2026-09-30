@@ -1,6 +1,6 @@
-# Stage 2a: Skim (propose Views)
+# Skim (propose Views)
 
-Runs on a fast model the moment the reader clicks Next. It must finish in ~10–20 s, so it reads a **sample**, not everything: the first and last few segments of each Source, every user turn of a chat (they carry the questions), and the headings of documents. Extraction runs in parallel; this stage never waits for it.
+Runs on a fast model the moment the reader clicks Next, with structured output (no tools). It must finish in ~10–20 s, so it reads a **sample**, not everything: the first and last few segments of each Source, every user turn of a chat (they carry the questions), and the headings of documents. The curator starts building the Concept set at the same moment; this stage never waits for it.
 
 ## Input
 
@@ -12,7 +12,7 @@ Runs on a fast model the moment the reader clicks Next. It must finish in ~10–
 
 1. Name the Expedition: a short title (≤ 6 words) and a one-sentence summary of what it covers.
 2. Propose **4–8 Views** that would each answer a real question these Sources raise. For each:
-   - `id`: `v-` plus a short kebab name (`v-learning-path`, `v-compare-models`); build-view output files are keyed by it.
+   - `id`: `v-` plus a short kebab name (`v-learning-path`, `v-compare-models`).
    - `viewType`: one from the catalog.
    - `question`: the question in the reader's terms, specific to this material ("How do the open models stack up?", not "Comparison").
    - `why`: one short line tying it to the Sources ("You kept asking 'what is…' and 'back up'", "The sources disagree on a few numbers").
