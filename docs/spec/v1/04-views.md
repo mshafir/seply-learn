@@ -42,7 +42,7 @@ The View Type definitions live in [`docs/view-types/`](../../view-types/README.m
 ## 4.3 Layout rules (canvas Views)
 
 - **Each View is a pure layout function** `(scope, view, visible?) → positions (+ bands, ticks)`. React Flow 12 only renders. There are **no stored positions**.
-- **Layouts don't depend on input order.** Before laying out, the scope is sorted by what a reader sees: Concepts by title, then id; Relationships by their ends in that order. The same Expedition lays out the same from a file or from live collections (which list rows by key and hold minted ids). ([#60](https://github.com/mshafir/umbel-learn/issues/60))
+- **Layouts don't depend on input order.** Before laying out, the scope is sorted by what a reader sees: Concepts by title, then id; Relationships by their ends in that order. The same Expedition lays out the same from a file or from live collections (which list rows by key and hold minted ids). ([#60](https://github.com/mshafir/seply-learn/issues/60))
 - **Cards are sized for their titles:** a title that wraps to more lines gets a taller card, and the layout leaves room for it, so cards never run into each other.
 - **View switches** tween node positions by Concept id (d3-timer), then call `fitView`.
 - **Performance:** hundreds of nodes are comfortable. About 1–2k works but degrades; beyond that, simplify at low zoom.

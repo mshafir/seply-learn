@@ -1,4 +1,4 @@
-# @umbel/domain
+# @seply/domain
 
 **Lane:** A: Data & sync
 
@@ -25,7 +25,7 @@ The domain model of an Expedition, pure TypeScript with no I/O. Spec: [`docs/spe
 
 ### Fixtures
 
-`fixtures/` holds our JSON (v1) for the two public Expeditions: `compute.json` (the hand-made compute sample: 201 Concepts, 425 Relationships, 12 Views) and `research-doc.json` (generated from `docs/research/knowledge-graph-learning-tools.md`: 141, 331, 4), plus `trip.json`, a synthetic, hand-written week on a Swiss rail loop (public places, made-up plans, nobody real) with a Map and a Timeline View; the fixtures script leaves it alone. Import them as `@umbel/domain/fixtures/<name>.json`. `pnpm --filter @umbel/domain fixtures` regenerates them from `prototypes/sample-graphs` by upgrading version 0 files. Never add personal graphs (see the plan's private-data rule).
+`fixtures/` holds our JSON (v1) for the two public Expeditions: `compute.json` (the hand-made compute sample: 201 Concepts, 425 Relationships, 12 Views) and `research-doc.json` (generated from `docs/research/knowledge-graph-learning-tools.md`: 141, 331, 4), plus `trip.json`, a synthetic, hand-written week on a Swiss rail loop (public places, made-up plans, nobody real) with a Map and a Timeline View; the fixtures script leaves it alone. Import them as `@seply/domain/fixtures/<name>.json`. `pnpm --filter @seply/domain fixtures` regenerates them from `prototypes/sample-graphs` by upgrading version 0 files. Never add personal graphs (see the plan's private-data rule).
 
 ### Import: what is re-minted
 

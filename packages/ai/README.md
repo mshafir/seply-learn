@@ -1,4 +1,4 @@
-# @umbel/ai
+# @seply/ai
 
 **Lane:** E: AI
 
@@ -8,4 +8,4 @@ The curator agent (AI SDK 7 ToolLoopAgent), its tools and view.inspect checks, t
 
 ## Allowed dependencies
 
-@umbel/domain. See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.
+@seply/domain. See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.

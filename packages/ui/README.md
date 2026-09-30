@@ -1,4 +1,4 @@
-# @umbel/ui
+# @seply/ui
 
 **Lane:** D: App & UI
 
@@ -8,15 +8,15 @@ shadcn components on Base UI, design tokens (light + warm charcoal dark), fonts,
 
 | Export | What it is |
 |---|---|
-| `@umbel/ui/globals.css` | Tailwind v4, shadcn tokens, our tokens, fonts, Typeset. Import once, in the app entry. |
-| `@umbel/ui/components/*` | shadcn (Base UI) components: `alert`, `avatar`, `badge`, `button`, `card`, `command` (cmdk, as shadcn's), `dialog`, `dropdown-menu`, `empty`, `input`, `label`, `scroll-area`, `separator`, `sheet`, `sidebar`, `skeleton`, `spinner`, `switch`, `toast`, `toggle`, `toggle-group`, `tooltip`, plus `view-type-thumbnail` (`ViewTypeThumbnail` and `THUMBNAIL_VIEW_TYPES`: the fixed illustration of each View Type, divergence 3). Add more with `mise exec -- pnpm dlx shadcn@latest add <name>` from `apps/web` (hooks land in `apps/web/src/hooks`; move them to `src/hooks`, which is where the components import them from). `command`, `dialog`, `label` and `switch` (WP-2.6) were transcribed from the base-nova registry by hand because the session that added them couldn't reach ui.shadcn.com; re-running `shadcn add` over them should leave only formatting differences. |
-| `@umbel/ui/hooks/use-mobile` | shadcn's `useIsMobile` (below 768 px), used by `sidebar`. Rewritten with `useSyncExternalStore` so it passes the React Compiler lint rule against setState in effects; same behaviour. |
-| `@umbel/ui/components/theme-provider` | `ThemeProvider` and `useTheme()` → `{ theme, resolvedTheme, setTheme }`. `theme` is `system \| light \| dark` (persisted under `umbel-theme`); `resolvedTheme` is what is on screen and follows the OS live. |
-| `@umbel/ui/components/mode-toggle` | `ModeToggle`: System / Light / Dark (DropdownMenu + Button). |
-| `@umbel/ui/components/brand` | `Wordmark` and `UmbelGlyph`, drawn with tokens so they follow the theme. |
-| `@umbel/ui/lib/kinds` | `KIND_HUES` (the 12 names) and `kindColor(name)` → `var(--kind-<name>)`. |
-| `@umbel/ui/lib/color` | oklch parsing and WCAG contrast, used by the token test. |
-| `@umbel/ui/brand/*` | The swappable brand folder (below). |
+| `@seply/ui/globals.css` | Tailwind v4, shadcn tokens, our tokens, fonts, Typeset. Import once, in the app entry. |
+| `@seply/ui/components/*` | shadcn (Base UI) components: `alert`, `avatar`, `badge`, `button`, `card`, `command` (cmdk, as shadcn's), `dialog`, `dropdown-menu`, `empty`, `input`, `label`, `scroll-area`, `separator`, `sheet`, `sidebar`, `skeleton`, `spinner`, `switch`, `toast`, `toggle`, `toggle-group`, `tooltip`, plus `view-type-thumbnail` (`ViewTypeThumbnail` and `THUMBNAIL_VIEW_TYPES`: the fixed illustration of each View Type, divergence 3). Add more with `mise exec -- pnpm dlx shadcn@latest add <name>` from `apps/web` (hooks land in `apps/web/src/hooks`; move them to `src/hooks`, which is where the components import them from). `command`, `dialog`, `label` and `switch` (WP-2.6) were transcribed from the base-nova registry by hand because the session that added them couldn't reach ui.shadcn.com; re-running `shadcn add` over them should leave only formatting differences. |
+| `@seply/ui/hooks/use-mobile` | shadcn's `useIsMobile` (below 768 px), used by `sidebar`. Rewritten with `useSyncExternalStore` so it passes the React Compiler lint rule against setState in effects; same behaviour. |
+| `@seply/ui/components/theme-provider` | `ThemeProvider` and `useTheme()` → `{ theme, resolvedTheme, setTheme }`. `theme` is `system \| light \| dark` (persisted under `seply-theme`); `resolvedTheme` is what is on screen and follows the OS live. |
+| `@seply/ui/components/mode-toggle` | `ModeToggle`: System / Light / Dark (DropdownMenu + Button). |
+| `@seply/ui/components/brand` | `Wordmark` and `SeplyGlyph`, drawn with tokens so they follow the theme. |
+| `@seply/ui/lib/kinds` | `KIND_HUES` (the 12 names) and `kindColor(name)` → `var(--kind-<name>)`. |
+| `@seply/ui/lib/color` | oklch parsing and WCAG contrast, used by the token test. |
+| `@seply/ui/brand/*` | The swappable brand folder (below). |
 
 ## Tokens
 
@@ -67,8 +67,8 @@ IBM Plex Sans (`font-sans`, the interface), IBM Plex Mono (`font-mono`, labels) 
 
 | File | Use |
 |---|---|
-| `glyph.svg` | The umbel: stalks from one point to small dots, in ink with one indigo dot. Follows `prefers-color-scheme`. |
-| `wordmark.svg` | Glyph + "Umbel" (Newsreader) + "Learn" (Plex Sans). Standalone use only: its text needs the fonts installed. In the app use `<Wordmark>`. |
+| `glyph.svg` | Placeholder mark until branding lands (the old umbel): stalks from one point to small dots, in ink with one indigo dot. Follows `prefers-color-scheme`. |
+| `wordmark.svg` | Glyph + "Seply" (Newsreader) + "Learn" (Plex Sans). Standalone use only: its text needs the fonts installed. In the app use `<Wordmark>`. |
 | `favicon.svg`, `favicon-32.png` | The glyph with heavier strokes for small sizes. |
 | `icon.svg` | App icon source: the glyph on the ground colour, inside the maskable safe zone. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | PWA and iOS icons, rasterised from `icon.svg` (they work as `any` and `maskable`). The manifest arrives with WP-2.7. |

@@ -1,6 +1,6 @@
-# Umbel Learn v1: build spec
+# Seply Learn v1: build spec
 
-**Umbel Learn** (a placeholder name; Umbel is the umbrella for separate LLM tools: Learn, Work, Plan) is a collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject. A reader learns a subject in well-defined chunks, sees it from several angles, and sees what they need to know first. Humans and LLMs curate Expeditions together.
+**Seply Learn** (Seply is the umbrella for separate LLM tools: Learn, Work, Plan; previously Umbel Learn, see [ADR 0002](../../adr/0002-rename-to-seply.md)) is a collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject. A reader learns a subject in well-defined chunks, sees it from several angles, and sees what they need to know first. Humans and LLMs curate Expeditions together.
 
 This spec is **build-ready**: every decision it relies on was made on the [wayfinder map](../../wayfinder/mindmaps-v1/map.md), and each section links the ticket that holds the detail and the reasoning. Where this spec and a ticket disagree, the ticket's latest resolution or amendment wins; please fix the spec. The **implementation game plan** (milestones, work packages, lanes) is a separate document built on this one.
 
@@ -13,7 +13,7 @@ This spec is **build-ready**: every decision it relies on was made on the [wayfi
 | 3 | [Screens and flows](03-screens-and-flows.md) | Every screen, what it does, and its states |
 | 4 | [Views and View Types](04-views.md) | The View Types shipped in v1, settings, per-View structure, layout rules |
 | 5 | [AI: building and growing](05-ai.md) | The curator agent, its tools and checks, the skim, writing, Grow, keys and cost |
-| 6 | [MCP and skills](06-mcp.md) | The remote MCP server, tools, auth and the `umbel-learn` skill |
+| 6 | [MCP and skills](06-mcp.md) | The remote MCP server, tools, auth and the `seply-learn` skill |
 | 7 | [Design system](07-design-system.md) | shadcn with Base UI, tokens, dark mode, divergences, branding |
 | 8 | [Phase 2 sketch](08-phase-2.md) | What comes after v1, and what v1 must not block |
 
@@ -40,7 +40,7 @@ This spec is **build-ready**: every decision it relies on was made on the [wayfi
 - **Collaborate** with owner, editor and viewer roles, live presence, a history of Changes with undo and restore, and Fork.
 - **Share** it: private, unlisted or public, with a live link. Export JSON or Markdown, and import JSON.
 - **Search** across everything you can see.
-- **Let agents in** through a remote MCP server and the `umbel-learn` skill.
+- **Let agents in** through a remote MCP server and the `seply-learn` skill.
 
 ## Assumptions made while assembling
 

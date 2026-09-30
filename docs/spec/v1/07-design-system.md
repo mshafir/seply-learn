@@ -59,6 +59,6 @@ shadcn `:root` / `.dark` pairs in oklch, exposed via `@theme inline`. Our own to
 
 ## 7.5 Placeholder branding
 
-- **Wordmark:** "Umbel" in Newsreader and "Learn" in IBM Plex Sans.
-- **Glyph:** an **umbel** (stalks radiating from one point to small dots), in ink with one indigo dot.
+- **Wordmark:** "Seply" in Newsreader and "Learn" in IBM Plex Sans.
+- **Glyph:** a placeholder until the Seply branding lands: the old umbel mark (stalks radiating from one point to small dots), in ink with one indigo dot.
 - Used for the favicon, the PWA icons and the header, from one swappable folder: `packages/ui/brand`.

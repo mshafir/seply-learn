@@ -1,4 +1,4 @@
-# @umbel/config
+# @seply/config
 
 **Lane:** B: Server & infra
 
