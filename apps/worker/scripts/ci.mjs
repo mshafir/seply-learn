@@ -20,8 +20,8 @@
 //
 // Env: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, NEON_API_KEY, NEON_PROJECT_ID,
 // DATABASE_URL, the AUTH_SECRETS, and optionally NEON_DATABASE (neondb),
-// NEON_ROLE (neondb_owner), WORKER_PRODUCTION (umbel-learn) and PRODUCTION_DOMAIN
-// (e.g. learn.umbel.dev; unset means production stays on workers.dev).
+// NEON_ROLE (neondb_owner), WORKER_PRODUCTION (seply-learn) and PRODUCTION_DOMAIN
+// (e.g. learn.seply.dev; unset means production stays on workers.dev).
 import { appendFileSync, chmodSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -180,7 +180,7 @@ async function workerUrls(name) {
     throw new Error(
       "no workers.dev subdomain on this account (see the docs/ops/deploy.md checklist)"
     )
-  const production = process.env.WORKER_PRODUCTION || "umbel-learn"
+  const production = process.env.WORKER_PRODUCTION || "seply-learn"
   const domain = process.env.PRODUCTION_DOMAIN
   const productionUrl = domain
     ? `https://${domain}`
@@ -191,7 +191,7 @@ async function workerUrls(name) {
         ? productionUrl
         : `https://${name}.${sub}.workers.dev`,
     production_url: productionUrl,
-    preview_origins: `https://umbel-pr-*.${sub}.workers.dev`,
+    preview_origins: `https://seply-pr-*.${sub}.workers.dev`,
   }
   output(values)
   console.log(values)
