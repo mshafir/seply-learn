@@ -99,6 +99,11 @@ jobs:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
         run: node scripts/ci.mjs hyperdrive-upsert "$WORKER_PREVIEW"
 
+      # Source files: one bucket shared by every preview (keys are per Expedition).
+      - name: Point the Sources bucket binding at the preview bucket
+        working-directory: apps/worker
+        run: node scripts/ci.mjs r2-bucket seply-sources-preview
+
       - name: Work out the Worker URLs
         id: urls
         working-directory: apps/worker
@@ -293,6 +298,10 @@ jobs:
         env:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
         run: node scripts/ci.mjs hyperdrive-upsert seply-production
+
+      - name: Point the Sources bucket binding at the production bucket
+        working-directory: apps/worker
+        run: node scripts/ci.mjs r2-bucket seply-sources
 
       - name: Work out the Worker URLs
         id: urls

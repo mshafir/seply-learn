@@ -1,0 +1,51 @@
+[
+  {
+    "uuid": "00000000-0000-4000-8000-000000000001",
+    "name": "Photosynthesis, briefly",
+    "created_at": "2026-09-01T10:00:00.000000Z",
+    "updated_at": "2026-09-01T10:05:00.000000Z",
+    "account": { "uuid": "00000000-0000-4000-8000-00000000000a" },
+    "chat_messages": [
+      {
+        "uuid": "00000000-0000-4000-8000-000000000011",
+        "text": "What does photosynthesis actually produce?",
+        "content": [{ "type": "text", "text": "What does photosynthesis actually produce?" }],
+        "sender": "human",
+        "created_at": "2026-09-01T10:00:00.000000Z",
+        "attachments": [],
+        "files": []
+      },
+      {
+        "uuid": "00000000-0000-4000-8000-000000000012",
+        "text": "",
+        "content": [
+          { "type": "text", "text": "Glucose and oxygen, from carbon dioxide and water, powered by light." },
+          { "type": "tool_use", "name": "noop", "input": {} },
+          { "type": "text", "text": "The light reactions happen in the thylakoids; the Calvin cycle in the stroma." }
+        ],
+        "sender": "assistant",
+        "created_at": "2026-09-01T10:00:05.000000Z",
+        "attachments": [],
+        "files": []
+      },
+      {
+        "uuid": "00000000-0000-4000-8000-000000000013",
+        "text": "And what happens at night?",
+        "content": [],
+        "sender": "human",
+        "created_at": "2026-09-01T10:01:00.000000Z",
+        "attachments": [],
+        "files": []
+      },
+      {
+        "uuid": "00000000-0000-4000-8000-000000000014",
+        "text": "The light reactions stop, but cellular respiration carries on day and night.",
+        "content": [{ "type": "text", "text": "The light reactions stop, but cellular respiration carries on day and night." }],
+        "sender": "assistant",
+        "created_at": "2026-09-01T10:01:05.000000Z",
+        "attachments": [],
+        "files": []
+      }
+    ]
+  }
+]

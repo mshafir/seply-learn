@@ -1,7 +1,13 @@
 // @seply/worker: see README.md for this package's contract.
 // Static assets (the SPA) are served by Cloudflare before this code runs;
 // only /api/* reaches the Worker (see run_worker_first in wrangler.jsonc).
-import { connectPg, createApp, type JobRunner, type Relay } from "@seply/server"
+import {
+  connectPg,
+  createApp,
+  r2BlobStore,
+  type JobRunner,
+  type Relay,
+} from "@seply/server"
 import { env } from "cloudflare:workers"
 import { Hono } from "hono"
 import type { Bindings } from "./bindings.ts"
@@ -55,6 +61,7 @@ app.route(
         await conn.close()
       }
     },
+    blobs: (env) => (env?.SOURCES ? r2BlobStore(env.SOURCES) : null),
   })
 )
 

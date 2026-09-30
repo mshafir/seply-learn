@@ -1,8 +1,9 @@
 // The Concept panel's reading content (spec §3.7, canvas 04). Two places on
 // the back stack: the overview depth (summary, Attributes, the overview in
 // Newsreader, Relationships both ways) and the article depth (its sections).
-// Each overview and section carries a provenance badge. In-text `#c/` links
-// and Relationship links push onto the back stack.
+// Each overview and section carries a provenance badge, which opens the
+// Source viewer at the cited segment. In-text `#c/` links and Relationship
+// links push onto the back stack.
 import * as React from "react"
 import {
   ArrowLeftIcon,
@@ -41,6 +42,8 @@ export type ConceptReading = {
   onBack: (() => void) | null
   /** Where Back goes, for its label. */
   previous: PanelEntry | null
+  /** Opens the Source viewer at a provenance ref. */
+  onOpenSource: (ref: { source: string; segment: string }) => void
 }
 
 /**
@@ -165,17 +168,30 @@ function ProvenanceBadge({
   of: string
 }) {
   const label = provenanceLabel(prov, reading.data.sources)
-  // The Source viewer (which opens at the segment) is a later work package;
-  // until then the badge only names where the content came from.
+  const ref = label.ref
+  // A ref to a Source this Expedition has opens the Source viewer there.
+  const opens = !!ref && reading.data.sources.some((s) => s.id === ref.source)
   return (
     <Badge
       variant={label.kind}
       data-testid="provenance"
       data-provenance={label.kind}
-      data-source={label.ref?.source}
-      data-segment={label.ref?.segment}
-      aria-label={`Provenance of ${of}: ${label.text}`}
+      data-source={ref?.source}
+      data-segment={ref?.segment}
+      aria-label={`Provenance of ${of}: ${label.text}${opens ? " (open the Source)" : ""}`}
       className="self-start"
+      render={
+        opens ? (
+          <a
+            href={`?${new URLSearchParams({ source: ref.source, segment: ref.segment })}`}
+            onClick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey) return
+              event.preventDefault()
+              reading.onOpenSource(ref)
+            }}
+          />
+        ) : undefined
+      }
     >
       {label.text}
     </Badge>

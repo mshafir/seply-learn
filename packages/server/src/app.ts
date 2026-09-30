@@ -6,6 +6,7 @@ import type { ProviderOptions } from "@seply/ai"
 import { Hono, type Context, type MiddlewareHandler } from "hono"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
+import type { BlobStore } from "./blobs.ts"
 import {
   ConfigError,
   readConfig,
@@ -21,6 +22,7 @@ import { webPushRoutes } from "./push/index.ts"
 import { readerRoutes } from "./reader.ts"
 import { noopRelay, type Relay } from "./relay.ts"
 import { searchRoutes } from "./search.ts"
+import { sourceRoutes } from "./sources/routes.ts"
 import { syncRoutes } from "./sync.ts"
 
 export type SessionUser = { id: string; email: string; name: string }
@@ -30,6 +32,8 @@ export type AppVariables = {
   db: () => Promise<Db>
   config: () => ServerConfig
   auth: () => Promise<Auth>
+  /** The blob store (Source files and segments); throws when there is none. */
+  blobs: () => BlobStore
   /** Set by `requireUser`. */
   user: SessionUser
 }
@@ -44,6 +48,8 @@ export type AppOptions<Env extends ServerEnv> = {
   connect: Connect<Env>
   /** Told about newly logged ops after each push commits. Default: `noopRelay`. */
   relay?: Relay
+  /** Where Source files and segments go (R2, a volume, memory in tests); null: none. */
+  blobs?: (env: Env) => BlobStore | null
   /** Provider options for AI calls made by routes (tests pass a fake `fetch`). */
   ai?: ProviderOptions
   /** Starts, cancels and retries jobs. Without one, the job routes answer 501. */
@@ -57,6 +63,7 @@ export type AppOptions<Env extends ServerEnv> = {
 }
 
 class NoDatabase extends Error {}
+class NoBlobStore extends Error {}
 
 /** Runs `p` after the response on Workers; awaits it elsewhere (Node, tests). */
 async function afterResponse(c: Context, p: Promise<unknown>) {
@@ -86,6 +93,12 @@ function resources<Env extends ServerEnv>(
     const getConfig = () => (config ??= readConfig(c.env ?? {}))
     c.set("db", db)
     c.set("config", getConfig)
+    let store: BlobStore | null | undefined
+    c.set("blobs", () => {
+      store ??= opts.blobs?.(c.env as Env) ?? null
+      if (!store) throw new NoBlobStore()
+      return store
+    })
     c.set("auth", () => (auth ??= db().then((d) => createAuth(getConfig(), d))))
     try {
       await next()
@@ -131,6 +144,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.onError((err, c) => {
     if (err instanceof NoDatabase)
       return c.json({ error: "no database configured" }, 503)
+    if (err instanceof NoBlobStore)
+      return c.json({ error: "no file storage configured" }, 503)
     if (err instanceof ConfigError) {
       console.error("config:", err.message)
       return c.json({ error: "server not configured" }, 503)
@@ -179,6 +194,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/reader", readerRoutes(relay))
   app.use("/search", signedIn)
   app.route("/search", searchRoutes())
+  app.route("/sources", sourceRoutes(relay))
   app.use("/ai", signedIn)
   app.use("/ai/*", signedIn)
   app.route("/ai", aiRoutes(opts.ai))

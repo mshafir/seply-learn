@@ -39,6 +39,9 @@
       "class_name": "JobWorkflow",
     },
   ],
+  // Source files and their segments (spec §2.7). CI points previews at
+  // seply-sources-preview (scripts/ci.mjs r2-bucket); wrangler dev simulates it locally.
+  "r2_buckets": [{ "binding": "SOURCES", "bucket_name": "seply-sources" }],
   "vars": {
     // The Neon branch this deploy reads from; CI overrides it with --var.
     "DB_BRANCH": "local",

@@ -4,6 +4,8 @@ import type { ExpeditionRoom } from "./room.ts"
 /** This Worker's env: the server's vars and secrets, plus its bindings. */
 export type Bindings = ServerEnv & {
   HYPERDRIVE?: Hyperdrive
+  /** Source files and segments. */
+  SOURCES?: R2Bucket
   EXPEDITION_ROOM: DurableObjectNamespace<ExpeditionRoom>
   JOBS: Workflow<JobPayload>
   /**
