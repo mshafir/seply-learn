@@ -505,7 +505,7 @@ export const jobs = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     status: text("status", {
-      enum: ["queued", "running", "complete", "failed", "cancelled"],
+      enum: ["queued", "running", "paused", "complete", "failed", "cancelled"],
     })
       .notNull()
       .default("queued"),
@@ -516,6 +516,8 @@ export const jobs = pgTable(
     error: text("error"),
     /** How many times it was started: 1, then one more per retry. */
     attempt: integer("attempt").notNull().default(1),
+    /** How many times the reader chose Continue at the spending cap. */
+    capRaises: integer("cap_raises").notNull().default(0),
     createdAt: ts("created_at").notNull().defaultNow(),
     updatedAt: ts("updated_at").notNull().defaultNow(),
   },

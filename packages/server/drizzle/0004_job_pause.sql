@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ADD COLUMN "cap_raises" integer DEFAULT 0 NOT NULL;

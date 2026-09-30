@@ -5,6 +5,7 @@
 //   GET  /jobs/:id               → { job }                        (read)
 //   POST /jobs/:id/cancel        → { job }                        (useAi)
 //   POST /jobs/:id/retry         → { job }                        (useAi)
+//   POST /jobs/:id/continue      → { job }  paused at the cap     (useAi)
 //   GET  /expeditions/:id/live   WebSocket upgrade into the room  (read)
 //
 // A job or Expedition the caller can't view is a 404; one they can view but
@@ -144,6 +145,17 @@ export function jobRoutes(runner: JobRunner | undefined, relay: Relay) {
     if (res) return res
     try {
       return c.json({ job: await runner.retry(db, job!.id) })
+    } catch (err) {
+      return refused(c, err)
+    }
+  })
+
+  r.post("/jobs/:id/continue", async (c) => {
+    if (!runner) return noRunner(c)
+    const { db, job, res } = await jobFor(c, "useAi")
+    if (res) return res
+    try {
+      return c.json({ job: await runner.continue(db, job!.id) })
     } catch (err) {
       return refused(c, err)
     }

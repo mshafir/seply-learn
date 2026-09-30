@@ -2,12 +2,14 @@
 // It queues some Outline Views in one Change, then builds each in its own
 // step and commits it as its own Change ("checkpoint per commit"), streaming
 // `build` events with preview Concepts. Its input can force a step to fail
-// once (it is retried) or on every try (the View and the job fail), and can slow
+// once (it is retried) or on every try (the View and the job fail), can stop
+// at the spending cap before a View (the job pauses until Continue), and can slow
 // each step so a test can restart the runtime mid-job. A retry resumes: Views
 // it built before stay as they are.
 //
 // Startable only where test credentials are on (a localhost Worker). The
 // Building UX (WP-3.7) and the e2e tests use it.
+import { SpendMeter } from "@seply/ai"
 import { isLive, keysAfter, ulid, type OpBody } from "@seply/domain"
 import { z } from "zod"
 import { loadState } from "../projection.ts"
@@ -31,7 +33,16 @@ export const FakeJobInput = z.strictObject({
       jobAttempts: z.number().int().min(1).default(1),
     })
     .optional(),
+  /**
+   * The View (1-based) before which the job reaches its spending cap: it
+   * pauses there until the reader chooses Continue (the next attempt, with
+   * the cap raised, goes on past it).
+   */
+  capAt: z.number().int().min(1).optional(),
 })
+
+/** The fake job's spending cap, in USD (it has spent it all by `capAt`). */
+export const FAKE_CAP_USD = 0.5
 export type FakeJobInput = z.infer<typeof FakeJobInput>
 
 export const fakeViewLabel = (n: number) => `Test View ${n}`
@@ -48,7 +59,7 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
       : { title: "Test build failed", body: "A test View could not be built." },
 
   async run(ctx) {
-    const { views, stepMs, failOnce, failView } = ctx.input
+    const { views, stepMs, failOnce, failView, capAt } = ctx.input
     const failing = (n: number) =>
       failView?.n === n && ctx.job.attempt <= failView.jobAttempts
     const { expeditionId } = ctx.job
@@ -108,6 +119,18 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
     for (const { n, viewId, status } of plan.views) {
       if (status === "ready") continue
       const label = fakeViewLabel(n)
+      if (capAt === n)
+        await ctx.step(`spend before View ${n}`, async () => {
+          // The whole cap is spent by here; each Continue raises it once.
+          const meter = new SpendMeter({
+            kind: "build",
+            capUsd: FAKE_CAP_USD,
+            spentUsd: FAKE_CAP_USD,
+          })
+          for (let i = 0; i < ctx.job.capRaises; i++) meter.raise()
+          meter.check()
+          return true
+        })
       await ctx.progress({
         viewId,
         status: "building",

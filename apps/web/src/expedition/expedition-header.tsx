@@ -2,6 +2,7 @@
 // the title (editors rename it in place, through the sync client), sync
 // status, search inside the Expedition and the account menu. Render it
 // inside a SidebarProvider (its trigger opens the Views rail on phones).
+// While a build runs, the activity indicator sits before the search.
 // Presence, Share, Suggestions and History arrive with their work packages.
 import * as React from "react"
 import { CloudOffIcon, LoaderCircleIcon } from "lucide-react"
@@ -22,6 +23,7 @@ export function ExpeditionHeader({
   health,
   signInHref,
   search,
+  activity,
 }: {
   title: string
   canEdit: boolean
@@ -31,6 +33,8 @@ export function ExpeditionHeader({
   signInHref?: string | null
   /** Search inside the Expedition, before the sync status. */
   search?: React.ReactNode
+  /** The build activity indicator (build-activity.tsx), when building. */
+  activity?: React.ReactNode
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -79,6 +83,7 @@ export function ExpeditionHeader({
         <h1 className="truncate px-2 text-base font-semibold">{shown}</h1>
       )}
       <div className="flex-1" />
+      {activity}
       {search}
       {health && health.pending > 0 && (
         <span

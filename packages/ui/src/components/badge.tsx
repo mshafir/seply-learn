@@ -22,6 +22,11 @@ const badgeVariants = cva(
         // Source"; background knowledge is muted.
         source: "bg-suggested/15 text-suggested-text [a]:hover:bg-suggested/25",
         background: "bg-muted text-muted-foreground [a]:hover:bg-muted/80",
+        // Divergence 8: build status (WP-3.7). Ready is green, building is
+        // amber (in progress, spec 7.2), queued is muted.
+        success: "bg-success/15 text-success",
+        progress: "bg-suggested/15 text-suggested-text",
+        queued: "bg-muted text-muted-foreground",
       },
     },
     defaultVariants: {

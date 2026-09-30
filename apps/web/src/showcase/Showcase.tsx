@@ -22,6 +22,15 @@ import {
   DropdownMenuTrigger,
 } from "@seply/ui/components/dropdown-menu"
 import { ModeToggle } from "@seply/ui/components/mode-toggle"
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@seply/ui/components/popover"
+import { Progress } from "@seply/ui/components/progress"
 import { Separator } from "@seply/ui/components/separator"
 import { useTheme } from "@seply/ui/components/theme-provider"
 import { toast } from "@seply/ui/components/toast"
@@ -290,6 +299,23 @@ function Components() {
         <Badge variant="secondary">Secondary</Badge>
         <Badge variant="outline">Outline</Badge>
         <Badge variant="destructive">Destructive</Badge>
+        <Badge variant="success">Ready</Badge>
+        <Badge variant="progress">Building</Badge>
+        <Badge variant="queued">Queued</Badge>
+      </div>
+      <div className="flex max-w-sm flex-wrap items-center gap-4">
+        <Progress value={40} aria-label="Progress" className="flex-1" />
+        <Popover>
+          <PopoverTrigger render={<Button variant="outline" size="sm" />}>
+            Popover
+          </PopoverTrigger>
+          <PopoverContent>
+            <PopoverHeader>
+              <PopoverTitle>Building</PopoverTitle>
+              <PopoverDescription>Built 1 of 3</PopoverDescription>
+            </PopoverHeader>
+          </PopoverContent>
+        </Popover>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button
