@@ -63,7 +63,7 @@ Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/0
 - [x] **Neon:** a project, plus an API key for CI branch creation.
 - [x] **Google OAuth:** a client ID and secret (hosted login).
 - [x] **Domain:** `seply.app`, registered with Cloudflare Registrar (zone on Cloudflare); production at `learn.seply.app` ([ADR 0002](../../adr/0002-rename-to-seply.md)).
-- [ ] **Email:** Resend, sending from `mail.seply.app` (DNS in the Cloudflare zone `seply.app`). `RESEND_API_KEY` is a sending-only key; `EMAIL_FROM` is a repo variable.
+- [x] **Email:** Resend, sending from `mail.seply.app` (DNS in the Cloudflare zone `seply.app`). `RESEND_API_KEY` is a sending-only key; `EMAIL_FROM` is a repo variable.
 - [x] **AI keys:** a Vercel AI Gateway key (`AI_GATEWAY_API_KEY`) for development and the hosted instance key mode. Set a spend limit on it in the Vercel dashboard; per-user caps are phase 2.
 
 ## Unlock order

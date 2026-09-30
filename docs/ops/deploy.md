@@ -47,16 +47,16 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
     Previews are not listed: Google allows no wildcards, so previews sign in through production with Better Auth's OAuth proxy plugin (WP-1.1). The workers.dev row is only needed while `PRODUCTION_DOMAIN` is unset (below).
   - **Secrets:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `BETTER_AUTH_SECRET` (session signing; generate it without seeing it: `openssl rand -base64 32 | gh secret set BETTER_AUTH_SECRET -R mshafir/seply-learn`).
 
-- [ ] **Production domain (optional):** `learn.seply.app`. Unset, production stays on `https://seply-learn.<subdomain>.workers.dev`.
+- [X] **Production domain (optional):** `learn.seply.app`. Unset, production stays on `https://seply-learn.<subdomain>.workers.dev`.
   - [X] The domain `seply.app` is registered with **Cloudflare Registrar**, so its zone is on Cloudflare (a Worker custom domain can't be reached by a CNAME from another DNS host). Its mail records (`mail.seply.app`, Resend) are DNS only (not proxied).
-  - [ ] Add **Zone** permissions for that zone to `CLOUDFLARE_API_TOKEN`: Zone: Read, DNS: Edit, Workers Routes: Edit.
-  - [ ] Add the domain's origin and callback to the Google client (table above) **before** setting the variable, or sign-in breaks.
-  - [ ] Then set the repo **variable** `PRODUCTION_DOMAIN=learn.seply.app`. The next production deploy attaches it as the Worker's custom domain (`ci.mjs custom-domain`, production only) and makes it `BETTER_AUTH_URL` and every preview's `AUTH_PROXY_URL`. The workers.dev URL keeps working.
-  - **Previous domain:** the product was Umbel Learn on `learn.umbel.dev` ([ADR 0002](../adr/0002-rename-to-seply.md)). `learn.umbel.dev` redirects to `learn.seply.app` with a Cloudflare redirect rule on the `umbel.dev` zone, which stays registered with Google Cloud Domains until its renewal is decided. Browser storage and sessions don't carry across origins, so readers sign in again on the new domain.
+  - [X] Add **Zone** permissions for that zone to `CLOUDFLARE_API_TOKEN`: Zone: Read, DNS: Edit, Workers Routes: Edit.
+  - [X] Add the domain's origin and callback to the Google client (table above) **before** setting the variable, or sign-in breaks.
+  - [X] Then set the repo **variable** `PRODUCTION_DOMAIN=learn.seply.app`. The next production deploy attaches it as the Worker's custom domain (`ci.mjs custom-domain`, production only) and makes it `BETTER_AUTH_URL` and every preview's `AUTH_PROXY_URL`. The workers.dev URL keeps working.
+  - **Previous domain:** the product was Umbel Learn on `learn.umbel.dev` ([ADR 0002](../adr/0002-rename-to-seply.md)). It was switched off on 2026-09-30 with no redirect: the old Worker, its Hyperdrive config, the Resend domain `mail.umbel.dev` and its DNS records are deleted. Browser storage and sessions don't carry across origins, so readers sign in on the new domain.
 
 - [X] **`AI_GATEWAY_API_KEY`:** a Vercel AI Gateway key (_Vercel dashboard → AI Gateway → API keys_), the hosted instance key (spec §5.1, §5.7). Needed from WP-3.3. Set a spend limit in Vercel: previews use it too, and per-user caps are phase 2.
 
-- [ ] **Email (Resend):** needed from WP-5.2. The domain `mail.seply.app` is verified in Resend; its DKIM, SPF (MX and TXT on `send.mail`) and `_dmarc.seply.app` records live in the Cloudflare zone `seply.app`.
+- [X] **Email (Resend):** needed from WP-5.2. The domain `mail.seply.app` is verified in Resend; its DKIM, SPF (MX and TXT on `send.mail`) and `_dmarc.seply.app` records live in the Cloudflare zone `seply.app`.
   - **`RESEND_API_KEY`:** a _Sending access_ key restricted to `mail.seply.app`.
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Seply Learn <invites@mail.seply.app>`.
 
