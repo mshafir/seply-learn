@@ -18,7 +18,7 @@ The product was called **Umbel Learn**, with Umbel as the umbrella for separate 
 ## Consequences
 
 - **New origin:** browser storage (the `seply-offline` IndexedDB database, the `seply-user` and `seply-theme` keys) and sessions start empty on `learn.seply.app`, and readers sign in again. The keys were renamed from `umbel-*` with no migration shim, because the only user was the owner, pre-launch. Pending edits on the old origin had to be synced before the switch.
-- **`learn.umbel.dev` redirects** to `learn.seply.app`. The `umbel.dev` zone stays on Cloudflare, registered with Google Cloud Domains, until its renewal is decided.
+- **No redirect from `learn.umbel.dev`.** The old host was switched off on 2026-09-30 rather than redirected, because there were no outside readers to keep. The `umbel.dev` zone stays on Cloudflare, registered with Google Cloud Domains, until its renewal is decided.
 - **SQL function names keep the old prefix.** The applied migration `packages/server/drizzle/0001_search.sql` defines `umbel_expedition_search`, `umbel_concept_tsvector`, `umbel_concept_search` and `umbel_article_section_search`. Applied migrations are never edited, and the names are internal, so they stay. A later migration can rename them if it's worth it.
 - **Code names changed:** packages are `@seply/*`, CSS custom properties and classes use the `--seply-*` / `.seply-*` prefix, the production Worker is `seply-learn`, previews are `seply-pr-<n>`, and the Hyperdrive configs are `seply-production` / `seply-pr-<n>`. The old `umbel-learn` Worker and `umbel-*` Hyperdrive configs are deleted after the switch.
 - **Historical records keep the old name:** `docs/wayfinder/` tickets, research and the map describe decisions as they were made, and still say Umbel.
