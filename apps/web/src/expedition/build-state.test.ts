@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { Job } from "@/lib/api.ts"
 import {
   activeJob,
+  articleAsk,
   buildSummary,
   EMPTY_LOG,
   readyLabel,
@@ -268,5 +269,28 @@ describe("the View a screen opens on", () => {
     expect(startViewOf(views, "C", readyOf())?.id).toBe("C")
     expect(startViewOf(views, null, readyOf())?.id).toBe("A")
     expect(startViewOf([], null, readyOf())).toBeNull()
+  })
+})
+
+describe("the Write the article ask", () => {
+  const ask = (over: Partial<Job> = {}) =>
+    job({ id: "J9", kind: "article", input: { conceptId: "C1" }, ...over })
+
+  it("is never the build", () => {
+    const log = withJobs(EMPTY_LOG, [ask(), job({ id: "J1", status: "complete" })])
+    expect(activeJob(log)).toBeNull()
+    expect(retryableJob(withJobs(EMPTY_LOG, [ask({ status: "failed" })]))).toBeNull()
+    expect(viewBuild({ id: "V1", status: "ready" }, log)).toEqual({ status: "ready" })
+  })
+
+  it("follows its newest job for that Concept", () => {
+    expect(articleAsk(EMPTY_LOG, "C1")).toBeNull()
+    let log = withJob(EMPTY_LOG, ask({ status: "queued" }))
+    expect(articleAsk(log, "C1")).toEqual({ status: "writing", step: "Writing the article…" })
+    expect(articleAsk(log, "C2")).toBeNull()
+    log = build(log, evt({ jobId: "J9", kind: "article", status: "complete", at: at(5) }))
+    expect(articleAsk(log, "C1")).toEqual({ status: "suggested" })
+    log = withJobs(log, [ask({ status: "failed", error: "That Concept is gone", updatedAt: at(9) })])
+    expect(articleAsk(log, "C1")).toEqual({ status: "failed", reason: "That Concept is gone" })
   })
 })

@@ -37,6 +37,16 @@ export type BuildLog = {
 export const EMPTY_LOG: BuildLog = { events: {}, previews: {}, jobs: null }
 
 const OPEN: readonly JobStatus[] = ["queued", "running", "paused"]
+
+/**
+ * Job kinds that are asks about one Concept (the "Write the article" action,
+ * WP-3.6), not builds: they never show as the build in the header or rail.
+ */
+export const ASK_KINDS: ReadonlySet<string> = new Set(["article"])
+
+/** Build jobs only (not asks), newest first. */
+const buildJobs = (log: BuildLog) =>
+  jobStates(log).filter((j) => !ASK_KINDS.has(j.kind))
 const RETRYABLE: readonly JobStatus[] = ["failed", "cancelled"]
 
 const keyOf = (e: Pick<BuildEvent, "jobId" | "viewId">) =>
@@ -145,12 +155,12 @@ export function jobStates(log: BuildLog): JobState[] {
 
 /** The job building now (queued, running or paused at the cap), newest first. */
 export function activeJob(log: BuildLog): JobState | null {
-  return jobStates(log).find((j) => OPEN.includes(j.status)) ?? null
+  return buildJobs(log).find((j) => OPEN.includes(j.status)) ?? null
 }
 
 /** The newest job that Retry can start again (failed or cancelled). */
 export function retryableJob(log: BuildLog): JobState | null {
-  const newest = jobStates(log).find((j) => !OPEN.includes(j.status))
+  const newest = buildJobs(log).find((j) => !OPEN.includes(j.status))
   return newest && RETRYABLE.includes(newest.status) ? newest : null
 }
 
@@ -213,7 +223,7 @@ export function viewBuild(
     }
   }
   if (log.jobs === null) return { status: "queued", step: "Queued" }
-  const last = jobStates(log)[0]
+  const last = buildJobs(log)[0]
   return {
     status: "stopped",
     reason:
@@ -222,6 +232,36 @@ export function viewBuild(
         : last?.status === "failed"
           ? "The build ended before this View was built."
           : "Nothing is building this View.",
+  }
+}
+
+/** Where the "Write the article" action stands for one Concept (its newest ask). */
+export type ArticleAsk =
+  | { status: "writing"; step: string }
+  | { status: "suggested" }
+  | { status: "failed"; reason: string }
+
+export function articleAsk(log: BuildLog, conceptId: string): ArticleAsk | null {
+  const job = (log.jobs ?? []).find(
+    (j) =>
+      j.kind === "article" &&
+      (j.input as { conceptId?: unknown } | null)?.conceptId === conceptId
+  )
+  if (!job) return null
+  const state = jobStates(log).find((j) => j.id === job.id)
+  if (!state) return null
+  if (OPEN.includes(state.status))
+    return {
+      status: "writing",
+      step:
+        state.status === "paused"
+          ? "Paused at the spending cap"
+          : "Writing the article…",
+    }
+  if (state.status === "complete") return { status: "suggested" }
+  return {
+    status: "failed",
+    reason: state.reason || "The article couldn't be written.",
   }
 }
 

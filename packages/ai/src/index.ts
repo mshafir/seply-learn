@@ -59,6 +59,7 @@ export {
   type StageEstimate,
 } from "./estimate.ts"
 export {
+  combineSpend,
   meteredModel,
   SpendingCapReached,
   SpendMeter,
@@ -154,3 +155,23 @@ export {
   type SkimSource,
 } from "./skim.ts"
 export { startingSettings, UNSET_ATTRIBUTE } from "./plan.ts"
+// The writers (spec §5.2 step 4)
+export {
+  ArticleOutput,
+  CORE_FALLBACK,
+  coreConcepts,
+  OverviewOutput,
+  planWriters,
+  unresolvedProv,
+  writeArticles,
+  writeBatch,
+  writeOverviews,
+  writerInstructions,
+  writerLabel,
+  WRITER_BATCH,
+  type ProvRepair,
+  type WriteOptions,
+  type WriteResult,
+  type WriterMode,
+  type WriterPlan,
+} from "./writers/writers.ts"

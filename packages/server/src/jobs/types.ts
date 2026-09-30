@@ -119,6 +119,8 @@ export type JobServices = {
   model?: (stage: Stage) => LanguageModelV4
   /** Tests only: how much Source the curator reads at once (see @seply/ai's planSources). */
   curator?: { wholeSourceMaxTokens?: number; chunkTokens?: number }
+  /** Tests only: Concepts per writer batch (see @seply/ai's planWriters). */
+  writers?: { overviews?: number; articles?: number }
 }
 
 export type JobNotification = {

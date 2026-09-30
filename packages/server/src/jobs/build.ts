@@ -8,6 +8,8 @@
 //                 committed as one Change: "Found 84 Concepts in 3 Sources"
 //   View n        each View built, inspected, self-reviewed, and committed as
 //                 its own Change (or failed with a plain reason)
+//   write n       the writers (./writers.ts): overviews for every Concept, then
+//                 articles for core ones, each batch its own Change (WP-3.6)
 //
 // Every AI stage is a durable step (retried twice) whose result is JSON: the
 // op bodies and the spend meter's state. A restart replays the job from the
@@ -25,21 +27,14 @@ import {
   Goal,
   extractConcepts,
   mergeConceptSet,
-  meteredModel,
-  modelFor,
   startingSettings,
   planSources,
   previewNodes,
-  SpendingCapReached,
   SpendMeter,
   understand,
   autoMerge,
-  type AiSetup,
-  type CuratorSource,
-  type LanguageModelV4,
   type SourcePlan,
   type SpendState,
-  type Stage,
   type ViewPlan,
 } from "@seply/ai"
 import {
@@ -52,12 +47,19 @@ import {
   type OpBody,
 } from "@seply/domain"
 import { z } from "zod"
-import { resolveAi } from "../ai.ts"
-import type { Db } from "../db.ts"
-import { loadState } from "../projection.ts"
-import { readSegments } from "../sources/store.ts"
+import {
+  AI_STEP,
+  load,
+  loadSources,
+  metered,
+  mustLoad,
+  setupFor,
+  throttle,
+  type Metered,
+} from "./ai-steps.ts"
 import { failureReason, isJobPaused } from "./host.ts"
-import type { JobContext, JobDefinition, JobServices, Json } from "./types.ts"
+import type { JobDefinition, Json } from "./types.ts"
+import { runWriters } from "./writers.ts"
 
 /** One View the reader chose (the skim's proposal, spec §5.2 step 2). */
 export const BuildViewChoice = z.strictObject({
@@ -91,9 +93,6 @@ export const BuildJobInput = z.strictObject({
 })
 export type BuildJobInput = z.infer<typeof BuildJobInput>
 
-/** Step options for AI stages: retried twice (spec §5.6), with room for a long tool loop. */
-const AI_STEP = { retries: 2, retryDelayMs: 5_000, timeoutMs: 30 * 60_000 }
-
 type PlannedView = {
   n: number
   viewId: string
@@ -116,8 +115,8 @@ type Plan = {
   draft: boolean
 }
 
-/** What an AI step returns: its outcome and the meter after it. */
-type Metered<T> = T & { meter: SpendState }
+/** How much of the job's progress bar the Views take (after the Concept set's 0.3); the writers take the rest. */
+const VIEWS_SHARE = 0.5
 
 export const buildJob: JobDefinition<BuildJobInput> = {
   kind: "build",
@@ -125,7 +124,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
   notification: (_job, outcome) =>
     outcome === "complete"
       ? { title: "Your Expedition is ready", body: "Every View is built." }
-      : { title: "The build stopped", body: "Some Views couldn't be built. Open it to see why." },
+      : { title: "The build stopped", body: "Some of it couldn't be finished. Open it to see why." },
 
   async run(ctx) {
     const { expeditionId } = ctx.job
@@ -306,7 +305,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
     const todo = plan.views.filter((v) => v.status !== "ready")
     const failed: string[] = []
     for (const [i, v] of todo.entries()) {
-      const at = 0.3 + (0.7 * i) / todo.length
+      const at = 0.3 + (VIEWS_SHARE * i) / todo.length
       await ctx.progress({
         viewId: v.viewId,
         status: "building",
@@ -404,9 +403,20 @@ export const buildJob: JobDefinition<BuildJobInput> = {
       await ctx.progress({
         status: "running",
         step: `Built ${i + 1} of ${todo.length} Views`,
-        progress: at + 0.7 / todo.length,
+        progress: at + VIEWS_SHARE / todo.length,
       })
     }
+
+    // --- the writers ------------------------------------------------------------
+    // Summaries and overviews for every Concept, then articles for core ones
+    // (spec §5.2 step 4), after every View, even when one failed: the Concept
+    // set is committed, and reading starts as soon as overviews exist.
+    await runWriters(ctx, {
+      meter,
+      whole,
+      note: note.note,
+      progress: [0.3 + VIEWS_SHARE, 1],
+    })
 
     if (failed.length)
       throw new Error(
@@ -418,115 +428,6 @@ export const buildJob: JobDefinition<BuildJobInput> = {
 }
 
 // --- helpers ------------------------------------------------------------------
-
-async function mustLoad(db: Db, expeditionId: string): Promise<DomainState> {
-  const state = await loadState(db, expeditionId)
-  if (!state) throw new Error("The Expedition is gone")
-  return state
-}
-
-/** The Sources to build from, with their segments, in the order they were added. */
-async function loadSources(
-  db: Db,
-  services: JobServices,
-  state: DomainState,
-  only: readonly string[] | undefined
-): Promise<CuratorSource[]> {
-  if (!services.blobs) throw new Error("This server can't read Sources")
-  const ids = Object.values(state.sources)
-    .sort((a, b) => a.addedAt.localeCompare(b.addedAt) || a.id.localeCompare(b.id))
-    .map((s) => s.id)
-    .filter((id) => !only || only.includes(id))
-  const out: CuratorSource[] = []
-  for (const id of ids) {
-    const r = await readSegments(db, services.blobs, state.expedition.id, id)
-    if (!r || !r.segments.segments.length) continue
-    out.push({
-      id,
-      title: r.source.title,
-      segments: r.segments.segments.map((s) => ({
-        id: s.id,
-        text: s.text,
-        ...(s.speaker && { speaker: s.speaker }),
-        ...(s.heading && { heading: s.heading }),
-      })),
-    })
-  }
-  if (!out.length) throw new Error("There are no Sources to build from")
-  return out
-}
-
-type AiFor = {
-  setup: AiSetup | null
-  priceKey: { provider: string; modelId: string }
-}
-
-/** The AI setup (never persisted: resolved in each step), or the test model. */
-async function setupFor(db: Db, services: JobServices, userId: string): Promise<AiFor> {
-  if (services.model) {
-    const m = services.model("curator")
-    return { setup: null, priceKey: { provider: "gateway", modelId: m.modelId } }
-  }
-  if (!services.env) throw new Error("This server has no AI configured")
-  const ai = await resolveAi(db, services.env, userId)
-  if (!ai.ok)
-    throw new Error(
-      ai.reason === "no-key"
-        ? "No AI key: add one in Settings to build"
-        : "This server has no AI configured"
-    )
-  return {
-    setup: ai.setup,
-    priceKey: { provider: ai.setup.credentials.provider, modelId: ai.setup.models.curator },
-  }
-}
-
-/** What each AI step reads afresh: the state, the Sources and a metered model. */
-async function load(
-  ctx: JobContext<BuildJobInput>,
-  meter: SpendMeter,
-  stage: Stage
-): Promise<{ state: DomainState; sources: CuratorSource[]; model: LanguageModelV4 }> {
-  return ctx.withDb(async (db) => {
-    const state = await mustLoad(db, ctx.job.expeditionId)
-    const sources = await loadSources(db, ctx.services, state, ctx.input.sources)
-    const test = ctx.services.model?.(stage)
-    let model: LanguageModelV4
-    if (test) {
-      model = meteredModel(test, meter, { provider: "gateway", modelId: test.modelId })
-    } else {
-      const ai = await setupFor(db, ctx.services, ctx.job.startedBy)
-      model = modelFor(ai.setup!, stage, meter)
-    }
-    return { state, sources, model }
-  })
-}
-
-/**
- * Runs an AI stage with the meter restored from the last step. A cap
- * reached inside it propagates (the host pauses the job; never retried).
- */
-async function metered<T extends object>(
-  state: SpendState,
-  fn: (m: SpendMeter) => Promise<T>
-): Promise<Json> {
-  const m = SpendMeter.from(state)
-  try {
-    const out = await fn(m)
-    return { ...out, meter: m.toJSON() } as unknown as Json
-  } catch (err) {
-    // The AI SDK may wrap it; the host pauses on the bare error.
-    throw capReached(err) ?? err
-  }
-}
-
-function capReached(err: unknown): SpendingCapReached | null {
-  for (let e: unknown = err, i = 0; e && i < 5; i++) {
-    if (e instanceof SpendingCapReached) return e
-    e = (e as { lastError?: unknown }).lastError ?? (e as { cause?: unknown }).cause
-  }
-  return null
-}
 
 /**
  * Which Views to build: those named by id, then the chosen ones (matched to Views a previous attempt
@@ -605,14 +506,3 @@ const viewPlan = (v: PlannedView): ViewPlan => ({
   ...(v.question && { question: v.question }),
   ...(v.why && { why: v.why }),
 })
-
-/** Calls `fn` at most every `ms` (progress events are best effort). */
-function throttle<A extends unknown[]>(fn: (...a: A) => Promise<void>, ms = 1500) {
-  let last = 0
-  return async (...a: A) => {
-    const now = Date.now()
-    if (now - last < ms) return
-    last = now
-    await fn(...a)
-  }
-}

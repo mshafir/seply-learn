@@ -139,3 +139,51 @@ export function idsFrom(turn: ScriptTurn, tool: string, key = "id"): string[] {
     .map((r) => (r.output as Record<string, unknown> | null)?.[key])
     .filter((id): id is string => typeof id === "string")
 }
+
+/**
+ * A writer (spec §5.2 step 4) as a script: answers each overview or article
+ * batch with realistic output for every Concept in the task, citing the
+ * segments the task says the Concept is cited in, and linking the first
+ * neighbour. `bad` adds refs that don't resolve (a made-up segment, and a
+ * wrong Source id), to test the repair.
+ */
+export function writerScript(opts: { bad?: boolean; skip?: (id: string) => boolean } = {}): Script {
+  return (turn) => {
+    const task = turn.user
+    const articles = task.includes("Write the **article**")
+    const blocks = task.split(/\n(?=## )/).filter((b) => b.startsWith("## "))
+    const concepts = blocks.flatMap((b): object[] => {
+      const head = /^## (.*) \(([^)\s]+)\)$/m.exec(b)
+      if (!head || opts.skip?.(head[2]!)) return []
+      const [, title, id] = head
+      const cited = /^cited in: (.*)$/m.exec(b)?.[1] ?? ""
+      const refs = [...cited.matchAll(/(\S+) ([tsp]\d+[a-z]*)/g)].map((m) => ({
+        source: m[1]!,
+        segment: m[2]!,
+      }))
+      const link = /^- .*?(\[[^\]]+\]\(#c\/[^)]+\))/m.exec(b)?.[1]
+      const prov = [
+        ...refs,
+        ...(opts.bad && refs[0]
+          ? [
+              { source: refs[0].source, segment: "t999" },
+              { source: "no-such-source", segment: refs[0].segment },
+            ]
+          : []),
+      ]
+      const para = `${title} matters here because the Sources come back to it${link ? `, next to ${link}` : ""}. It is explained in plain words, with what it is, why it matters and how it connects.`
+      return articles
+        ? [
+            {
+              id,
+              article: [
+                { heading: "What it is", md: para, prov },
+                { heading: "Why it matters", md: `More on ${title}, from what is well known.`, prov: [] },
+              ],
+            },
+          ]
+        : [{ id, summary: `${title}, in one line.`, overview: para, overviewProv: prov }]
+    })
+    return { text: JSON.stringify({ concepts }) }
+  }
+}
