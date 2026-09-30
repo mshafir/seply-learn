@@ -1,0 +1,88 @@
+## User
+
+I'm planning a week in Portugal by train in early May: fly into Lisbon, fly out of Porto. I like old towns, food and a bit of walking. What would a good route look like?
+
+## Assistant
+
+A classic Lisbon-to-Porto week works well by train, since the main line runs up the coast. A balanced plan:
+
+- **Days 1 to 3: Lisbon.** Alfama and the castle, Belém (the tower and the Jerónimos Monastery), and a day trip to **Sintra** (40 minutes by suburban train from Rossio) for the palaces.
+- **Day 4: Óbidos or Tomar.** Óbidos is a walled medieval town; it's easier by bus from Lisbon (about 1 hour). Tomar has the Convent of Christ, a Templar castle, and a direct train (about 2 hours).
+- **Days 5 to 6: Coimbra.** The old university, the library, and the steep old town. About 1 h 45 on the Alfa Pendular from Lisbon or 1 h from Tomar with a change at Entroncamento.
+- **Days 7 to 8: Porto.** The Ribeira riverside, the Dom Luís I bridge, port cellars across the river in Vila Nova de Gaia, and the Douro valley if you have an extra day. Coimbra to Porto is 1 hour by fast train.
+
+## User
+
+Is the Douro valley worth it? How would I get there by train?
+
+## Assistant
+
+It's one of the most beautiful train rides in Europe. The Douro line runs from Porto's São Bento station to **Pinhão** (about 2 h 30) along the river through terraced vineyards. Sit on the right-hand side going east for river views.
+
+In early May the vines are green and it's not yet hot. You can visit a quinta (wine estate) near Pinhão for a tasting, then take the train back. That makes a long day, so it works best as an extra day 9 or instead of one Porto day.
+
+## User
+
+What about tickets? Do I need to book ahead?
+
+## Assistant
+
+- **Alfa Pendular and Intercidades** (Lisbon, Coimbra, Porto): book on the CP website or app. Seats are reserved and cheaper when booked a few weeks ahead (a "promo" fare can be 30 to 50 percent off). Lisbon to Coimbra is about 25 to 35 euros full price.
+- **Regional and urban trains** (Sintra, the Douro line, Tomar): no reservation, buy on the day at the station or with a contactless card on the Lisbon suburban lines. Sintra is about 2.40 euros each way; Porto to Pinhão about 11 euros.
+
+The Douro line can be full on weekends in spring: arrive 20 minutes early.
+
+## User
+
+Where should I stay in Lisbon? I don't want to be climbing hills with a suitcase.
+
+## Assistant
+
+Lisbon is hilly everywhere, but some areas are easier:
+
+- **Baixa** (downtown): flat, central, next to Rossio station for Sintra. The best choice with luggage.
+- **Chiado**: stylish and central but uphill from Baixa.
+- **Alfama**: charming, but steep cobbled lanes; lovely to walk in, hard with a suitcase.
+
+In Porto, **Ribeira** is beautiful but steep; staying near **São Bento station** or on the flat area around Aliados is easier and puts you next to the Douro trains.
+
+## User
+
+How much time do I really need in Sintra, and which palace should I pick if I only do one?
+
+## Assistant
+
+Give Sintra a full day and start early (be on the 8:40 train or so); the crowds arrive by 10:30.
+
+If you only do one:
+- **Pena Palace** is the famous colourful one on the hilltop, with the best views; the most crowded, and you need a timed ticket.
+- **Quinta da Regaleira** has the gardens with the initiation well, grottos and tunnels; more fun to explore on foot, and better if you like walking.
+
+Many people do Regaleira in the morning, then walk or take the bus up to Pena for the afternoon slot.
+
+## User
+
+What should I eat in each place?
+
+## Assistant
+
+- **Lisbon**: pastéis de nata (the Belém bakery is the famous one), grilled sardines (more in June, but you'll find them), bacalhau (salt cod) dishes, and a ginjinha (cherry liqueur) at the tiny bars near Rossio.
+- **Coimbra**: chanfana (goat stewed in red wine) and leitão (suckling pig) from the Bairrada area just north.
+- **Porto**: the francesinha (a heavy sandwich with a beer and tomato sauce), tripas à moda do Porto, and port tastings in Gaia.
+- **Douro**: the local wines, and a lunch at a quinta if you book ahead.
+
+## User
+
+Can you lay out the final plan with dates? Arrive Saturday 2 May, fly out Sunday 10 May.
+
+## Assistant
+
+- **Sat 2 May**: land in Lisbon, stay in Baixa, evening walk in Alfama.
+- **Sun 3 May**: Belém in the morning, Chiado and the Bairro Alto in the evening.
+- **Mon 4 May**: Sintra day trip (early train from Rossio).
+- **Tue 5 May**: train to Tomar (Convent of Christ), overnight in Tomar.
+- **Wed 6 May**: train to Coimbra (change at Entroncamento), afternoon in the old town.
+- **Thu 7 May**: Coimbra University and the Joanina Library (book a timed slot); evening train to Porto.
+- **Fri 8 May**: Porto: Ribeira, the bridge, Gaia port cellars.
+- **Sat 9 May**: Douro line to Pinhão, quinta tasting, back in the evening (book the quinta ahead; weekend trains are busy).
+- **Sun 10 May**: morning at the Livraria Lello or the market, then fly out of Porto.

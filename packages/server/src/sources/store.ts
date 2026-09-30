@@ -133,6 +133,46 @@ export async function addSource(
   }
 }
 
+/**
+ * Removes a Source as `userId` (owners and editors): logs `source.remove` as
+ * one Change ("Removed the Source “…”"). The blobs stay, so undoing the Change
+ * restores it. Throws PushError: 404 (no such Expedition or Source), 403.
+ */
+export async function removeSource(
+  db: Db,
+  args: { expeditionId: string; sourceId: string; userId: string }
+): Promise<LoggedOp[]> {
+  const { expeditionId, sourceId, userId } = args
+  const visibility = await expeditionVisibility(db, expeditionId)
+  const role = visibility ? await roleOf(db, expeditionId, userId) : null
+  const actor = { role, signedIn: true }
+  if (!visibility || !can(actor, "read", visibility))
+    throw new PushError(404, { error: "Expedition not found" })
+  if (!can(actor, "manageSources", visibility))
+    throw new PushError(403, {
+      error: "not allowed",
+      message: `${role ?? "a reader"} may not remove Sources`,
+    })
+  const source = await sourceRow(db, expeditionId, sourceId)
+  if (!source) throw new PushError(404, { error: "Source not found" })
+  const changeId = ulid(Date.now())
+  const ops = makeOps([{ kind: "source.remove", target: sourceId }], {
+    expeditionId,
+    actor: userId,
+    changeId,
+    nextOpId: () => ulid(Date.now()),
+  })
+  const { logged } = await db.transaction((tx) =>
+    appendOps(tx, {
+      expeditionId,
+      userId,
+      ops,
+      changes: [{ id: changeId, label: `Removed the Source “${source.title}”` }],
+    })
+  )
+  return logged
+}
+
 /** A Source's row, or null. */
 export async function sourceRow(
   db: Db,

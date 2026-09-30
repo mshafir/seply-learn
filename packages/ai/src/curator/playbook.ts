@@ -1,9 +1,9 @@
 // The curator's instructions, assembled from the playbook (spec §5.4) and the
 // View Type definitions. The files live in playbook/ and docs/view-types/;
-// src/playbook.gen.ts carries them as strings (scripts/build-playbook.mjs).
+// src/playbook/generated.ts carries them as strings (`pnpm --filter @seply/ai playbook`).
 import type { ViewTypeId } from "@seply/domain"
 import { NOTE_INSTRUCTIONS } from "../estimate.ts"
-import { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "../playbook.gen.ts"
+import { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "../playbook/generated.ts"
 
 /** A playbook file by name: `_contract`, `skim`, `extract`, `merge`, `build-view`, `write`. */
 export function playbook(name: string): string {

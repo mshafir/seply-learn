@@ -22,11 +22,12 @@ import {
   conceptCount,
   conceptSetLabel,
   estimateFor,
+  Goal,
   extractConcepts,
   mergeConceptSet,
   meteredModel,
   modelFor,
-  placeholderSettings,
+  startingSettings,
   planSources,
   previewNodes,
   SpendingCapReached,
@@ -76,6 +77,13 @@ export const BuildJobInput = z.strictObject({
    * Views already queued in the Expedition are built too, after these.
    */
   views: z.array(BuildViewChoice).max(8).default([]),
+  /**
+   * Views already in the Expedition (queued by the create flow), best first:
+   * each is built into its own row. Built before `views`.
+   */
+  viewIds: z.array(Id).max(16).optional(),
+  /** The reader's goals from the Sources screen; the understanding note weighs them. */
+  goals: z.array(Goal).max(3).optional(),
   /** Which Sources to build from; every Source by default. */
   sources: z.array(Id).min(1).optional(),
   /** The spending cap in USD; 2× the estimate by default (spec §5.6). */
@@ -139,7 +147,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
           const state = await mustLoad(db, expeditionId)
           const sources = await loadSources(db, services, state, ctx.input.sources)
           const ai = await setupFor(db, services, ctx.job.startedBy)
-          const views = planViews(state, ctx.input.views)
+          const views = planViews(state, ctx.input.views, ctx.input.viewIds ?? [])
           const sourceChars = sources.reduce(
             (n, s) => n + s.segments.reduce((m, g) => m + g.text.length, 0),
             0
@@ -190,7 +198,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
                     label: v.label,
                     ...(v.question && { question: v.question }),
                     orderKey: plan.keys[i]!,
-                    settings: placeholderSettings(v.viewType),
+                    settings: startingSettings(v.viewType),
                     status: "queued",
                   },
                 },
@@ -211,7 +219,7 @@ export const buildJob: JobDefinition<BuildJobInput> = {
       async () =>
         metered(meter, async (m) => {
           const { sources, model } = await load(ctx, m, "curator")
-          return { note: await understand({ model, sources, whole }) }
+          return { note: await understand({ model, sources, whole, goals: ctx.input.goals }) }
         }),
       AI_STEP
     )) as unknown as Metered<{ note: string }>
@@ -527,15 +535,33 @@ function causeIs(err: unknown, cls: new (...a: never[]) => Error): boolean {
 }
 
 /**
- * Which Views to build: the chosen ones (matched to Views a previous attempt
+ * Which Views to build: those named by id, then the chosen ones (matched to Views a previous attempt
  * queued, by View Type and label), then any others queued in the Expedition.
  */
-function planViews(state: DomainState, chosen: readonly BuildViewChoice[]): PlannedView[] {
+function planViews(
+  state: DomainState,
+  chosen: readonly BuildViewChoice[],
+  viewIds: readonly string[]
+): PlannedView[] {
   const live = Object.values(state.views)
     .filter(isLive)
     .sort((a, b) => a.orderKey.localeCompare(b.orderKey))
   const used = new Set<string>()
   const out: PlannedView[] = []
+  // Views named by id (the create flow queued them): into their own rows.
+  for (const id of viewIds) {
+    const v = state.views[id]
+    if (!isLive(v) || used.has(id)) continue
+    used.add(id)
+    out.push({
+      n: out.length + 1,
+      viewId: id,
+      viewType: v!.viewType,
+      label: v!.label,
+      ...(v!.question && { question: v!.question }),
+      status: v!.status,
+    })
+  }
   // The curator may sharpen a View's label and question, so a Retry matches
   // by View Type and label, then question, then rail order.
   const tests: ((c: BuildViewChoice, v: DomainState["views"][string]) => boolean)[] = [

@@ -311,6 +311,34 @@ describe("the build job", () => {
     expect((await changes(s)).filter((l) => l.startsWith("Found"))).toHaveLength(1)
   })
 
+  it("builds the create flow's queued Views into their own rows (POST /build)", async () => {
+    const s = await setup()
+    const plan = await s.app.request(`/api/expeditions/${s.exp}/plan`, {
+      method: "PUT",
+      headers: s.ada.headers,
+      body: JSON.stringify({ title: "Which printer?", views: VIEWS }),
+    })
+    expect(plan.status).toBe(200)
+    const queued = liveViews(await state(s)).map((v) => v.id)
+    expect(queued).toHaveLength(2)
+    const res = await s.app.request(`/api/expeditions/${s.exp}/build`, {
+      method: "POST",
+      headers: s.ada.headers,
+      body: JSON.stringify({ goals: ["decide"] }),
+    })
+    expect(res.status).toBe(202)
+    const { jobId } = (await res.json()) as { jobId: string }
+    await s.engine.settled(instanceId({ jobId, attempt: 1 }))
+    expect((await job(s, jobId)).status).toBe("complete")
+    const st = await state(s)
+    expect(liveViews(st).map((v) => [v.id, v.status])).toEqual(queued.map((id) => [id, "ready"]))
+    expect(st.expedition.status).toBe("ready")
+    const labels = await changes(s)
+    expect(labels).toContain("Started the build")
+    expect(labels.some((l) => l.startsWith("Queued"))).toBe(false)
+    expect(s.model.turns[0]!.user).toContain("The reader's goals: decide.")
+  })
+
   it("builds the Concept set chunk by chunk when the Sources don't fit, then merges", async () => {
     const s = await setup({ curator: { wholeSourceMaxTokens: 10, chunkTokens: 40 } })
     const j = await start(s, { views: [VIEWS[0]], capUsd: 50 })

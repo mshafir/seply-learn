@@ -109,7 +109,6 @@ export {
   extractConcepts,
   MAX_STEPS,
   mergeConceptSet,
-  placeholderSettings,
   previewNodes,
   understand,
   type ConceptStageResult,
@@ -129,5 +128,29 @@ export {
 } from "./curator/sources.ts"
 export { rollCache, runLoop, type LoopOptions, type LoopResult } from "./curator/loop.ts"
 export { playbook, viewTypeDoc } from "./curator/playbook.ts"
-export { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "./playbook.gen.ts"
+export { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "./playbook/generated.ts"
 export type { LanguageModelV4 } from "@ai-sdk/provider"
+// The skim (spec §5.2 step 2) and the playbook it reads
+export {
+  GOAL_LABELS,
+  Goal,
+  GOALS,
+  normalizeSkim,
+  ProposedView,
+  runSkim,
+  SKIM_COUNTS,
+  SKIM_SAMPLE,
+  SKIM_VIEW_TYPES,
+  SkimOutput,
+  skimPrompt,
+  SkimResult,
+  skimSample,
+  skimSystem,
+  VIEW_TYPE_CATALOG,
+  type CatalogEntry,
+  type ExistingView,
+  type SkimRequest,
+  type SkimRun,
+  type SkimSource,
+} from "./skim.ts"
+export { startingSettings, UNSET_ATTRIBUTE } from "./plan.ts"

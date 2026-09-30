@@ -6,6 +6,7 @@ import type { ProviderOptions } from "@seply/ai"
 import { Hono, type Context, type MiddlewareHandler } from "hono"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
+import { createFlowRoutes } from "./create.ts"
 import type { BlobStore } from "./blobs.ts"
 import {
   ConfigError,
@@ -187,6 +188,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/expeditions", signedIn)
   app.use("/expeditions/*", signedIn)
   app.route("/expeditions", expeditionRoutes(relay))
+  app.route("/expeditions", createFlowRoutes(relay, opts.ai, opts.jobs))
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)

@@ -68,9 +68,16 @@ export type StageOptions = {
  * step 3.2). Plain prose, kept in the job and never shown.
  */
 export async function understand(
-  o: Pick<StageOptions, "model" | "sources" | "abortSignal"> & { whole: boolean }
+  o: Pick<StageOptions, "model" | "sources" | "abortSignal"> & {
+    whole: boolean
+    /** The reader's goals from the Sources screen ("learn", "decide", "plan"). */
+    goals?: readonly string[]
+  }
 ): Promise<string> {
   const text = o.whole ? renderSources(o.sources) : renderSourceIndex(o.sources)
+  const goals = o.goals?.length
+    ? [{ type: "text" as const, text: `The reader's goals: ${o.goals.map((g) => (g === "learn" ? "learn it" : g)).join(", ")}.` }]
+    : []
   const r = await generateText({
     model: o.model,
     system: noteInstructions(),
@@ -83,6 +90,7 @@ export async function understand(
             text,
             providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
           },
+          ...goals,
         ],
       },
     ],
@@ -589,29 +597,6 @@ async function inspectCommitted(
 }
 
 // --- helpers the job uses -----------------------------------------------------
-
-/**
- * Minimal valid settings for a View that is queued but not built yet (the
- * domain validates settings on create). The curator replaces them.
- */
-export function placeholderSettings(viewType: ViewTypeId): Record<string, unknown> {
-  const s: Record<ViewTypeId, Record<string, unknown>> = {
-    "comparison-table": { rows: {}, columns: [] },
-    outline: { relationshipTypes: ["builtin:part-of"], rootTag: "topic" },
-    evidence: { supports: ["builtin:supports"], challenges: ["builtin:challenges"], claimKinds: ["builtin:claim"] },
-    "cause-and-effect": { mode: "mechanism", positive: [], negative: [], outcomes: [], levers: {} },
-    map: {},
-    timeline: { lanes: [] },
-    anatomy: { roots: [], containment: ["builtin:part-of"], pins: [] },
-    "learning-path": { relationshipTypes: ["builtin:prerequisite"] },
-    lineage: { relationshipTypes: ["builtin:led-to"] },
-    quadrant: { x: "x", y: "y" },
-    rates: { group: "group", low: "low", high: "high", direction: "direction" },
-  }
-  const out = s[viewType]
-  VIEW_TYPES[viewType].shared.parse(out)
-  return out
-}
 
 /** Applies op bodies to a state (validated, all or nothing). */
 export function applyBodies(state: DomainState, bodies: readonly OpBody[]): DomainState {

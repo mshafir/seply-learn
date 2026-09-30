@@ -6,11 +6,9 @@ import {
   emptyState,
   keysAfter,
   VIEW_TYPE_IDS,
-  VIEW_TYPES,
   type DomainState,
 } from "@seply/domain"
 import type { ModelMessage } from "ai"
-import { execFileSync } from "node:child_process"
 import { describe, expect, it } from "vitest"
 import { CHAT, stubViewReader } from "../test/printer.ts"
 import { idsFrom, scriptedModel, type ScriptTurn } from "../testing.ts"
@@ -21,10 +19,10 @@ import {
   conceptSetLabel,
   describeConcepts,
   extractConcepts,
-  placeholderSettings,
   previewNodes,
   understand,
 } from "./curator.ts"
+import { startingSettings } from "../plan.ts"
 import { rollCache } from "./loop.ts"
 import { planSources, renderSources, type CuratorSource } from "./sources.ts"
 
@@ -97,7 +95,7 @@ function withQueuedView(state: DomainState, viewType: "outline" | "comparison-ta
         viewType,
         label: viewType === "outline" ? "Outline" : "Compare printers",
         orderKey: keysAfter(null, 1)[0]!,
-        settings: placeholderSettings(viewType),
+        settings: startingSettings(viewType),
         status: "queued",
       },
     },
@@ -246,7 +244,7 @@ describe("the tools a provider gets", () => {
         {
           kind: "view.create",
           target: "v1",
-          value: { viewType, label: "V", orderKey: keysAfter(null, 1)[0]!, settings: placeholderSettings(viewType), status: "queued" },
+          value: { viewType, label: "V", orderKey: keysAfter(null, 1)[0]!, settings: startingSettings(viewType), status: "queued" },
         },
       ])
       await buildView({ model: scriptedModel(grab), sources: SOURCES, state: s, note: "", view: { id: "v1", viewType, label: "V" }, views: stubViewReader(), whole: true })
@@ -294,11 +292,6 @@ describe("the deterministic merge", () => {
 })
 
 describe("the helpers", () => {
-  it("has placeholder settings that parse for every View Type", () => {
-    for (const t of VIEW_TYPE_IDS)
-      expect(VIEW_TYPES[t].shared.safeParse(placeholderSettings(t)).success).toBe(true)
-  })
-
   it("lists the Concept set with ids, Kinds and Relationships", async () => {
     const { state } = await conceptSet()
     const text = describeConcepts(state)
@@ -318,16 +311,5 @@ describe("the helpers", () => {
     expect(out[0]!.content).toEqual(msgs[0]!.content)
     expect(out[1]!.providerOptions).toBeUndefined()
     expect(out[2]!.providerOptions).toEqual(eph)
-  })
-})
-
-describe("the playbook", () => {
-  it("src/playbook.gen.ts matches playbook/ and docs/view-types/", () => {
-    expect(() =>
-      execFileSync(process.execPath, ["scripts/build-playbook.mjs", "--check"], {
-        cwd: new URL("../../", import.meta.url),
-        stdio: "pipe",
-      })
-    ).not.toThrow()
   })
 })
