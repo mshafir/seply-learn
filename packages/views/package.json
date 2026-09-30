@@ -5,6 +5,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./inspect": "./src/inspect.ts",
     "./canvas.css": "./src/canvas/canvas.css"
   },
   "scripts": {

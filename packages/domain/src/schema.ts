@@ -112,6 +112,24 @@ export const aiKeys = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.provider] })]
 )
 
+/**
+ * A reader's AI settings (spec §3.10): which of their keys builds use, model
+ * overrides per provider and stage (BYOK mode), and the per-ask spending cap
+ * (null: the default).
+ */
+export const aiSettings = pgTable("ai_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  provider: text("provider"),
+  models: jsonb("models")
+    .$type<Record<string, Partial<Record<string, string>>>>()
+    .notNull()
+    .default({}),
+  askCapCents: integer("ask_cap_cents"),
+  updatedAt: authTs("updated_at").notNull().defaultNow(),
+})
+
 // --- Expeditions (plain columns + logged fields) ---------------------------
 
 export const expeditions = pgTable("expeditions", {

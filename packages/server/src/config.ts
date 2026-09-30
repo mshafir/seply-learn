@@ -25,6 +25,24 @@ export type ServerEnv = {
   AUTH_TEST_CREDENTIALS?: string
   /** The Neon branch this deploy reads from (reported by /api/health). */
   DB_BRANCH?: string
+
+  // --- AI (spec §5.6; see ai-config.ts) ---
+  /** "instance" (default): the operator's key serves everyone. "byok": each reader adds their own. */
+  AI_KEY_MODE?: string
+  /** Instance key: a Vercel AI Gateway key (the hosted instance). */
+  AI_GATEWAY_API_KEY?: string
+  /** Instance key alternatives (self-host), used when no gateway key is set. */
+  ANTHROPIC_API_KEY?: string
+  OPENAI_API_KEY?: string
+  GOOGLE_GENERATIVE_AI_API_KEY?: string
+  OPENAI_COMPATIBLE_BASE_URL?: string
+  OPENAI_COMPATIBLE_API_KEY?: string
+  /** Instance mode: the model per stage, over the provider's defaults. */
+  AI_MODEL_SKIM?: string
+  AI_MODEL_CURATOR?: string
+  AI_MODEL_WRITER?: string
+  /** BYOK mode: 32 random bytes, base64. Readers' keys are AES-GCM encrypted under it. */
+  AI_KEYS_MASTER_KEY?: string
   /**
    * Our VAPID key pair for web push (base64url: the 65-byte public point and
    * the 32-byte private scalar) and a contact for push services

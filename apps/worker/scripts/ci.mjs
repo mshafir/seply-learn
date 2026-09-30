@@ -16,7 +16,8 @@
 //                                                  $GITHUB_OUTPUT, before the first deploy
 //   node scripts/ci.mjs custom-domain <hostname>   add <hostname> to wrangler.ci.json as the
 //                                                  Worker's custom domain (production only)
-//   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below)
+//   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below,
+//                                                  plus OPTIONAL_SECRETS that are set)
 //                                                  from env to <path> as JSON, mode 0600, for
 //                                                  `wrangler deploy --secrets-file`
 //
@@ -227,20 +228,24 @@ const AUTH_SECRETS = [
   "GOOGLE_CLIENT_SECRET",
 ]
 
-// Copied when set: web push is off without them (WP-3.2).
+// AI secrets (spec §5.6), uploaded when the repo secret exists: the hosted
+// instance key, and the master key that bring-your-own-key mode encrypts
+// readers' keys under. Without them the Worker runs, and AI says it isn't set up.
+// And the web push VAPID keys (WP-3.2): web push is off without them.
 const OPTIONAL_SECRETS = [
+  "AI_GATEWAY_API_KEY",
+  "AI_KEYS_MASTER_KEY",
   "VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
 ]
 
 function secretsFile(path) {
-  const optional = OPTIONAL_SECRETS.filter((n) => process.env[n])
-  const names = [...AUTH_SECRETS, ...optional]
-  const secrets = Object.fromEntries(names.map((n) => [n, env(n)]))
+  const secrets = Object.fromEntries(AUTH_SECRETS.map((n) => [n, env(n)]))
+  for (const n of OPTIONAL_SECRETS) if (process.env[n]) secrets[n] = process.env[n]
   writeFileSync(path, JSON.stringify(secrets), { mode: 0o600 })
   chmodSync(path, 0o600)
-  console.log(`wrote ${names.join(", ")} to ${path}`)
+  console.log(`wrote ${Object.keys(secrets).join(", ")} to ${path}`)
 }
 
 // Attaches the production Worker to its own hostname. Only the production job calls

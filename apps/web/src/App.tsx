@@ -3,6 +3,7 @@
 //   /                   the Library
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
+//   /settings           Settings: AI keys, models and the per-ask cap (WP-3.3)
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
 
@@ -12,6 +13,7 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"
 import { LibraryScreen } from "@/screens/library.tsx"
+import { SettingsScreen } from "@/screens/settings.tsx"
 import { SignInScreen } from "@/screens/sign-in.tsx"
 import { Showcase } from "@/showcase/Showcase.tsx"
 
@@ -56,6 +58,11 @@ export function App() {
             <ExpeditionScreen expeditionId={params.id} viewId={params.viewId} />
           </WaitForSession>
         )}
+      </Route>
+      <Route path="/settings">
+        <RequireUser>
+          <SettingsScreen />
+        </RequireUser>
       </Route>
       <Route path="/">
         <RequireUser>

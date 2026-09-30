@@ -55,7 +55,7 @@ async function setup(): Promise<Setup> {
   }
   const engine = createInlineEngine({ deps, registry: JOB_KINDS })
   const jobs = createJobRunner({ engine, registry: JOB_KINDS, relay })
-  const app = testApp(TEST_ENV, db, relay, { jobs })
+  const app = testApp(TEST_ENV, db, relay, undefined, { jobs })
   const ada = await signUp(app, "ada")
   const created = await app.request("/api/expeditions", {
     method: "POST",
@@ -379,7 +379,7 @@ describe("job routes", () => {
       },
       registry: JOB_KINDS,
     })
-    const prod = testApp(env, s.db, undefined, {
+    const prod = testApp(env, s.db, undefined, undefined, {
       jobs: createJobRunner({
         engine,
         registry: JOB_KINDS,

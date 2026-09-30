@@ -70,7 +70,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **Three panes:**
   1. the **Views rail** (272 px), where each entry shows the View's name and question, reorderable
   2. the **canvas**, as wide as possible
-  3. the **side panel** (440 px), which opens on selection; a Sheet on narrow screens
+  3. the **side panel** (440 px by default; the reader can drag its edge to resize it, 320 px up to whatever leaves the canvas 360 px, and the width is kept per browser), which opens on selection; a Sheet on narrow screens
 - **An Expedition opens on its best View** (chosen by a curator; by default the first to finish building), or on the reader's last position.
 - **There's no toolbar above the canvas.** A **floating View button** (icon, name, question, settings icon) opens the **View panel**, which has:
   - the description

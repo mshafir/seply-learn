@@ -11,7 +11,7 @@ Decided in:
 
 ## 2.1 Monorepo
 
-pnpm + Turborepo, TypeScript throughout. Tools come from mise: Node LTS and pnpm. Wrangler, Turbo and drizzle-kit are dev dependencies, and Docker is used only to build the self-host image. Dependencies run one way: `domain ← sync ← views/ui ← web`, and `domain ← server/ai`.
+pnpm + Turborepo, TypeScript throughout. Tools come from mise: Node LTS and pnpm. Wrangler, Turbo and drizzle-kit are dev dependencies, and Docker is used only to build the self-host image. Dependencies run one way: `domain ← sync ← views/ui ← web`, and `domain ← server/ai`. Apps compose packages. The apps that run the curator job (`worker`, `server-node`) may also take `views`, only for `@seply/views/inspect`: the pure, React-free reading of a View (as text) and its layout metrics, which they hand to `ai`'s `ViewReader` port for `view.inspect` ([AI §5.3](05-ai.md#53-tools-and-checks)). `ai` itself never imports `views`.
 
 ```
 apps/
@@ -94,10 +94,11 @@ Relay {
   - **Hosted:** Google login by default.
   - **Self-host:** email + password by default, Google optional.
 - **MCP OAuth:** Better Auth is the OAuth 2.1 authorization server (`@better-auth/mcp` + CIMD; dynamic client registration opt-in only). Personal API tokens (`@better-auth/api-key`) are the fallback on the same Bearer header. Scopes are coarse (`expeditions:read`, `expeditions:create`, `proposals:write`), and the Collaborator role is checked on every call.
-- **AI key mode** is an instance setting in env config:
+- **AI key mode** is an instance setting in env config (`AI_KEY_MODE`: `instance`, the default, or `byok`):
   - **instance key:** the operator's keys serve everyone; usage caps are phase 2.
   - **bring your own key:** each reader adds their own.
-- **BYOK storage:** AES-GCM encrypted in `ai_keys` under an **instance master key** (a CF secret or env var), decrypted only inside the request or job that uses it, and never returned to the browser, which shows the provider, the last 4 characters and a Test button. One key per provider per user.
+- **BYOK storage:** AES-GCM encrypted in `ai_keys` under an **instance master key** (`AI_KEYS_MASTER_KEY`: a CF secret or env var, 32 bytes base64), decrypted only inside the request or job that uses it, and never returned to the browser, which shows the provider, the last 4 characters and a Test button. One key per provider per user. Each ciphertext is bound to its user and provider (AES-GCM additional data).
+- **Instance key:** `AI_GATEWAY_API_KEY` on the hosted instance; self-hosts may set a direct provider key or an OpenAI-compatible endpoint instead (see the server README).
 
 ## 2.7 Storage
 

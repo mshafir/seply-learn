@@ -2,7 +2,9 @@
 // (the Worker now, the Node server later). Runtimes supply env and a
 // per-request `connect`; nothing here holds state across requests.
 import { sql } from "drizzle-orm"
+import type { ProviderOptions } from "@seply/ai"
 import { Hono, type Context, type MiddlewareHandler } from "hono"
+import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
 import {
   ConfigError,
@@ -42,6 +44,8 @@ export type AppOptions<Env extends ServerEnv> = {
   connect: Connect<Env>
   /** Told about newly logged ops after each push commits. Default: `noopRelay`. */
   relay?: Relay
+  /** Provider options for AI calls made by routes (tests pass a fake `fetch`). */
+  ai?: ProviderOptions
   /** Starts, cancels and retries jobs. Without one, the job routes answer 501. */
   jobs?: JobRunner
   /**
@@ -175,6 +179,9 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/reader", readerRoutes(relay))
   app.use("/search", signedIn)
   app.route("/search", searchRoutes())
+  app.use("/ai", signedIn)
+  app.use("/ai/*", signedIn)
+  app.route("/ai", aiRoutes(opts.ai))
   app.use("/jobs/*", signedIn)
   app.route("/", jobRoutes(opts.jobs, relay))
   app.route("/web-push", webPushRoutes())

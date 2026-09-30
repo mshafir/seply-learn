@@ -44,6 +44,7 @@ proposal_items   id, proposal_id, ops[], base{}, status (pending|accepted|dismis
 collaborators    exp, user_id, role (owner|editor|viewer)              (plain rows, not logged)
 users, sessions, accounts, api_keys                                    (Better Auth tables)
 ai_keys          user_id, provider, ciphertext, iv, last4, created_at  (BYOK mode only)
+ai_settings      user_id, provider, models{provider: {stage: model}}, ask_cap_cents, updated_at  (per reader)
 reading_status   user_id, concept_id, state (unread|read|known), at    (per reader)
 personal_view_settings  user_id, view_id, settings{}, at               (per reader)
 reader_position  user_id, expedition_id, view_id, focus_concept_id, step, panel_depth, at  (per reader)

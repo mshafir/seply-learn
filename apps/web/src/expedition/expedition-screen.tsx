@@ -432,81 +432,83 @@ function ExpeditionFrame({
             navigate(`/e/${expeditionId}/${id}`)
           }}
         />
-        <main
-          data-testid="canvas-pane"
-          data-settled={view && settledViewId === view.id ? "" : undefined}
-          aria-label="Canvas"
-          className="relative min-w-0 flex-1 overflow-hidden bg-background"
-        >
-          {view ? (
-            <>
-              <CanvasSlot
-                collections={client.collections}
-                viewId={view.id}
-                selectedConceptId={selectedConcept?.id ?? null}
-                onSelectConcept={(id) =>
-                  setPanel(
-                    id ? { type: "concept", stack: openConcept(id) } : null
-                  )
-                }
-                onSettled={() => setSettledViewId(view.id)}
-                personal={personal.values}
-                onPersonalChange={personal.set}
-                onStatus={setStatus}
-                matches={matches}
-                covered={covered}
-                onMarkKnown={markKnown}
-              />
-              <ViewButton
-                view={view}
-                open={panel?.type === "view"}
-                onClick={() =>
-                  setPanel((p) =>
-                    p?.type === "view" ? null : { type: "view" }
-                  )
-                }
-                className="absolute top-4 left-4 z-10"
-              />
-              {status && (
-                <StatusChip
-                  status={status}
-                  className="absolute bottom-4 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2"
-                />
-              )}
-              {resumed && (
-                <div className="absolute right-4 bottom-4 z-10">
-                  <Alert data-testid="resumed" className="shadow-sm">
-                    <AlertTitle>Continuing where you left off</AlertTitle>
-                    <AlertDescription>
-                      <Button
-                        size="xs"
-                        variant="link"
-                        className="h-auto p-0"
-                        onClick={backToStart}
-                      >
-                        Back to the start
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
-            </>
-          ) : (
-            <Empty className="h-full">
-              <EmptyHeader>
-                <EmptyTitle>No Views yet</EmptyTitle>
-                <EmptyDescription>
-                  This Expedition has {data.concepts.length} Concepts and no
-                  Views to read them through.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          )}
-        </main>
         <SidePanel
           content={content}
           inline={inlinePanel}
           onClose={() => setPanel(null)}
+          canvas={
+            <main
+              data-testid="canvas-pane"
+              data-settled={view && settledViewId === view.id ? "" : undefined}
+              aria-label="Canvas"
+              className="relative h-full overflow-hidden bg-background"
+            >
+              {view ? (
+                <>
+                  <CanvasSlot
+                    collections={client.collections}
+                    viewId={view.id}
+                    selectedConceptId={selectedConcept?.id ?? null}
+                    onSelectConcept={(id) =>
+                      setPanel(
+                        id ? { type: "concept", stack: openConcept(id) } : null
+                      )
+                    }
+                    onSettled={() => setSettledViewId(view.id)}
+                    personal={personal.values}
+                    onPersonalChange={personal.set}
+                    onStatus={setStatus}
+                    matches={matches}
+                    covered={covered}
+                    onMarkKnown={markKnown}
+                  />
+                  <ViewButton
+                    view={view}
+                    open={panel?.type === "view"}
+                    onClick={() =>
+                      setPanel((p) =>
+                        p?.type === "view" ? null : { type: "view" }
+                      )
+                    }
+                    className="absolute top-4 left-4 z-10"
+                  />
+                  {status && (
+                    <StatusChip
+                      status={status}
+                      className="absolute bottom-4 left-1/2 z-10 max-w-[calc(100%-2rem)] -translate-x-1/2"
+                    />
+                  )}
+                  {resumed && (
+                    <div className="absolute right-4 bottom-4 z-10">
+                      <Alert data-testid="resumed" className="shadow-sm">
+                        <AlertTitle>Continuing where you left off</AlertTitle>
+                        <AlertDescription>
+                          <Button
+                            size="xs"
+                            variant="link"
+                            className="h-auto p-0"
+                            onClick={backToStart}
+                          >
+                            Back to the start
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Empty className="h-full">
+                  <EmptyHeader>
+                    <EmptyTitle>No Views yet</EmptyTitle>
+                    <EmptyDescription>
+                      This Expedition has {data.concepts.length} Concepts and no
+                      Views to read them through.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </main>
+          }
         />
       </div>
     </>

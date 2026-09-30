@@ -108,3 +108,25 @@ export {
   type TagHit,
 } from "./search.ts"
 export { PushBody, PullQuery, PUSH_LIMIT } from "./sync.ts"
+export {
+  aiRoutes,
+  MAX_ASK_CAP_USD,
+  readAiSettings,
+  resolveAi,
+  type AiOverview,
+  type AiResolution,
+  type AiSettings,
+  type AiUnavailable,
+} from "./ai.ts"
+export { readAiConfig, type AiConfig, type AiKeyMode } from "./ai-config.ts"
+export {
+  deleteKey,
+  importMasterKey,
+  listKeys,
+  loadKey,
+  openKey,
+  saveKey,
+  sealKey,
+  type KeySummary,
+  type Sealed,
+} from "./ai-keys.ts"

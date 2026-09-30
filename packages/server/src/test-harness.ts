@@ -1,6 +1,7 @@
 // Test helpers: the app over an in-memory PGlite database with the committed
 // migrations applied, and a tiny cookie jar. Not exported from the package.
 import { PGlite } from "@electric-sql/pglite"
+import type { ProviderOptions } from "@seply/ai"
 import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm"
 import { schema } from "@seply/domain"
 import { drizzle } from "drizzle-orm/pglite"
@@ -26,7 +27,8 @@ export function testApp(
   env: ServerEnv,
   db: Db | null,
   relay?: Relay,
-  extra: Omit<AppOptions<ServerEnv>, "connect" | "relay"> = {}
+  ai?: ProviderOptions,
+  extra: Omit<AppOptions<ServerEnv>, "connect" | "relay" | "ai"> = {}
 ) {
   const root = new Hono()
   root.route(
@@ -34,12 +36,13 @@ export function testApp(
     createApp({
       connect: async () => (db ? { db, close: async () => {} } : null),
       relay,
+      ai,
       ...extra,
     })
   )
   const request = (path: string, init: RequestInit = {}) =>
     root.request(path, init, env)
-  return { request }
+  return { request, routes: root.routes }
 }
 
 /** Keeps cookies from Set-Cookie headers, like a browser on one origin. */
