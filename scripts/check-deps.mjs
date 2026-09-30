@@ -1,5 +1,6 @@
 // Enforces the one-way package dependency rule (see CLAUDE.md):
 //   domain ← sync ← views/ui ← web;  domain ← server/ai;  apps compose packages.
+// The job-running apps take views only for `@seply/views/inspect` (spec §2.1).
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 
 const allowed = {
@@ -11,8 +12,8 @@ const allowed = {
   "@seply/ai": ["@seply/domain"],
   "@seply/server": ["@seply/domain", "@seply/ai"],
   web: ["@seply/ui", "@seply/views", "@seply/sync", "@seply/domain"],
-  "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain"],
-  "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain"],
+  "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
+  "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
 };
 let bad = 0;
 for (const root of ["apps", "packages"]) {

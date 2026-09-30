@@ -12,7 +12,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@seply/domain": "workspace:*"
+    "@seply/domain": "workspace:*",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@seply/config": "workspace:*",
