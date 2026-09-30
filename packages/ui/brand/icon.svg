@@ -1,19 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- PWA / app icon source: the glyph on the ground colour, inside the
-       maskable safe zone (the central 80%). Rasterised to the PNGs here. -->
-  <rect width="512" height="512" fill="#F6F5F1" />
-  <g transform="translate(96 96) scale(5)">
-    <mask id="ring">
-      <rect width="64" height="64" fill="#fff" />
-      <circle cx="32" cy="32" r="11" fill="#000" />
-    </mask>
-    <g fill="#2D5C3F" mask="url(#ring)">
-      <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" />
-      <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(72 32 32)" />
-      <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(144 32 32)" />
-      <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(216 32 32)" />
-      <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(288 32 32)" />
-    </g>
-    <circle fill="#3A45B5" cx="32" cy="32" r="8.5" />
+  <!-- PWA / app icon source: the tile full-bleed (platforms round the
+       corners), leaves inside the maskable safe zone (the central 80%).
+       Rasterised to the PNGs here. -->
+  <rect width="512" height="512" fill="#2D5C3F" />
+  <g fill="#DFE9D8" transform="scale(8)">
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(-10 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(62 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(134 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(206 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(278 32 32)" />
   </g>
 </svg>

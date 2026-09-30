@@ -1,23 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Seply Learn">
   <title>Seply Learn</title>
   <style>
-    .calyx { fill: #2D5C3F; }
-    .bud { fill: #3A45B5; }
+    .tile { fill: #2D5C3F; }
+    .leaf { fill: #DFE9D8; }
     @media (prefers-color-scheme: dark) {
-      .calyx { fill: #8FC7A0; }
-      .bud { fill: #8E97F2; }
+      .tile { fill: #8FC7A0; }
+      .leaf { fill: #26352B; }
     }
   </style>
-  <mask id="ring">
-    <rect width="64" height="64" fill="#fff" />
-    <circle cx="32" cy="32" r="11" fill="#000" />
-  </mask>
-  <g class="calyx" mask="url(#ring)">
-    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" />
-    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(72 32 32)" />
-    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(144 32 32)" />
-    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(216 32 32)" />
-    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(288 32 32)" />
+  <rect class="tile" width="64" height="64" rx="14" />
+  <g class="leaf">
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(-10 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(62 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(134 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(206 32 32)" />
+    <path d="M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z" transform="rotate(278 32 32)" />
   </g>
-  <circle class="bud" cx="32" cy="32" r="8.5" />
 </svg>

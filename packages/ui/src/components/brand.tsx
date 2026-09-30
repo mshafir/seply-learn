@@ -1,23 +1,18 @@
-import * as React from "react"
+import type * as React from "react"
 import { cn } from "cn"
 
 // The Seply brand (spec 7.5). The standalone files live in packages/ui/brand;
 // these components draw the same marks with tokens, so they follow the theme.
 
-/** One sepal, pointing up from the centre; the glyph rotates it five times. */
-const SEPAL = "M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z"
-const ANGLES = [0, 72, 144, 216, 288] as const
+/** One leaf, a lens pointing up from the centre; the glyph turns it five times. */
+const LEAF = "M32 29A12.2 12.2 0 0 1 32 10.2A12.2 12.2 0 0 1 32 29Z"
+const ANGLES = [-10, 62, 134, 206, 278] as const
 
-/**
- * Five sepals (`--calyx`) in a slight whorl, holding a bud in the product's
- * colour (`--primary`: gentian in Learn). A ring around the bud is cut out of
- * the sepals, so the glyph sits on any surface.
- */
+/** Five pale leaves (`--sprout`) in a whorl on a rounded calyx tile (`--calyx`). */
 export function SeplyGlyph({
   className,
   ...props
 }: React.ComponentProps<"svg">) {
-  const maskId = `seply-ring-${React.useId().replace(/[^\w-]/g, "")}`
   return (
     <svg
       viewBox="0 0 64 64"
@@ -25,20 +20,12 @@ export function SeplyGlyph({
       className={cn("size-6 shrink-0", className)}
       {...props}
     >
-      <mask id={maskId}>
-        <rect width={64} height={64} fill="white" />
-        <circle cx={32} cy={32} r={11} fill="black" />
-      </mask>
-      <g fill="var(--calyx)" mask={`url(#${maskId})`}>
+      <rect width={64} height={64} rx={14} fill="var(--calyx)" />
+      <g fill="var(--sprout)">
         {ANGLES.map((angle) => (
-          <path
-            key={angle}
-            d={SEPAL}
-            transform={angle ? `rotate(${angle} 32 32)` : undefined}
-          />
+          <path key={angle} d={LEAF} transform={`rotate(${angle} 32 32)`} />
         ))}
       </g>
-      <circle fill="var(--primary)" cx={32} cy={32} r={8.5} />
     </svg>
   )
 }

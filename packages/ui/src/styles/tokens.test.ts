@@ -71,6 +71,14 @@ describe.each(Object.entries(themes))("%s theme", (_, tokens) => {
     expect(ratio).toBeGreaterThanOrEqual(4.5)
   })
 
+  it("the glyph's leaves reach 3:1 on its tile", () => {
+    const ratio = contrastRatio(
+      color(tokens, "--sprout"),
+      color(tokens, "--calyx")
+    )
+    expect(ratio).toBeGreaterThanOrEqual(3)
+  })
+
   it("muted ink reaches 4.5:1 on the muted fill", () => {
     const ratio = contrastRatio(
       color(tokens, "--muted-foreground"),
