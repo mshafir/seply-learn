@@ -40,6 +40,7 @@ const text = [
   ["accent", "--primary"],
   ["suggested-text", "--suggested-text"],
   ["success", "--success"],
+  ["calyx (brand)", "--calyx"],
 ] as const
 
 const fills = [

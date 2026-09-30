@@ -1,6 +1,6 @@
 # Seply Learn
 
-A tool for building, curating, and exploring Expeditions: bodies of knowledge on one subject, so a learner can take in a subject in well-defined chunks, see it from several angles, and see what they need to know first. Humans and LLMs curate Expeditions together. (Seply is the umbrella for separate LLM tools such as Learn, Work and Plan; branding is still a placeholder. The product was previously called Umbel Learn, and older planning docs say "Umbel", "Mindmaps" and "Graph"; see [ADR 0002](docs/adr/0002-rename-to-seply.md).)
+A tool for building, curating, and exploring Expeditions: bodies of knowledge on one subject, so a learner can take in a subject in well-defined chunks, see it from several angles, and see what they need to know first. Humans and LLMs curate Expeditions together. (Seply is the umbrella for separate LLM tools such as Learn, Plan and Work. The product was previously called Umbel Learn, and older planning docs say "Umbel", "Mindmaps" and "Graph"; see [ADR 0002](docs/adr/0002-rename-to-seply.md).)
 
 ## Language
 

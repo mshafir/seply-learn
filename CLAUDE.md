@@ -1,6 +1,6 @@
 # Seply Learn: notes for agents
 
-Seply Learn (Seply is the umbrella for Learn, Work and Plan; previously Umbel Learn, branding still a placeholder) is a collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject, built from Sources, split into Concepts and Relationships, and read through Views.
+Seply Learn (Seply is the umbrella for Learn, Plan and Work; previously Umbel Learn; branding in [spec 7.5](docs/spec/v1/07-design-system.md#75-branding)) is a collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject, built from Sources, split into Concepts and Relationships, and read through Views.
 
 ## Read before you build
 

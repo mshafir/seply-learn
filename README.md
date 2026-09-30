@@ -2,7 +2,7 @@
 
 A collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject. Start from an AI chat, a few files or just a prompt. Seply Learn breaks the material into well-defined **Concepts**, links them, and lets you look at them through several **Views**: a learning path, a comparison table, cause and effect, a timeline, a map, and more. Humans and AI agents curate it together, and every AI change is a suggestion you accept or dismiss.
 
-> **Status:** planning complete; the build is starting. Seply is the umbrella for separate LLM tools (Learn, Work, Plan); branding is still a placeholder. Previously called Umbel Learn ([ADR 0002](docs/adr/0002-rename-to-seply.md)).
+> **Status:** planning complete; the build is starting. Seply is the umbrella for separate LLM tools (Learn, Plan, Work): shared perspective for people and agents. Previously called Umbel Learn ([ADR 0002](docs/adr/0002-rename-to-seply.md)).
 
 ## What's here
 

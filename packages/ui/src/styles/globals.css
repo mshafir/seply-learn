@@ -65,6 +65,7 @@
     --color-suggested: var(--suggested);
     --color-suggested-text: var(--suggested-text);
     --color-success: var(--success);
+    --color-calyx: var(--calyx);
     --color-kind-blue: var(--kind-blue);
     --color-kind-teal: var(--kind-teal);
     --color-kind-green: var(--kind-green);
@@ -117,6 +118,7 @@
     --suggested: oklch(0.6264 0.1248 70.45); /* #B7791F: fills, dashes, borders */
     --suggested-text: oklch(0.5191 0.105 69.29); /* #8F5C14 */
     --success: oklch(0.4712 0.0963 157.26); /* #1F6B45 */
+    --calyx: oklch(0.4326 0.071 154.93); /* brand green #2D5C3F: the glyph's sepals */
 
     /* 12 named Kind / Relationship Type hues: >= 4.5:1 on ground and surface. */
     --kind-blue: oklch(0.54 0.14 250);
@@ -172,6 +174,7 @@
     --suggested: oklch(0.7912 0.1184 79.71); /* #E3B25C */
     --suggested-text: oklch(0.7912 0.1184 79.71); /* #E3B25C */
     --success: oklch(0.7812 0.1199 157.83); /* #6FCF9A */
+    --calyx: oklch(0.7802 0.0804 153.84); /* #8FC7A0 */
 
     /* Same hues, lighter: >= 6:1 on ground and surface. */
     --kind-blue: oklch(0.702 0.126 250);

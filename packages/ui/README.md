@@ -63,13 +63,13 @@ IBM Plex Sans (`font-sans`, the interface), IBM Plex Mono (`font-mono`, labels) 
 
 ## Brand
 
-`brand/` is the one swappable folder for the placeholder brand (spec 7.5). `apps/web` serves it as its public directory, so its files sit at the site root.
+`brand/` is the one swappable folder for the brand (spec 7.5). `apps/web` serves it as its public directory, so its files sit at the site root.
 
 | File | Use |
 |---|---|
-| `glyph.svg` | Placeholder mark until branding lands (the old umbel): stalks from one point to small dots, in ink with one indigo dot. Follows `prefers-color-scheme`. |
-| `wordmark.svg` | Glyph + "Seply" (Newsreader) + "Learn" (Plex Sans). Standalone use only: its text needs the fonts installed. In the app use `<Wordmark>`. |
-| `favicon.svg`, `favicon-32.png` | The glyph with heavier strokes for small sizes. |
+| `glyph.svg` | The Seply glyph: five calyx-green sepals holding a gentian bud (Learn). Follows `prefers-color-scheme`. |
+| `wordmark.svg` | Glyph + "Seply" (Newsreader) + "Learn" (Plex Sans), with the text as outlines, so it needs no fonts. In the app use `<Wordmark>`. |
+| `favicon.svg`, `favicon-32.png` | The glyph for browser tabs (it holds at 16px). |
 | `icon.svg` | App icon source: the glyph on the ground colour, inside the maskable safe zone. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` | PWA and iOS icons, rasterised from `icon.svg` (they work as `any` and `maskable`). The manifest arrives with WP-2.7. |
 
