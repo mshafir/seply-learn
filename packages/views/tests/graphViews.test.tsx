@@ -251,3 +251,18 @@ describe("the Anatomy model", () => {
     expect(litIds).toEqual(new Set(["attn-kernel", "attention", "layer-stack", "transformer"].map(f.concept)));
   });
 });
+
+describe("Concepts show without waiting on React Flow's measuring (#76)", () => {
+  // The ResizeObserver above never calls back, as when a measurement is lost
+  // between two renders: every Concept must still be visible, with its size.
+  it("keeps every Concept visible and sized, before and after a re-render", async () => {
+    const f = live();
+    const { container } = render(<Selecting collections={f.collections} viewId={f.view("learn")} transitionMs={0} />);
+    await waitFor(() => expect(nodes(container).length).toBeGreaterThan(0), { timeout: 5000 });
+    const hidden = () => nodes(container).filter((n) => n.style.visibility === "hidden");
+    expect(hidden()).toEqual([]);
+    fireEvent.click(nodes(container)[0]!);
+    await waitFor(() => expect(container.querySelector(".seply-concept--dim")).not.toBeNull());
+    expect(hidden()).toEqual([]);
+  });
+});

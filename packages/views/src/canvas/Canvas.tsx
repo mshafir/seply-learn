@@ -1,7 +1,7 @@
 // The React Flow canvas for graph-drawn Views. It renders what the pure
 // layout functions compute and tweens Concepts by id when the layout changes.
 import { useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties } from "react";
-import { Background, Controls, ReactFlow, ReactFlowProvider, ViewportPortal, useReactFlow, type Node } from "@xyflow/react";
+import { Background, Controls, ReactFlow, ReactFlowProvider, ViewportPortal, useReactFlow, type Node, type NodeChange } from "@xyflow/react";
 import { timer } from "d3-timer";
 import { interpolateNumber } from "d3-interpolate";
 import type { Expedition, View } from "../model.ts";
@@ -45,6 +45,8 @@ export function Canvas(props: CanvasProps) {
   );
 }
 
+type Size = { width: number; height: number };
+
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
 function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered }: CanvasProps) {
@@ -62,6 +64,14 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
   const laidOut = useRef<string | undefined>(undefined);
   const flowRef = useRef<HTMLDivElement>(null);
   const colorMode = useInheritedColorMode(flowRef);
+  // What React Flow last measured for each Concept. Nodes are rebuilt every
+  // render (every frame of a tween), and a node without `measured` stays hidden
+  // until it's measured again, which can be never (#76). So they carry it.
+  const [measured, setMeasured] = useState<ReadonlyMap<string, Size>>(() => new Map());
+  const onNodesChange = (changes: NodeChange[]) => {
+    const sized = changes.flatMap((c) => (c.type === "dimensions" && c.dimensions ? [[c.id, c.dimensions] as const] : []));
+    if (sized.length) setMeasured((was) => new Map([...was, ...sized]));
+  };
   const { fitView } = useReactFlow();
   const fitIds = overlay?.fit?.join(",");
   const isLearningPath = view.viewType === "learning-path";
@@ -159,6 +169,8 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
         id: c.id,
         type: "concept",
         position: { x: p.x - size.width / 2, y: p.y - size.height / 2 },
+        // The card's own size until React Flow has measured it.
+        measured: measured.get(c.id) ?? size,
         data: {
           concept: c,
           kind: kinds.get(c.kind),
@@ -184,6 +196,7 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
       edges={edges}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}
+      onNodesChange={onNodesChange}
       onNodeClick={(_, n) => onSelect(n.id)}
       onPaneClick={() => onSelect(undefined)}
       nodesConnectable={false}
