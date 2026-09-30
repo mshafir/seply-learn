@@ -8,6 +8,7 @@ import { migrate } from "drizzle-orm/pglite/migrator"
 import { Hono } from "hono"
 import { fileURLToPath } from "node:url"
 import { createApp } from "./app.ts"
+import type { BlobStore } from "./blobs.ts"
 import type { ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
 import type { Relay } from "./relay.ts"
@@ -22,13 +23,19 @@ export async function testDb(): Promise<Db> {
 }
 
 /** The app mounted at /api, as the Worker mounts it, bound to `env`. */
-export function testApp(env: ServerEnv, db: Db | null, relay?: Relay) {
+export function testApp(
+  env: ServerEnv,
+  db: Db | null,
+  relay?: Relay,
+  blobs?: BlobStore
+) {
   const root = new Hono()
   root.route(
     "/api",
     createApp({
       connect: async () => (db ? { db, close: async () => {} } : null),
       relay,
+      blobs: () => blobs ?? null,
     })
   )
   const request = (path: string, init: RequestInit = {}) =>

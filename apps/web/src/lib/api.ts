@@ -3,6 +3,8 @@
 // These types mirror the server's responses: the app may not import
 // @seply/server (dependency rule).
 
+import type { SegmentsDoc } from "@seply/domain"
+
 export type User = { id: string; email: string; name: string }
 
 export type Role = "owner" | "editor" | "viewer"
@@ -169,3 +171,30 @@ export function searchAll(
   const params = new URLSearchParams({ q, public: includePublic ? "1" : "0" })
   return call(`/search?${params}`, { signal })
 }
+
+/** A Source's own fields, as GET /api/sources/:expedition/:source returns them. */
+export type SourceInfo = {
+  id: string
+  kind: "chat" | "file" | "prompt"
+  title: string
+  mime?: string
+  size?: number
+  addedBy: string
+  addedAt: string
+}
+
+/** A Source and its segments (for the Source viewer). */
+export function getSourceSegments(
+  expeditionId: string,
+  sourceId: string,
+  signal?: AbortSignal
+): Promise<{ source: SourceInfo; segments: SegmentsDoc }> {
+  return call(
+    `/sources/${encodeURIComponent(expeditionId)}/${encodeURIComponent(sourceId)}`,
+    { signal }
+  )
+}
+
+/** Where a Source's raw file downloads from. */
+export const sourceFileHref = (expeditionId: string, sourceId: string) =>
+  `/api/sources/${encodeURIComponent(expeditionId)}/${encodeURIComponent(sourceId)}/file`

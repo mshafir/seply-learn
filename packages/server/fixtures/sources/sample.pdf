@@ -1,0 +1,68 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Title (Volcanoes: a field guide) /Producer (seply fixtures) >>
+endobj
+5 0 obj
+<< /Length 169 >>
+stream
+BT /F1 14 Tf 72 720 Td
+(Volcanoes: a field guide) Tj
+0 -20 Td (Page one. A volcano is an opening in the crust) Tj
+0 -20 Td (where molten rock, ash and gas escape.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 121 >>
+stream
+BT /F1 14 Tf 72 720 Td
+(Page two. Shield volcanoes have gentle slopes,) Tj
+0 -20 Td (built from runny basalt lava.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 138 >>
+stream
+BT /F1 14 Tf 72 720 Td
+(Page three. Stratovolcanoes are steep and explosive,) Tj
+0 -20 Td (built from layers of ash and thick lava.) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+xref
+0 11
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000128 00000 n 
+0000000198 00000 n 
+0000000280 00000 n 
+0000000500 00000 n 
+0000000626 00000 n 
+0000000798 00000 n 
+0000000924 00000 n 
+0000001113 00000 n 
+trailer
+<< /Size 11 /Root 1 0 R /Info 4 0 R >>
+startxref
+1240
+%%EOF

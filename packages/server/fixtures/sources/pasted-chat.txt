@@ -1,0 +1,14 @@
+You said:
+Can you explain what a prime number is?
+ChatGPT said:
+A prime number is a whole number greater than 1 whose only divisors are 1 and itself.
+
+Examples: 2, 3, 5, 7, 11.
+You said:
+Is 1 prime?
+ChatGPT said:
+No. By convention 1 is not prime, which keeps factorisation into primes unique.
+You said:
+Why does uniqueness matter?
+ChatGPT said:
+Because the fundamental theorem of arithmetic says every number above 1 has exactly one prime factorisation, and many proofs lean on that.

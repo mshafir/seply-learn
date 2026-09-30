@@ -14,6 +14,8 @@
 //                                                  $GITHUB_OUTPUT, before the first deploy
 //   node scripts/ci.mjs custom-domain <hostname>   add <hostname> to wrangler.ci.json as the
 //                                                  Worker's custom domain (production only)
+//   node scripts/ci.mjs r2-bucket <name>           create the R2 bucket if absent, and point
+//                                                  wrangler.ci.json's SOURCES binding at it
 //   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below)
 //                                                  from env to <path> as JSON, mode 0600, for
 //                                                  `wrangler deploy --secrets-file`
@@ -223,7 +225,26 @@ function customDomain(hostname) {
   console.log(`wrangler.ci.json: custom domain ${hostname}`)
 }
 
+// Source files (spec §2.7): previews share seply-sources-preview, production
+// uses seply-sources. Run after hyperdrive-upsert, which writes wrangler.ci.json.
+async function r2Bucket(name) {
+  const existing = await cf("GET", `/r2/buckets/${encodeURIComponent(name)}`)
+  if (existing) console.log(`r2 bucket ${name}: exists`)
+  else {
+    await cf("POST", "/r2/buckets", { name })
+    console.log(`r2 bucket created: ${name}`)
+  }
+  const path = join(root, "wrangler.ci.json")
+  const config = JSON.parse(readFileSync(path, "utf8"))
+  const binding = config.r2_buckets?.find((b) => b.binding === "SOURCES")
+  if (!binding) throw new Error("wrangler.jsonc has no SOURCES binding")
+  binding.bucket_name = name
+  writeFileSync(path, JSON.stringify(config, null, 2))
+  console.log(`wrangler.ci.json: SOURCES → ${name}`)
+}
+
 const commands = {
+  "r2-bucket": r2Bucket,
   "custom-domain": customDomain,
   "worker-urls": workerUrls,
   "secrets-file": secretsFile,
