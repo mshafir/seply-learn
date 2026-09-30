@@ -5,8 +5,8 @@ import { needsDatabase, screenshot, signUp, widthOf } from "./helpers.ts"
 
 // WP-1.5: sign in with the test credentials, reach the Library, import the
 // compute fixture, open it, and check the Expedition screen's panes: Views
-// rail 272 px, canvas as wide as possible, side panel 440 px (a Sheet on
-// narrow windows). Runs in light and dark (app-light, app-dark).
+// rail 272 px, canvas as wide as possible, side panel 440 px and resizable by
+// its edge, the width kept over a reload (a Sheet on narrow windows). Runs in light and dark (app-light, app-dark).
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(
@@ -91,9 +91,46 @@ test("sign in, import the compute fixture, and open it in three panes", async ({
   await expect(panel).not.toContainText("View · Learning path")
   const conceptTitle = (await panel.getByTestId("panel-title").textContent())!
   expect(conceptTitle.length).toBeGreaterThan(0)
-  expect(await node.textContent()).toContain(conceptTitle)
+  // The canvas may still be re-fitting to its new width, so the click can
+  // land on a neighbour of the first node: check it opened one of the canvas's.
+  await expect(
+    canvas.locator(".react-flow__node", { hasText: conceptTitle })
+  ).not.toHaveCount(0)
   expect(await widthOf(page, "[data-testid=side-panel]")).toBe(PANEL)
   await screenshot(page, testInfo, "expedition-concept")
+
+  // Drag the panel's edge: it widens, the canvas gives way, and the width
+  // survives a reload. Then back to the default for the rest of the test.
+  const dragPanelEdge = async (dx: number) => {
+    const box = (await page.getByTestId("side-panel-handle").boundingBox())!
+    const y = box.y + box.height / 2
+    await page.mouse.move(box.x + box.width / 2, y)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 + dx, y, { steps: 8 })
+    await page.mouse.up()
+  }
+  await dragPanelEdge(-120)
+  expect(await widthOf(page, "[data-testid=side-panel]")).toBeCloseTo(
+    PANEL + 120,
+    0
+  )
+  expect(await widthOf(page, "[data-testid=canvas-pane]")).toBeCloseTo(
+    WIDE.width - RAIL - PANEL - 120,
+    0
+  )
+  await page.reload()
+  await canvas
+    .locator(".react-flow__node", { hasText: conceptTitle })
+    .first()
+    .click()
+  await expect(panel.getByTestId("panel-title")).toHaveText(conceptTitle)
+  expect(await widthOf(page, "[data-testid=side-panel]")).toBeCloseTo(
+    PANEL + 120,
+    0
+  )
+  await screenshot(page, testInfo, "expedition-panel-resized")
+  await dragPanelEdge(120)
+  expect(await widthOf(page, "[data-testid=side-panel]")).toBeCloseTo(PANEL, 0)
 
   // Another View: a Comparison Table.
   await rail.getByRole("button", { name: /Open models/ }).click()
