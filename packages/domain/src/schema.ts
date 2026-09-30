@@ -485,3 +485,55 @@ export const readerPosition = pgTable(
     index("reader_position_recent_idx").on(t.userId, t.at),
   ]
 )
+
+// --- Jobs and notifications (plain rows, not logged; spec §2.5) -------------
+
+/**
+ * Long server work (builds, writers, the test job): one row per job. The
+ * runtime's own state (the Workflow instance, later a pg-boss job) holds the
+ * step checkpoints; this row is what the API reads and what the room's
+ * `build` events summarise. A View's build status is its own logged field.
+ */
+export const jobs = pgTable(
+  "jobs",
+  {
+    id: text("id").primaryKey(),
+    expeditionId: exp(),
+    kind: text("kind").notNull(),
+    input: jsonb("input").$type<unknown>().notNull().default({}),
+    startedBy: text("started_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status", {
+      enum: ["queued", "running", "complete", "failed", "cancelled"],
+    })
+      .notNull()
+      .default("queued"),
+    /** What it is doing now, in plain words. */
+    step: text("step"),
+    progress: doublePrecision("progress").notNull().default(0),
+    /** A plain failure reason, when failed. */
+    error: text("error"),
+    /** How many times it was started: 1, then one more per retry. */
+    attempt: integer("attempt").notNull().default(1),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+  (t) => [index("jobs_expedition_idx").on(t.expeditionId, t.status)]
+)
+
+/** A browser's web push subscription (per user; asked on "Leave it building"). */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    endpoint: text("endpoint").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** The browser's P-256 public key and auth secret, base64url. */
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId)]
+)

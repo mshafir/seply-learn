@@ -119,6 +119,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           AI_KEYS_MASTER_KEY: ${{ secrets.AI_KEYS_MASTER_KEY }}
+          # Optional: web push is off without them (docs/ops/deploy.md).
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ vars.VAPID_SUBJECT }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # Google sign-in goes through production (AUTH_PROXY_URL): Google only
@@ -321,6 +325,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
           AI_KEYS_MASTER_KEY: ${{ secrets.AI_KEYS_MASTER_KEY }}
+          # Optional: web push is off without them (docs/ops/deploy.md).
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: ${{ vars.VAPID_SUBJECT }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # AUTH_PROXY_URL is production itself: the OAuth proxy plugin only unwraps

@@ -16,6 +16,9 @@ import {
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
 import { importRoutes } from "./import.ts"
+import { jobRoutes } from "./jobs/routes.ts"
+import type { JobRunner } from "./jobs/types.ts"
+import { webPushRoutes } from "./push/index.ts"
 import { readerRoutes } from "./reader.ts"
 import { noopRelay, type Relay } from "./relay.ts"
 import { searchRoutes } from "./search.ts"
@@ -49,6 +52,14 @@ export type AppOptions<Env extends ServerEnv> = {
   blobs?: (env: Env) => BlobStore | null
   /** Provider options for AI calls made by routes (tests pass a fake `fetch`). */
   ai?: ProviderOptions
+  /** Starts, cancels and retries jobs. Without one, the job routes answer 501. */
+  jobs?: JobRunner
+  /**
+   * Called once, in the background, on the first request a fresh instance
+   * serves, after the response (the Worker wakes jobs `wrangler dev` lost on
+   * a restart). It opens its own connections.
+   */
+  onFirstRequest?: (env: Env) => Promise<void>
 }
 
 class NoDatabase extends Error {}
@@ -118,6 +129,17 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   const app = new Hono<AppEnv>()
   const relay = opts.relay ?? noopRelay
   app.use(resources(opts))
+  let first = !!opts.onFirstRequest
+  app.use(async (c, next) => {
+    if (first && opts.onFirstRequest) {
+      first = false
+      const run = opts
+        .onFirstRequest(c.env as Env)
+        .catch((err) => console.error("first request hook failed", err))
+      await afterResponse(c, run)
+    }
+    await next()
+  })
 
   app.onError((err, c) => {
     if (err instanceof NoDatabase)
@@ -176,6 +198,9 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/ai", signedIn)
   app.use("/ai/*", signedIn)
   app.route("/ai", aiRoutes(opts.ai))
+  app.use("/jobs/*", signedIn)
+  app.route("/", jobRoutes(opts.jobs, relay))
+  app.route("/web-push", webPushRoutes())
   app.route("/", syncRoutes(relay))
 
   app.notFound((c) => c.json({ error: "not found" }, 404))

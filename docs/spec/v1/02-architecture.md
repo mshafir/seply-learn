@@ -70,7 +70,7 @@ Relay {
   - `hello {headSeq, presence[], builds[]}`
   - `ops {from, to, ops[]}`, or `poke {headSeq}` for large batches and gaps
   - `presence {view, cursor, selection[], editing?}`, at ~10–20 Hz, throttled by the client, and `leave`
-  - `build {viewId, status, step, progress, previewNodes?}`
+  - `build {jobId, kind, viewId?, status, step, progress, previewNodes?, reason?, at}`: with `viewId` about that View (its status), without it about the whole job (queued, running, complete, failed, cancelled)
   - `kick {reason}`
 - **Who connects:** signed-in collaborators connect with presence. Signed-in viewers connect read-only. **Anonymous readers of a public or unlisted link subscribe to `ops` but send no presence** *(assumed; the research proposed it)*.
 - **Agents via MCP** appear as a participant. The MCP handler calls `agentPresence` on each tool call, with a TTL.
@@ -83,6 +83,8 @@ Relay {
   - **Node:** **pg-boss** in Postgres, with an in-process worker.
 - The step functions (the curator agent loop, the skim, writers) live in `packages/ai` and are shared by both.
 - Build progress and preview nodes go to the room as `build` events. The View's status and failure reason are logged fields.
+- **Checkpoints and commits:** a job commits through a pair of steps (make the ops, then append them as one Change with origin `build`); op ids are fixed in the first, so a retried or replayed commit is never logged twice. A job's row (`jobs`) holds its status, step, progress, failure reason and attempt; Retry starts the next attempt from the first step, and the job resumes from its logged state (Views already ready are kept).
+- **Local dev:** `wrangler dev` does not resume a running Workflow after a restart (production does), so with `JOBS_WAKE_ON_START=1` the Worker wakes open jobs on its first request.
 - **Notifications:** live status on Library cards, an activity indicator in the header, and **web push** if the reader allowed it (asked on the first "Leave it building"). Build notifications don't use email in v1.
 - **Email (invites only):** a `Mailer` interface. Hosted: a transactional provider (Resend assumed; Cloudflare's email service if it fits better). Self-host: optional SMTP via env vars. Without one, invites use the link and in-app inbox only ([Invites and email](../../wayfinder/mindmaps-v1/tickets/26-invites-and-email.md)).
 

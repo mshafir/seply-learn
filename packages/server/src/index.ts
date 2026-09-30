@@ -54,7 +54,47 @@ export {
   type ImportCounts,
   type ImportResponse,
 } from "./import.ts"
-export { noopRelay, type Relay } from "./relay.ts"
+export {
+  noopRelay,
+  publishBuild,
+  publishCommitted,
+  type Relay,
+  type RoomJoin,
+} from "./relay.ts"
+export {
+  instanceId,
+  jobRegistry,
+  STEP_DEFAULTS,
+  type Job,
+  type JobContext,
+  type JobDefinition,
+  type JobDeps,
+  type JobEngine,
+  type JobNotification,
+  type JobPayload,
+  type JobRegistry,
+  type JobRunner,
+  type Json,
+  type Progress,
+  type StepOptions,
+  type Steps,
+} from "./jobs/types.ts"
+export { failureReason, runJob } from "./jobs/host.ts"
+export { createJobRunner, JobError } from "./jobs/runner.ts"
+export { createInlineEngine, type InlineEngine } from "./jobs/inline.ts"
+export { fakeJob, fakeViewLabel, FakeJobInput } from "./jobs/fake.ts"
+export { JOB_KINDS } from "./jobs/registry.ts"
+export {
+  encryptPayload,
+  notifyUser,
+  readVapid,
+  saveSubscription,
+  sendPush,
+  vapidAuthorization,
+  type PushResult,
+  type PushSubscriptionJson,
+  type VapidKeys,
+} from "./push/index.ts"
 export {
   readReaderState,
   recentPositions,
