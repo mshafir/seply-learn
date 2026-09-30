@@ -125,7 +125,7 @@ Closed with the user's review.
   - sparse columns.
 - **A curator agent** (the whole Source in context, the prompts as a playbook, validated tools, self-review) produced content the user rated good. After one layout round, its Learning path was rated great.
 - **Deliverables, which feed `packages/ai` and the MCP skill:**
-  - [`prototypes/seeding/prompts/`](../../../../prototypes/seeding/prompts/): the playbook (`_contract.md`, skim, extract, merge, build-view, write), with every rule learned in review.
+  - [`prototypes/seeding/prompts/`](../../../../packages/ai/playbook/) (now `packages/ai/playbook/`): the playbook (`_contract.md`, skim, extract, merge, build-view, write), with every rule learned in review.
   - `validate.py` (structural guardrails) plus `sample-graphs/scripts/layout-metrics.ts` (layout quality using the viewer's own layouts): the checks the agent's tools enforce.
   - `segment.py` / `chunk.py`: Source segmentation for provenance, and chunking for Sources larger than the context.
   - Generated Expeditions for printer, compute, statins (local only) and the research doc: pipeline versions (`gen-*`) and agent versions (`gen-agent-*`).

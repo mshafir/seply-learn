@@ -1,0 +1,195 @@
+{
+  "fixture": "research-doc",
+  "expeditionId": "01M3T38T0EPDHWJAZXZNYN7CY6",
+  "jobId": "01M3T38T1EY30C25NNN8342HVR",
+  "status": "complete",
+  "error": null,
+  "model": "anthropic/claude-sonnet-5.5",
+  "seconds": 748,
+  "costUsd": {
+    "gatewayBilled": 2.9073
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "outcome": "failed",
+      "seconds": 486,
+      "gatewayBilledUsd": 1.7571
+    },
+    {
+      "attempt": 2,
+      "outcome": "complete",
+      "seconds": 262,
+      "gatewayBilledUsd": 1.1502
+    }
+  ],
+  "counts": {
+    "concepts": 77,
+    "relationships": 254,
+    "attributes": 6,
+    "views": 4,
+    "coreConcepts": 11,
+    "backgroundConcepts": 0
+  },
+  "changes": [
+    "Created the Expedition",
+    "Added the Source “knowledge-graph-learning-tools”",
+    "Queued 4 Views",
+    "Found 69 Concepts in 1 Source",
+    "Built Compare tools",
+    "Built What the evidence says",
+    "Built Anatomy of a tool",
+    "Built Where to start"
+  ],
+  "views": [
+    {
+      "viewType": "comparison-table",
+      "label": "Compare tools",
+      "question": "Which tools have the features I need: prerequisite graphs, visual exploration, LLM help, and human curation?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": null
+      }
+    },
+    {
+      "viewType": "evidence",
+      "label": "What the evidence says",
+      "question": "What evidence exists for which features are most important, and where do the tools fail?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": {
+          "viewId": "01M3T38T33A5JBZRJXVAB2SW1R",
+          "label": "What the evidence says",
+          "viewType": "evidence",
+          "shown": 17,
+          "edges": 16,
+          "crossings": 0,
+          "edgesThroughNodes": 0,
+          "veryLongEdges": 0,
+          "overlaps": 0,
+          "verdict": "reads well"
+        }
+      }
+    },
+    {
+      "viewType": "anatomy",
+      "label": "Anatomy of a tool",
+      "question": "What are the parts of a working knowledge-graph learning tool, and how do they fit together?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": null
+      }
+    },
+    {
+      "viewType": "learning-path",
+      "label": "Where to start",
+      "question": "What do I need to understand first: what are prerequisites vs related concepts, and where do the different tool families sit?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": {
+          "viewId": "01M3T38T33YSXD6H54HVQ3PT7X",
+          "label": "Where to start",
+          "viewType": "learning-path",
+          "shown": 12,
+          "edges": 13,
+          "crossings": 0,
+          "edgesThroughNodes": 0,
+          "veryLongEdges": 1,
+          "overlaps": 0,
+          "crossTopic": 8,
+          "verdict": "reads well"
+        }
+      }
+    }
+  ],
+  "stages": {
+    "attempt 1: note": {
+      "summary": "**Understanding note**\n\nThe reader wanted to know which open-source tools already cover four things: a concept graph with prerequisite edges, visual exploration, built-in LLM or agent capabilities, and human-plus-LLM co-curation with provenance. The source is a research report dated 2026-09-24. It records no decisions by the reader, only the report's own findings and recommendations, so I should not present those as choices the reader made.\n\n**What the report concludes.** No open-source project does all four well. Tools cluster by pillar:\n- Prerequisite data models: Metacademy (archived), Oppia, Learning Commons.\n- AI tutors: DeepTutor, OpenMAIC. These have no curatable prerequisite graph.\n- Code-focused \"graphs that teach\": Understand-Anything, Graphify.\n- Curation patterns: Karpathy's LLM Wiki, Co-STORM. These produce wikis or hierarchies, not prerequisite DAGs.\n- GraphRAG infrastructure, which does not model pedagogy.\n\nLLMs are unreliable prerequisite judges (about 46–57% exact match on K12-Bench), so human review is needed. The suggested opening is a local-first, git-backed concept DAG. An agent proposes nodes and edges with evidence and confidence, and humans accept or reject them in a review queue. Learners then explore the graph with mastery overlays. The report also proposes design principles and a starting stack.\n\n**What is still open.**\n- Nobody has built the proposed system. The stack is a suggestion, not a validated design.\n- The most relevant patterns (SyllabusGraph, PathFinder and others) are tiny projects with 0–1★. SyllabusGraph's human audit is still pending.\n- Learning Commons is only K-12, has mixed licensing, some gated data, and general availability is only \"expected\" in 2026.\n- It is unclear how to handle depth-qualified prerequisites and edge types in practice.\n- Licensing needs checking for roadmap.sh (restrictive), AFFiNE (mixed) and tldraw (commercial).\n- The report does not say how to handle general knowledge outside K-12, code and math, where vetted graphs are absent.\n- Star counts are a snapshot from one date.",
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 0.0434105
+    },
+    "attempt 1: concepts": {
+      "summary": "I built the Concept set for the survey: 87 Concepts in 8 topic hubs, plus a dense web of Relationships. I did not run the duplicate check at the end, so a Concept under two names is possible.\n\n- **Hubs:** what we need from a tool, prerequisite-graph systems, AI tutors, LLM-built graphs and curation patterns, infrastructure and DIY tooling, visualization building blocks, research evidence, and design implications.\n- **Reader's side:** the main question, a goal (build a curatable learning concept DAG), and 8 criteria. The four pillars are marked hard priority.\n- **Tools and papers:** each has its stars, license and status where the report gives them. Tools the report treats together are one Concept: the small DAG engines, the GraphRAG tools, the canvas libraries and the closed-source references.\n- **Options against criteria:** tools are linked to the criteria with meets, partly-meets and fails, each with a short note.\n- **Report's conclusions:** the main claims, such as \"No tool does all four\" and \"LLMs are weak prerequisite judges\", are their own Concepts. So are the suggested starting stack and its parts, three risks, and two open questions. All are tied to the evidence.\n- **Not reader decisions:** the report records no choices by the reader, so the stack appears as the report's proposal, not a choice.",
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": 8,
+      "toolCalls": 242,
+      "spentUsdSoFar": 0.8634669
+    },
+    "attempt 1: View 1: build": {
+      "summary": null,
+      "review": "The table has 15 tools across the four must-have pillars. It also has a nice-to-have learner-state column and the stars and license facts. Every cell is filled from the report's comparison matrix. No tool clears all four hard columns cleanly, and that matches the report's conclusion. SyllabusGraph, Lean Blueprint, Understand-Anything and Obsidian + Breadcrumbs come closest. Weak spots: stars and license are missing for some rows, and the rows are sorted by stars in ascending order.",
+      "reason": null,
+      "warnings": [],
+      "steps": 7,
+      "toolCalls": 49,
+      "spentUsdSoFar": 1.205717
+    },
+    "attempt 1: View 2: build": {
+      "summary": null,
+      "review": "Four claims centred on the question. \"No tool does all four\" is backed by five tool reviews (DeepTutor, Understand-Anything, Learning Commons, Oppia, LLM Wiki), and challenged by SyllabusGraph (a near miss) and the tiny-projects caveat. \"LLMs are weak prerequisite judges\" rests on K12-Bench, with the few-shot research as a partial challenge. The open-slot claim is marked contested because nothing validates a method beyond K-12, code and math. To keep the layout readable I changed the design-recommendation claims (plain files, distinct edge types, DAG-first, reuse, skill distribution, separate tutor) to ideas, so they no longer appear here, and I removed the SyllabusGraph → \"Edges are proposals\" support link. Weak spots: the evidence is mostly the report's own tool reviews, not independent studies, and strength ratings are my judgement.",
+      "reason": null,
+      "warnings": [],
+      "steps": 22,
+      "toolCalls": 63,
+      "spentUsdSoFar": 1.7570874
+    },
+    "attempt 1: View 3: build": {
+      "summary": null,
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.7570874
+    },
+    "attempt 2: note": {
+      "summary": "**Understanding note**\n\nThe reader wanted to know which open-source tools already deliver a particular learning system. It would have four parts: a concept graph with prerequisite edges, visual exploration of where a concept sits, built-in LLM or agent help (generating nodes, proposing edges, tutoring, checking mastery), and human-plus-LLM co-curation with provenance.\n\nThe research answers that nothing mature does all four. Existing projects each cover one or two. Prerequisite-graph systems (Metacademy, Oppia, Learning Commons) have the data model but little LLM help or visualization. AI tutors (DeepTutor, OpenMAIC) are popular but have no curatable prerequisite graph. Code-graph tools (Understand-Anything, Graphify) have the right user experience but only for codebases. Wiki and GraphRAG tools curate or extract structure, but not pedagogy. Research evidence (K12-Bench, about 46–57% exact match on prerequisites) says LLMs alone can't be trusted on prerequisite edges, which is why human review matters.\n\nThe reader has not actually made a decision that the source records. What exists is the report's own recommendation: build a git-backed, file-per-concept DAG where agents propose edges with evidence and confidence, humans accept or reject them in a review queue, and learners explore a layered graph with mastery overlays. It also sketches a starting stack and a weekend prototype using Obsidian and Breadcrumbs. I should treat this as advice, not a commitment.\n\nStill open:\n- Whether the reader will build at all, and for one user or many.\n- Which domain to start in (K-12 data exists via Learning Commons; other domains need generation).\n- Licensing choices: roadmap.sh is restrictive, AFFiNE's license is mixed, tldraw needs a commercial license for production, and some Learning Commons datasets are gated.\n- Whether the small, recent projects (0–1★) are solid enough to learn from beyond their ideas.\n- Human audit of SyllabusGraph-style output is still pending.\n- Star counts are a snapshot from 2026-09-24 and will drift.",
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 0.0435805
+    },
+    "attempt 2: View 3: build": {
+      "summary": null,
+      "review": "The anatomy nests the report's suggested starting stack into agents (proposer, critic, tutor), content store, curation UI with its review queue, learner UI with a mastery model, and seed data. Nine design ideas are pinned onto the parts they change, coloured by strength of backing. Limits: the stack is the report's proposal, not a validated design. Mastery-model pins are only proposals. The UI libraries (React Flow, Cytoscape) are named in summaries but not drawn as parts.",
+      "reason": null,
+      "warnings": [],
+      "steps": 6,
+      "toolCalls": 32,
+      "spentUsdSoFar": 0.3221935
+    },
+    "attempt 2: View 4: build": {
+      "summary": null,
+      "review": "Three targets (No tool does all four, The open slot, Edges are proposals) are reached through the chunk → prerequisite-graph → tutor → LLM-built-graph family chain and the LLM/co-curation pillars. Edge types (requires vs helps vs related) are a step before edge proposals. The layout reads well. Weak spots: the prerequisite links are my judgement, not from the Source. To keep the map readable I left out the build goal, the mastery strand and the infrastructure family as targets; they stay in the Expedition but not on this path.",
+      "reason": null,
+      "warnings": [],
+      "steps": 25,
+      "toolCalls": 98,
+      "spentUsdSoFar": 1.1501767999999997
+    }
+  }
+}

@@ -60,7 +60,29 @@ export function conceptSize(scope: Scope, id: string) {
 }
 const titleCache = new WeakMap<Concept[], Map<string, string>>();
 
-const elk = new ELK();
+/**
+ * ELK, made on first use. elkjs's in-process worker (`elk-worker.min.js`)
+ * decides at its first load whether it *is* a Web Worker: `self` defined and
+ * no `document`. That holds in Workers (workerd), where the curator's
+ * `view.inspect` lays Views out, and it then exports nothing, so `new ELK()`
+ * throws. Hiding `self` for that first load makes it export the in-process
+ * worker, as in Node. Browsers have a `document`, so nothing changes there.
+ */
+let elkInstance: InstanceType<typeof ELK> | null = null;
+function elkLayout(): InstanceType<typeof ELK> {
+  if (elkInstance) return elkInstance;
+  const g = globalThis as Record<string, unknown>;
+  const self = typeof g.document === "undefined" ? Object.getOwnPropertyDescriptor(g, "self") : undefined;
+  const hide = self?.configurable === true;
+  if (hide) delete g.self;
+  try {
+    elkInstance = new ELK();
+  } finally {
+    if (hide) Object.defineProperty(g, "self", self!);
+  }
+  return elkInstance;
+}
+const elk = { layout: (...a: Parameters<InstanceType<typeof ELK>["layout"]>) => elkLayout().layout(...a) };
 
 /** ELK layered defaults shared by every directed layout (spec §4.3). */
 const layered = {

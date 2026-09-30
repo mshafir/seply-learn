@@ -1,12 +1,21 @@
-# Stage 2b: Extract Concepts (per chunk)
+# Build the Concept set
 
-Runs in the background from the moment the reader clicks Next, over **chunks** of consecutive segments sized for the model (~40k characters each in this prototype). Chunks run in parallel; the merge stage combines them. Follow [`_contract.md`](_contract.md) for every shape.
+The curator's first build stage, after the understanding note. You read the **whole Source set** (or, when it doesn't fit, one **chunk** of consecutive segments at a time, with the Concepts earlier chunks made already in the Expedition) and create the Concept set through the tools. It is committed as one Change ("Found 84 Concepts in 3 Sources"); the Views are built from it afterwards. Follow [`_contract.md`](_contract.md) for every shape.
 
 ## Input
 
-- The chunk: segments with their ids (and speaker, for chats).
-- The Expedition title and summary from the skim.
-- The **running Concept index** so far, when available: `id, title, aliases, kind` for Concepts already found in earlier chunks. Reuse those ids instead of creating near-duplicates.
+- The Sources: segments with their ids (and speaker, for chats).
+- Your understanding note: what the reader wanted, what they decided, what's still open.
+- In chunk mode: the Concepts found so far. **Search before you create** (`search_existing`, by title and by alias) and reuse what's there: add a new alias, Tag, Attribute value or `prov` with `concept_update` instead of making a near-duplicate.
+
+## How to work
+
+1. Define the Attributes you'll need first (`attribute_define`).
+2. Create the topic hubs, then the Concepts under them (`concept_create`). Many calls in one turn is fine and faster.
+3. Then add the Relationships (`relationship_add`), using the ids the creates returned: every Concept's one `part-of` first, then the rest.
+4. Pin `weightPin: "core"` on the 10–20% of Concepts the whole Expedition hangs on (see [`_contract.md`](_contract.md)); leave the rest unset.
+5. Check with `search_existing` for duplicates you made under two names; fix them with `concept_update` (aliases) and by not linking the extra one. Don't write overviews or articles: writers do that later.
+6. When the set is complete, reply with a one-line summary and **no tool calls**. That ends the stage.
 
 ## Shape and size
 
@@ -25,14 +34,14 @@ Runs in the background from the moment the reader clicks Next, over **chunks** o
 - One Concept per distinct **option, idea, finding, claim, action, criterion, person, place, source or event** the Sources treat as a thing.
 - **Criteria** a reader uses to decide are their own Concepts (kind `criterion`), titled as a short noun phrase ("Price / value", "Can print ABS/ASA", "Fits on a desk"), with the segment where they were introduced. Every criterion the assistant weighs options against counts, even if the reader never named it.
 - **People** in the subject (researchers, authors) *and* in the conversation (the user's kids, a doctor mentioned) are Concepts of kind `person`.
-- **Numbers that recur** (a price, a rate, a date) become Attributes on the Concepts they describe, not Concepts. Define the Attribute once.
+- **Numbers that recur** (a price, a rate, a date) become Attributes on the Concepts they describe, not Concepts. Define the Attribute once (`attribute_define`) before you use it.
 - **Dates:** set `date` when the Source gives or clearly implies one. Relative dates ("in ~8 weeks") are counted from the Source's own date (the export or conversation date in its header) and get `dateApprox: true`.
 - Titles are the name a reader would search for; put abbreviations and other names in `aliases` ("Mixture of experts", aliases ["MoE"]).
 - Don't make Concepts for chat mechanics ("the user asked", "the previous answer"), pleasantries, or tool calls.
 
 ## What makes a good Relationship
 
-- Use the built-in types. `prerequisite` is directional: A → B means *you need A to understand B*.
+- Use the built-in types. `builtin:prerequisite` is directional: A → B means *you need A to understand B*.
 - `part-of` for structure (component → whole, subtopic → topic).
 - **Every self-correction** in a chat ("actually, I was wrong about…", "correction:") is a `corrects` Relationship from the corrected-to Concept (or claim) to the corrected-from one, with a note saying what changed.
 - Evidence → claim: `supports` / `challenges`. Option → criterion: `meets` / `partly-meets` / `fails`, with a short note ("fails: Saturday check-in only").
@@ -43,16 +52,7 @@ Runs in the background from the moment the reader clicks Next, over **chunks** o
 
 Every Concept and Relationship lists the segments it came from. When you add something the Sources don't say (a well-known prerequisite, a missing date), give it `prov: []` so it's marked background knowledge. Background additions should be rare in this stage.
 
-## Output
+## What it isn't
 
-```json
-{
-  "concepts": [ … ],
-  "relationships": [ … ],
-  "attributes": [ … ],
-  "customKinds": [ … ],
-  "customRelationshipTypes": [ … ]
-}
-```
-
-A Concept from the running index that this chunk adds to appears again with the **same id** and only the new fields and `prov` entries.
+- Not the Views: they are built next, one at a time, and may add the Concepts and Relationships they need.
+- Not the prose: writers add overviews and articles after the Views.

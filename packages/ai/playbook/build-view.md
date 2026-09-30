@@ -1,13 +1,23 @@
-# Stage 3: Build one View
+# Build one View
 
-Runs once per chosen View, independently and in parallel, on a strong model. The View streams nodes as a live preview and commits as its own Change when it finishes. The same stage serves "Suggest more Views" and "Ask for a specific View" later; then changes to *existing* Concepts come back as a Proposal instead of direct edits.
+Runs once per chosen View, one after another, after the Concept set is committed. The View streams in as a live preview and is committed as its own Change when it passes its checks. The same stage serves "Suggest more Views" and "Ask for a specific View" later; then changes to *existing* Concepts come back as a Proposal instead of direct edits.
 
 ## Input
 
-- The View proposal: `viewType`, `question`, `why`.
-- The **full View Type definition** from `docs/view-types/<type>.md` (question, central Concepts, what it draws on, layout, how to read it) and its settings shape from `types.ts`.
-- The merged Concept set: `id, title, aliases, kind, tags, summary, date, attributes, weight` for every Concept, plus all Relationships.
-- Relevant segments, when the View needs facts extraction didn't capture (dates for a Timeline, verdicts for a table).
+- The View: its id (already in the Views rail, queued), `viewType`, `question`, and why it was chosen.
+- The **full View Type definition** (question, central Concepts, what it draws on, layout, how to read it). Its settings shape is the `view_build` tool's input for that View Type.
+- The Concept set: `id, title, aliases, kind, tags, summary, date, attributes, weight` for every Concept, plus all Relationships.
+- The Sources, and `source_read` for segments you need to check (dates for a Timeline, verdicts for a table).
+
+## How to work
+
+1. Read the View Type definition and decide what the View needs (Task below).
+2. Add what's missing through the tools: Attributes and their values, Relationships, dates, the few Concepts the View can't do without.
+3. `view_build` with the View's id, its View Type, label, question and settings.
+4. `view_inspect`: it shows the View as a reader sees it, with its checks. Fix every problem, and the warnings that matter, then inspect again.
+5. **Self-review:** read the inspection's reading against the View's question, as the reader would. Does it answer it? Is anything important missing, wrong, padded or unreadable? Fix what you find.
+6. `view_commit` with your review in a sentence or two. It is refused while `view_inspect` finds problems; the reply lists them.
+7. If the Sources can't support this View, call `view_fail` with a plain reason a reader will understand ("Only one estimate per trend, so there's nothing to compare."), rather than padding it with guesses.
 
 ## Task
 
@@ -32,24 +42,12 @@ Runs once per chosen View, independently and in parallel, on a strong model. The
    - Anatomy / Outline: `part-of` structure; Outline roots are the `topic` hubs (`rootTag: "topic"`).
    - Quadrant: the two enum Attributes on every placed Concept. Enum values are listed low → high; the y axis draws the first value at the bottom.
    - Rates: low/high/direction Attributes per estimate, grouped by quantity.
-3. **Write the settings** exactly in the View Type's settings shape.
+3. **Write the settings** exactly in the View Type's settings shape (`view_build`).
 4. **Label it**: a short label for the Views rail and the question as proposed (you may sharpen it).
 
 ## Rules
 
-- To move a Concept under a different parent, remove its old `part-of` in `removedRelationships` and add the new one.
+- To move a Concept under a different parent, remove its old `part-of` (`relationship_remove`) and add the new one. To change it for this View only, use the `placement` override instead.
 - Prefer existing Concepts; add a new one only when the View can't answer its question without it. New Concepts carry `prov` like any other.
-- If the Sources can't support this View (a Rates view with one estimate per trend), **fail it** with a plain reason a reader will understand, rather than padding it with guesses.
-
-## Output
-
-```json
-{
-  "view": { "id": "v-…", "viewType": "…", "label": "…", "question": "…", "settings": { … } },
-  "added": { "concepts": [ … ], "relationships": [ … ], "attributes": [ … ] },
-  "updated": [ { "concept": "c-…", "set": { "date": "2017", "attributes": { … } }, "prov": [ … ] } ],
-  "removedRelationships": [ { "from": "c-…", "type": "part-of", "to": "c-…" } ]
-}
-```
-
-or `{ "failed": "Only one estimate per trend, so there's nothing to compare." }`.
+- If the Sources can't support this View (a Rates view with one estimate per trend), **fail it** (`view_fail`) with a plain reason a reader will understand, rather than padding it with guesses.
+- Layout problems (`view_inspect` says cluttered) are fixed by reshaping structure: fewer cross-topic prerequisites, one parent each, levers aimed at one stage, `placement`, `hide`, targets. Never positions.

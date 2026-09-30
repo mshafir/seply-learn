@@ -188,7 +188,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/expeditions", signedIn)
   app.use("/expeditions/*", signedIn)
   app.route("/expeditions", expeditionRoutes(relay))
-  app.route("/expeditions", createFlowRoutes(relay, opts.ai))
+  app.route("/expeditions", createFlowRoutes(relay, opts.ai, opts.jobs))
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)

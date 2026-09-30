@@ -5,7 +5,7 @@
 //   GET  /expeditions/:id/draft   the draft: Sources (with their size), queued Views, counts
 //   POST /expeditions/:id/skim    run the skim: propose, suggest more, or ask for one View
 //   PUT  /expeditions/:id/plan    save the title and the chosen Views (queued), one Change
-//   POST /expeditions/:id/build   start the build: the hand-off to WP-3.5b (501 until then)
+//   POST /expeditions/:id/build   start the build (the `build` job, WP-3.5b); 501 without a job runner
 import {
   estimateFor,
   Goal,
@@ -40,6 +40,8 @@ import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
 import { appendOps, roleOf } from "./oplog.ts"
 import { loadState } from "./projection.ts"
+import type { BuildJobInput } from "./jobs/build.ts"
+import type { JobRunner } from "./jobs/types.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
 import { expeditionVisibility, readSegments } from "./sources/store.ts"
 
@@ -155,25 +157,42 @@ export type BuildStart =
   | { ok: false; status: 409 | 501; error: string; message: string }
 
 /**
- * The hand-off to the build. TODO(WP-3.5b): register a `build` JobDefinition
- * and start it here through the JobRunner (WP-3.2; `createApp`'s `jobs`
- * runner, as `jobRoutes` does): `runner.start(db, { expeditionId, kind:
- * "build", input: request minus userId, startedBy: userId })`; set the
- * Expedition's status to `building`, and return the job id (the route answers
- * 202 `{ jobId }`). Until then the draft stays a draft.
+ * The hand-off to the build (WP-3.5b): marks the draft `building` (its own
+ * Change, so a second click finds it started already) and starts the `build`
+ * job through the JobRunner. The job builds each queued View into its
+ * existing row, best first, and resolves the AI setup from `userId` itself.
  */
 export async function startBuild(
   c: Context<AppEnv>,
-  request: BuildRequest
+  request: BuildRequest,
+  deps: { runner?: JobRunner; relay: Relay }
 ): Promise<BuildStart> {
-  void c
-  void request
-  return {
-    ok: false,
-    status: 501,
-    error: "build-unavailable",
-    message: "Building isn't available yet. Your draft is in your Library, under Drafts.",
-  }
+  const { runner, relay } = deps
+  if (!runner?.registry.has("build"))
+    return {
+      ok: false,
+      status: 501,
+      error: "build-unavailable",
+      message: "Building isn't available on this server. Your draft is in your Library, under Drafts.",
+    }
+  const { expeditionId, userId, viewIds, sourceIds, goals } = request
+  const db = await c.var.db()
+  const changeId = ulid(Date.now())
+  const { logged } = await db.transaction((tx) =>
+    appendOps(tx, {
+      expeditionId,
+      userId,
+      ops: makeOps(
+        [{ kind: "expedition.set", target: expeditionId, path: "status", value: "building" }],
+        { expeditionId, actor: userId, changeId, nextOpId: () => ulid(Date.now()) }
+      ),
+      changes: [{ id: changeId, label: "Started the build" }],
+    })
+  )
+  await publishCommitted(relay, expeditionId, logged)
+  const input: BuildJobInput = { views: [], viewIds, sources: sourceIds, goals }
+  const job = await runner.start(db, { expeditionId, kind: "build", input, startedBy: userId })
+  return { ok: true, jobId: job.id }
 }
 
 type Access = { role: Role | null; ok: boolean; found: boolean }
@@ -266,7 +285,7 @@ async function skimSources(
   return out
 }
 
-export function createFlowRoutes(relay: Relay, ai?: ProviderOptions) {
+export function createFlowRoutes(relay: Relay, ai?: ProviderOptions, jobs?: JobRunner) {
   const r = new Hono<AppEnv>()
 
   r.get("/:id/draft", async (c) => {
@@ -308,8 +327,9 @@ export function createFlowRoutes(relay: Relay, ai?: ProviderOptions) {
     // The skim is the build's first stage: it counts against the build's cap.
     const chars = sources.reduce((n, s) => n + s.segments.chars, 0)
     const meter = new SpendMeter({ kind: "build", capUsd: estimateFor(setup, chars).capUsd })
-    // TODO(WP-3.5b): spec §5.2 starts the curator (reading the Sources and
-    // building the Concept set) at this same moment, when `mode` is "propose".
+    // Spec §5.2 starts the curator at this moment; v1 starts it at Create
+    // (POST /build) instead: the Views are chosen by then, and a draft that is
+    // never built spends nothing on it (WP-3.5b, a judgement call).
     try {
       const run = await runSkim({
         model: modelFor(setup, "skim", meter),
@@ -467,7 +487,7 @@ export function createFlowRoutes(relay: Relay, ai?: ProviderOptions) {
       viewIds,
       sourceIds,
       goals: body.data.goals,
-    })
+    }, { runner: jobs, relay })
     if (!started.ok)
       return c.json({ error: started.error, message: started.message }, started.status)
     return c.json({ jobId: started.jobId }, 202)

@@ -42,6 +42,8 @@ export type InlineEngine = JobEngine & {
   status(id: string): Instance["status"] | undefined
   /** Step names in the order their results were recorded. */
   recorded(id: string): string[]
+  /** A recorded step's result (undefined when it hasn't returned). */
+  result(id: string, name: string): Json | undefined
 }
 
 export function createInlineEngine(opts: {
@@ -127,5 +129,6 @@ export function createInlineEngine(opts: {
     settled: (id) => get(id).done,
     status: (id) => instances.get(id)?.status,
     recorded: (id) => [...get(id).results.keys()],
+    result: (id, name) => get(id).results.get(name),
   }
 }

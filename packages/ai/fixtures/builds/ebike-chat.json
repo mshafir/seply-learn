@@ -1,0 +1,2775 @@
+{
+  "schemaVersion": 1,
+  "id": "01M3T2DZ9S3V464D7J338ANTEA",
+  "title": "E-bike for the commute",
+  "summary": "",
+  "tags": [],
+  "bestViewId": "01M3T2DZCR7S9QASAZBQN8EZ4M",
+  "kinds": [
+    {
+      "id": "builtin:idea",
+      "label": "Idea",
+      "color": "blue",
+      "icon": "lightbulb"
+    },
+    {
+      "id": "builtin:topic",
+      "label": "Topic",
+      "color": "slate",
+      "icon": "folder"
+    },
+    {
+      "id": "builtin:question",
+      "label": "Question",
+      "color": "amber",
+      "icon": "circle-help"
+    },
+    {
+      "id": "builtin:person",
+      "label": "Person",
+      "color": "violet",
+      "icon": "user"
+    },
+    {
+      "id": "builtin:place",
+      "label": "Place",
+      "color": "teal",
+      "icon": "map-pin"
+    },
+    {
+      "id": "builtin:thing",
+      "label": "Thing",
+      "color": "orange",
+      "icon": "box"
+    },
+    {
+      "id": "builtin:claim",
+      "label": "Claim",
+      "color": "amber",
+      "icon": "message-square-quote"
+    },
+    {
+      "id": "builtin:criterion",
+      "label": "Criterion",
+      "color": "olive",
+      "icon": "list-checks"
+    },
+    {
+      "id": "builtin:decision",
+      "label": "Decision",
+      "color": "pink",
+      "icon": "git-branch"
+    },
+    {
+      "id": "builtin:action",
+      "label": "Action",
+      "color": "green",
+      "icon": "play"
+    },
+    {
+      "id": "builtin:measurement",
+      "label": "Measurement",
+      "color": "teal",
+      "icon": "ruler"
+    }
+  ],
+  "relationshipTypes": [
+    {
+      "id": "builtin:part-of",
+      "label": "is part of",
+      "inverseLabel": "has part",
+      "color": "violet",
+      "dashed": true
+    },
+    {
+      "id": "builtin:prerequisite",
+      "label": "is needed to understand",
+      "inverseLabel": "needs",
+      "color": "blue",
+      "dashed": false
+    },
+    {
+      "id": "builtin:led-to",
+      "label": "led to",
+      "inverseLabel": "came from",
+      "color": "teal",
+      "dashed": false
+    },
+    {
+      "id": "builtin:uses",
+      "label": "uses",
+      "inverseLabel": "is used by",
+      "color": "orange",
+      "dashed": false
+    },
+    {
+      "id": "builtin:raises",
+      "label": "raises",
+      "inverseLabel": "is raised by",
+      "color": "red",
+      "dashed": false
+    },
+    {
+      "id": "builtin:lowers",
+      "label": "lowers",
+      "inverseLabel": "is lowered by",
+      "color": "green",
+      "dashed": false
+    },
+    {
+      "id": "builtin:causes",
+      "label": "causes",
+      "inverseLabel": "is caused by",
+      "color": "orange",
+      "dashed": false
+    },
+    {
+      "id": "builtin:supports",
+      "label": "supports",
+      "inverseLabel": "is supported by",
+      "color": "indigo",
+      "dashed": false
+    },
+    {
+      "id": "builtin:challenges",
+      "label": "challenges",
+      "inverseLabel": "is challenged by",
+      "color": "amber",
+      "dashed": true
+    },
+    {
+      "id": "builtin:corrects",
+      "label": "corrects",
+      "inverseLabel": "is corrected by",
+      "color": "brown",
+      "dashed": false
+    },
+    {
+      "id": "builtin:alternative-to",
+      "label": "is an alternative to",
+      "inverseLabel": "is an alternative to",
+      "color": "slate",
+      "dashed": true
+    },
+    {
+      "id": "builtin:meets",
+      "label": "meets",
+      "inverseLabel": "is met by",
+      "color": "green",
+      "dashed": false
+    },
+    {
+      "id": "builtin:partly-meets",
+      "label": "partly meets",
+      "inverseLabel": "is partly met by",
+      "color": "amber",
+      "dashed": false
+    },
+    {
+      "id": "builtin:fails",
+      "label": "fails",
+      "inverseLabel": "is failed by",
+      "color": "red",
+      "dashed": false
+    }
+  ],
+  "attributes": [
+    {
+      "id": "torque",
+      "label": "Motor torque",
+      "type": "number",
+      "unit": "Nm"
+    },
+    {
+      "id": "battery-wh",
+      "label": "Battery capacity",
+      "type": "number",
+      "unit": "Wh"
+    },
+    {
+      "id": "weight",
+      "label": "Bike weight",
+      "type": "number",
+      "unit": "kg"
+    },
+    {
+      "id": "price",
+      "label": "Price (approx.)",
+      "type": "money"
+    },
+    {
+      "id": "motor",
+      "label": "Motor",
+      "type": "text"
+    },
+    {
+      "id": "drivetrain",
+      "label": "Drivetrain",
+      "type": "text"
+    },
+    {
+      "id": "priority",
+      "label": "Priority",
+      "type": "enum",
+      "enumValues": [
+        "dropped",
+        "nice",
+        "hard"
+      ]
+    },
+    {
+      "id": "standing",
+      "label": "Standing",
+      "type": "enum",
+      "enumValues": [
+        "ruled-out",
+        "in-play",
+        "chosen"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "01M3T2DZARA0N1X8KHXNJB45NB",
+      "kind": "chat",
+      "title": "E-bike chat",
+      "mime": "text/plain; charset=utf-8",
+      "size": 6452,
+      "addedAt": "2026-09-30T21:09:51.064Z"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "title": "App motor lock",
+      "aliases": [
+        "Bosch eBike Lock",
+        "Flow app"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Bosch's eBike Lock (Flow app) disables the motor when you walk away; the Alder supports it, the Cedar doesn't.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "quote": "can disable the motor when you walk away; the Alder supports that",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JARW328STCZ5YJGSNM",
+      "title": "Bike insurance",
+      "aliases": [],
+      "kind": "builtin:measurement",
+      "summary": "Around 100–150 a year for a 3,000 bike. Not yet arranged.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "around 100 to 150 a year for a 3,000 bike",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "title": "Test ride checklist",
+      "aliases": [],
+      "kind": "builtin:action",
+      "summary": "Ride the hill (or similar) in middle assist mode, check frame fit, carry it up stairs with the battery out, ask about first service and battery warranty, and try the app motor lock.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JBGS5FB1P3WEYEQV3X",
+      "title": "Check frame size",
+      "aliases": [],
+      "kind": "builtin:action",
+      "summary": "Stand over the frame with a few centimetres clearance and reach the bars without locking your elbows.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "stand over it with a few centimetres clearance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "title": "My commute & needs",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "The reader's ride, body, budget, home and workplace constraints, and what they care about most.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "title": "Motors & torque",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Mid-drive versus hub motors, torque figures, and how the motor brands (Bosch, Shimano, Bafang) compare.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8C5W62FSG4DZHD4J99",
+      "title": "Battery & range",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "How big a battery the commute needs and how long it lasts before losing capacity.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8CJS9BW1AS49TQCBRK",
+      "title": "Drivetrain, frame & maintenance",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Chain versus belt drive, internal gear hubs, frame style, and the upkeep each needs.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "title": "The bikes compared",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "The four shortlisted e-bikes, how they score on the reader's priorities, and the final choice.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8DRBNMM6228081MRP4",
+      "title": "Costs over three years",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Running costs beyond the purchase: chains, belts, servicing, battery replacement and insurance.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8EZ1CQ8BY6J8S982Z9",
+      "title": "Theft & security",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Protecting a bike left at an outdoor work rack: removable battery, locks, motor lock app, insurance.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2FR8ED7TJWGA8Y7RDF0H2",
+      "title": "Next steps",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "What's left to do after choosing: the test ride, fit, warranty, and a fallback if it goes badly.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC17R95JP9KZMH8ZB8JF",
+      "title": "Me",
+      "aliases": [],
+      "kind": "builtin:person",
+      "summary": "The reader: about 80 kg, commutes with a laptop bag, budget up to 3,500, lives on a second floor with no lift, parks at an outdoor rack at work.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "I'm about 80 kg, and I'd carry a laptop bag. Budget up to 3500",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t13"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t15"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC17F4AV5HW7S8K9633R",
+      "title": "My commute",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "14 km each way, 28 km a day, roughly 6,000 km a year, with one real hill; the reader doesn't want to arrive sweaty.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "14 km each way, one real hill",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        },
+        {
+          "quote": "your 6,000 km a year",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC17GC0BD9MNRB6EEAED",
+      "title": "The hill",
+      "aliases": [],
+      "kind": "builtin:place",
+      "summary": "The one climb on the commute: about 800 m long, peaking near an 8 percent grade.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "About 800 metres long, maybe 8 percent at the steepest",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t3"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "title": "Hill climbing",
+      "aliases": [
+        "Arrive without sweating"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "Climb the 800 m, 8 percent hill easily enough to arrive at work without sweating; judged mainly by motor type and torque.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "I really don't want to arrive sweaty",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t3"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "title": "Low maintenance",
+      "aliases": [],
+      "kind": "builtin:criterion",
+      "summary": "Little cleaning, oiling and part replacement for a daily all-weather commuter.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "low maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "title": "Weight for the stairs",
+      "aliases": [],
+      "kind": "builtin:criterion",
+      "summary": "Light enough to carry up two flights daily; 23–24 kg is noticeably easier than 26 kg, and removing the battery saves about 2.5–3 kg.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "My flat is on the second floor with no lift.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t15"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "title": "Theft protection",
+      "aliases": [],
+      "kind": "builtin:criterion",
+      "summary": "How well the bike can be secured at an outdoor work rack, beyond just a lock.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Theft worries me.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t13"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC182WZ52FC72RB60TNH",
+      "title": "Price",
+      "aliases": [
+        "Budget up to 3,500"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "Purchase price within a 3,500 budget; a secondary concern after the four main priorities.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        },
+        {
+          "quote": "Price second.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04AMGQV9XVT98RNG201",
+      "title": "Torque",
+      "aliases": [],
+      "kind": "builtin:measurement",
+      "summary": "The key number for hill climbing: 60–85 Nm for mid-drives (Bosch Performance Line CX 85, Shimano EP8 85, Bosch Performance Line 75) versus 40–50 Nm for typical hub motors.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "quote": "Torque is the number to look at",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04AQ55S817N1AET428K",
+      "title": "Go mid-drive",
+      "aliases": [],
+      "kind": "builtin:decision",
+      "summary": "For the 8 percent hill, a mid-drive is the safer bet: shifting down keeps cadence, meaning less effort and less sweat. A good hub motor would cope at moderate speed.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Then a mid-drive is the safer bet.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "title": "Bosch & Shimano systems",
+      "aliases": [
+        "Bosch",
+        "Shimano"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Rated more refined by independent tests: smoother power, better sensors and software, and a larger dealer network for warranty repairs.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Independent tests generally rate Bosch and Shimano systems as more refined",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "title": "Which e-bike should I buy?",
+      "aliases": [],
+      "kind": "builtin:question",
+      "summary": "Answer: the Alder C5, the best all-rounder for hill climbing, weight, maintenance and theft protection, chosen over the Birch Metro 8 and Cedar Urban.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        },
+        {
+          "quote": "I'll go with the Alder.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t19"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04AQBDC6DCR0H234BYM",
+      "title": "Bafang",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Motor maker whose strengths are price and openness (cheaper parts, more shops can work on them); weaker on polished power delivery, with more variation between bike makers' setups.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Bafang's advantage is price and openness",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04BWGARBMEDJM0SV8DN",
+      "title": "Bosch batteries beat Bafang",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "The reader's claim that Bosch batteries are better than Bafang's; only partly true, since most brands use the same few cell makers.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "I read that Bosch batteries are better than Bafang.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t11"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04B7QXE46ZSM92J5PW1",
+      "title": "Cells matter, not the brand",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "Most brands use cells from Samsung, LG or Panasonic; battery life depends more on the cells and charging habits than on the brand on the case.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Battery life depends more on the cells and how you charge them than on the brand",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04B6PT3PCKKS8CPC4H9",
+      "title": "Dealer network is the real point",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "For a daily commuter where downtime matters, Bosch/Shimano's dealer network for warranty repairs matters more than any battery difference.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "the dealer network is the real point, more than the battery",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04BKEMZ4BT51CF6MJZM",
+      "title": "Battery size",
+      "aliases": [
+        "Battery capacity"
+      ],
+      "kind": "builtin:measurement",
+      "summary": "For 28 km a day with a hill, 400–500 Wh gives a couple of days between charges, even in winter.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "400 to 500 Wh gives a couple of days between charges in winter",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04BFRPSA4GDJ5XHK42Z",
+      "title": "Battery lifespan",
+      "aliases": [],
+      "kind": "builtin:measurement",
+      "summary": "A 500 Wh battery keeps about 80% capacity after 500–800 full cycles; at one cycle every two days that's 3–4 years, so a 600–800 replacement may come near the end of three years.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "keeps about 80 percent of its capacity after 500 to 800 full cycles",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "title": "Belt drive",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "A carbon-reinforced rubber belt replacing the chain: no oil, no rust, lasts 2–3× as long (about 15,000–20,000 km). Needs an internal gear hub. Worth it for a rain-riding daily commuter.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "quote": "A belt drive replaces the chain with a carbon-reinforced rubber belt.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZ954D0555C5C0G9CE3",
+      "title": "Internal gear hub",
+      "aliases": [
+        "IGH",
+        "Nexus 5"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Gears sealed inside the rear hub; required for a belt. Trade-offs: fewer gears, slightly more friction, needs a knowledgeable shop, and rear flats are fiddlier.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "It only works with an internal gear hub",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "title": "Chain and cassette",
+      "aliases": [
+        "Chain drive",
+        "Derailleur gears"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Conventional drivetrain with more gears; chains wear out every 3,000–4,000 km and cassettes every other chain, and need cleaning and oiling.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        },
+        {
+          "quote": "chains every 3,000 to 4,000 km",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZAKAH7ATYG0BH3GY6P",
+      "title": "Step-through or diamond frame?",
+      "aliases": [
+        "Frame style"
+      ],
+      "kind": "builtin:question",
+      "summary": "Still open. Step-through is easier with a bag and work clothes; a diamond frame is stiffer and lighter.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "step-through is easier with a bag and in work clothes",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JBQRX6C56R6K70GR6R",
+      "title": "First service & battery warranty",
+      "aliases": [],
+      "kind": "builtin:action",
+      "summary": "Ask the shop about the first service (usually free after 500 km) and the battery warranty (usually 2 years).",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "usually free after 500 km",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZAZV99KNBZ5Z9BMJPF",
+      "title": "Dogwood Hub",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Hub-motor contrast option: 45 Nm rear hub, 418 Wh, 7-speed, 21 kg, about 1,700; not worth close comparison. Name may be illustrative.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "The ones worth comparing closely are the first three.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "motor": "Rear hub motor",
+        "price": 1700,
+        "torque": 45,
+        "weight": 21,
+        "standing": "ruled-out",
+        "battery-wh": 418,
+        "drivetrain": "7-speed chain"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "title": "No bike wins everything",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "Alder is the best all-rounder for the reader's list; Birch if maintenance matters more than stairs; Cedar to save about 1,000.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "No bike wins everything. The Alder is the best all-rounder for your list",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "title": "Three-year running cost",
+      "aliases": [],
+      "kind": "builtin:measurement",
+      "summary": "At 6,000 km/year: chain bikes about 850 (≈5 chains, 2–3 cassettes, 4 sets of pads, two services a year); belt bike quoted at about 650, though its listed items sum nearer 730. Excludes a possible battery replacement.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "About 850 over three years.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZBCXFNN3RTGMN7Q5NW",
+      "title": "Belt saves little",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "Over three years the belt saves maybe 200 (likely closer to 100–150 when the figures are summed); not a big factor either way.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "the belt saves maybe 200 over three years, not a huge amount",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JA9JK0B2SC41QQPN9Y",
+      "title": "Removable battery",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "All four bikes have one: take it inside at work to deter theft, and remove it (about 2.5–3 kg) before carrying the bike upstairs.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "A removable battery (all four have one)",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JAN2PCK62AYXRMAF6E",
+      "title": "D-lock plus front-wheel cable",
+      "aliases": [
+        "Sold Secure Gold/Diamond D-lock"
+      ],
+      "kind": "builtin:action",
+      "summary": "Buy a Sold Secure Gold or Diamond rated D-lock plus a cable for the front wheel. Not yet bought.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "a Sold Secure Gold or Diamond D-lock plus a cable for the front wheel",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2J6JB759K9JJ3TNPG4STT",
+      "title": "Cedar is the fallback",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "If the Alder's test ride goes badly (stairs, sizing), the lighter, cheaper Cedar Urban is the natural alternative.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "the Cedar if you'd rather save 1,000",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "title": "Hub motor",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Motor in the rear (or front) wheel: cheaper, quieter, lower maintenance, but struggles on long steep climbs. Typically 40–50 Nm.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "it's cheaper, quieter, and needs less maintenance, but struggles on long steep climbs",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ],
+      "tags": [
+        "motor-choice"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "title": "Mid-drive motor",
+      "aliases": [
+        "Mid-drive"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Motor at the pedals that drives the chain and uses the bike's gears; climbs far better and feels natural. Typically 60–85 Nm.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "quote": "a mid-drive motor sits at the pedals and drives the chain",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ],
+      "tags": [
+        "motor-choice"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2SF6C61GQSEGMV9E1KSRS",
+      "title": "Motor drives through the gears",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "A mid-drive turns the chain, so you can shift down on a climb and keep your cadence: less effort, less sweat.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "drives the chain, so it uses the bike's gears",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "quote": "lets you shift down and keep cadence, which means less effort and less sweat",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2SF6C71AR60EQ0F126BZG",
+      "title": "Motor noise",
+      "aliases": [
+        "How quiet the ride is"
+      ],
+      "kind": "builtin:idea",
+      "summary": "How much sound the motor makes on the ride; hub motors are the quieter kind.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "it's cheaper, quieter, and needs less maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2SF6DZYMHVJS72WAC2FJ3",
+      "title": "Motor maintenance needs",
+      "aliases": [
+        "Maintenance you face"
+      ],
+      "kind": "builtin:idea",
+      "summary": "How much upkeep the motor system asks for; hub motors need less than mid-drives.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "needs less maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        },
+        {
+          "quote": "I care most about: hill climbing, low maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZA34F091GEWS3A1AMS",
+      "title": "Birch Metro 8",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Shimano EP6 85 Nm, 504 Wh, Nexus 5 internal hub with belt drive, 26 kg, about 3,400. Lowest maintenance but heaviest mid-drive. Name may be illustrative.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "attributes": {
+        "motor": "Shimano EP6 (mid-drive)",
+        "price": 3400,
+        "torque": 85,
+        "weight": 26,
+        "standing": "in-play",
+        "battery-wh": 504,
+        "drivetrain": "Belt + Nexus 5 internal hub"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "title": "Alder C5",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "The chosen bike: Bosch Performance Line 75 Nm, 500 Wh, 10-speed chain, mudguards and rack, 24 kg, about 3,200; supports Bosch's app motor lock. Name may be illustrative.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        },
+        {
+          "quote": "I'll go with the Alder.",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t19"
+        }
+      ],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "attributes": {
+        "motor": "Bosch Performance Line (mid-drive)",
+        "price": 3200,
+        "torque": 75,
+        "weight": 24,
+        "standing": "chosen",
+        "battery-wh": 500,
+        "drivetrain": "10-speed chain"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "title": "Cedar Urban",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Bafang M400 80 Nm, 460 Wh, 9-speed chain, 23 kg, about 2,300. Lightest and about 1,000 cheaper, but no motor lock. Name may be illustrative.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ],
+      "tags": [
+        "path-target",
+        "shortlist"
+      ],
+      "attributes": {
+        "motor": "Bafang M400 (mid-drive)",
+        "price": 2300,
+        "torque": 80,
+        "weight": 23,
+        "standing": "in-play",
+        "battery-wh": 460,
+        "drivetrain": "9-speed chain"
+      },
+      "sections": []
+    }
+  ],
+  "relationships": [
+    {
+      "from": "01M3T2GC17R95JP9KZMH8ZB8JF",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC17F4AV5HW7S8K9633R",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC17GC0BD9MNRB6EEAED",
+      "type": "builtin:part-of",
+      "to": "01M3T2GC17F4AV5HW7S8K9633R",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2GC182WZ52FC72RB60TNH",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8BR0DC6RADP3NDXCVV",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04AMGQV9XVT98RNG201",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04AQ55S817N1AET428K",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04AQBDC6DCR0H234BYM",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04BWGARBMEDJM0SV8DN",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C5W62FSG4DZHD4J99",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04B7QXE46ZSM92J5PW1",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C5W62FSG4DZHD4J99",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04B6PT3PCKKS8CPC4H9",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04BKEMZ4BT51CF6MJZM",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C5W62FSG4DZHD4J99",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04BFRPSA4GDJ5XHK42Z",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C5W62FSG4DZHD4J99",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8CJS9BW1AS49TQCBRK",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZ954D0555C5C0G9CE3",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8CJS9BW1AS49TQCBRK",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8CJS9BW1AS49TQCBRK",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAKAH7ATYG0BH3GY6P",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8CJS9BW1AS49TQCBRK",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAZV99KNBZ5Z9BMJPF",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8D3AW0JBKMNWWHV54H",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8DRBNMM6228081MRP4",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZBCXFNN3RTGMN7Q5NW",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8DRBNMM6228081MRP4",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JA9JK0B2SC41QQPN9Y",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8EZ1CQ8BY6J8S982Z9",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JAN2PCK62AYXRMAF6E",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8EZ1CQ8BY6J8S982Z9",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8EZ1CQ8BY6J8S982Z9",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JARW328STCZ5YJGSNM",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8EZ1CQ8BY6J8S982Z9",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8ED7TJWGA8Y7RDF0H2",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JBGS5FB1P3WEYEQV3X",
+      "type": "builtin:part-of",
+      "to": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JBQRX6C56R6K70GR6R",
+      "type": "builtin:part-of",
+      "to": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "prov": []
+    },
+    {
+      "from": "01M3T2J6JB759K9JJ3TNPG4STT",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8ED7TJWGA8Y7RDF0H2",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "75 Nm mid-drive is plenty for 8 percent",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "85 Nm, strongest",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "80 Nm, among the strongest",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAZV99KNBZ5Z9BMJPF",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "45 Nm hub motor; copes at moderate speed but no gear advantage",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:meets",
+      "to": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "note": "Clearly best: belt and internal hub",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "note": "Chain needs cleaning and replacing",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "note": "Chain drivetrain",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:meets",
+      "to": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "note": "23 kg, lightest",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:meets",
+      "to": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "note": "24 kg, close to the Cedar",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:fails",
+      "to": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "note": "26 kg, heaviest mid-drive; hard up two flights daily",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:meets",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "Best: app motor lock",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "Relies on locks and removable battery alone",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "No motor lock; locks alone",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        },
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:meets",
+      "to": "01M3T2GC182WZ52FC72RB60TNH",
+      "note": "About 2,300, cheapest by about 1,000",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC182WZ52FC72RB60TNH",
+      "note": "About 3,200, within budget",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC182WZ52FC72RB60TNH",
+      "note": "About 3,400, near the top of the budget",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04B7QXE46ZSM92J5PW1",
+      "type": "builtin:corrects",
+      "to": "01M3T2H04BWGARBMEDJM0SV8DN",
+      "note": "Only partly true: Bosch systems are more refined, but cells come from the same makers",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "type": "builtin:supports",
+      "to": "01M3T2H04B6PT3PCKKS8CPC4H9",
+      "note": "Larger dealer network for warranty repairs",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AQBDC6DCR0H234BYM",
+      "type": "builtin:alternative-to",
+      "to": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "note": "Cheaper and more open, less polished",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "type": "builtin:alternative-to",
+      "to": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "type": "builtin:meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "Shift down and keep cadence: less effort, less sweat",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:partly-meets",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "Fine at moderate speed, struggles on long steep climbs",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17GC0BD9MNRB6EEAED",
+      "type": "builtin:led-to",
+      "to": "01M3T2H04AQ55S817N1AET428K",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AQ55S817N1AET428K",
+      "type": "builtin:uses",
+      "to": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17GC0BD9MNRB6EEAED",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t3"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:uses",
+      "to": "01M3T2HQZ954D0555C5C0G9CE3",
+      "note": "A belt can't shift across cassette cogs",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:alternative-to",
+      "to": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:meets",
+      "to": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "note": "No oil, no rust, lasts 2–3× a chain",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:uses",
+      "to": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:uses",
+      "to": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:uses",
+      "to": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:uses",
+      "to": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "note": "Bosch Performance Line 75 Nm",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:uses",
+      "to": "01M3T2H04AK11R7XNC6EP9TAVN",
+      "note": "Shimano EP6 85 Nm",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:uses",
+      "to": "01M3T2H04AQBDC6DCR0H234BYM",
+      "note": "Bafang M400 80 Nm",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAZV99KNBZ5Z9BMJPF",
+      "type": "builtin:uses",
+      "to": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:uses",
+      "to": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "type": "builtin:raises",
+      "to": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "note": "About 850 vs about 650 for belt",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:lowers",
+      "to": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "note": "One belt in three years",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "type": "builtin:supports",
+      "to": "01M3T2HQZBCXFNN3RTGMN7Q5NW",
+      "note": "Totals overstate the gap slightly (Birch items sum ~730)",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZBCXFNN3RTGMN7Q5NW",
+      "type": "builtin:challenges",
+      "to": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "note": "Cost saving is small; the benefit is convenience",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04BFRPSA4GDJ5XHK42Z",
+      "type": "builtin:raises",
+      "to": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "note": "Possible 600–800 replacement near year 3–4",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04BKEMZ4BT51CF6MJZM",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04BFRPSA4GDJ5XHK42Z",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17F4AV5HW7S8K9633R",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04BKEMZ4BT51CF6MJZM",
+      "note": "28 km a day sets the size",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JARW328STCZ5YJGSNM",
+      "type": "builtin:raises",
+      "to": "01M3T2HQZB0D4PDJS3RVQ019SR",
+      "note": "100–150 a year on top",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JA9JK0B2SC41QQPN9Y",
+      "type": "builtin:supports",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "Take it inside at work",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JA9JK0B2SC41QQPN9Y",
+      "type": "builtin:supports",
+      "to": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "note": "Removing it saves 2.5–3 kg on the stairs",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t16"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JAN2PCK62AYXRMAF6E",
+      "type": "builtin:supports",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "type": "builtin:supports",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "Disables the motor when you walk away",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17R95JP9KZMH8ZB8JF",
+      "type": "builtin:raises",
+      "to": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17R95JP9KZMH8ZB8JF",
+      "type": "builtin:raises",
+      "to": "01M3T2HQZAKAH7ATYG0BH3GY6P",
+      "note": "Carries a laptop bag, rides in work clothes",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC17R95JP9KZMH8ZB8JF",
+      "type": "builtin:uses",
+      "to": "01M3T2GC17F4AV5HW7S8K9633R",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t1"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "type": "builtin:led-to",
+      "to": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "note": "The answer: Alder chosen",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t19"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "type": "builtin:supports",
+      "to": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "note": "Alder is the best all-rounder",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:alternative-to",
+      "to": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "note": "Fallback if the Alder's test ride goes badly",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:led-to",
+      "to": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t19"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "type": "builtin:led-to",
+      "to": "01M3T2J6JB759K9JJ3TNPG4STT",
+      "note": "If stairs or sizing go badly",
+      "prov": []
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:supports",
+      "to": "01M3T2J6JB759K9JJ3TNPG4STT",
+      "note": "Lightest and about 1,000 cheaper",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "type": "builtin:uses",
+      "to": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "note": "Try the motor lock before buying",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JB5D9TSSPRM2CPBATC",
+      "type": "builtin:uses",
+      "to": "01M3T2GC17GC0BD9MNRB6EEAED",
+      "note": "Ride it in middle assist mode",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JBGS5FB1P3WEYEQV3X",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZAKAH7ATYG0BH3GY6P",
+      "note": "Fit is checked alongside the still-open frame style",
+      "prov": []
+    },
+    {
+      "from": "01M3T2H04B6PT3PCKKS8CPC4H9",
+      "type": "builtin:supports",
+      "to": "01M3T2J6JBQRX6C56R6K70GR6R",
+      "note": "Warranty repairs depend on dealer access",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04BFRPSA4GDJ5XHK42Z",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2J6JBQRX6C56R6K70GR6R",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t20"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:lowers",
+      "to": "01M3T2SF6C71AR60EQ0F126BZG",
+      "note": "Quieter than a mid-drive",
+      "prov": [
+        {
+          "quote": "cheaper, quieter",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:lowers",
+      "to": "01M3T2SF6DZYMHVJS72WAC2FJ3",
+      "note": "Needs less maintenance than a mid-drive",
+      "prov": [
+        {
+          "quote": "needs less maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "type": "builtin:raises",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "60–85 Nm and drives through the bike's gears: shift down, keep cadence, less sweat on the 8% hill",
+      "prov": [
+        {
+          "quote": "shift down and keep cadence, which means less effort and less sweat",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        },
+        {
+          "quote": "It climbs hills far better",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:lowers",
+      "to": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "note": "40–50 Nm, no gear advantage: fine for 800 m at 8% at moderate speed, struggles on long steep climbs",
+      "prov": [
+        {
+          "quote": "fine for a good hub motor at moderate speed",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        },
+        {
+          "quote": "struggles on long steep climbs",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04AQ55S817N1AET428K",
+      "prov": [
+        {
+          "quote": "Then a mid-drive is the safer bet",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04A390GCVNGHCQ0Q66P",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04AQ55S817N1AET428K",
+      "note": "The alternative the decision weighs against",
+      "prov": [
+        {
+          "quote": "fine for a good hub motor at moderate speed",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC1879TZ8TBR87XQ4QV7",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04AQ55S817N1AET428K",
+      "note": "The hill and not wanting to sweat drive the motor choice",
+      "prov": [
+        {
+          "quote": "I really don't want to arrive sweaty",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t3"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ954D0555C5C0G9CE3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "note": "A belt only works with an internal gear hub",
+      "prov": [
+        {
+          "quote": "It only works with an internal gear hub",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA34F091GEWS3A1AMS",
+      "prov": [
+        {
+          "quote": "The belt drive on the Birch means almost no chain maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AQ55S817N1AET428K",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "quote": "all with mid-drives except one for contrast",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AQ55S817N1AET428K",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA34F091GEWS3A1AMS",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "quote": "all with mid-drives except one for contrast",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AQ55S817N1AET428K",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "note": "The shortlist is mid-drives",
+      "prov": [
+        {
+          "quote": "all with mid-drives except one for contrast",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAMJP9VBXYYYXSSSB1",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "No bike wins everything",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA34F091GEWS3A1AMS",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "No bike wins everything",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAQBRTMGVFE1WGE4JA",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "No bike wins everything",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC18W2HQ2CWFT7GV80DJ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "weight for the stairs",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "theft protection",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "prov": [
+        {
+          "quote": "low maintenance",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t17"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZA1V4T3A04SHF9Q5TW",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "prov": [
+        {
+          "quote": "The Alder is the best all-rounder for your list",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JA9JK0B2SC41QQPN9Y",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "prov": [
+        {
+          "quote": "A removable battery (all four have one)",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ98ZH187J8E65TPKHH",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC182BDRSN5XK5T7E2RQ",
+      "prov": [
+        {
+          "quote": "Birch clearly (belt and internal hub)",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZAKAH7ATYG0BH3GY6P",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "note": "One of the three shaping choices, still open",
+      "prov": [
+        {
+          "quote": "the motor type, the battery size, and the frame style",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2J6JAZBAPJ5CXMJWRD2KV",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC180C3SS1MP7D6ABD1E",
+      "note": "The motor lock is what separates the bikes on theft",
+      "prov": [
+        {
+          "quote": "Alder best (motor lock through the app)",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t18"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04BKEMZ4BT51CF6MJZM",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2GC18X6SBK3T0W0R5MEQC",
+      "note": "One of the three shaping choices; all shortlisted bikes sit in the 400–500 Wh range",
+      "prov": [
+        {
+          "quote": "the motor type, the battery size, and the frame style",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2HQZ9960YHJ1SB3DWWK45",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2SF6C61GQSEGMV9E1KSRS",
+      "note": "A mid-drive turns the chain and uses its gears",
+      "prov": [
+        {
+          "quote": "drives the chain, so it uses the bike's gears",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t2"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2H04AMGQV9XVT98RNG201",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04ACZA1YBKW1N4VNQDC",
+      "note": "Mid-drives are typically 60–85 Nm",
+      "prov": [
+        {
+          "quote": "60 to 85 Nm for mid-drives",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2SF6C61GQSEGMV9E1KSRS",
+      "type": "builtin:prerequisite",
+      "to": "01M3T2H04AQ55S817N1AET428K",
+      "note": "Shifting down to keep cadence is why a mid-drive means less sweat",
+      "prov": [
+        {
+          "quote": "a mid-drive lets you shift down and keep cadence",
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    },
+    {
+      "from": "01M3T2SF6C61GQSEGMV9E1KSRS",
+      "type": "builtin:part-of",
+      "to": "01M3T2FR8C9Z3ZD3GFWWKZP3SE",
+      "prov": [
+        {
+          "source": "01M3T2DZARA0N1X8KHXNJB45NB",
+          "segment": "t4"
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "01M3T2DZCR7S9QASAZBQN8EZ4M",
+      "viewType": "comparison-table",
+      "label": "Compare the bikes",
+      "question": "How do these bikes stack up on what matters to me: hill climbing, maintenance, weight, theft protection, and price?",
+      "settings": {
+        "rows": {
+          "tags": [
+            "shortlist"
+          ],
+          "kinds": [
+            "builtin:thing"
+          ]
+        },
+        "sortBy": "price",
+        "columns": [
+          {
+            "criteria": "auto"
+          },
+          {
+            "attribute": "torque"
+          },
+          {
+            "attribute": "weight"
+          },
+          {
+            "attribute": "price"
+          },
+          {
+            "attribute": "drivetrain"
+          },
+          {
+            "attribute": "standing"
+          }
+        ],
+        "priority": "priority",
+        "standing": "standing"
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T2DZCRDKEKT31PZA2SVV81",
+      "viewType": "cause-and-effect",
+      "label": "Mid-drive or hub",
+      "question": "If I pick mid-drive vs hub, what follows: how steep can I climb, how quiet is the ride, what maintenance do I face?",
+      "settings": {
+        "hide": [
+          "01M3T2GC17R95JP9KZMH8ZB8JF",
+          "01M3T2GC18X6SBK3T0W0R5MEQC",
+          "01M3T2HQZAKAH7ATYG0BH3GY6P",
+          "01M3T2HQZ9960YHJ1SB3DWWK45",
+          "01M3T2HQZ98ZH187J8E65TPKHH",
+          "01M3T2H04BFRPSA4GDJ5XHK42Z",
+          "01M3T2J6JARW328STCZ5YJGSNM",
+          "01M3T2HQZB0D4PDJS3RVQ019SR"
+        ],
+        "mode": "mechanism",
+        "levers": {
+          "tags": [
+            "motor-choice"
+          ]
+        },
+        "negative": [
+          "builtin:lowers"
+        ],
+        "outcomes": [
+          "01M3T2GC1879TZ8TBR87XQ4QV7",
+          "01M3T2SF6C71AR60EQ0F126BZG",
+          "01M3T2SF6DZYMHVJS72WAC2FJ3"
+        ],
+        "positive": [
+          "builtin:raises",
+          "builtin:causes"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T2DZCR1RVVG6909B8FZXME",
+      "viewType": "learning-path",
+      "label": "What to learn first",
+      "question": "What do I need to understand first: motor types, battery size, frame style, or the bikes themselves?",
+      "settings": {
+        "targets": {
+          "tags": [
+            "path-target"
+          ]
+        },
+        "minSteps": 4,
+        "relationshipTypes": [
+          "builtin:prerequisite"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T2DZCR166W7AV5WJ5PZVHQ",
+      "viewType": "timeline",
+      "label": "Running costs over time",
+      "question": "When do batteries, chains, and servicing cost kick in, and how much for each bike?",
+      "settings": {
+        "lanes": []
+      },
+      "settingsVersion": 1,
+      "status": "failed",
+      "failReason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000–4,000 km\" or \"battery after 3–4 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better."
+    }
+  ]
+}

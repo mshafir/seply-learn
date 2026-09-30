@@ -1,6 +1,7 @@
 // Every job kind this server runs. Each runtime's engine and the API share
-// it. The build (WP-3.5b) and the writers (WP-3.6) add theirs here.
+// it. The writers (WP-3.6) add theirs here.
+import { buildJob } from "./build.ts"
 import { fakeJob } from "./fake.ts"
 import { jobRegistry } from "./types.ts"
 
-export const JOB_KINDS = jobRegistry(fakeJob)
+export const JOB_KINDS = jobRegistry(buildJob, fakeJob)

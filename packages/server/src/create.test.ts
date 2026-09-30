@@ -8,6 +8,8 @@ import { describe, expect, it } from "vitest"
 import { memoryBlobStore } from "./blobs.ts"
 import type { Draft } from "./create.ts"
 import { loadState } from "./projection.ts"
+import { JOB_KINDS } from "./jobs/registry.ts"
+import type { Job, JobRunner } from "./jobs/types.ts"
 import type { Relay } from "./relay.ts"
 import { signUp, TEST_ENV, testApp, testDb, type TestUser } from "./test-harness.ts"
 
@@ -65,11 +67,13 @@ function fakeModel(content: () => unknown) {
   return { fetch: fetch as typeof globalThis.fetch, calls }
 }
 
-async function setup(opts: { env?: typeof ENV; content?: () => unknown; relay?: Relay } = {}) {
+async function setup(
+  opts: { env?: typeof ENV; content?: () => unknown; relay?: Relay; jobs?: JobRunner } = {}
+) {
   const db = await testDb()
   const blobs = memoryBlobStore()
   const model = fakeModel(opts.content ?? (() => answer))
-  const app = testApp(opts.env ?? ENV, db, opts.relay, { blobs, ai: { fetch: model.fetch } })
+  const app = testApp(opts.env ?? ENV, db, opts.relay, { blobs, ai: { fetch: model.fetch }, jobs: opts.jobs })
   const ada = await signUp(app, "ada")
   const created = await app.request("/api/expeditions", { method: "POST", headers: ada.headers, body: "{}" })
   const { id } = (await created.json()) as { id: string }
@@ -264,8 +268,8 @@ describe("DELETE /sources/:exp/:source", () => {
   })
 })
 
-describe("POST /expeditions/:id/build (the hand-off to WP-3.5b)", () => {
-  it("needs Sources and queued Views, then answers 501 until the build exists", async () => {
+describe("POST /expeditions/:id/build (the hand-off to the build job)", () => {
+  it("needs Sources and queued Views, and answers 501 on a server without jobs", async () => {
     const { call, ada, id, paste } = await setup()
     expect((await call(ada, "POST", `/api/expeditions/${id}/build`, {})).status).toBe(409)
     await paste()
@@ -276,5 +280,45 @@ describe("POST /expeditions/:id/build (the hand-off to WP-3.5b)", () => {
     const res = await call(ada, "POST", `/api/expeditions/${id}/build`, { goals: ["learn"] })
     expect(res.status).toBe(501)
     expect(await res.json()).toMatchObject({ error: "build-unavailable" })
+  })
+
+  it("marks the draft building and starts the build job on its queued Views, best first", async () => {
+    const started: { expeditionId: string; kind: string; input: unknown; startedBy: string }[] = []
+    const jobs: JobRunner = {
+      registry: JOB_KINDS,
+      start: async (_db, req) => {
+        started.push(req)
+        return { id: "J1" } as Job
+      },
+      cancel: async () => ({}) as Job,
+      retry: async () => ({}) as Job,
+      continue: async () => ({}) as Job,
+      wake: async () => 0,
+    }
+    const { call, ada, id, paste, db } = await setup({ jobs })
+    const added = (await (await paste()).json()) as { source: { id: string } }
+    await call(ada, "PUT", `/api/expeditions/${id}/plan`, {
+      title: "Sourdough",
+      views: [
+        { viewType: "outline", label: "Stages", question: "What are the stages?" },
+        { viewType: "learning-path", label: "Path", question: "What first?" },
+      ],
+    })
+    const res = await call(ada, "POST", `/api/expeditions/${id}/build`, { goals: ["learn"] })
+    expect(res.status).toBe(202)
+    expect(await res.json()).toEqual({ jobId: "J1" })
+    const state = (await loadState(db, id))!
+    expect(state.expedition.status).toBe("building")
+    const queued = Object.values(state.views).sort((a, b) => a.orderKey.localeCompare(b.orderKey))
+    expect(started).toEqual([
+      {
+        expeditionId: id,
+        kind: "build",
+        startedBy: ada.id,
+        input: { views: [], viewIds: queued.map((v) => v.id), sources: [added.source.id], goals: ["learn"] },
+      },
+    ])
+    // A second click finds it started.
+    expect((await call(ada, "POST", `/api/expeditions/${id}/build`, {})).status).toBe(409)
   })
 })

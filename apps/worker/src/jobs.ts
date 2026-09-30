@@ -5,6 +5,7 @@
 import {
   connectPg,
   createJobRunner,
+  r2BlobStore,
   instanceId,
   JOB_KINDS,
   notifyUser,
@@ -23,6 +24,7 @@ import {
   type WorkflowStep,
 } from "cloudflare:workers"
 import type { Bindings } from "./bindings.ts"
+import { readView } from "@seply/views/inspect"
 import { roomRelay } from "./relay.ts"
 
 /** Our `Steps` over a Workflow's `step.do`. */
@@ -58,6 +60,13 @@ export function jobDeps(env: Bindings): JobDeps {
     relay: roomRelay(env.EXPEDITION_ROOM),
     notify: (db, userId, note) =>
       notifyUser(db, userId, note, { vapid }).then(() => {}),
+    // The build reads the AI setup (instance keys), Source segments, and
+    // renders Views for the curator's view.inspect (@seply/views/inspect).
+    services: {
+      env,
+      blobs: env.SOURCES ? r2BlobStore(env.SOURCES) : undefined,
+      views: { read: readView },
+    },
   }
 }
 

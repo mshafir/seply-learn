@@ -11,6 +11,9 @@
 //   `createJobRunner` builds one from an engine; it keeps the `jobs` rows.
 import type { BuildEvent, JobStatus, OpBody } from "@seply/domain"
 import type { z } from "zod"
+import type { LanguageModelV4, Stage, ViewReader } from "@seply/ai"
+import type { BlobStore } from "../blobs.ts"
+import type { ServerEnv } from "../config.ts"
 import type { Db, DbConnection } from "../db.ts"
 import type { Relay } from "../relay.ts"
 
@@ -97,6 +100,25 @@ export type JobDeps = {
   /** Delivers a notification to one user's browsers (web push). Optional. */
   notify?: (db: Db, userId: string, n: JobNotification) => Promise<void>
   now?: () => number
+  /** What AI jobs (the build) read from the runtime. */
+  services?: JobServices
+}
+
+/**
+ * What AI jobs need from the app that runs them (spec §2.1: the composing app
+ * fills the ports). The build reads the AI setup from `env` (instance keys) and
+ * the database (BYOK), Source segments from `blobs`, and renders Views for
+ * `view.inspect` with `views` (@seply/views/inspect's `readView`, which this
+ * package may not import).
+ */
+export type JobServices = {
+  env?: ServerEnv
+  blobs?: BlobStore
+  views?: ViewReader
+  /** Tests only: the model a stage uses instead of the resolved one. */
+  model?: (stage: Stage) => LanguageModelV4
+  /** Tests only: how much Source the curator reads at once (see @seply/ai's planSources). */
+  curator?: { wholeSourceMaxTokens?: number; chunkTokens?: number }
 }
 
 export type JobNotification = {
@@ -144,6 +166,8 @@ export interface JobContext<Input> {
   progress(evt: Progress): Promise<void>
   /** Runs `fn` over one database connection, closed afterwards. Use inside steps. */
   withDb<T>(fn: (db: Db) => Promise<T>): Promise<T>
+  /** The runtime's services (AI setup, blobs, the ViewReader); empty when it has none. */
+  services: JobServices
 }
 
 export type JobDefinition<Input = unknown> = {
