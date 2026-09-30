@@ -25,3 +25,9 @@ AI_GATEWAY_API_KEY=
 # bytes, base64: `openssl rand -base64 32`. Changing it makes stored keys
 # unreadable (readers add them again).
 AI_KEYS_MASTER_KEY=
+# "1": wake running jobs after a restart (wrangler dev doesn't resume Workflows).
+JOBS_WAKE_ON_START=1
+# Web push (optional): a VAPID key pair, base64url. Off when empty.
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=

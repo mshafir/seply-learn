@@ -155,9 +155,12 @@ export type BuildStart =
   | { ok: false; status: 409 | 501; error: string; message: string }
 
 /**
- * The hand-off to the build. TODO(WP-3.5b): start the curator's `build` job
- * through the JobRunner (WP-3.2) with `request`, set the Expedition's status
- * to `building`, and return its job id. Until then the draft stays a draft.
+ * The hand-off to the build. TODO(WP-3.5b): register a `build` JobDefinition
+ * and start it here through the JobRunner (WP-3.2; `createApp`'s `jobs`
+ * runner, as `jobRoutes` does): `runner.start(db, { expeditionId, kind:
+ * "build", input: request minus userId, startedBy: userId })`; set the
+ * Expedition's status to `building`, and return the job id (the route answers
+ * 202 `{ jobId }`). Until then the draft stays a draft.
  */
 export async function startBuild(
   c: Context<AppEnv>,

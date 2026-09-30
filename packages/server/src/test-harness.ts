@@ -10,6 +10,7 @@ import { Hono } from "hono"
 import { fileURLToPath } from "node:url"
 import { createApp } from "./app.ts"
 import type { BlobStore } from "./blobs.ts"
+import type { JobRunner } from "./jobs/types.ts"
 import type { ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
 import type { Relay } from "./relay.ts"
@@ -28,7 +29,11 @@ export function testApp(
   env: ServerEnv,
   db: Db | null,
   relay?: Relay,
-  { blobs, ai }: { blobs?: BlobStore; ai?: ProviderOptions } = {}
+  {
+    blobs,
+    ai,
+    jobs,
+  }: { blobs?: BlobStore; ai?: ProviderOptions; jobs?: JobRunner } = {}
 ) {
   const root = new Hono()
   root.route(
@@ -38,6 +43,7 @@ export function testApp(
       relay,
       blobs: () => blobs ?? null,
       ai,
+      jobs,
     })
   )
   const request = (path: string, init: RequestInit = {}) =>

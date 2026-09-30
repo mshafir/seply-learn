@@ -43,6 +43,14 @@ export type ServerEnv = {
   AI_MODEL_WRITER?: string
   /** BYOK mode: 32 random bytes, base64. Readers' keys are AES-GCM encrypted under it. */
   AI_KEYS_MASTER_KEY?: string
+  /**
+   * Our VAPID key pair for web push (base64url: the 65-byte public point and
+   * the 32-byte private scalar) and a contact for push services
+   * (`mailto:` or `https:`). Web push is off without the keys.
+   */
+  VAPID_PUBLIC_KEY?: string
+  VAPID_PRIVATE_KEY?: string
+  VAPID_SUBJECT?: string
 }
 
 export type ServerConfig = {
