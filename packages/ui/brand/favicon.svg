@@ -1,26 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Seply Learn">
   <title>Seply Learn</title>
   <style>
-    .ink { stroke: #1D1C1A; fill: #1D1C1A; }
-    .accent { fill: #3A45B5; }
+    .calyx { fill: #2D5C3F; }
+    .bud { fill: #3A45B5; }
     @media (prefers-color-scheme: dark) {
-      .ink { stroke: #ECE9E3; fill: #ECE9E3; }
-      .accent { fill: #8E97F2; }
+      .calyx { fill: #8FC7A0; }
+      .bud { fill: #8E97F2; }
     }
   </style>
-  <g class="ink" stroke-width="4" stroke-linecap="round" fill="none">
-    <path d="M32 52 L32 61" />
-    <path d="M32 52 L10 24" />
-    <path d="M32 52 L20 15" />
-    <path d="M32 52 L32 11" />
-    <path d="M32 52 L44 15" />
-    <path d="M32 52 L54 24" />
+  <mask id="ring">
+    <rect width="64" height="64" fill="#fff" />
+    <circle cx="32" cy="32" r="11" fill="#000" />
+  </mask>
+  <g class="calyx" mask="url(#ring)">
+    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" />
+    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(72 32 32)" />
+    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(144 32 32)" />
+    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(216 32 32)" />
+    <path d="M32 31C19.5 26 18.5 11 29.5 2.5C41.5 9 42 24.5 32 31Z" transform="rotate(288 32 32)" />
   </g>
-  <g class="ink" stroke="none">
-    <circle cx="10" cy="24" r="6" />
-    <circle cx="20" cy="15" r="6" />
-    <circle cx="32" cy="11" r="6" />
-    <circle cx="54" cy="24" r="6" />
-  </g>
-  <circle class="accent" cx="44" cy="15" r="6" />
+  <circle class="bud" cx="32" cy="32" r="8.5" />
 </svg>
