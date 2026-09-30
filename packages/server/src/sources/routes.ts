@@ -8,6 +8,8 @@
 //     → { source, segments: SegmentsDoc }
 //   GET  /sources/:expeditionId/:sourceId/file  (anyone who can view)
 //     → the raw file, as a download
+//   DELETE /sources/:expeditionId/:sourceId (signed in; owners and editors)
+//     → 204; logs `source.remove`
 //
 // Viewing needs no sign-in where Visibility allows, like /pull: anyone who
 // can view an Expedition can see its Sources (spec §1.8).
@@ -33,6 +35,7 @@ import {
   expeditionVisibility,
   ownKey,
   readSegments,
+  removeSource,
   sourceRow,
 } from "./store.ts"
 
@@ -164,6 +167,26 @@ export function sourceRoutes(relay: Relay) {
     void _b
     void _s
     return c.json({ source, segments: read.segments })
+  })
+
+  // Remove a Source (the create flow's Sources list; owners and editors): logs
+  // `source.remove` as one Change. The blobs stay, so undoing the Change
+  // brings the Source back whole.
+  r.delete("/:expeditionId/:sourceId", requireUser(), async (c) => {
+    const { expeditionId, sourceId } = c.req.param()
+    const db = await c.var.db()
+    try {
+      const logged = await removeSource(db, {
+        expeditionId,
+        sourceId,
+        userId: c.var.user.id,
+      })
+      await publishCommitted(relay, expeditionId, logged)
+      return c.body(null, 204)
+    } catch (err) {
+      if (err instanceof PushError) return c.json(err.body, err.status)
+      throw err
+    }
   })
 
   r.get("/:expeditionId/:sourceId/file", async (c) => {

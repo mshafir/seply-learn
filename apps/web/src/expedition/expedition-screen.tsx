@@ -11,8 +11,8 @@
 // Building (spec §3.5, WP-3.7): the rail shows each View's build status, a
 // View still building shows its skeleton (view-skeleton.tsx) and a failed one
 // its card (failed-view-card.tsx); the first View to finish opens by itself
-// (opened without a View in the URL, the screen shows the best View, else the
-// first ready one, else the first); a toast announces each View as it
+// (opened without a View in the URL, the screen shows the best View once it
+// is ready, else the first ready one; `startViewOf`); a toast announces each View as it
 // finishes; the header's activity indicator (build-activity.tsx) holds
 // Cancel and "Leave it building"; the spending cap pauses with Continue or
 // Stop. Builds come from the room (use-builds.ts); signed out or offline
@@ -58,6 +58,7 @@ import { BuildActivity } from "@/expedition/build-activity.tsx"
 import {
   buildSummary,
   retryableJob,
+  startViewOf,
   viewBuild,
 } from "@/expedition/build-state.ts"
 import { FailedViewCard } from "@/expedition/failed-view-card.tsx"
@@ -316,13 +317,13 @@ function ExpeditionFrame({
   const buildOf = (v: ViewRow) => viewBuild(v, builds.log)
   const summary = buildSummary(data.views, builds.log)
 
-  // The URL's View, else the best View, else the first ready one (so the
-  // first View to finish building opens by itself), else the first.
-  const startView =
-    data.views.find((v) => v.id === expedition?.bestViewId) ??
-    data.views.find((v) => buildOf(v).status === "ready") ??
-    data.views[0] ??
-    null
+  // The URL's View, else the best View once ready, else the first ready one
+  // (so the first View to finish building opens by itself), else the first.
+  const startView = startViewOf(
+    data.views,
+    expedition?.bestViewId,
+    (v) => buildOf(v).status === "ready"
+  )
   const view = data.views.find((v) => v.id === viewId) ?? startView
   const build = view ? buildOf(view) : null
   React.useEffect(() => {

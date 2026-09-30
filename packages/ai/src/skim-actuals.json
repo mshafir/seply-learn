@@ -1,0 +1,336 @@
+{
+  "measuredAt": "2026-09-30T20:24:31.718Z",
+  "rows": [
+    {
+      "fixture": "sourdough (learning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "ms": 7105,
+      "usd": 0.00879,
+      "usage": {
+        "input": 5493,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 660
+      },
+      "sample": {
+        "segments": 15,
+        "chars": 2925
+      },
+      "ok": true,
+      "title": "Sourdough from starter to loaf",
+      "views": [
+        "● v-learning-path [learning-path] What do I need to understand first to make good bread?",
+        "● v-dense-loaf-causes [cause-and-effect] What's making my bread dense, and what can I change?",
+        "● v-sourdough-anatomy [anatomy] What are the parts of sourdough, and what does each one do?",
+        "● v-fermentation-timeline [timeline] When does each stage happen, and how long does it take?",
+        "○ v-whole-wheat-comparison [cause-and-effect] How does whole wheat flour change the recipe, and what do I adjust?",
+        "○ v-starter-anatomy [anatomy] What microbes live in a starter, and what do they do?"
+      ]
+    },
+    {
+      "fixture": "sourdough (learning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 1,
+      "ms": 7107,
+      "usd": 0.00875,
+      "usage": {
+        "input": 5493,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 652
+      },
+      "sample": {
+        "segments": 15,
+        "chars": 2925
+      },
+      "ok": true,
+      "title": "Making sourdough that rises",
+      "views": [
+        "● v-learning-path [learning-path] What do I need to understand before I can move on?",
+        "● v-dense-loaf-causes [cause-and-effect] What drives a dense loaf, and what can I actually change?",
+        "● v-sourdough-anatomy [anatomy] What are the parts of sourdough baking, and how do they fit together?",
+        "○ v-fermentation-comparison [comparison-table] How do bulk fermentation and proofing differ in what they do and how you read them?",
+        "○ v-hydration-impact [cause-and-effect] How does water content change what happens to your dough and crumb?",
+        "○ v-starter-timeline [timeline] What happens to a starter over time, and when is it ready to use?"
+      ]
+    },
+    {
+      "fixture": "sourdough (learning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 2,
+      "ms": 6424,
+      "usd": 0.00831,
+      "usage": {
+        "input": 5493,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 564
+      },
+      "sample": {
+        "segments": 15,
+        "chars": 2925
+      },
+      "ok": true,
+      "title": "Sourdough from starter to crumb",
+      "views": [
+        "● v-learning-path [learning-path] What do I need to understand first to avoid dense loaves?",
+        "● v-dense-causes [cause-and-effect] What drives density, and what can I pull on to fix it?",
+        "● v-process-outline [outline] What are the main steps, and what belongs to each one?",
+        "○ v-anatomy-loaf [anatomy] What makes a loaf, and what does each part do?",
+        "○ v-whole-wheat-tweaks [cause-and-effect] How does whole wheat change the process, and what do I adjust?",
+        "○ v-starter-culture [anatomy] What microbes are in there, and what do they do?"
+      ]
+    },
+    {
+      "fixture": "e-bike (decision chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "ms": 8935,
+      "usd": 0.0086,
+      "usage": {
+        "input": 5488,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 623
+      },
+      "sample": {
+        "segments": 13,
+        "chars": 2919
+      },
+      "ok": true,
+      "title": "Picking an e-bike for commuting",
+      "views": [
+        "● v-decide-bike [comparison-table] How do these bikes stack up on what matters to me: hill climbing, maintenance, weight, theft protection, and price?",
+        "● v-motor-choices [cause-and-effect] If I pick mid-drive vs hub, what follows: how steep can I climb, how quiet is the ride, what maintenance do I face?",
+        "● v-learning-path [learning-path] What do I need to understand first: motor types, battery size, frame style, or the bikes themselves?",
+        "● v-commute-timeline [timeline] When do batteries, chains, and servicing cost kick in, and how much for each bike?",
+        "○ v-theft-methods [anatomy] What are the parts that stop a thief: the motor lock, the frame material, the lock you buy separately?",
+        "○ v-weight-tradeoff [quadrant] Where does each bike sit: heavy but strong, light but less powerful, or best of both?"
+      ]
+    },
+    {
+      "fixture": "e-bike (decision chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 1,
+      "ms": 8701,
+      "usd": 0.00916,
+      "usage": {
+        "input": 5488,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 734
+      },
+      "sample": {
+        "segments": 13,
+        "chars": 2919
+      },
+      "ok": true,
+      "title": "E-bike for your commute",
+      "views": [
+        "● v-comparison-table [comparison-table] How do the three bikes—Alder, Birch, Cedar—stack up against what matters most to you?",
+        "● v-learning-path [learning-path] What do I need to understand before I can pick a bike?",
+        "● v-cost-timeline [timeline] When will I spend money on each bike, and how much?",
+        "● v-hill-climb-anatomy [anatomy] What makes a bike climb your hill without leaving you sweaty?",
+        "○ v-motor-types [cause-and-effect] What does choosing mid-drive versus hub drive change about how the bike behaves?",
+        "○ v-maintenance-comparison [comparison-table] Which bike will need the least work over three years, and why?",
+        "○ v-theft-protection [cause-and-effect] What features reduce theft risk, and which bike offers the best combination?",
+        "○ v-weight-impact [comparison-table] How heavy is each bike with the battery, and can you carry it up one flight?"
+      ]
+    },
+    {
+      "fixture": "e-bike (decision chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 2,
+      "ms": 7302,
+      "usd": 0.00874,
+      "usage": {
+        "input": 5488,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 650
+      },
+      "sample": {
+        "segments": 13,
+        "chars": 2919
+      },
+      "ok": true,
+      "title": "Pick an e-bike for your commute",
+      "views": [
+        "● v-compare-bikes [comparison-table] How do the Alder, Birch, and Cedar stack up on what matters to you?",
+        "● v-motor-choice [cause-and-effect] Which motor type will get you up your hill without arriving soaked?",
+        "● v-e-bike-anatomy [anatomy] What are the parts of an e-bike, and how do they work together?",
+        "● v-total-cost [rates] What will batteries, chains, and servicing actually cost you over three years?",
+        "○ v-weight-stairs [evidence] How much does each bike weigh, and is that a real problem carrying it up two flights?",
+        "○ v-battery-longevity [evidence] Are Bosch batteries actually better than Bafang, and what's the evidence?",
+        "○ v-test-ride-checklist [learning-path] What do you need to understand and verify before you commit?"
+      ]
+    },
+    {
+      "fixture": "rail trip (planning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "ms": 7468,
+      "usd": 0.00871,
+      "usage": {
+        "input": 5492,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 643
+      },
+      "sample": {
+        "segments": 10,
+        "chars": 2624
+      },
+      "ok": true,
+      "title": "Portugal by train: Lisbon to Porto",
+      "views": [
+        "● v-itinerary [timeline] When do I arrive, move, and leave each place?",
+        "● v-route-map [map] Where is everything on the way from Lisbon to Porto, and how do I move between them?",
+        "● v-stops-compared [comparison-table] What matters at each town — how much time, what to see, how to get there?",
+        "● v-food-guide [outline] What should I eat and drink, and where does it fit in the plan?",
+        "○ v-logistics [outline] How do I book tickets, get from place to place, and handle the details?",
+        "○ v-sintra-decision [comparison-table] Which palace should I pick if I only have time for one, and what's the trade-off?"
+      ]
+    },
+    {
+      "fixture": "rail trip (planning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 1,
+      "ms": 7227,
+      "usd": 0.00889,
+      "usage": {
+        "input": 5492,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 679
+      },
+      "sample": {
+        "segments": 10,
+        "chars": 2624
+      },
+      "ok": true,
+      "title": "Portugal by train, May 2–10",
+      "views": [
+        "● v-timeline [timeline] What happens each day, and when do I travel?",
+        "● v-map [map] Where are all the stops, and how far apart are they?",
+        "● v-comparison-stops [comparison-table] What does each town offer, and how long should I spend there?",
+        "● v-food-by-place [outline] What are the signature dishes in each town, and how do they fit the local culture?",
+        "○ v-travel-logistics [outline] How do I get between towns, book tickets, and find a good place to sleep?",
+        "○ v-douro-detour [cause-and-effect] What makes the Douro worth the extra time, and what would you miss?"
+      ]
+    },
+    {
+      "fixture": "rail trip (planning chat)",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 2,
+      "ms": 6213,
+      "usd": 0.00859,
+      "usage": {
+        "input": 5492,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 620
+      },
+      "sample": {
+        "segments": 10,
+        "chars": 2624
+      },
+      "ok": true,
+      "title": "Portugal by train: Lisbon to Porto",
+      "views": [
+        "● v-itinerary-timeline [timeline] When am I where, and what's the sequence of stops?",
+        "● v-route-map [map] Where is everything on the map, and how are the towns connected?",
+        "● v-stops-comparison [comparison-table] What's worth seeing in each town, and how much time should I spend there?",
+        "● v-food-by-place [outline] What should I eat in each place, and what's the local specialty?",
+        "○ v-train-logistics [learning-path] What do I need to know about booking tickets and using trains before I go?",
+        "○ v-douro-detour [anatomy] What is a Douro day trip, what does it include, and how do I fit it in?"
+      ]
+    },
+    {
+      "fixture": "research doc",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 0,
+      "ms": 9128,
+      "usd": 0.01053,
+      "usage": {
+        "input": 7075,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 692
+      },
+      "sample": {
+        "segments": 28,
+        "chars": 8196
+      },
+      "ok": true,
+      "title": "Open-source tools for knowledge graphs in",
+      "views": [
+        "● v-comparison-table [comparison-table] Which tools have the features I need—prerequisite graphs, visual exploration, LLM help, and human curation?",
+        "● v-evidence [evidence] What evidence exists for which features are most important, and where do the tools fail?",
+        "● v-anatomy [anatomy] What are the parts of a working knowledge-graph learning tool, and how do they fit together?",
+        "● v-learning-path [learning-path] What do I need to understand first: what are prerequisites vs related concepts, and where do the different tool families sit?",
+        "○ v-outline [outline] What's covered in this research, from the evaluation rubric through tool categories to gaps?",
+        "○ v-lineage [lineage] Where did the key ideas come from—Metacademy, Lean Blueprint, roadmap.sh—and what did they lead to?",
+        "○ v-quadrant [quadrant] Which tools are production-ready, and which are experimental patterns worth learning from?"
+      ]
+    },
+    {
+      "fixture": "research doc",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 1,
+      "ms": 10869,
+      "usd": 0.01138,
+      "usage": {
+        "input": 7075,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 861
+      },
+      "sample": {
+        "segments": 28,
+        "chars": 8196
+      },
+      "ok": true,
+      "title": "Open-source tools for learning graphs",
+      "views": [
+        "● v-tool-comparison [comparison-table] Which tools do what? What's strong, weak, or missing in each?",
+        "● v-landscape-map [anatomy] How does the field actually break down? What does each family of tools do?",
+        "● v-gap-priorities [cause-and-effect] What are the real barriers, and what would it take to remove them?",
+        "● v-design-stack [outline] If I were starting today, what's the right stack of pieces and practices?",
+        "○ v-adoption-trends [rates] Which tools are seeing real adoption, and what does their growth tell us?",
+        "○ v-lineage [lineage] Where did each family come from? Which ideas moved between camps?",
+        "○ v-visualization-substrate [learning-path] What visualization and UI libraries underpin the tools that work?",
+        "○ v-reference-closed [evidence] Closed-source products (Math Academy, Brilliant) have the graph right. What can we learn from them?"
+      ]
+    },
+    {
+      "fixture": "research doc",
+      "model": "anthropic/claude-haiku-4.5",
+      "run": 2,
+      "ms": 9069,
+      "usd": 0.01059,
+      "usage": {
+        "input": 7075,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 703
+      },
+      "sample": {
+        "segments": 28,
+        "chars": 8196
+      },
+      "ok": true,
+      "title": "Open-source knowledge graph tools for learning",
+      "views": [
+        "● v-comparison-table [comparison-table] Which tools cover the four things we need: prerequisites, visual exploration, LLM co-authoring, and human curation?",
+        "● v-learning-path [learning-path] What do I need to grasp first: the data model, the adoption patterns, or the technical pieces?",
+        "● v-evidence [evidence] What does the source claim about LLM strengths and weaknesses in knowledge graphs, and what's the evidence?",
+        "● v-anatomy [anatomy] What are the parts of a curation system, and how do they fit together?",
+        "○ v-outline [outline] What categories of tools exist, and what's in each one?",
+        "○ v-lineage [lineage] Where did the key ideas come from, and how did they evolve?",
+        "○ v-quadrant [quadrant] Which tools are high-adoption and incomplete, and which are complete but niche?"
+      ]
+    }
+  ]
+}

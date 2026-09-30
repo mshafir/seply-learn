@@ -9,6 +9,7 @@ import {
   readyLabel,
   receive,
   retryableJob,
+  startViewOf,
   viewBuild,
   withJob,
   withJobs,
@@ -247,5 +248,25 @@ describe("the summary", () => {
     expect(s.job?.id).toBe("J1")
     expect(readyLabel(s)).toBe("1 of 3 Views ready")
     expect(readyLabel({ ready: 0, total: 1 })).toBe("0 of 1 View ready")
+  })
+})
+
+describe("the View a screen opens on", () => {
+  const views = [{ id: "A" }, { id: "B" }, { id: "C" }]
+  const readyOf =
+    (...ids: string[]) =>
+    (v: { id: string }) =>
+      ids.includes(v.id)
+
+  it("is the best View once it is ready", () => {
+    expect(startViewOf(views, "C", readyOf("B", "C"))?.id).toBe("C")
+  })
+  it("is the first ready one while the best still builds", () => {
+    expect(startViewOf(views, "C", readyOf("B"))?.id).toBe("B")
+  })
+  it("is the best, else the first, while nothing is ready", () => {
+    expect(startViewOf(views, "C", readyOf())?.id).toBe("C")
+    expect(startViewOf(views, null, readyOf())?.id).toBe("A")
+    expect(startViewOf([], null, readyOf())).toBeNull()
   })
 })

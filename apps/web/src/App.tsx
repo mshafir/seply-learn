@@ -3,6 +3,7 @@
 //   /                   the Library
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
+//   /new/:id(/views)    the create flow: Sources, then Choose Views (WP-3.4)
 //   /settings           Settings: AI keys, models and the per-ask cap (WP-3.3)
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
@@ -10,6 +11,7 @@ import { Redirect, Route, Switch } from "wouter"
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Spinner } from "@seply/ui/components/spinner"
 
+import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"
 import { LibraryScreen } from "@/screens/library.tsx"
@@ -57,6 +59,17 @@ export function App() {
           <WaitForSession>
             <ExpeditionScreen expeditionId={params.id} viewId={params.viewId} />
           </WaitForSession>
+        )}
+      </Route>
+      <Route path="/new/:id/:step?">
+        {(params) => (
+          <RequireUser>
+            <CreateScreen
+              key={params.id}
+              expeditionId={params.id}
+              step={params.step === "views" ? "views" : "sources"}
+            />
+          </RequireUser>
         )}
       </Route>
       <Route path="/settings">

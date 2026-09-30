@@ -250,6 +250,21 @@ export function buildSummary(
   }
 }
 
+/**
+ * The View a screen opened without one in the URL shows: the best View once
+ * it is ready, else the first ready one (so the first View to finish opens by
+ * itself), else the best, else the first.
+ */
+export function startViewOf<V extends { id: string }>(
+  views: readonly V[],
+  bestViewId: string | null | undefined,
+  isReady: (view: V) => boolean
+): V | null {
+  const best = views.find((v) => v.id === bestViewId)
+  if (best && isReady(best)) return best
+  return views.find(isReady) ?? best ?? views[0] ?? null
+}
+
 /** "1 of 3 Views ready" */
 export function readyLabel(s: Pick<BuildSummary, "ready" | "total">): string {
   return `${s.ready} of ${s.total} ${s.total === 1 ? "View" : "Views"} ready`
