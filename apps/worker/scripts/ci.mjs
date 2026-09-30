@@ -16,7 +16,8 @@
 //                                                  Worker's custom domain (production only)
 //   node scripts/ci.mjs r2-bucket <name>           create the R2 bucket if absent, and point
 //                                                  wrangler.ci.json's SOURCES binding at it
-//   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below)
+//   node scripts/ci.mjs secrets-file <path>        write the Worker secrets (AUTH_SECRETS below,
+//                                                  plus OPTIONAL_SECRETS that are set)
 //                                                  from env to <path> as JSON, mode 0600, for
 //                                                  `wrangler deploy --secrets-file`
 //
@@ -206,11 +207,17 @@ const AUTH_SECRETS = [
   "GOOGLE_CLIENT_SECRET",
 ]
 
+// AI secrets (spec §5.6), uploaded when the repo secret exists: the hosted
+// instance key, and the master key that bring-your-own-key mode encrypts
+// readers' keys under. Without them the Worker runs, and AI says it isn't set up.
+const OPTIONAL_SECRETS = ["AI_GATEWAY_API_KEY", "AI_KEYS_MASTER_KEY"]
+
 function secretsFile(path) {
   const secrets = Object.fromEntries(AUTH_SECRETS.map((n) => [n, env(n)]))
+  for (const n of OPTIONAL_SECRETS) if (process.env[n]) secrets[n] = process.env[n]
   writeFileSync(path, JSON.stringify(secrets), { mode: 0o600 })
   chmodSync(path, 0o600)
-  console.log(`wrote ${AUTH_SECRETS.join(", ")} to ${path}`)
+  console.log(`wrote ${Object.keys(secrets).join(", ")} to ${path}`)
 }
 
 // Attaches the production Worker to its own hostname. Only the production job calls

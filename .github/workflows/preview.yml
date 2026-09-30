@@ -117,6 +117,8 @@ jobs:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+          AI_KEYS_MASTER_KEY: ${{ secrets.AI_KEYS_MASTER_KEY }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # Google sign-in goes through production (AUTH_PROXY_URL): Google only
@@ -317,6 +319,8 @@ jobs:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+          AI_KEYS_MASTER_KEY: ${{ secrets.AI_KEYS_MASTER_KEY }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # AUTH_PROXY_URL is production itself: the OAuth proxy plugin only unwraps

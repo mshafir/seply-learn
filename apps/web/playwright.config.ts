@@ -81,6 +81,10 @@ export default defineConfig({
               "--var BETTER_AUTH_SECRET:e2e-only-secret-not-used-anywhere-else",
               "--var AUTH_TEST_CREDENTIALS:1",
               "--var DB_BRANCH:e2e",
+              // Bring-your-own-key mode (e2e/app/settings.spec.ts), with a
+              // test-only master key (32 bytes, base64).
+              "--var AI_KEY_MODE:byok",
+              "--var AI_KEYS_MASTER_KEY:ZTJlLW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy1sb24=",
             ].join(" "),
             url: `http://localhost:${API_PORT}/api/health`,
             reuseExistingServer: false,

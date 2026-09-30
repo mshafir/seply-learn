@@ -53,6 +53,10 @@ export {
   type LayoutMetrics,
 } from "./metrics.ts";
 
+// What a reader sees, as text, with layout metrics: the curator's ViewReader
+// (also `@seply/views/inspect`, without React)
+export { expeditionFromState, MAX_LINES, readView, type ViewReading } from "./inspect.ts";
+
 // Overlays
 export {
   actsOn,

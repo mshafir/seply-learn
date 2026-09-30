@@ -162,6 +162,79 @@ export type SearchResults = {
   tags: { tag: string; count: number }[]
 }
 
+// --- AI settings (spec §3.10, §5.6; the server's /api/ai) --------------------
+
+export type AiStage = "skim" | "curator" | "writer"
+export type StageModels = Record<AiStage, string>
+export type ByokProvider = "anthropic" | "openai" | "google" | "gateway"
+
+/** A stored key as the browser sees it: never the key itself. */
+export type AiKeySummary = {
+  provider: ByokProvider
+  last4: string
+  createdAt: string
+}
+
+export type AiSettings = {
+  provider: ByokProvider | null
+  models: Partial<Record<ByokProvider, Partial<StageModels>>>
+  askCapUsd: number
+}
+
+/** The server's `AiOverview`. */
+export type AiOverview = {
+  mode: "instance" | "byok"
+  ready: boolean
+  active: { provider: string; label: string; models: StageModels } | null
+  keys: AiKeySummary[]
+  providers: { id: ByokProvider; label: string; defaults: StageModels }[]
+  settings: AiSettings
+  defaultAskCapUsd: number
+}
+
+export type KeyTest =
+  | { ok: true }
+  | { ok: false; reason: "rejected" | "unreachable" | "error"; status?: number }
+
+export function getAi(): Promise<AiOverview> {
+  return call("/ai")
+}
+
+export async function saveAiKey(
+  provider: ByokProvider,
+  apiKey: string
+): Promise<AiKeySummary> {
+  return (
+    await call<{ key: AiKeySummary }>(`/ai/keys/${provider}`, {
+      method: "PUT",
+      body: JSON.stringify({ apiKey }),
+    })
+  ).key
+}
+
+export function testAiKey(provider: ByokProvider): Promise<KeyTest> {
+  return call(`/ai/keys/${provider}/test`, { method: "POST" })
+}
+
+/** Deletes my key for a provider (already gone is fine). */
+export async function deleteAiKey(provider: ByokProvider): Promise<void> {
+  try {
+    await call(`/ai/keys/${provider}`, { method: "DELETE" })
+  } catch (e) {
+    if (!(e instanceof ApiError && e.status === 404)) throw e
+  }
+}
+
+export function updateAiSettings(
+  patch: Partial<{
+    provider: ByokProvider | null
+    models: AiSettings["models"]
+    askCapUsd: number | null
+  }>
+): Promise<AiOverview> {
+  return call("/ai/settings", { method: "PATCH", body: JSON.stringify(patch) })
+}
+
 /** Searches the Expeditions I collaborate on, plus public ones if asked. */
 export function searchAll(
   q: string,

@@ -2,7 +2,9 @@
 // (the Worker now, the Node server later). Runtimes supply env and a
 // per-request `connect`; nothing here holds state across requests.
 import { sql } from "drizzle-orm"
+import type { ProviderOptions } from "@seply/ai"
 import { Hono, type Context, type MiddlewareHandler } from "hono"
+import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
 import type { BlobStore } from "./blobs.ts"
 import {
@@ -45,6 +47,8 @@ export type AppOptions<Env extends ServerEnv> = {
   relay?: Relay
   /** Where Source files and segments go (R2, a volume, memory in tests); null: none. */
   blobs?: (env: Env) => BlobStore | null
+  /** Provider options for AI calls made by routes (tests pass a fake `fetch`). */
+  ai?: ProviderOptions
 }
 
 class NoDatabase extends Error {}
@@ -169,6 +173,9 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/search", signedIn)
   app.route("/search", searchRoutes())
   app.route("/sources", sourceRoutes(relay))
+  app.use("/ai", signedIn)
+  app.use("/ai/*", signedIn)
+  app.route("/ai", aiRoutes(opts.ai))
   app.route("/", syncRoutes(relay))
 
   app.notFound((c) => c.json({ error: "not found" }, 404))

@@ -130,7 +130,7 @@ export type CauseEffectSettings = {
   outcomes: string[];
   levers: ConceptFilter; // things you can pull, as opposed to facts of nature
   rankBy?: string; // risk mode: order levers by this attribute
-  fold?: string[]; // Relationship Types folded into their target
+  fold?: Record<string, string[]>; // explicit folds: a lever's build steps, drawn inside it
 };
 
 export type MapSettings = {

@@ -1,7 +1,13 @@
 // The account menu (spec §3.6, §3.10): who is signed in, the theme toggle
-// (System / Light / Dark) and sign out. DropdownMenu + Avatar, with the
+// (System / Light / Dark), Settings and sign out. DropdownMenu + Avatar, with the
 // radio group from the shadcn ModeToggle recipe.
-import { LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
+import {
+  LogOutIcon,
+  MonitorIcon,
+  MoonIcon,
+  SettingsIcon,
+  SunIcon,
+} from "lucide-react"
 import { useLocation } from "wouter"
 
 import { Avatar, AvatarFallback } from "@seply/ui/components/avatar"
@@ -88,6 +94,10 @@ export function AccountMenu() {
         {user && (
           <>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/settings")}>
+              <SettingsIcon />
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
                 signOut().then(

@@ -35,7 +35,7 @@ type Added = {
 async function setup(relay?: Relay) {
   const db = await testDb()
   const blobs = memoryBlobStore()
-  const app = testApp(TEST_ENV, db, relay, blobs)
+  const app = testApp(TEST_ENV, db, relay, { blobs })
   const ada = await signUp(app, "ada")
   const res = await app.request("/api/expeditions", {
     method: "POST",
