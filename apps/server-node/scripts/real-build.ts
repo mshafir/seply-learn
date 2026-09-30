@@ -7,19 +7,21 @@
 //     --experimental-transform-types scripts/real-build.ts <fixture> [options]
 //
 // Fixtures: `research-doc` (docs/research/knowledge-graph-learning-tools.md)
-// and `ebike-chat` (packages/ai/fixtures/builds/ebike-chat.md, a synthetic
-// chat). Options:
+// and `ebike-chat` (packages/ai/fixtures/skim/ebike-decision-chat.txt, the
+// synthetic decision chat WP-3.4 wrote). Options:
 //   --crash-at-view <n>  simulate a runtime restart as View n starts building,
 //                        then wake the job (Workflows' restart semantics)
 //   --kill-at-view <n>   exit the process as View n starts building (a hard
 //                        kill); rerun with --resume <jobId> to Retry it
-//   --resume <jobId>     mark an interrupted job failed and Retry it
+//   --resume <jobId>     mark an interrupted job failed and Retry it (the
+//                        summary adds up time, cost and stages across runs)
+//   --summarize <expeditionId>  no build: inspect and export it again
 //   --model <id>         override the curator model (AI_MODEL_CURATOR)
 //
 // Writes packages/ai/fixtures/builds/<fixture>.json (the Expedition, our JSON)
 // and <fixture>.summary.json (Views, counts, inspect results, cost, time).
 import { createGateway } from "ai"
-import { inspectView } from "@seply/ai"
+import { inspectView, memorySourceReader, type Segment } from "@seply/ai"
 import {
   addSource,
   connectPg,
@@ -30,6 +32,7 @@ import {
   JOB_KINDS,
   loadState,
   parseFile,
+  readSegments,
   parsePaste,
   type BlobStore,
   type BuildViewChoice,
@@ -65,22 +68,25 @@ const FIXTURES: Record<
         filename: "knowledge-graph-learning-tools.md",
         type: "text/markdown",
       }),
-    // The Views the seeding prototype's skim proposed for this doc.
+    // The four Views the WP-3.4 skim pre-selected for this doc (src/skim-actuals.json, run 0).
     views: [
-      { viewType: "comparison-table", label: "Compare tools", question: "How do the tools stack up on the four pillars: prerequisites, visuals, LLM and human curation?" },
-      { viewType: "outline", label: "Outline", question: "What families of tools are out there, what's in each, and what does it all add up to?" },
-      { viewType: "evidence", label: "Evidence", question: "Why can't an LLM build the prerequisite graph on its own, and what backs the design advice?" },
-      { viewType: "quadrant", label: "Prerequisites vs LLM", question: "Which tools have a real prerequisite model, which have real LLM power, and does anything have both?" },
+      { viewType: "comparison-table", label: "Compare tools", question: "Which tools have the features I need: prerequisite graphs, visual exploration, LLM help, and human curation?" },
+      { viewType: "evidence", label: "What the evidence says", question: "What evidence exists for which features are most important, and where do the tools fail?" },
+      { viewType: "anatomy", label: "Anatomy of a tool", question: "What are the parts of a working knowledge-graph learning tool, and how do they fit together?" },
+      { viewType: "learning-path", label: "Where to start", question: "What do I need to understand first: what are prerequisites vs related concepts, and where do the different tool families sit?" },
     ],
   },
   "ebike-chat": {
-    title: "E-bike commute",
-    raw: () => readFileSync(new URL("ebike-chat.md", outDir)),
-    read: async () => parsePaste(readFileSync(new URL("ebike-chat.md", outDir), "utf8"), "E-bike commute chat"),
+    title: "E-bike for the commute",
+    raw: () => readFileSync(new URL("packages/ai/fixtures/skim/ebike-decision-chat.txt", root)),
+    read: async () =>
+      parsePaste(readFileSync(new URL("packages/ai/fixtures/skim/ebike-decision-chat.txt", root), "utf8"), "E-bike chat"),
+    // The four Views the WP-3.4 skim pre-selected for this chat (src/skim-actuals.json, run 0).
     views: [
-      { viewType: "comparison-table", label: "Compare e-bikes", question: "Which e-bike fits a 14 km hilly, all-year commute?" },
-      { viewType: "outline", label: "Outline", question: "What do I need to know to commute by e-bike?" },
-      { viewType: "cause-and-effect", label: "What wears it down", question: "What makes winter and the hill harder on the bike and battery, and what can I do about it?" },
+      { viewType: "comparison-table", label: "Compare the bikes", question: "How do these bikes stack up on what matters to me: hill climbing, maintenance, weight, theft protection, and price?" },
+      { viewType: "cause-and-effect", label: "Mid-drive or hub", question: "If I pick mid-drive vs hub, what follows: how steep can I climb, how quiet is the ride, what maintenance do I face?" },
+      { viewType: "learning-path", label: "What to learn first", question: "What do I need to understand first: motor types, battery size, frame style, or the bikes themselves?" },
+      { viewType: "timeline", label: "Running costs over time", question: "When do batteries, chains, and servicing cost kick in, and how much for each bike?" },
     ],
   },
 }
@@ -97,6 +103,7 @@ if (!fixture) throw new Error(`fixture: one of ${Object.keys(FIXTURES).join(", "
 const crashAt = opt("--crash-at-view") ? Number(opt("--crash-at-view")) : null
 const killAt = opt("--kill-at-view") ? Number(opt("--kill-at-view")) : null
 const resume = opt("--resume")
+const summarizeOnly = opt("--summarize")
 if (opt("--model")) process.env.AI_MODEL_CURATOR = opt("--model")
 const url = process.env.DATABASE_URL
 if (!url) throw new Error("DATABASE_URL is not set")
@@ -138,7 +145,8 @@ const relay: Relay = {
       console.log(`[${secs}s] View ${viewN} building (${evt.step})`)
       if (killAt === viewN) {
         console.log(`KILL: exiting as View ${viewN} starts`)
-        process.exit(3)
+        engineRef?.crash()
+        void writeSummary("killed").finally(() => process.exit(3))
       }
       if (crashAt === viewN && engineRef) {
         console.log(`CRASH: dropping the job as View ${viewN} starts`)
@@ -159,7 +167,11 @@ const conn = await connect()
 const db = conn.db
 let job: Job
 let expeditionId: string
-if (resume) {
+if (summarizeOnly) {
+  expeditionId = summarizeOnly
+  const prev = JSON.parse(readFileSync(new URL(`${name}.summary.json`, outDir), "utf8")) as { jobId: string }
+  job = { id: prev.jobId, attempt: 1 } as Job
+} else if (resume) {
   const [row] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, resume))
   if (!row) throw new Error(`no job ${resume}`)
   expeditionId = row.expeditionId
@@ -172,6 +184,7 @@ if (resume) {
   const userId = `real-build-${ulid(Date.now())}`
   await db.insert(schema.users).values({ id: userId, name: "Real build", email: `${userId}@example.com` })
   expeditionId = ulid(Date.now())
+  const changeId = ulid(Date.now())
   await db.transaction((tx) =>
     createExpedition(tx, {
       id: expeditionId,
@@ -179,10 +192,10 @@ if (resume) {
       ops: makeOps([{ kind: "expedition.set", target: expeditionId, path: "title", value: fixture.title }], {
         expeditionId,
         actor: userId,
-        changeId: ulid(Date.now()),
+        changeId,
         nextOpId: () => ulid(Date.now()),
       }),
-      change: { id: ulid(Date.now()), label: "Created the Expedition" },
+      change: { id: changeId, label: "Created the Expedition" },
     })
   )
   const parsed = await fixture.read()
@@ -192,68 +205,100 @@ if (resume) {
 }
 
 const id = instanceId({ jobId: job.id, attempt: job.attempt })
-await engine.settled(id)
-if (crashAt !== null && engine.status(id) === "running") {
-  console.log("waking the job after the simulated restart")
-  await engine.wake!(id)
+if (!summarizeOnly) {
   await engine.settled(id)
+  if (crashAt !== null && engine.status(id) === "running") {
+    console.log("waking the job after the simulated restart")
+    await engine.wake!(id)
+    await engine.settled(id)
+  }
 }
-const secs = Math.round((Date.now() - t0) / 1000)
-const [final] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, job.id))
-console.log(`job ${final!.status}${final!.error ? `: ${final!.error}` : ""} in ${secs}s`)
-
-// --- what it made ----------------------------------------------------------------
-const state = (await loadState(db, expeditionId))!
-const views = Object.values(state.views).filter(isLive).sort((a, b) => a.orderKey.localeCompare(b.orderKey))
-const inspected = []
-for (const v of views) {
-  const i = await inspectView(state, v.id, { views: { read: readView } })
-  inspected.push({
-    viewType: v.viewType,
-    label: v.label,
-    question: v.question ?? null,
-    status: v.status,
-    failReason: v.failReason ?? null,
-    inspect: { ok: i.ok, problems: i.problems.map((p) => p.message), warnings: i.warnings.map((w) => w.message), layout: i.layout ?? null },
-  })
-}
-const results = Object.fromEntries(
-  engine.recorded(id).filter((n) => /^(note|concepts|View \d+: build)/.test(n)).map((n) => [n, engine.result(id, n)])
-)
-const lastMeter = Object.values(results).at(-1) as { meter?: { spentUsd: number; usage: unknown; calls: number } } | undefined
-await new Promise((r) => setTimeout(r, 5000)) // the gateway's usage settles
-const usedAfter = Number(await credits())
-const changes = await db.select({ label: schema.changes.label }).from(schema.changes).where(eq(schema.changes.expeditionId, expeditionId)).orderBy(schema.changes.id)
-const summary = {
-  fixture: name,
-  expeditionId,
-  jobId: job.id,
-  attempt: final!.attempt,
-  status: final!.status,
-  error: final!.error,
-  model: process.env.AI_MODEL_CURATOR ?? "anthropic/claude-opus-5.5 (default)",
-  seconds: secs,
-  costUsd: { gatewayBilled: +(usedAfter - usedBefore).toFixed(4), meter: lastMeter?.meter?.spentUsd ?? null, calls: lastMeter?.meter?.calls ?? null },
-  counts: {
-    concepts: Object.values(state.concepts).filter(isLive).length,
-    relationships: Object.values(state.relationships).filter(isLive).length,
-    attributes: Object.values(state.attributes).filter(isLive).length,
-    views: views.length,
-    coreConcepts: Object.values(state.concepts).filter((c) => isLive(c) && c.weightPin === "core").length,
-    backgroundConcepts: Object.values(state.concepts).filter((c) => isLive(c) && c.prov.length === 0).length,
-  },
-  changes: changes.map((c) => c.label),
-  views: inspected,
-  stages: Object.fromEntries(
-    Object.entries(results).map(([k, v]) => {
-      const r = v as Record<string, unknown>
-      return [k, { summary: r.summary ?? r.note ?? null, review: r.review ?? null, reason: r.reason ?? null, steps: r.steps ?? null, toolCalls: r.toolCalls ?? null, spentUsd: (r.meter as { spentUsd?: number } | undefined)?.spentUsd ?? null }]
-    })
-  ),
-}
-mkdirSync(outDir, { recursive: true })
-writeFileSync(new URL(`${name}.json`, outDir), JSON.stringify(stateToExpeditionJson(state), null, 2) + "\n")
-writeFileSync(new URL(`${name}.summary.json`, outDir), JSON.stringify(summary, null, 2) + "\n")
-console.log(JSON.stringify({ ...summary, changes: undefined, stages: undefined }, null, 2))
+await writeSummary(summarizeOnly ? null : "ran")
 await conn.close()
 process.exit(0)
+
+/** Inspects and exports the Expedition; adds this run to the summary. */
+async function writeSummary(run: "ran" | "killed" | null) {
+  const secs = Math.round((Date.now() - t0) / 1000)
+  const [final] = await db.select().from(schema.jobs).where(eq(schema.jobs.id, job.id))
+  if (run) console.log(`job ${final!.status}${final!.error ? `: ${final!.error}` : ""} in ${secs}s`)
+  const state = (await loadState(db, expeditionId))!
+  // The Sources, for the checks that read segments (a cited reader decision).
+  const segs: Record<string, Segment[]> = {}
+  for (const sid of Object.keys(state.sources)) {
+    const r = await readSegments(db, fsBlobs, expeditionId, sid)
+    if (r) segs[sid] = r.segments.segments
+  }
+  const ports = { views: { read: readView }, sources: memorySourceReader(segs) }
+  const views = Object.values(state.views).filter(isLive).sort((a, b) => a.orderKey.localeCompare(b.orderKey))
+  const inspected = []
+  for (const v of views) {
+    const i = await inspectView(state, v.id, ports)
+    inspected.push({
+      viewType: v.viewType,
+      label: v.label,
+      question: v.question ?? null,
+      status: v.status,
+      failReason: v.failReason ?? null,
+      inspect: { ok: i.ok, problems: i.problems.map((p) => p.message), warnings: i.warnings.map((w) => w.message), layout: i.layout ?? null },
+    })
+  }
+  const file = new URL(`${name}.summary.json`, outDir)
+  type Prev = { jobId: string; seconds: number; costUsd: { gatewayBilled: number }; runs: unknown[]; stages: Record<string, unknown> }
+  const prev: Prev | null =
+    existsSync(file) && (resume || !run) ? (JSON.parse(readFileSync(file, "utf8")) as Prev) : null
+  let stages = prev?.stages ?? {}
+  let seconds = prev?.seconds ?? 0
+  let billed = prev?.costUsd.gatewayBilled ?? 0
+  const runs = prev?.runs ?? []
+  if (run) {
+    await new Promise((r) => setTimeout(r, 5000)) // the gateway's usage settles
+    const cost = Number(await credits()) - usedBefore
+    const recorded = engine.recorded(id).filter((n) => /^(note|concepts|View \d+: build)/.test(n))
+    const these = Object.fromEntries(
+      recorded.map((n) => {
+        const r = (engine.result(id, n) ?? {}) as Record<string, unknown>
+        return [
+          `attempt ${job.attempt}: ${n}`,
+          { summary: r.summary ?? r.note ?? null, review: r.review ?? null, reason: r.reason ?? null, warnings: r.warnings ?? null, steps: r.steps ?? null, toolCalls: r.toolCalls ?? null, spentUsdSoFar: (r.meter as { spentUsd?: number } | undefined)?.spentUsd ?? null },
+        ]
+      })
+    )
+    stages = { ...stages, ...these }
+    seconds += secs
+    billed += cost
+    runs.push({ attempt: job.attempt, outcome: run === "killed" ? "killed (process exit)" : final!.status, seconds: secs, gatewayBilledUsd: +cost.toFixed(4) })
+  }
+  const changes = await db
+    .select({ label: schema.changes.label })
+    .from(schema.changes)
+    .where(eq(schema.changes.expeditionId, expeditionId))
+    .orderBy(schema.changes.id)
+  const live = <T extends { deletedAt: string | null }>(r: Record<string, T>) => Object.values(r).filter(isLive)
+  const summary = {
+    fixture: name,
+    expeditionId,
+    jobId: job.id,
+    status: final!.status,
+    error: final!.error,
+    model: process.env.AI_MODEL_CURATOR ?? "anthropic/claude-opus-5.5 (the default curator)",
+    seconds,
+    costUsd: { gatewayBilled: +billed.toFixed(4) },
+    runs,
+    counts: {
+      concepts: live(state.concepts).length,
+      relationships: live(state.relationships).length,
+      attributes: live(state.attributes).length,
+      views: views.length,
+      coreConcepts: live(state.concepts).filter((c) => c.weightPin === "core").length,
+      backgroundConcepts: live(state.concepts).filter((c) => c.prov.length === 0).length,
+    },
+    changes: changes.map((c) => c.label),
+    views: inspected,
+    stages,
+  }
+  mkdirSync(outDir, { recursive: true })
+  writeFileSync(new URL(`${name}.json`, outDir), JSON.stringify(stateToExpeditionJson(state), null, 2) + "\n")
+  writeFileSync(file, JSON.stringify(summary, null, 2) + "\n")
+  console.log(JSON.stringify({ ...summary, changes: undefined, stages: undefined }, null, 2))
+}

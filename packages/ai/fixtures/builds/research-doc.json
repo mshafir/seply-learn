@@ -1,0 +1,3789 @@
+{
+  "schemaVersion": 1,
+  "id": "01M3T38T0EPDHWJAZXZNYN7CY6",
+  "title": "Open-source tools for learning graphs",
+  "summary": "",
+  "tags": [],
+  "bestViewId": "01M3T38T33A024VCXXMH4YM155",
+  "kinds": [
+    {
+      "id": "builtin:idea",
+      "label": "Idea",
+      "color": "blue",
+      "icon": "lightbulb"
+    },
+    {
+      "id": "builtin:topic",
+      "label": "Topic",
+      "color": "slate",
+      "icon": "folder"
+    },
+    {
+      "id": "builtin:question",
+      "label": "Question",
+      "color": "amber",
+      "icon": "circle-help"
+    },
+    {
+      "id": "builtin:goal",
+      "label": "Goal",
+      "color": "green",
+      "icon": "target"
+    },
+    {
+      "id": "builtin:thing",
+      "label": "Thing",
+      "color": "orange",
+      "icon": "box"
+    },
+    {
+      "id": "builtin:claim",
+      "label": "Claim",
+      "color": "amber",
+      "icon": "message-square-quote"
+    },
+    {
+      "id": "builtin:criterion",
+      "label": "Criterion",
+      "color": "olive",
+      "icon": "list-checks"
+    },
+    {
+      "id": "builtin:decision",
+      "label": "Decision",
+      "color": "pink",
+      "icon": "git-branch"
+    },
+    {
+      "id": "builtin:source",
+      "label": "Source",
+      "color": "brown",
+      "icon": "book-open"
+    },
+    {
+      "id": "builtin:risk",
+      "label": "Risk",
+      "color": "red",
+      "icon": "triangle-alert"
+    }
+  ],
+  "relationshipTypes": [
+    {
+      "id": "builtin:part-of",
+      "label": "is part of",
+      "inverseLabel": "has part",
+      "color": "violet",
+      "dashed": true
+    },
+    {
+      "id": "builtin:prerequisite",
+      "label": "is needed to understand",
+      "inverseLabel": "needs",
+      "color": "blue",
+      "dashed": false
+    },
+    {
+      "id": "builtin:example",
+      "label": "is an example of",
+      "inverseLabel": "has example",
+      "color": "teal",
+      "dashed": true
+    },
+    {
+      "id": "builtin:led-to",
+      "label": "led to",
+      "inverseLabel": "came from",
+      "color": "teal",
+      "dashed": false
+    },
+    {
+      "id": "builtin:uses",
+      "label": "uses",
+      "inverseLabel": "is used by",
+      "color": "orange",
+      "dashed": false
+    },
+    {
+      "id": "builtin:modifies",
+      "label": "changes",
+      "inverseLabel": "is changed by",
+      "color": "violet",
+      "dashed": true
+    },
+    {
+      "id": "builtin:raises",
+      "label": "raises",
+      "inverseLabel": "is raised by",
+      "color": "red",
+      "dashed": false
+    },
+    {
+      "id": "builtin:supports",
+      "label": "supports",
+      "inverseLabel": "is supported by",
+      "color": "indigo",
+      "dashed": false
+    },
+    {
+      "id": "builtin:challenges",
+      "label": "challenges",
+      "inverseLabel": "is challenged by",
+      "color": "amber",
+      "dashed": true
+    },
+    {
+      "id": "builtin:meets",
+      "label": "meets",
+      "inverseLabel": "is met by",
+      "color": "green",
+      "dashed": false
+    },
+    {
+      "id": "builtin:partly-meets",
+      "label": "partly meets",
+      "inverseLabel": "is partly met by",
+      "color": "amber",
+      "dashed": false
+    },
+    {
+      "id": "builtin:fails",
+      "label": "fails",
+      "inverseLabel": "is failed by",
+      "color": "red",
+      "dashed": false
+    }
+  ],
+  "attributes": [
+    {
+      "id": "stars",
+      "label": "GitHub stars",
+      "type": "number",
+      "unit": "★"
+    },
+    {
+      "id": "license",
+      "label": "License",
+      "type": "text"
+    },
+    {
+      "id": "priority",
+      "label": "Priority",
+      "type": "enum",
+      "enumValues": [
+        "dropped",
+        "nice",
+        "hard"
+      ]
+    },
+    {
+      "id": "status",
+      "label": "Project status",
+      "type": "text"
+    },
+    {
+      "id": "evidence-type",
+      "label": "Evidence type",
+      "type": "text"
+    },
+    {
+      "id": "consensus",
+      "label": "Strength of backing",
+      "type": "enum",
+      "enumValues": [
+        "proposal",
+        "contested",
+        "backed"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "01M3T38T1469KYVZFT7601B8J1",
+      "kind": "file",
+      "title": "knowledge-graph-learning-tools",
+      "mime": "text/markdown; charset=utf-8",
+      "size": 32283,
+      "addedAt": "2026-09-30T21:24:30.372Z"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "01M3T3AG5BMNKDVTW30K488R60",
+      "title": "Learner state",
+      "aliases": [],
+      "kind": "builtin:criterion",
+      "summary": "Mastery tracking and a personalized path through the graph.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "title": "Adoption / health",
+      "aliases": [],
+      "kind": "builtin:criterion",
+      "summary": "Stars, recent commits and maintainers: is the project alive enough to build on?",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB5WMG63RRCWFPRZFYB",
+      "title": "Sigma.js",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "WebGL renderer that handles thousands of nodes: the whole-field \"map of knowledge\" scale.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 12200
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "title": "Concept graph with prerequisites",
+      "aliases": [
+        "Prereq model"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "Knowledge split into well-defined chunks, with typed directed \"you need A before B\" edges (ideally a validated DAG), not just \"related to\" links.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "title": "Visual exploration",
+      "aliases": [
+        "Visualization"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "A learner can see where a concept sits, what it depends on and what it unlocks; a graph/map, not just a list.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "title": "Built-in LLM / agent capabilities",
+      "aliases": [
+        "LLM / agent"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "The LLM generates nodes, proposes edges, writes explanations, tutors and checks mastery.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "title": "Human + LLM co-curation",
+      "aliases": [
+        "Human curation"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "A person reviews, edits and approves what the LLM proposes, with provenance, review/approve workflow and versioning.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "hard"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "title": "What we need from a tool",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "The four pillars the reader wants and the rubric used to judge every tool.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "title": "Prerequisite graphs & mastery systems",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Tools with the right data model: concepts joined by \"you need A before B\" edges, plus learner state and curation.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "title": "AI tutors & course generators",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Hugely adopted LLM teaching tools that generate lessons and quizzes but have no curatable prerequisite graph.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "title": "LLM-built graphs & curation patterns",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Tools and patterns where an LLM builds a graph or wiki and a human reviews it: code graphs, LLM Wiki, Co-STORM.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG59G967TBW75MCQSB6F",
+      "title": "Infrastructure & DIY tooling",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "GraphRAG and agent-memory substrates, and note-taking tools that could host a weekend prototype.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s17"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s21"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG591AY8E85JYB7CAKKM",
+      "title": "Visualization building blocks",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Libraries for drawing and editing the graph, and how a prerequisite DAG should be laid out.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG59C4Z1RA60BC092DZB",
+      "title": "Research evidence",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "Papers showing why LLM prerequisite edges need human review and how to structure that review.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "title": "Design implications & build plan",
+      "aliases": [],
+      "kind": "builtin:topic",
+      "summary": "What the survey implies for building the missing tool, and a suggested starting stack.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "topic"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG59CVFXDSQZEANXW4KH",
+      "title": "Which open-source tools already do most of this?",
+      "aliases": [],
+      "kind": "builtin:question",
+      "summary": "None does all four pillars well; the space splits into groups each covering one or two. Best models to copy: Lean Blueprint, roadmap.sh, Oppia/PathFinder, SyllabusGraph, Understand-Anything.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s2"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5AXQWKHEC0NADJCW0Y",
+      "title": "Chunked nodes",
+      "aliases": [
+        "Chunking"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "Nodes are self-contained learning units with content (explanation, resources, checks).",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "title": "Buildable license",
+      "aliases": [
+        "License"
+      ],
+      "kind": "builtin:criterion",
+      "summary": "Can you build on it? Permissive licenses (MIT, Apache-2.0) pass; custom, AGPL, mixed or commercial-only terms need checking.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s4"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "priority": "nice"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3AG5BQGAVERVWRWN287FM",
+      "title": "Build a curatable learning concept DAG",
+      "aliases": [],
+      "kind": "builtin:goal",
+      "summary": "A local-first, git-backed concept DAG where an agent proposes nodes and prerequisite edges, a human reviews them, and learners explore a zoomable graph with mastery overlays.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6CH64GEHTZC148884",
+      "title": "Review queue for proposed edges",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "A React Flow editor with accept/reject queue for proposed edges; git commits record provenance. Status per concept: proposed or reviewed, plus confidence.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYYSQ391SV98QQ8W63",
+      "title": "Learn Anything",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Began 2017 as community-curated mind maps and learning paths; the repo now holds a different dormant project (Linsa), so effectively discontinued as open source.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s19"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 16900,
+        "status": "Discontinued / dormant"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYVXJVRF2RVME6HF91",
+      "title": "Math Academy",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Closed-source; probably the best product built on a prerequisite graph. Hand-curated topic graph with \"encompassing\" edges giving implicit review credit to prerequisites, plus diagnostic placement.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s23"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYR0XT3573VYQZFMCZ",
+      "title": "Open Notebook and Khoj",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Open-source NotebookLM alternatives for chat, sources and podcasts (Open Notebook ~39.4k★ MIT, no mind maps; Khoj ~37.5k★ AGPL-3.0, Mermaid mind maps). A \"learn from your sources\" layer, not graph tools.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s16"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBY8RM9SG703R1J1ZVH",
+      "title": "OpenScienceBasedLearningPlatform",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "One curriculum.json (tracks → modules → skills → lessons) with CI checks for duplicate IDs, broken references and prerequisite cycles; zoom/pan graph view; changes by PR.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 0,
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBY8A33K9PR6SHW0CH1",
+      "title": "Other small DAG and mastery engines",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Tiny projects worth reading for ideas: propositional-logic \"Math Academy\" (fractional credit to prerequisites), Skillgraph_OS (prerequisite vs helps-with edges), math-concept-mapper (class prerequisite gaps), Cognitive-knowledge-graph-engine, niyue/skillmap.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s20"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 1,
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBZD41K75QQXSP3CE42",
+      "title": "Other PKM tools (InfraNodus, Logseq, AFFiNE)",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "InfraNodus finds clusters and gaps between them (AGPL plugin, commercial backend); Logseq is an outliner with graph view (AGPL, ~45k★); AFFiNE is local-first docs+whiteboard with AI (~73k★, mixed license).",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s17"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBZ2PCW47M4PGH3CB4J",
+      "title": "Other closed-source references",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "For comparison only: Khan Academy (old knowledge map retired; Khanmigo tutor), NotebookLM (hierarchical auto mind maps, hard to edit), Heptabase/Scrintal/Kosmik (human-built card whiteboards), InfraNodus SaaS.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s23"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB54RSMAZQJ76EDN9RF",
+      "title": "React Flow (xyflow)",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Best fit for an editable node/edge UI (curation); pair with ELK or dagre for layered DAG layout.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 38500
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB5W90FYN1V782AFX0W",
+      "title": "Cytoscape.js",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Graph algorithms plus many layouts, including dagre and klay for prerequisite DAGs; suited to the learner-facing view.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "stars": 11200
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB58P55M7KD8BMHCE6G",
+      "title": "Mind-map and canvas libraries",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "markmap (13.1k★) and simple-mind-map (12.8k★) make tree mind maps from markdown, an easy LLM output target but unable to express a DAG. Excalidraw (133k★) and tldraw (51k★) are freeform canvases; tldraw needs a commercial license for production.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "title": "Suggested starting stack",
+      "aliases": [],
+      "kind": "builtin:decision",
+      "summary": "The report's proposal, not a validated design: concepts/*.md files in git, proposer/critic/tutor agents, React Flow curation UI, Cytoscape/Sigma learner UI, seeded from Learning Commons or a LightRAG/Graphify ingestion pass.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "title": "Proposer, critic and tutor agents",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Proposer extracts concepts and edges with citations; critic checks cycles, finds missing prerequisites and verifies evidence; tutor explains and quizzes one node at a time.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB7Q1MV14MBNQ0DVVY9",
+      "title": "Curation bottleneck",
+      "aliases": [],
+      "kind": "builtin:risk",
+      "summary": "Metacademy's downfall: experts had to hand-write every node and edge. LLM-assisted curation targets exactly this.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s5"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "title": "License traps",
+      "aliases": [],
+      "kind": "builtin:risk",
+      "summary": "roadmap.sh is personal-use only, AFFiNE is mixed, tldraw needs a commercial license in production, Learning Commons has gated datasets, and AGPL tools (Khoj, Logseq, InfraNodus plugin) constrain reuse. Needs checking before building.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s18"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s17"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB7H9D80Z34KK7KREAS",
+      "title": "How to build graphs beyond K-12, code and math?",
+      "aliases": [],
+      "kind": "builtin:question",
+      "summary": "Open. Vetted graphs exist for K-12 (Learning Commons), formal math (blueprints) and code (mechanical extraction); general knowledge needs LLM-proposed, human-verified prerequisite edges, and the report gives no validated method.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s12"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB7SJ915481P74FC2T5",
+      "title": "How to model depth-qualified prerequisites?",
+      "aliases": [],
+      "kind": "builtin:question",
+      "summary": "Open. SyllabusGraph hints that a definition doesn't satisfy a dependency needing a calculation; how to combine mastery levels with edge types in practice is unresolved.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "title": "Metacademy",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "The original \"package manager for knowledge\": pick a target concept and get all unmet prerequisites in topological order with curated resources. Archived 2023; no LLM; curation bottleneck killed it.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s5"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 688,
+        "status": "Archived 2023",
+        "license": "GPL-3.0 code, CC BY-SA content"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6AXW3FYGMW1DQ61RS",
+      "title": "Encompassing edges and implicit credit",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Practicing an advanced topic gives fractional review credit to its prerequisites, weighted by edge weight (Math Academy and the propositional-logic clone).",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s23"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "title": "PathFinder (Learning-Path)",
+      "aliases": [
+        "PathFinder",
+        "Learning-Path"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Hand-built, cycle-validated skill DAG (NetworkX) plus LangGraph agents for gap finding, scheduling, quizzes and explanations; Bayesian Knowledge Tracing estimates mastery and replans on quiz scores.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 0
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "title": "OpenMAIC",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Tsinghua multi-agent classroom (AI teacher, TA, classmates) that turns a topic or document into slides, quizzes and simulations. Human-editable outline before generation; a linear outline, not a graph.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s11"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 38900,
+        "status": "v1.0 Aug 2026",
+        "license": "MIT"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "title": "STORM / Co-STORM",
+      "aliases": [
+        "Co-STORM"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Stanford OVAL: STORM writes cited Wikipedia-style articles; in Co-STORM a human joins agent discussion while a dynamic mind map serves as shared conceptual space. Best-studied co-exploration design, but a taxonomy not prerequisites; activity slowed.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s15"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 31500,
+        "status": "Last push Sep 2025",
+        "license": "MIT"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "title": "GraphRAG and agent-memory tools",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Entity/relation graph extractors for retrieval or agent memory: microsoft/graphrag (36k★), LightRAG (39.8k★), Graphiti (31.1k★), Cognee (31k★), Neo4j LLM Graph Builder (5.3k★), knowledge_graph, llmgraph. No pedagogy and noisy for teaching, but usable as an ingestion layer.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s21"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "title": "Obsidian + Breadcrumbs",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Breadcrumbs adds typed, directed links (e.g. requires) from frontmatter and builds a real directed graph in Obsidian. Combined with the LLM Wiki pattern, a working prerequisite-graph prototype today.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s17"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 800,
+        "license": "Obsidian closed-source (free); Breadcrumbs OSS"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "title": "Edges are proposals with evidence",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "Make every prerequisite edge a proposal carrying a confidence score and cited evidence (SyllabusGraph); route low-confidence or high-impact edges to a human review queue (ACE); record who approved what.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "backed"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB5Q1DSZKFND22CQX3Q",
+      "title": "K12-KGraph / K12-Bench",
+      "aliases": [],
+      "kind": "builtin:source",
+      "summary": "2026 curriculum-aligned KG with an LLM extraction pipeline. On prerequisite reasoning Gemini-3-Flash scores 57% and Gemma-4-31B 46% exact match.",
+      "overviewProv": [],
+      "date": "2026",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "evidence-type": "benchmark"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB5J2356EBXZB50J1XX",
+      "title": "ACE (AI-assisted educational KG construction)",
+      "aliases": [
+        "ACE"
+      ],
+      "kind": "builtin:source",
+      "summary": "JEDM 2024: scores concept pairs, sends top-ranked candidates to experts and infers further edges from what they confirm. Big cut in expert effort; students following ACE's order did better. The blueprint for a review queue.",
+      "overviewProv": [],
+      "date": "2024",
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "evidence-type": "peer-reviewed study"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB50WPS0G2Y0BXNWCX5",
+      "title": "Concept Catalyst",
+      "aliases": [],
+      "kind": "builtin:source",
+      "summary": "2026 work where teachers build concept maps while the LLM stays behind the UI as a suggestion generator, keeping decisions with the teacher.",
+      "overviewProv": [],
+      "date": "2026",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "evidence-type": "research paper"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ92NENMCMZGMYG3HSSM",
+      "title": "Curation UI",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Editable interface where a human edits the graph and accepts or rejects what agents propose; git commits record provenance.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "React Flow editor with an accept/reject queue for proposed edges. Git commits record provenance.",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ920QA52GBC9Z0DP9BB",
+      "title": "Learner UI",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Zoomable, layered DAG view for learners with a mastery overlay and \"plan my path to X\".",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Cytoscape.js or Sigma.js with dagre/ELK layered layout, a mastery overlay, and \"plan my path to X\".",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6ZE60DQ31S4JCS0VE",
+      "title": "Other research on concept and prerequisite extraction",
+      "aliases": [],
+      "kind": "builtin:source",
+      "summary": "Graphusion (RAG KG build with global merge), ProPRL (property-aware prerequisite learning), tutor-chat knowledge-gap detection, MDPI study (few-shot beats zero-shot by ~6 points; prerequisites gain most), CourseMapper (bottom-up beat top-down; Wikipedia links), TutorialBank/LectureBank datasets, a 2025 concept-map generation review.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "evidence-type": "research papers"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "title": "No tool does all four",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "No open-source project covers prerequisite graph, visual exploration, LLM/agent features and human+LLM co-curation well today; each group covers one or two pillars.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "backed"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "title": "LLMs are weak prerequisite judges",
+      "aliases": [
+        "Human curation is needed"
+      ],
+      "kind": "builtin:claim",
+      "summary": "Frontier LLMs reach only ~46–57% exact match on K12-Bench prerequisite reasoning, and a missing or backwards edge sends learners into material they can't follow, so human review is needed.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "backed"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "title": "The open slot: reviewed concept DAG",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "Nothing mature and open offers a local-first, git-backed concept DAG where an agent proposes nodes and edges with evidence and confidence, humans accept or reject in a review queue, and learners explore with mastery overlays.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s3"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "contested"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "title": "Use distinct edge types",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Useful types: requires (hard prerequisite), helps (soft), part-of, related, encompasses (Math Academy-style implicit practice). Consider depth-qualified prerequisites (\"requires B at apply level, not just define\").",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "title": "Plain files plus git beat a database",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "One markdown file per concept with frontmatter; every successful curated-knowledge project keeps content in version-controlled files, so agents and humans edit the same files and review happens in diffs or PRs, with CI checks for cycles and dangling references.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "backed"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6SS899B788HTJV0M4",
+      "title": "Keep graph separate from tutor",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "The curated DAG decides what to learn and in what order; an LLM tutor handles how, one node at a time. Mastery should come from a transparent model (BKT or Math Academy-style credit), not LLM judgment.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6TWJST0762X21FYMR",
+      "title": "Visualize DAG-first",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Prerequisite graphs are DAGs, not trees: a layered (Sugiyama) layout with foundations at the bottom beats force-directed layouts. Show a plan for one target, zoomable to a whole-field map, with mastery overlay and distinct styling for unreviewed AI-proposed edges.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s22"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "title": "Reuse vetted graphs",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Where vetted graphs exist, import rather than regenerate: Learning Commons for K-12, Mathlib/blueprint graphs for formal math, Wikipedia/Wikidata to anchor concept identity (as CourseMapper does).",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6ZW6Z9P0RJBGJF9V1",
+      "title": "Ship as agent skill or MCP",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Graphify and Understand-Anything reached massive adoption by shipping as skills for Claude Code/Codex/Cursor; a \"curate a concept graph\" skill plus a static viewer is a low-friction way in.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "backed"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB6BA9297JTR6BWFE4Q",
+      "title": "Weekend DIY prototype",
+      "aliases": [],
+      "kind": "builtin:claim",
+      "summary": "About 70% of the vision for a single user: one note per concept with a requires: field, an agent proposing notes and edges reviewed via git diffs, and a Breadcrumbs or Juggl view. Lacks a learner-facing view, mastery tracking and shared review.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s17"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "title": "Best patterns come from tiny projects",
+      "aliases": [],
+      "kind": "builtin:risk",
+      "summary": "SyllabusGraph, PathFinder and similar have 0–1★ and unaudited designs; they are sources of ideas, not proven platforms. Star counts are a snapshot from 2026-09-24.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s1"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "evidence-type": "caveat"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "title": "Oppia",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Nonprofit open-source lesson platform whose base unit is a skill (concept card, worked examples, misconceptions); lessons declare prerequisite skills. No learner-facing concept map and no LLM authoring.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s6"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 6800,
+        "status": "Very active",
+        "license": "Apache-2.0",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "title": "Learning Commons Knowledge Graph",
+      "aliases": [
+        "CZI Learning Commons"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Open K-12 prerequisite data from CZI with Anthropic: standards, Learning Components, Learning Progressions, Math Coherence Map, curriculum dependency endpoint; via REST, MCP server and JSONL. A data layer, not a viewer or editor.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s7"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 154,
+        "status": "Active; general availability expected 2026",
+        "license": "Mixed: many CC BY 4.0 / CC0, some gated",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "title": "Lean Blueprint",
+      "aliases": [
+        "leanblueprint",
+        "LeanArchitect"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Typed dependency graph of definitions, lemmas and theorems (\\uses{}), with per-node status shown as colors. Small, locally specified nodes let humans and AI work in parallel; progress is a roll-up of statuses. LeanArchitect infers dependencies from Lean code.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s8"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 376,
+        "status": "Used by major formalization projects",
+        "license": "Apache-2.0",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "title": "SyllabusGraph",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Source-to-course agent pipeline: every concept and edge cites evidence, an independent critic model reviews the graph, interactive zoomable concept map, mastery levels. Demo: 3 QFT books → 117 concepts. Tiny project; human audit pending.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 1,
+        "status": "Active Sep 2026",
+        "license": "MIT",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBY1715Y4HA96S1239S",
+      "title": "roadmap.sh",
+      "aliases": [
+        "developer-roadmap"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Interactive node-based developer roadmaps; each node is a markdown file edited via community PRs. Proves demand and that node-per-file plus PRs scale. Edges are roadmap order, AI features are not in the open repo, and the license is restrictive.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s18"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 368000,
+        "license": "Custom restrictive (personal use only)",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "title": "DeepTutor",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "HKU agent-native learning workspace: RAG over your materials, tutoring chat, quizzes, interactive books, mastery paths with progression gates, 3-layer learner memory. Graphs only inside retrieval; no curated prerequisite graph.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s10"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 40300,
+        "status": "Releases every few days",
+        "license": "Apache-2.0",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "title": "Understand-Anything",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "Multi-agent pipeline (scanner, analyzers, tour-builder, graph-reviewer) that turns a codebase into an interactive knowledge graph with dependency-ordered guided tours; graph committed as JSON. \"Graphs that teach > graphs that impress.\" The product shape wanted, but for code.",
+      "overviewProv": [],
+      "weightPin": "core",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s12"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 84000,
+        "license": "MIT",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "title": "Graphify",
+      "aliases": [],
+      "kind": "builtin:thing",
+      "summary": "A /graphify skill for Claude Code, Codex, Cursor that turns any folder into a local queryable knowledge graph with explained edges and no Neo4j. Validates \"agent skill + local graph file\" distribution; edges are relations, not pedagogy.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s13"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "stars": 121000,
+        "license": "Apache-2.0",
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "title": "LLM Wiki pattern",
+      "aliases": [
+        "Karpathy LLM Wiki"
+      ],
+      "kind": "builtin:thing",
+      "summary": "Karpathy's April 2026 pattern: raw/ immutable sources, wiki/ LLM-written interlinked markdown, a schema file (CLAUDE.md/AGENTS.md) governing the agent; human edits in Obsidian. Most popular human+LLM curation workflow; add typed prerequisites: frontmatter to get most of a concept DAG.",
+      "overviewProv": [],
+      "date": "2026-04",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s14"
+        }
+      ],
+      "tags": [
+        "compared-tool"
+      ],
+      "attributes": {
+        "evidence-type": "tool review"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "title": "Bayesian Knowledge Tracing",
+      "aliases": [
+        "BKT"
+      ],
+      "kind": "builtin:idea",
+      "summary": "A transparent probabilistic model of learner mastery, used by PathFinder to estimate mastery and replan when quiz scores arrive.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        },
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [],
+      "attributes": {
+        "consensus": "proposal",
+        "evidence-type": "model"
+      },
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ90C4DPMJKESJV6GK26",
+      "title": "Content store (concept files)",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "A folder of concepts/*.md files; frontmatter holds requires, helps, objectives, sources, status (proposed|reviewed) and confidence.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "a folder of `concepts/*.md` files. Frontmatter holds `requires`, `helps`, `objectives`, `sources`",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ92T9VWJ1MZE706FC7Q",
+      "title": "Seed data",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Where the first concepts and edges come from: Learning Commons (K-12) or a user corpus through a LightRAG/Graphify-style ingestion pass.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Learning Commons (K-12), or a user corpus through a LightRAG/Graphify-style ingestion pass.",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ924XBFHXR9NP1ZX13D",
+      "title": "Mastery model",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Learner state driving the mastery overlay and next-step plan; should be a transparent model, not LLM judgment.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "Mastery should come from a transparent model (BKT, or Math Academy-style credit that flows to prerequisites)",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s26"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ92KZ2N9VV19VHA32E2",
+      "title": "Proposer agent",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Extracts concepts and prerequisite edges from sources, with citations.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "proposer (extracts concepts and edges from sources, with citations)",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ93C2T5JRWMX8F9W3CW",
+      "title": "Critic agent",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Checks for cycles, finds missing prerequisites and verifies the cited evidence.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "critic (checks for cycles, finds missing prerequisites, verifies evidence)",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    },
+    {
+      "id": "01M3T3SQ93DG0DBBB3XP64BKBW",
+      "title": "Tutor agent",
+      "aliases": [],
+      "kind": "builtin:idea",
+      "summary": "Writes per-node explanations and quizzes, one node at a time, for the nodes the DAG selects.",
+      "overviewProv": [],
+      "prov": [
+        {
+          "quote": "tutor (per-node explanation and quizzes)",
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s27"
+        }
+      ],
+      "tags": [
+        "component"
+      ],
+      "attributes": {},
+      "sections": []
+    }
+  ],
+  "relationships": [
+    {
+      "from": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6SS899B788HTJV0M4",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG59CVFXDSQZEANXW4KH",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AXQWKHEC0NADJCW0Y",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5BMNKDVTW30K488R60",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5BQGAVERVWRWN287FM",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG57B6VAK7G7QW1PS4HY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY8RM9SG703R1J1ZVH",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY8A33K9PR6SHW0CH1",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYYSQ391SV98QQ8W63",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYVXJVRF2RVME6HF91",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6AXW3FYGMW1DQ61RS",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYR0XT3573VYQZFMCZ",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ2PCW47M4PGH3CB4J",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G967TBW75MCQSB6F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G967TBW75MCQSB6F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZD41K75QQXSP3CE42",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G967TBW75MCQSB6F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6BA9297JTR6BWFE4Q",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G967TBW75MCQSB6F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB54RSMAZQJ76EDN9RF",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG591AY8E85JYB7CAKKM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5W90FYN1V782AFX0W",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG591AY8E85JYB7CAKKM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5WMG63RRCWFPRZFYB",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG591AY8E85JYB7CAKKM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB58P55M7KD8BMHCE6G",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG591AY8E85JYB7CAKKM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6TWJST0762X21FYMR",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG591AY8E85JYB7CAKKM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5Q1DSZKFND22CQX3Q",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59C4Z1RA60BC092DZB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5J2356EBXZB50J1XX",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59C4Z1RA60BC092DZB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB50WPS0G2Y0BXNWCX5",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59C4Z1RA60BC092DZB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZE60DQ31S4JCS0VE",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59C4Z1RA60BC092DZB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59C4Z1RA60BC092DZB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZW6Z9P0RJBGJF9V1",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7Q1MV14MBNQ0DVVY9",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7H9D80Z34KK7KREAS",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7SJ915481P74FC2T5",
+      "type": "builtin:part-of",
+      "to": "01M3T3AG59G4BJVVKR76WVSX8F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Concept → prerequisites with curated resources",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "Predates LLMs",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Expert-edited only",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Prerequisite skills per lesson",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "No learner-facing concept map",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "No LLM authoring of the graph",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Creator tools",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Progressions and dependencies",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Data layer, not a viewer",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "MCP server for agents",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "\\uses{} typed dependencies",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Rendered dependency graph with status colors",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "LeanArchitect and AI provers",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Humans and AI work in parallel on nodes",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Overview-to-detail zoom",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "Agent pipeline plus critic",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Human audit pending",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Cycle-validated DAG",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "BKT mastery",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "No documented prerequisite modeling",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Mastery paths, learner memory",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:uses",
+      "to": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "note": "GraphRAG/LightRAG inside retrieval",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Linear outline only",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Editable outline, Edit with AI",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Code dependencies only",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "Multi-agent with reviewer",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Committed JSON shared by teams",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Relations, not pedagogy",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Links only, no typed prerequisites (yet)",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Files + git + schema-governed agent",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Hierarchy, not prerequisites",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Human joins the discourse",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Typed directed links via Breadcrumbs",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "Via plugins",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Roadmap ordering, not strict prerequisites",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "AI features not in open repo",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Entity/relation graphs, no \"learn A before B\"",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "type": "builtin:supports",
+      "to": "01M3T3AG59CVFXDSQZEANXW4KH",
+      "note": "The answer to the question",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "type": "builtin:led-to",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "type": "builtin:led-to",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "note": "The gap defines what to build",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5Q1DSZKFND22CQX3Q",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "note": "57% and 46% exact match",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5J2356EBXZB50J1XX",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "note": "Rank candidates, experts confirm top ones",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5J2356EBXZB50J1XX",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6CH64GEHTZC148884",
+      "note": "Blueprint for the review queue",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB50WPS0G2Y0BXNWCX5",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "note": "LLM as suggestion generator, decisions with the human",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZE60DQ31S4JCS0VE",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "note": "CourseMapper links concepts to Wikipedia",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:raises",
+      "to": "01M3T3CVB7SJ915481P74FC2T5",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "type": "builtin:led-to",
+      "to": "01M3T3CVB7SJ915481P74FC2T5",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6AXW3FYGMW1DQ61RS",
+      "type": "builtin:example",
+      "to": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "note": "encompasses edge type",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYVXJVRF2RVME6HF91",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB6AXW3FYGMW1DQ61RS",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY8A33K9PR6SHW0CH1",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "note": "Skillgraph_OS prerequisite vs helps-with edges",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "note": "Node-per-file plus PR curation at scale",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "note": "Committed JSON graph",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY8RM9SG703R1J1ZVH",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "note": "CI checks for cycles and dangling references",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6SS899B788HTJV0M4",
+      "note": "Pair curated DAG with DeepTutor-style agents",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6SS899B788HTJV0M4",
+      "note": "Transparent mastery model",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB58P55M7KD8BMHCE6G",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6TWJST0762X21FYMR",
+      "note": "Tree mind maps can't express a DAG",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5W90FYN1V782AFX0W",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6TWJST0762X21FYMR",
+      "note": "dagre/klay layered layouts",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5WMG63RRCWFPRZFYB",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6TWJST0762X21FYMR",
+      "note": "Whole-field scale",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "note": "Vetted K-12 prerequisite skeleton with MCP server",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6ZW6Z9P0RJBGJF9V1",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6ZW6Z9P0RJBGJF9V1",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6BA9297JTR6BWFE4Q",
+      "type": "builtin:uses",
+      "to": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6BA9297JTR6BWFE4Q",
+      "type": "builtin:uses",
+      "to": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:supports",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB54RSMAZQJ76EDN9RF",
+      "note": "Curation UI",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB5W90FYN1V782AFX0W",
+      "note": "Learner UI (or Sigma.js)",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:uses",
+      "to": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "note": "Seed data via LightRAG/Graphify-style ingestion",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "type": "builtin:uses",
+      "to": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "note": "Seed data for K-12",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB6SS899B788HTJV0M4",
+      "note": "Tutor agent teaches nodes the DAG selects",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6CH64GEHTZC148884",
+      "type": "builtin:uses",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "note": "Shows confidence and evidence per edge",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7Q1MV14MBNQ0DVVY9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7Q1MV14MBNQ0DVVY9",
+      "type": "builtin:led-to",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "note": "LLM-assisted curation aims at this bottleneck",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZD41K75QQXSP3CE42",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "note": "AFFiNE mixed, Logseq/InfraNodus AGPL",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB58P55M7KD8BMHCE6G",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "note": "tldraw needs commercial license",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7GQ0WGTPRZZ0YD4KD",
+      "type": "builtin:challenges",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "note": "Components must be license-checked before building",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY8A33K9PR6SHW0CH1",
+      "type": "builtin:example",
+      "to": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:raises",
+      "to": "01M3T3CVB7H9D80Z34KK7KREAS",
+      "note": "Code deps are mechanical; general knowledge isn't",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB7H9D80Z34KK7KREAS",
+      "type": "builtin:challenges",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "note": "No validated method for unvetted domains",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYR0XT3573VYQZFMCZ",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "Not graph tools; Open Notebook has no mind maps",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ2PCW47M4PGH3CB4J",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "note": "Closed-source",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYVXJVRF2RVME6HF91",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "note": "Closed-source; study only",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "note": "Custom restrictive license",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYYSQ391SV98QQ8W63",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "note": "Discontinued as open source",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "note": "Archived 2023",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "note": "~40k★, releases every few days",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5B0ZJKZ6JWJTTF7SWW",
+      "note": "Apache-2.0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AXQWKHEC0NADJCW0Y",
+      "note": "Small, locally specified nodes",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AXQWKHEC0NADJCW0Y",
+      "note": "Skill = concept card + examples + misconceptions",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BGXXJAQG060KZJZ1Y",
+      "note": "1★",
+      "prov": []
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "LLM extracts entity/relation graphs",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "note": "Agents research and discuss",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Partial visual graph",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Partial visual graph",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Mermaid / HTML visualizations only",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Linear outline, not a graph",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Only via Obsidian graph",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Hierarchical mind map",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Directed graph view in Obsidian",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Interactive node-based roadmaps",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "note": "Some have graph viewers (e.g. LightRAG)",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Expert-authored",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYV2K7ZHWM75Y2YG2Q",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Hand-edited JSON files",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Partial",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Partial; edges explained",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Notes edited directly; git diffs",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:meets",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Community PRs",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXN5TAEYC7JW5GNARG",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Personalized learning plans",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Data layer only",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Node status (not ready / ready / formalized)",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Mastery levels on dependencies",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYDPZZ63H3WBKCAZ8G",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Partial",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYHZKY7AW3ME194K2E",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYEKNVNTYQAXN85TZ5",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No mastery tracking",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY1715Y4HA96S1239S",
+      "type": "builtin:partly-meets",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "Partial",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBZ1FJCPJB201N01CAD",
+      "type": "builtin:fails",
+      "to": "01M3T3AG5BMNKDVTW30K488R60",
+      "note": "No learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYQAEBJY31RA6WTFWT",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Huge adoption and strong tutoring, but no curated, learner-visible prerequisite graph",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s10"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYK2FNAESFE1ST6JDK",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Has the product shape, but only for code; no learner state, and general knowledge can't be extracted mechanically",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s12"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXZ4ZVEB4Y9T2SBYXY",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Strong prerequisite data, but a data layer only: no viewer, editor or learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s7"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXNJBKJBXEHYETAX85",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Good skill chunks and learner state, but no concept map and no LLM authoring",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s6"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Best human+LLM curation workflow, but links only: no typed prerequisites or learner state",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s14"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBYSAFKGWC4AJAVED51",
+      "type": "builtin:challenges",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "Comes closest (prerequisites, zoomable map, agent+critic), but only partial curation (human audit pending) and 1★: a near miss, not a counterexample",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s25"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3CVB7CET08MDDAJC1BC2V",
+      "type": "builtin:challenges",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "note": "The judgement rests on a snapshot of tiny, unaudited projects; newer tools could already close the gap",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s9"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3CVB6ZE60DQ31S4JCS0VE",
+      "type": "builtin:challenges",
+      "to": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "note": "Few-shot prompting beats zero-shot by ~6 points, prerequisites gaining most: LLMs improve, but the report still treats that as short of reliable",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s24"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3BJBXPWJZVYWYD2W5G0SA",
+      "type": "builtin:supports",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "note": "Shows a typed graph with per-node status and humans+AI in parallel, but for math proofs, not pedagogy",
+      "prov": [
+        {
+          "source": "01M3T38T1469KYVZFT7601B8J1",
+          "segment": "s8"
+        }
+      ]
+    },
+    {
+      "from": "01M3T3CVB6CH64GEHTZC148884",
+      "type": "builtin:part-of",
+      "to": "01M3T3SQ92NENMCMZGMYG3HSSM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ90C4DPMJKESJV6GK26",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ92NENMCMZGMYG3HSSM",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ920QA52GBC9Z0DP9BB",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ92T9VWJ1MZE706FC7Q",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB655D2ZY8MXH6BV58A",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ924XBFHXR9NP1ZX13D",
+      "type": "builtin:part-of",
+      "to": "01M3T3SQ920QA52GBC9Z0DP9BB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ92KZ2N9VV19VHA32E2",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ93C2T5JRWMX8F9W3CW",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "prov": []
+    },
+    {
+      "from": "01M3T3SQ93DG0DBBB3XP64BKBW",
+      "type": "builtin:part-of",
+      "to": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ90C4DPMJKESJV6GK26",
+      "note": "Files in git, reviewed in diffs/PRs, CI checks for cycles",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ90C4DPMJKESJV6GK26",
+      "note": "requires / helps / part-of / related / encompasses edge types in frontmatter",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "type": "builtin:modifies",
+      "to": "01M3T3CVB6CH64GEHTZC148884",
+      "note": "Each edge shows confidence and cited evidence; low-confidence edges go to review",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6TWJST0762X21FYMR",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ920QA52GBC9Z0DP9BB",
+      "note": "Layered Sugiyama layout, zoom to whole-field map, unreviewed edges styled distinctly",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6SS899B788HTJV0M4",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ93DG0DBBB3XP64BKBW",
+      "note": "Tutor teaches one node; the DAG decides what's next",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ924XBFHXR9NP1ZX13D",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6AXW3FYGMW1DQ61RS",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ924XBFHXR9NP1ZX13D",
+      "note": "Fractional credit flows to prerequisites",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "type": "builtin:modifies",
+      "to": "01M3T3SQ92T9VWJ1MZE706FC7Q",
+      "note": "Import vetted graphs instead of regenerating",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZW6Z9P0RJBGJF9V1",
+      "type": "builtin:modifies",
+      "to": "01M3T3CVB65K9V3MKW6WGKSQQ6",
+      "note": "Distribute agents as a skill/MCP server plus static viewer",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AXQWKHEC0NADJCW0Y",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "note": "You need well-defined chunks before you can draw \"A before B\" edges between them.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "note": "Edge types (requires vs helps vs related) refine the basic prerequisite edge.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A5YMGC4Q5Z72HWAKS",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6TWJST0762X21FYMR",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "note": "Co-curation means reviewing what an LLM proposes.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB5Q1DSZKFND22CQX3Q",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "note": "The benchmark figures behind the claim.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6CH64GEHTZC148884",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3SQ90C4DPMJKESJV6GK26",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5BMNKDVTW30K488R60",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "note": "This family is defined by having the prerequisite-graph data model.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5A1JN3FZ3XZ0TWKNP3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG59G967TBW75MCQSB6F",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB66CYPM9JKV5TESPSY",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6ZG1MR8SK8J7J71G1",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6XEAAHT932EJQ4HDV",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6SS899B788HTJV0M4",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6TWJST0762X21FYMR",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB63TW7G1AY73K4ZZT4",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AGY962TN2J9XQZDWB",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3BJBZGQ4MXTNH25RC1NHB",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG5AJRM7GGCXZM4XT6G0",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6DQPPE2WCNXTWY1D3",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3BJBY75AW3ZCNTVB6MBM2",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB660NTZBBQDKZZA4ZR",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB6SS899B788HTJV0M4",
+      "note": "A transparent mastery model is what lets the tutor stay separate from the graph.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6CH64GEHTZC148884",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG5BQGAVERVWRWN287FM",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG583H1VMHY2Y83R2MQJ",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "note": "AI tutors are best understood against what they lack: a curatable prerequisite graph.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3AG58E0KJSWNZZ4V09TE0",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3AG59JC7VKM587E2ZDNR9",
+      "note": "LLM-built graphs add curation on top of tutoring and generation.",
+      "prov": []
+    },
+    {
+      "from": "01M3T3CVB6G0F7ECC3123EMXKT",
+      "type": "builtin:prerequisite",
+      "to": "01M3T3CVB635RMQSJ59Z7ZPDCC",
+      "note": "Proposals are made per typed edge (requires vs helps vs related), so you need the edge types first.",
+      "prov": []
+    }
+  ],
+  "views": [
+    {
+      "id": "01M3T38T33A024VCXXMH4YM155",
+      "viewType": "comparison-table",
+      "label": "Compare tools",
+      "question": "Which tools have the features I need: prerequisite graphs, visual exploration, LLM help, and human curation?",
+      "settings": {
+        "rows": {
+          "tags": [
+            "compared-tool"
+          ]
+        },
+        "sortBy": "stars",
+        "columns": [
+          {
+            "concept": "01M3T3AG5AGY962TN2J9XQZDWB"
+          },
+          {
+            "concept": "01M3T3AG5A5YMGC4Q5Z72HWAKS"
+          },
+          {
+            "concept": "01M3T3AG5A1JN3FZ3XZ0TWKNP3"
+          },
+          {
+            "concept": "01M3T3AG5AJRM7GGCXZM4XT6G0"
+          },
+          {
+            "concept": "01M3T3AG5BMNKDVTW30K488R60"
+          },
+          {
+            "attribute": "stars"
+          },
+          {
+            "attribute": "license"
+          }
+        ],
+        "priority": "priority"
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T38T33A5JBZRJXVAB2SW1R",
+      "viewType": "evidence",
+      "label": "What the evidence says",
+      "question": "What evidence exists for which features are most important, and where do the tools fail?",
+      "settings": {
+        "supports": [
+          "builtin:supports"
+        ],
+        "consensus": "consensus",
+        "challenges": [
+          "builtin:challenges"
+        ],
+        "claimKinds": [
+          "builtin:claim"
+        ],
+        "evidenceType": "evidence-type"
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T38T33T77GHSJ6CJ30TB4Y",
+      "viewType": "anatomy",
+      "label": "Anatomy of a tool",
+      "question": "What are the parts of a working knowledge-graph learning tool, and how do they fit together?",
+      "settings": {
+        "pins": [
+          "builtin:modifies"
+        ],
+        "roots": [
+          "01M3T3CVB655D2ZY8MXH6BV58A"
+        ],
+        "colorBy": "consensus",
+        "containment": [
+          "builtin:part-of"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    },
+    {
+      "id": "01M3T38T33YSXD6H54HVQ3PT7X",
+      "viewType": "learning-path",
+      "label": "Where to start",
+      "question": "What do I need to understand first: what are prerequisites vs related concepts, and where do the different tool families sit?",
+      "settings": {
+        "targets": {
+          "kinds": [
+            "builtin:decision",
+            "builtin:claim"
+          ]
+        },
+        "minSteps": 4,
+        "relationshipTypes": [
+          "builtin:prerequisite"
+        ]
+      },
+      "settingsVersion": 1,
+      "status": "ready"
+    }
+  ]
+}

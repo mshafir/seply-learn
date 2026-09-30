@@ -1,0 +1,159 @@
+{
+  "fixture": "ebike-chat",
+  "expeditionId": "01M3T2DZ9S3V464D7J338ANTEA",
+  "jobId": "01M3T2DZB2VCTGHNMBVQ5Q9W1J",
+  "status": "failed",
+  "error": "1 of 2 Views couldn't be built: Running costs over time",
+  "model": "anthropic/claude-opus-5.5 (the default curator)",
+  "seconds": 752,
+  "costUsd": {
+    "gatewayBilled": 2.9921
+  },
+  "runs": [
+    {
+      "attempt": 1,
+      "outcome": "killed (process exit as View 3 started)",
+      "seconds": 491,
+      "gatewayBilledUsd": 1.9166,
+      "built": [
+        "Found 47 Concepts in 1 Source",
+        "Built Compare the bikes",
+        "Built Mid-drive or hub"
+      ]
+    },
+    {
+      "attempt": 2,
+      "outcome": "failed (1 of 2 Views couldn't be built: Running costs over time)",
+      "seconds": 261,
+      "gatewayBilledUsd": 1.0755,
+      "built": [
+        "Built What to learn first",
+        "Could not build Running costs over time"
+      ]
+    }
+  ],
+  "counts": {
+    "concepts": 50,
+    "relationships": 129,
+    "attributes": 8,
+    "views": 4,
+    "coreConcepts": 6,
+    "backgroundConcepts": 0
+  },
+  "changes": [
+    "Edited",
+    "Added the Source \u201cE-bike chat\u201d",
+    "Queued 4 Views",
+    "Found 47 Concepts in 1 Source",
+    "Built Compare the bikes",
+    "Built Mid-drive or hub",
+    "Built What to learn first",
+    "Could not build Running costs over time"
+  ],
+  "views": [
+    {
+      "viewType": "comparison-table",
+      "label": "Compare the bikes",
+      "question": "How do these bikes stack up on what matters to me: hill climbing, maintenance, weight, theft protection, and price?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": null
+      }
+    },
+    {
+      "viewType": "cause-and-effect",
+      "label": "Mid-drive or hub",
+      "question": "If I pick mid-drive vs hub, what follows: how steep can I climb, how quiet is the ride, what maintenance do I face?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [
+          "'Mid-drive or hub': outcome 'Motor noise' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity"
+        ],
+        "layout": {
+          "viewId": "01M3T2DZCRDKEKT31PZA2SVV81",
+          "label": "Mid-drive or hub",
+          "viewType": "cause-and-effect",
+          "shown": 13,
+          "edges": 10,
+          "crossings": 2,
+          "edgesThroughNodes": 1,
+          "veryLongEdges": 0,
+          "overlaps": 0,
+          "verdict": "reads well"
+        }
+      }
+    },
+    {
+      "viewType": "learning-path",
+      "label": "What to learn first",
+      "question": "What do I need to understand first: motor types, battery size, frame style, or the bikes themselves?",
+      "status": "ready",
+      "failReason": null,
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": {
+          "viewId": "01M3T2DZCR1RVVG6909B8FZXME",
+          "label": "What to learn first",
+          "viewType": "learning-path",
+          "shown": 12,
+          "edges": 11,
+          "crossings": 2,
+          "edgesThroughNodes": 0,
+          "veryLongEdges": 1,
+          "overlaps": 0,
+          "crossTopic": 6,
+          "verdict": "reads well"
+        }
+      }
+    },
+    {
+      "viewType": "timeline",
+      "label": "Running costs over time",
+      "question": "When do batteries, chains, and servicing cost kick in, and how much for each bike?",
+      "status": "failed",
+      "failReason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000\u20134,000 km\" or \"battery after 3\u20134 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better.",
+      "inspect": {
+        "ok": true,
+        "problems": [],
+        "warnings": [],
+        "layout": null
+      }
+    }
+  ],
+  "stages": {
+    "attempt 2: note": {
+      "summary": "The reader is a commuter choosing an e-bike: 14 km each way, one hill of about 800 m peaking near 8 percent, rider about 80 kg, carrying a laptop bag, budget up to 3,500. They want to arrive without sweating. Two constraints surfaced later and shaped the outcome: the bike will sit at a work rack, so theft matters, and it must be carried up two flights of stairs daily, so weight matters. Their stated priorities are hill climbing, low maintenance, weight and theft protection, with price second.\n\nThey settled on a mid-drive over a hub motor for the hill and for less sweat. After comparing three mid-drives (Alder C5, Birch Metro 8, Cedar Urban) against a hub-motor contrast (Dogwood), they chose the **Alder C5**. It has a Bosch 75 Nm motor, a 500 Wh battery, a 10-speed chain drive, and weighs 24 kg at about 3,200. It was the best all-rounder, and the only one with an app-based motor lock. The Birch's belt drive was judged not worth its extra weight, since it saves only about 200 over three years. The Bosch-versus-Bafang battery question resolved to: the dealer network matters more than the cells.\n\nSeveral things are still open:\n- **Test ride.** They need to ride the hill in middle assist, check frame fit, carry the bike upstairs with the battery out, confirm the first free service and the 2-year battery warranty, and try the motor lock.\n- **Security and insurance.** The lock (Sold Secure Gold or Diamond D-lock plus a cable) and insurance (100 to 150 a year) are not yet chosen.\n- **Battery replacement.** A possible 600 to 800 replacement near year three or four needs to be budgeted.\n\nCaveats for building: the bike names appear to be illustrative placeholders, so specs and prices need checking. The belt-bike running-cost figure (650) doesn't obviously add up from its listed items. All cost and lifespan numbers are rough estimates.",
+      "review": null,
+      "reason": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsd": 0.033811
+    },
+    "attempt 2: View 3: build": {
+      "summary": null,
+      "review": "The View shows three shortlisted bikes as targets, each with a short numbered path of 8\u201310 steps. Every path starts from the hill and hill climbing, then torque and the two motor types, then how a mid-drive uses the chain's gears, then the Go mid-drive decision. The Birch path also adds the internal gear hub and belt drive. So the answer to the question is: understand the motor first, and the drivetrain second. The weak spot: battery size and frame style are not on any bike's path. They lead only into the overall \"Which e-bike?\" question. I had to take that question off the targets to keep the layout readable. They do matter, but you don't need them to understand the bikes, since all the options fall in the 400\u2013500 Wh range and the frame choice is still open.",
+      "reason": null,
+      "steps": 16,
+      "toolCalls": 78,
+      "spentUsd": 0.9250388
+    },
+    "attempt 2: View 4: build": {
+      "summary": null,
+      "review": null,
+      "reason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000\u20134,000 km\" or \"battery after 3\u20134 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better.",
+      "steps": 1,
+      "toolCalls": 1,
+      "spentUsd": 1.0754898000000002
+    }
+  },
+  "note": "Attempt 1's stage results (the note, the Concept set, Views 1 and 2) lived in the killed process's in-memory engine; their Changes are in the log (see changes)."
+}
