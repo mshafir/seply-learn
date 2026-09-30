@@ -1,4 +1,4 @@
-// @umbel/domain: see README.md for this package's contract.
+// @seply/domain: see README.md for this package's contract.
 export * from "./common.ts"
 export * from "./ulid.ts"
 export * from "./order-key.ts"

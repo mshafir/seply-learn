@@ -1,4 +1,4 @@
-// WP-0.5 harness page: `pnpm --filter @umbel/sync harness`. Dev-only; not
+// WP-0.5 harness page: `pnpm --filter @seply/sync harness`. Dev-only; not
 // part of the package's exports. Renders Concepts from a TanStack DB live
 // query, types fast into c1's title and simulates push delay, echo delay and
 // another client's edits landing first. A MutationObserver records every
@@ -11,7 +11,7 @@ import {
   makeOps,
   ulidSequence,
   type DomainState,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { findFlicker } from "../src/spike/flicker.ts"
 import { SimClient, SimServer } from "../src/spike/sim.ts"
 

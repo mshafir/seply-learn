@@ -1,8 +1,8 @@
 import type { ReactNode } from "react"
 
-import { Badge } from "@umbel/ui/components/badge"
-import { Wordmark, UmbelGlyph } from "@umbel/ui/components/brand"
-import { Button } from "@umbel/ui/components/button"
+import { Badge } from "@seply/ui/components/badge"
+import { Wordmark, SeplyGlyph } from "@seply/ui/components/brand"
+import { Button } from "@seply/ui/components/button"
 import {
   Card,
   CardAction,
@@ -11,7 +11,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@umbel/ui/components/card"
+} from "@seply/ui/components/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,13 +20,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@umbel/ui/components/dropdown-menu"
-import { ModeToggle } from "@umbel/ui/components/mode-toggle"
-import { Separator } from "@umbel/ui/components/separator"
-import { useTheme } from "@umbel/ui/components/theme-provider"
-import { toast } from "@umbel/ui/components/toast"
-import { KIND_HUES, kindColor } from "@umbel/ui/lib/kinds"
-import { cn } from "@umbel/ui/lib/utils"
+} from "@seply/ui/components/dropdown-menu"
+import { ModeToggle } from "@seply/ui/components/mode-toggle"
+import { Separator } from "@seply/ui/components/separator"
+import { useTheme } from "@seply/ui/components/theme-provider"
+import { toast } from "@seply/ui/components/toast"
+import { KIND_HUES, kindColor } from "@seply/ui/lib/kinds"
+import { cn } from "@seply/ui/lib/utils"
 
 // A Storybook-less showcase (WP-0.3): every token, Kind hue, type style and
 // component, rendered side by side in the light and dark palettes.
@@ -420,8 +420,8 @@ function Brand() {
       <SectionTitle>Brand</SectionTitle>
       <div className="flex flex-wrap items-center gap-6">
         <Wordmark className="text-3xl" />
-        <UmbelGlyph className="size-12" />
-        <UmbelGlyph className="size-4" />
+        <SeplyGlyph className="size-12" />
+        <SeplyGlyph className="size-4" />
       </div>
     </div>
   )

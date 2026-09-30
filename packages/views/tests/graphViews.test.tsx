@@ -7,7 +7,7 @@
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
 import { computeRiskView } from "../fixtures/index.ts";
 import { computeRiskViewOp, openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { ExpeditionView, type ExpeditionViewProps } from "../src/ExpeditionView.tsx";
@@ -45,10 +45,10 @@ const live = () => {
 };
 const noop = () => {};
 const nodes = (root: HTMLElement) => [...root.querySelectorAll<HTMLElement>(".react-flow__node")];
-const node = (root: HTMLElement, id: string) => root.querySelector<HTMLElement>(`.umbel-concept[data-concept="${id}"]`);
+const node = (root: HTMLElement, id: string) => root.querySelector<HTMLElement>(`.seply-concept[data-concept="${id}"]`);
 const lit = (root: HTMLElement) =>
   new Set(
-    [...root.querySelectorAll<HTMLElement>(".umbel-concept")].filter((n) => !n.classList.contains("umbel-concept--dim")).map((n) => n.dataset.concept!),
+    [...root.querySelectorAll<HTMLElement>(".seply-concept")].filter((n) => !n.classList.contains("seply-concept--dim")).map((n) => n.dataset.concept!),
   );
 
 /** ExpeditionView with its selection held in state, as the app holds it. */
@@ -72,7 +72,7 @@ describe("every compute-fixture View of these types, from live collections", () 
       const view = e.views.find((v) => v.id === id)!;
       const want = scopeFor(e, view).concepts.map((c) => c.id);
       const { container } = render(<ExpeditionView collections={f.collections} viewId={id} onSelect={noop} transitionMs={0} />);
-      expect(container.querySelector(`.umbel-view[data-view-type="${type}"]`)).not.toBeNull();
+      expect(container.querySelector(`.seply-view[data-view-type="${type}"]`)).not.toBeNull();
       await waitFor(() => expect(nodes(container)).toHaveLength(want.length), { timeout: 5000 });
       expect(new Set(nodes(container).map((n) => n.dataset.id))).toEqual(new Set(want));
     });
@@ -80,21 +80,21 @@ describe("every compute-fixture View of these types, from live collections", () 
   it("draws the Anatomy as nested parts with pins", () => {
     const f = live();
     const { container } = render(<ExpeditionView collections={f.collections} viewId={f.view("anatomy")} onSelect={noop} />);
-    const root = container.querySelector<HTMLElement>(".umbel-anatomy .umbel-part--root")!;
+    const root = container.querySelector<HTMLElement>(".seply-anatomy .seply-part--root")!;
     expect(root.dataset.concept).toBe(f.concept("transformer"));
     // Containment is boxes inside boxes: the KV-cache sits inside Attention,
     // inside the layer stack, inside the transformer.
-    const kv = container.querySelector<HTMLElement>(`.umbel-part[data-concept="${f.concept("kv-cache")}"]`)!;
+    const kv = container.querySelector<HTMLElement>(`.seply-part[data-concept="${f.concept("kv-cache")}"]`)!;
     const chain = [];
-    for (let el = kv.parentElement?.closest<HTMLElement>(".umbel-part"); el; el = el.parentElement?.closest<HTMLElement>(".umbel-part"))
+    for (let el = kv.parentElement?.closest<HTMLElement>(".seply-part"); el; el = el.parentElement?.closest<HTMLElement>(".seply-part"))
       chain.push(el.dataset.concept);
     expect(chain).toEqual([f.concept("attention"), f.concept("layer-stack"), f.concept("transformer")]);
     // The KV-cache collects the most pins (the doc's reading of this View).
-    const pins = [...kv.querySelectorAll<HTMLElement>(":scope > .umbel-part__pins > .umbel-pin")].map((p) => p.textContent);
+    const pins = [...kv.querySelectorAll<HTMLElement>(":scope > .seply-part__pins > .seply-pin")].map((p) => p.textContent);
     expect(pins).toContain("Multi-head Latent Attention (MLA)");
     expect(pins).toHaveLength(5);
     // Pins are coloured by maturity, from the legend.
-    expect(container.querySelector(".umbel-anatomy__legend")?.textContent).toContain("maturity");
+    expect(container.querySelector(".seply-anatomy__legend")?.textContent).toContain("maturity");
   });
 });
 
@@ -109,7 +109,7 @@ describe("Cause & Effect risk mode: clicking a lever", () => {
     expect(node(container, distillation)!.textContent).toContain("acts on Serving cost per token");
 
     fireEvent.click(node(container, distillation)!);
-    await waitFor(() => expect(node(container, distillation)!.classList).toContain("umbel-concept--selected"));
+    await waitFor(() => expect(node(container, distillation)!.classList).toContain("seply-concept--selected"));
     // Distillation lowers serving cost per token, which raises the price
     // directly and, by lowering it, raises usage growth → compute demand →
     // price. Exactly that path is lit; every other lever and cause dims.
@@ -183,15 +183,15 @@ describe("reading status and search in these Views", () => {
         matches={new Set([mla])}
       />,
     );
-    const pin = container.querySelector<HTMLElement>(`.umbel-part[data-concept="${kv}"] .umbel-pin[data-concept="${mla}"]`)!;
+    const pin = container.querySelector<HTMLElement>(`.seply-part[data-concept="${kv}"] .seply-pin[data-concept="${mla}"]`)!;
     expect(pin.querySelector('[data-testid="read-check"]')).not.toBeNull();
-    expect(pin.classList).not.toContain("umbel-pin--dim");
-    const part = (id: string) => container.querySelector<HTMLElement>(`.umbel-part[data-concept="${id}"]`)!;
+    expect(pin.classList).not.toContain("seply-pin--dim");
+    const part = (id: string) => container.querySelector<HTMLElement>(`.seply-part[data-concept="${id}"]`)!;
     expect(part(embedding).dataset.covered).toBe("true");
-    expect(part(kv).classList).not.toContain("umbel-part--dim");
-    expect(part(attention).classList).not.toContain("umbel-part--dim");
-    expect(part(embedding).classList).toContain("umbel-part--dim");
-    expect(container.querySelectorAll(".umbel-pin:not(.umbel-pin--dim)")).toHaveLength(1);
+    expect(part(kv).classList).not.toContain("seply-part--dim");
+    expect(part(attention).classList).not.toContain("seply-part--dim");
+    expect(part(embedding).classList).toContain("seply-part--dim");
+    expect(container.querySelectorAll(".seply-pin:not(.seply-pin--dim)")).toHaveLength(1);
   });
 
   it("selects a part or a pin on click, and clears on the background", () => {
@@ -200,9 +200,9 @@ describe("reading status and search in these Views", () => {
     const { container } = render(
       <ExpeditionView collections={f.collections} viewId={f.view("anatomy")} onSelect={(id) => selected.push(id)} />,
     );
-    fireEvent.click(container.querySelector(`.umbel-pin[data-concept="${f.concept("flash-attn")}"]`)!);
-    fireEvent.click(container.querySelector(`.umbel-part[data-concept="${f.concept("ffn")}"] .umbel-part__title`)!);
-    fireEvent.click(container.querySelector(".umbel-anatomy")!);
+    fireEvent.click(container.querySelector(`.seply-pin[data-concept="${f.concept("flash-attn")}"]`)!);
+    fireEvent.click(container.querySelector(`.seply-part[data-concept="${f.concept("ffn")}"] .seply-part__title`)!);
+    fireEvent.click(container.querySelector(".seply-anatomy")!);
     expect(selected).toEqual([f.concept("flash-attn"), f.concept("ffn"), undefined]);
   });
 });

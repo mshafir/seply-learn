@@ -1,5 +1,5 @@
 // Live data for the Views: one Expedition's TanStack DB collections
-// (@umbel/sync), read as the Expedition the Views draw.
+// (@seply/sync), read as the Expedition the Views draw.
 //
 // Every change to the collections (a local edit, optimistic or confirmed, or
 // someone else's edit arriving by pull) bumps a version; the Expedition is
@@ -7,7 +7,7 @@
 // touches several tables notifies once per table in the same tick, and React
 // batches those into one render, so the canvas re-lays out once.
 import { useMemo, useSyncExternalStore } from "react";
-import type { TableCollections } from "@umbel/sync";
+import type { TableCollections } from "@seply/sync";
 import { expeditionFromRows } from "./data.ts";
 import type { Expedition } from "./model.ts";
 

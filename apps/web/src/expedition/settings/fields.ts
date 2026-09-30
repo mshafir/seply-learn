@@ -1,6 +1,6 @@
 // The View panel's settings forms, generated from a View Type's Zod schemas
 // (spec §4.2): shared settings and personal settings each have one schema in
-// @umbel/domain, and this walks it into a list of fields. The schema is the
+// @seply/domain, and this walks it into a list of fields. The schema is the
 // only source; nothing here is written per View Type except display labels.
 //
 // - booleans → a switch; enums → a select; numbers and strings → an input
@@ -12,7 +12,7 @@
 //   against the schema before it is written
 // - the per-View structure overrides (`placement`, `order`, `hide`, `fold`)
 //   are left out: they are edited on the canvas, not in a form.
-import { OVERRIDE_KEYS, type SettingsRefs } from "@umbel/domain"
+import { OVERRIDE_KEYS, type SettingsRefs } from "@seply/domain"
 
 export type RefKind = "relTypes" | "kinds" | "concepts"
 

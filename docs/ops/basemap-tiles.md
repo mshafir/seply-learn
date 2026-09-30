@@ -37,7 +37,7 @@ node scripts/basemap-tiles.mjs extract --maxzoom=10 --dry-run
 node scripts/basemap-tiles.mjs extract --maxzoom=10
 node scripts/basemap-tiles.mjs extract --maxzoom=14 --bbox=5.9,45.8,10.5,47.8   # a region
 
-# Upload to R2 (bucket umbel-tiles, key basemap.pmtiles by default)
+# Upload to R2 (bucket seply-tiles, key basemap.pmtiles by default)
 CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/basemap-tiles.mjs upload basemap-z10.pmtiles
 
 # Or both
@@ -50,8 +50,8 @@ node scripts/basemap-tiles.mjs all --maxzoom=10
 
 ## Serving it (owner, once)
 
-1. **Create the bucket:** `pnpm --filter @umbel/worker exec wrangler r2 bucket create umbel-tiles`.
-2. **Make it public:** connect a custom domain (e.g. `tiles.<production domain>`) under _R2 → umbel-tiles → Settings → Public access_. The `r2.dev` URL works for testing but is rate-limited.
+1. **Create the bucket:** `pnpm --filter @seply/worker exec wrangler r2 bucket create seply-tiles`.
+2. **Make it public:** connect a custom domain (e.g. `tiles.<production domain>`) under _R2 → seply-tiles → Settings → Public access_. The `r2.dev` URL works for testing but is rate-limited.
 3. **CORS**, so the app's origins can make range requests: allow `GET` and `HEAD` from the production and preview origins, allow the `Range` and `If-Match` request headers, and expose `ETag`, `Content-Length` and `Content-Range`.
 4. **Set the repo variable** `MAP_TILES_URL` to the public URL of `basemap.pmtiles`, and redeploy.
 

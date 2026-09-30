@@ -3,7 +3,7 @@
 // in-process rooms + LISTEN/NOTIFY on Node) come in M4; until then the app
 // uses `noopRelay`. The rest of the interface (build, kick, agentPresence,
 // handleUpgrade) is added with its first caller.
-import type { LoggedOp, ReaderBatch } from "@umbel/domain"
+import type { LoggedOp, ReaderBatch } from "@seply/domain"
 
 export interface Relay {
   /** Newly logged ops of one Expedition, in `serverSeq` order. Never a retry's. */

@@ -14,9 +14,9 @@ export type Tick = { x: number; label: string };
 export type Extras = { bands?: Band[]; ticks?: Tick[] };
 export type LayoutResult = { positions: Positions; extras: Extras };
 
-/** Title font size in px by weight: focal, major, medium, minor (canvas.css `.umbel-concept--*`). */
+/** Title font size in px by weight: focal, major, medium, minor (canvas.css `.seply-concept--*`). */
 const titleFont = (w: number) => (w > 1 ? 20 : w > 0.6 ? 15 : w > 0.3 ? 13 : 12);
-/** A card's horizontal chrome: padding, borders, the Kind icon and its gap (canvas.css `.umbel-concept`). */
+/** A card's horizontal chrome: padding, borders, the Kind icon and its gap (canvas.css `.seply-concept`). */
 const CARD_CHROME_X = 2 * 10 + 4 + 1 + 16 + 8;
 /** Vertical chrome: padding and borders. */
 const CARD_CHROME_Y = 2 * 6 + 2;

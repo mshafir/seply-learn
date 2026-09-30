@@ -1,5 +1,5 @@
 // Screenshot tests of the dev harness. Not part of `pnpm check`: run with
-// `pnpm --filter @umbel/views test:e2e` (needs Playwright's Chromium). CI
+// `pnpm --filter @seply/views test:e2e` (needs Playwright's Chromium). CI
 // runs it in the Playwright job (.github/workflows/ci.yml).
 import { defineConfig, devices } from "@playwright/test";
 

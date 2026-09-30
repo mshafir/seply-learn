@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto"
 import { IDBFactory } from "fake-indexeddb"
-import { builtinId, emptyState, type OpBody } from "@umbel/domain"
+import { builtinId, emptyState, type OpBody } from "@seply/domain"
 import { afterEach, describe, expect, it } from "vitest"
 import {
   openSyncClient,

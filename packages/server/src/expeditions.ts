@@ -10,7 +10,7 @@ import {
   type OpBody,
   type Role,
   type ViewTypeId,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"

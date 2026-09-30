@@ -6,7 +6,7 @@ import { SessionContext, type Session } from "@/lib/session.ts"
 
 // The last signed-in user, so a reload without a connection still knows
 // whose pending edits to load (they are scoped by user). Cleared on sign-out.
-const USER_KEY = "umbel-user"
+const USER_KEY = "seply-user"
 
 function cachedUser(): User | null {
   try {

@@ -4,7 +4,7 @@
 // 2.7). Guide and measured sizes: docs/ops/basemap-tiles.md.
 //
 //   node scripts/basemap-tiles.mjs extract [--maxzoom=10] [--bbox=w,s,e,n] [--build=<url, file or YYYYMMDD>] [--out=<file>] [--dry-run]
-//   node scripts/basemap-tiles.mjs upload <file> [--bucket=umbel-tiles] [--key=basemap.pmtiles]
+//   node scripts/basemap-tiles.mjs upload <file> [--bucket=seply-tiles] [--key=basemap.pmtiles]
 //   node scripts/basemap-tiles.mjs all [extract flags] [upload flags]
 //
 // Needs the `pmtiles` CLI (go-pmtiles: https://github.com/protomaps/go-pmtiles
@@ -27,7 +27,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DOC = join(ROOT, "docs/ops/basemap-tiles.md");
 const BUILDS = "https://build-metadata.protomaps.dev/builds.json";
 const BUILD_HOST = "https://build.protomaps.com";
-const DEFAULTS = { maxzoom: "10", bucket: "umbel-tiles", key: "basemap.pmtiles" };
+const DEFAULTS = { maxzoom: "10", bucket: "seply-tiles", key: "basemap.pmtiles" };
 
 const [command, ...rest] = process.argv.slice(2);
 const flags = Object.fromEntries(rest.filter((a) => a.startsWith("--")).map((a) => a.slice(2).split(/=(.*)/s).slice(0, 2)));

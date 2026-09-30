@@ -1,4 +1,4 @@
-// React Flow always puts `light` or `dark` on its container. @umbel/ui reads
+// React Flow always puts `light` or `dark` on its container. @seply/ui reads
 // those classes as theme islands (`.light` forces the light palette), so the
 // canvas must carry the theme it sits in, or it would force its own. This
 // follows the nearest `.dark` / `.light` ancestor: read on mount, and again

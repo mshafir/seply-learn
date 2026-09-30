@@ -1,8 +1,8 @@
-# Umbel Learn
+# Seply Learn
 
-A collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject. Start from an AI chat, a few files or just a prompt. Umbel Learn breaks the material into well-defined **Concepts**, links them, and lets you look at them through several **Views**: a learning path, a comparison table, cause and effect, a timeline, a map, and more. Humans and AI agents curate it together, and every AI change is a suggestion you accept or dismiss.
+A collaborative, LLM-assisted tool for building, curating and exploring **Expeditions**: bodies of knowledge on one subject. Start from an AI chat, a few files or just a prompt. Seply Learn breaks the material into well-defined **Concepts**, links them, and lets you look at them through several **Views**: a learning path, a comparison table, cause and effect, a timeline, a map, and more. Humans and AI agents curate it together, and every AI change is a suggestion you accept or dismiss.
 
-> **Status:** planning complete; the build is starting. "Umbel Learn" is a placeholder name (Umbel is the umbrella for separate LLM tools: Learn, Work, Plan).
+> **Status:** planning complete; the build is starting. Seply is the umbrella for separate LLM tools (Learn, Work, Plan); branding is still a placeholder. Previously called Umbel Learn ([ADR 0002](docs/adr/0002-rename-to-seply.md)).
 
 ## What's here
 

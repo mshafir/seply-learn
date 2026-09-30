@@ -7,7 +7,7 @@
 // are the offline mark queue and the rest are a cache for offline reading;
 // an anonymous reader's marks are all pending until they sign in and the
 // marks merge into their account.
-import type { PositionMark, ReadingMark, ViewSettingsMark } from "@umbel/domain"
+import type { PositionMark, ReadingMark, ViewSettingsMark } from "@seply/domain"
 
 export type MarkRecord =
   | { kind: "reading"; mark: ReadingMark; pending: boolean }
@@ -71,7 +71,7 @@ function done(tx: IDBTransaction): Promise<void> {
 }
 
 export type IndexedDbReaderStoreOptions = {
-  /** Database name (default "umbel-reader"). */
+  /** Database name (default "seply-reader"). */
   name?: string
   /** The IDBFactory (default `globalThis.indexedDB`; tests pass fake-indexeddb's). */
   indexedDB?: IDBFactory
@@ -83,7 +83,7 @@ export class IndexedDbReaderStore implements ReaderStore {
 
   constructor(opts: IndexedDbReaderStoreOptions = {}) {
     const factory = opts.indexedDB ?? globalThis.indexedDB
-    const open = factory.open(opts.name ?? "umbel-reader", 1)
+    const open = factory.open(opts.name ?? "seply-reader", 1)
     open.onupgradeneeded = () => {
       if (!open.result.objectStoreNames.contains(STORE))
         open.result.createObjectStore(STORE, { keyPath: ["scope", "key"] })

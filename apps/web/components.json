@@ -14,8 +14,8 @@
     "components": "@/components",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@umbel/ui/lib/utils",
-    "ui": "@umbel/ui/components"
+    "utils": "@seply/ui/lib/utils",
+    "ui": "@seply/ui/components"
   },
   "rtl": false,
   "menuColor": "default",

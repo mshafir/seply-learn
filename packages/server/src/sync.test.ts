@@ -10,7 +10,7 @@ import {
   type LoggedOp,
   type Op,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { and, eq } from "drizzle-orm"
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"

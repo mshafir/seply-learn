@@ -1,7 +1,7 @@
 // The View Type definitions (docs/view-types/*.md, part of the spec) bundled
 // at build time, for the View panel's description and "Read the View Type".
 // The candidates/ folder and the template are not View Types readers see.
-import type { ViewTypeId } from "@umbel/domain"
+import type { ViewTypeId } from "@seply/domain"
 
 const files = import.meta.glob<string>("../../../../docs/view-types/*.md", {
   query: "?raw",

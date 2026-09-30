@@ -2,7 +2,7 @@
 // migrations applied, and a tiny cookie jar. Not exported from the package.
 import { PGlite } from "@electric-sql/pglite"
 import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm"
-import { schema } from "@umbel/domain"
+import { schema } from "@seply/domain"
 import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import { Hono } from "hono"

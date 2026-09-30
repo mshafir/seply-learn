@@ -1,7 +1,7 @@
 // Search queries as typed: free text plus `#tag` filters (spec §2.8). The
 // server parses global queries the same way; inside an Expedition the
 // Concepts already loaded are matched here, which also works offline.
-import type { ConceptRow } from "@umbel/sync"
+import type { ConceptRow } from "@seply/sync"
 
 export type ParsedQuery = { terms: string[]; tags: string[] }
 

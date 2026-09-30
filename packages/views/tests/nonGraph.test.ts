@@ -2,7 +2,7 @@
 // View's own placement/order/hide/fold overrides, and Reading status), the
 // Quadrant's grid, and the Rates View's log axis.
 import { afterAll, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
 import { openLiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";
 import type { Concept, Expedition, View } from "../src/model.ts";

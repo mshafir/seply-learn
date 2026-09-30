@@ -3,16 +3,16 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 
 const allowed = {
-  "@umbel/config": [],
-  "@umbel/domain": [],
-  "@umbel/ui": [],
-  "@umbel/sync": ["@umbel/domain"],
-  "@umbel/views": ["@umbel/domain", "@umbel/sync"],
-  "@umbel/ai": ["@umbel/domain"],
-  "@umbel/server": ["@umbel/domain", "@umbel/ai"],
-  web: ["@umbel/ui", "@umbel/views", "@umbel/sync", "@umbel/domain"],
-  "@umbel/worker": ["@umbel/server", "@umbel/ai", "@umbel/domain"],
-  "@umbel/server-node": ["@umbel/server", "@umbel/ai", "@umbel/domain"],
+  "@seply/config": [],
+  "@seply/domain": [],
+  "@seply/ui": [],
+  "@seply/sync": ["@seply/domain"],
+  "@seply/views": ["@seply/domain", "@seply/sync"],
+  "@seply/ai": ["@seply/domain"],
+  "@seply/server": ["@seply/domain", "@seply/ai"],
+  web: ["@seply/ui", "@seply/views", "@seply/sync", "@seply/domain"],
+  "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain"],
+  "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain"],
 };
 let bad = 0;
 for (const root of ["apps", "packages"]) {
@@ -20,7 +20,7 @@ for (const root of ["apps", "packages"]) {
     const file = `${root}/${dir}/package.json`;
     if (!existsSync(file)) continue;
     const pkg = JSON.parse(readFileSync(file, "utf8"));
-    const deps = Object.keys(pkg.dependencies ?? {}).filter((d) => d.startsWith("@umbel/"));
+    const deps = Object.keys(pkg.dependencies ?? {}).filter((d) => d.startsWith("@seply/"));
     const ok = allowed[pkg.name];
     if (!ok) {
       console.error(`${pkg.name}: not in the dependency rule; add it to scripts/check-deps.mjs`);

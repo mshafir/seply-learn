@@ -1,5 +1,5 @@
 // The canvas pane: the selected View of the Expedition, drawn by
-// @umbel/views from the sync client's live collections. Every change (a local
+// @seply/views from the sync client's live collections. Every change (a local
 // edit, a pull, a rebase) re-derives the View; switching Views tweens.
 //
 // - `viewId` is the View the rail has selected (the screen picks it the same
@@ -16,12 +16,12 @@
 //   read"); `onMarkKnown` is the Learning path's "I know …".
 // - `matches` (search inside the Expedition) dims every other Concept.
 // - The Map View's tiles come from the build's env (lib/basemap.ts).
-import type { EngineCollections } from "@umbel/sync"
+import type { EngineCollections } from "@seply/sync"
 import {
   ExpeditionView,
   type ReaderInteraction,
   type ViewStatusChip,
-} from "@umbel/views"
+} from "@seply/views"
 import { basemap } from "@/lib/basemap"
 
 export type CanvasSlotProps = {

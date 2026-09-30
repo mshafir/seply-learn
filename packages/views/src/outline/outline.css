@@ -1,39 +1,39 @@
 /*
  * Outline View (Outline.tsx). Imported by canvas.css; every colour is an
- * @umbel/ui token through a --umbel-* variable, so both themes follow.
+ * @seply/ui token through a --seply-* variable, so both themes follow.
  */
 :where(:root, .light, .dark) {
-  --umbel-outline-bg: var(--background);
-  --umbel-outline-fg: var(--foreground);
-  --umbel-outline-muted: var(--muted-foreground);
-  --umbel-outline-hover: var(--accent);
-  --umbel-outline-selected: color-mix(in oklch, var(--primary) 10%, var(--background));
-  --umbel-outline-selected-edge: var(--primary);
-  --umbel-outline-rule: var(--border);
-  --umbel-outline-count-bg: var(--muted);
+  --seply-outline-bg: var(--background);
+  --seply-outline-fg: var(--foreground);
+  --seply-outline-muted: var(--muted-foreground);
+  --seply-outline-hover: var(--accent);
+  --seply-outline-selected: color-mix(in oklch, var(--primary) 10%, var(--background));
+  --seply-outline-selected-edge: var(--primary);
+  --seply-outline-rule: var(--border);
+  --seply-outline-count-bg: var(--muted);
 }
 
-.umbel-outline {
+.seply-outline {
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
   padding: 1.5rem;
-  background: var(--umbel-outline-bg);
-  color: var(--umbel-outline-fg);
+  background: var(--seply-outline-bg);
+  color: var(--seply-outline-fg);
   font-family: var(--font-sans);
 }
-.umbel-outline ul {
+.seply-outline ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.umbel-outline__tree {
+.seply-outline__tree {
   max-width: 48rem;
 }
-.umbel-outline__tree > li + li {
+.seply-outline__tree > li + li {
   margin-top: 0.25rem;
 }
-.umbel-outline__line {
+.seply-outline__line {
   display: flex;
   align-items: flex-start;
   gap: 0.375rem;
@@ -42,18 +42,18 @@
   cursor: pointer;
   transition: opacity 150ms;
 }
-.umbel-outline__line:hover {
-  background: var(--umbel-outline-hover);
+.seply-outline__line:hover {
+  background: var(--seply-outline-hover);
 }
-.umbel-outline__line--selected,
-.umbel-outline__line--selected:hover {
-  background: var(--umbel-outline-selected);
-  box-shadow: inset 3px 0 0 var(--umbel-outline-selected-edge);
+.seply-outline__line--selected,
+.seply-outline__line--selected:hover {
+  background: var(--seply-outline-selected);
+  box-shadow: inset 3px 0 0 var(--seply-outline-selected-edge);
 }
-.umbel-outline__line--dim {
+.seply-outline__line--dim {
   opacity: 0.3;
 }
-.umbel-outline__chevron {
+.seply-outline__chevron {
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -63,36 +63,36 @@
   border: 0;
   border-radius: 0.25rem;
   background: transparent;
-  color: var(--umbel-outline-muted);
+  color: var(--seply-outline-muted);
   cursor: pointer;
 }
-.umbel-outline__chevron:hover {
-  color: var(--umbel-outline-fg);
+.seply-outline__chevron:hover {
+  color: var(--seply-outline-fg);
 }
-.umbel-outline__chevron--none {
+.seply-outline__chevron--none {
   visibility: hidden;
 }
-.umbel-outline__chevron-icon {
+.seply-outline__chevron-icon {
   width: 1rem;
   height: 1rem;
   transition: transform 150ms;
 }
-.umbel-outline__chevron-icon--open {
+.seply-outline__chevron-icon--open {
   transform: rotate(90deg);
 }
-.umbel-outline__icon {
+.seply-outline__icon {
   flex-shrink: 0;
   width: 1rem;
   height: 1rem;
   margin-top: 0.125rem;
 }
-.umbel-outline__text {
+.seply-outline__text {
   display: flex;
   flex-direction: column;
   min-width: 0;
   gap: 0.125rem;
 }
-.umbel-outline__title {
+.seply-outline__title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -101,52 +101,52 @@
   font-weight: 500;
   line-height: 1.35;
 }
-.umbel-outline__line--topic .umbel-outline__title {
+.seply-outline__line--topic .seply-outline__title {
   font-size: 1.0625rem;
   font-weight: 600;
 }
-.umbel-outline__summary {
+.seply-outline__summary {
   font-size: 0.875rem;
   line-height: 1.4;
-  color: var(--umbel-outline-muted);
+  color: var(--seply-outline-muted);
 }
-.umbel-outline__count {
+.seply-outline__count {
   padding: 0 0.375rem;
   border-radius: 9999px;
-  background: var(--umbel-outline-count-bg);
+  background: var(--seply-outline-count-bg);
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--umbel-outline-muted);
+  color: var(--seply-outline-muted);
 }
-.umbel-outline__folded {
+.seply-outline__folded {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
   margin-top: 0.125rem;
 }
-.umbel-outline__chip {
+.seply-outline__chip {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0 0.5rem;
-  border: 1px solid var(--umbel-outline-rule);
+  border: 1px solid var(--seply-outline-rule);
   border-radius: 9999px;
   background: transparent;
   font: inherit;
   font-size: 0.75rem;
-  color: var(--umbel-outline-fg);
+  color: var(--seply-outline-fg);
   cursor: pointer;
 }
-.umbel-outline__chip--selected {
-  border-color: var(--umbel-outline-selected-edge);
-  background: var(--umbel-outline-selected);
+.seply-outline__chip--selected {
+  border-color: var(--seply-outline-selected-edge);
+  background: var(--seply-outline-selected);
 }
-.umbel-outline__unsorted {
+.seply-outline__unsorted {
   margin-top: 1rem !important;
   padding-top: 0.75rem;
-  border-top: 1px dashed var(--umbel-outline-rule);
+  border-top: 1px dashed var(--seply-outline-rule);
 }
-.umbel-outline__empty {
-  color: var(--umbel-outline-muted);
+.seply-outline__empty {
+  color: var(--seply-outline-muted);
   font-size: 0.875rem;
 }

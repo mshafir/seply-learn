@@ -4,8 +4,8 @@
 import { LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react"
 import { useLocation } from "wouter"
 
-import { Avatar, AvatarFallback } from "@umbel/ui/components/avatar"
-import { Button } from "@umbel/ui/components/button"
+import { Avatar, AvatarFallback } from "@seply/ui/components/avatar"
+import { Button } from "@seply/ui/components/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +16,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@umbel/ui/components/dropdown-menu"
-import { useTheme, type Theme } from "@umbel/ui/components/theme-provider"
-import { toast } from "@umbel/ui/components/toast"
+} from "@seply/ui/components/dropdown-menu"
+import { useTheme, type Theme } from "@seply/ui/components/theme-provider"
+import { toast } from "@seply/ui/components/toast"
 
 import { useSession } from "@/lib/session.ts"
 

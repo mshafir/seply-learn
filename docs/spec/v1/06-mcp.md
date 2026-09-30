@@ -36,7 +36,7 @@ All output is compact markdown with ids, not raw JSON dumps.
 - **Not exposed in v1:** reading state, history, undo and restore, Fork, sharing, Visibility.
 - **Tool definitions and validation are shared in-process** with the curator agent's tools (`packages/ai`), so MCP and in-app AI can't drift.
 
-## 6.3 The `umbel-learn` skill
+## 6.3 The `seply-learn` skill
 
 - **One Agent Skill,** shipped as a Claude Code plugin through a repo marketplace, and mirrored in the server's `instructions` and tool descriptions for hosted chat clients. It covers:
   - how to decompose Sources into right-sized Concepts, Relationships and provenance

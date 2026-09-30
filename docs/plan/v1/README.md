@@ -1,4 +1,4 @@
-# Umbel Learn v1: implementation game plan
+# Seply Learn v1: implementation game plan
 
 How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implementation game plan](../../wayfinder/mindmaps-v1/tickets/19-implementation-game-plan.md). The work packages are in [work-packages.md](work-packages.md), and `make_issues.py` turns them into GitHub Issues.
 
@@ -23,7 +23,7 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 ## Repo conventions (set up in WP-0.1)
 
 - **Root `CLAUDE.md`:**
-  - what Umbel Learn is
+  - what Seply Learn is
   - links to [`CONTEXT.md`](../../../CONTEXT.md), the spec, `docs/view-types/` and this plan
   - the one-way package dependency rule (`domain ← sync ← views/ui ← web`; `domain ← server/ai`)
   - "prebuilt shadcn/Base UI first; every divergence goes in `packages/ui/DIVERGENCES.md`"
@@ -51,18 +51,19 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | **M2** | Read | All 11 View Types; View panel (shared and personal settings); Reading status and Continue reading; search; thumbnails and Library; offline read cache (PWA) |
 | **M3** | Create | Paste a chat or upload files → skim → Choose Views → the curator agent builds Views one by one, streaming in, with failure and retry; overviews and articles; bring-your-own-key and instance key modes; web push |
 | **M4** | Grow and collaborate | Live presence and cursors; History with undo, view as of, restore; editing in place and Merge; per-View overrides; Proposals and the Suggestions tab; Grow asks and Concept actions |
-| **M5** | Share | Roles and invites (email, link, inbox); Visibility and live public links; Fork; Trash; export and import; the MCP server, OAuth and the `umbel-learn` skill |
+| **M5** | Share | Roles and invites (email, link, inbox); Visibility and live public links; Fork; Trash; export and import; the MCP server, OAuth and the `seply-learn` skill |
 | **M6** | Self-host | A Node image with docker compose: in-process rooms + LISTEN/NOTIFY, pg-boss, volume/S3 blobs, optional SMTP, email+password auth; PMTiles instructions |
 
 Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
 
 ## Owner checklist before M0 (a task only the owner can do)
 
-- [x] **GitHub:** `mshafir/umbel-learn` (**public**), pushed 2026-09-28. Personal content is excluded by `.gitignore`, and family and health specifics in the docs were redacted. Keep new fixtures synthetic or public.
-- [ ] **Cloudflare:** a Workers Paid account, plus an API token for CI (Workers, R2, Durable Objects, Workflows, Hyperdrive).
-- [ ] **Neon:** a project, plus an API key for CI branch creation.
-- [ ] **Google OAuth:** a client ID and secret (hosted login).
-- [x] **Email:** Resend, sending from `mail.umbel.dev` (DNS in Cloud DNS, zone `umbel-dev`). `RESEND_API_KEY` is a sending-only key; `EMAIL_FROM` is a repo variable.
+- [x] **GitHub:** `mshafir/seply-learn` (**public**; renamed from `umbel-learn`), pushed 2026-09-28. Personal content is excluded by `.gitignore`, and family and health specifics in the docs were redacted. Keep new fixtures synthetic or public.
+- [x] **Cloudflare:** a Workers Paid account, plus an API token for CI (Workers, R2, Durable Objects, Workflows, Hyperdrive).
+- [x] **Neon:** a project, plus an API key for CI branch creation.
+- [x] **Google OAuth:** a client ID and secret (hosted login).
+- [x] **Domain:** `seply.app`, registered with Cloudflare Registrar (zone on Cloudflare); production at `learn.seply.app` ([ADR 0002](../../adr/0002-rename-to-seply.md)).
+- [ ] **Email:** Resend, sending from `mail.seply.app` (DNS in the Cloudflare zone `seply.app`). `RESEND_API_KEY` is a sending-only key; `EMAIL_FROM` is a repo variable.
 - [x] **AI keys:** a Vercel AI Gateway key (`AI_GATEWAY_API_KEY`) for development and the hosted instance key mode. Set a spend limit on it in the Vercel dashboard; per-user caps are phase 2.
 
 ## Unlock order

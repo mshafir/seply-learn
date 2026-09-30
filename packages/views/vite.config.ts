@@ -1,6 +1,6 @@
 // Dev harness only; the package itself ships as source. Tailwind is here
-// because the harness plays the app's part and loads @umbel/ui's tokens
-// (globals.css), which the canvas's --umbel-* variables point at.
+// because the harness plays the app's part and loads @seply/ui's tokens
+// (globals.css), which the canvas's --seply-* variables point at.
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";

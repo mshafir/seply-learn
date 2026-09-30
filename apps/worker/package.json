@@ -1,5 +1,5 @@
 {
-  "name": "@umbel/worker",
+  "name": "@seply/worker",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -16,15 +16,15 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@umbel/ai": "workspace:*",
-    "@umbel/domain": "workspace:*",
-    "@umbel/server": "workspace:*",
+    "@seply/ai": "workspace:*",
+    "@seply/domain": "workspace:*",
+    "@seply/server": "workspace:*",
     "hono": "^4.13.10"
   },
   "devDependencies": {
     "@eslint/js": "^10",
     "@types/node": "^24",
-    "@umbel/config": "workspace:*",
+    "@seply/config": "workspace:*",
     "eslint": "^10",
     "globals": "^17",
     "typescript": "~6",

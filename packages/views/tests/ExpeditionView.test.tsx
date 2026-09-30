@@ -5,8 +5,8 @@
 // Views swaps renderers.
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
-import { builtinId, relKey } from "@umbel/domain";
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
+import { builtinId, relKey } from "@seply/domain";
 import optionsFile from "../fixtures/options.json" with { type: "json" };
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { ExpeditionView } from "../src/ExpeditionView.tsx";
@@ -101,14 +101,14 @@ describe("Comparison Table on live collections", () => {
   it('draws bands, "?" cells and the must-have fail tint, and follows a pull', async () => {
     const f = live(optionsFile);
     const { container, getByText } = render(<ExpeditionView collections={f.collections} onSelect={noop} />);
-    const bands = [...container.querySelectorAll(".umbel-band-head")].map((b) => b.textContent);
+    const bands = [...container.querySelectorAll(".seply-band-head")].map((b) => b.textContent);
     expect(bands).toEqual(["Facts", "Must-haves", "Nice-to-haves"]);
     const rowOf = (title: string) => getByText(title).closest("tr")!;
-    expect(rowOf("Kettleworks Duo").className).toContain("umbel-table__row--fails");
-    expect(rowOf("Brewline 40").className).toContain("umbel-table__row--chosen");
-    expect(rowOf("Crema Compact").className).not.toContain("umbel-table__row--fails");
-    expect(rowOf("Crema Compact").querySelectorAll(".umbel-table__unknown")).toHaveLength(2);
-    expect(container.querySelector(".umbel-table__dropped")?.textContent).toContain("Quiet on the open-plan floor");
+    expect(rowOf("Kettleworks Duo").className).toContain("seply-table__row--fails");
+    expect(rowOf("Brewline 40").className).toContain("seply-table__row--chosen");
+    expect(rowOf("Crema Compact").className).not.toContain("seply-table__row--fails");
+    expect(rowOf("Crema Compact").querySelectorAll(".seply-table__unknown")).toHaveLength(2);
+    expect(container.querySelector(".seply-table__dropped")?.textContent).toContain("Quiet on the open-plan floor");
 
     act(() =>
       f.pull([
@@ -119,8 +119,8 @@ describe("Comparison Table on live collections", () => {
         },
       ]),
     );
-    await waitFor(() => expect(rowOf("Crema Compact").className).toContain("umbel-table__row--fails"));
-    expect(rowOf("Crema Compact").querySelectorAll(".umbel-table__unknown")).toHaveLength(1);
+    await waitFor(() => expect(rowOf("Crema Compact").className).toContain("seply-table__row--fails"));
+    expect(rowOf("Crema Compact").querySelectorAll(".seply-table__unknown")).toHaveLength(1);
     expect(rowOf("Crema Compact").textContent).toContain("a 1.8 L tank");
   });
 
@@ -136,15 +136,15 @@ describe("Comparison Table on live collections", () => {
     try {
       const f = live(optionsFile);
       const { container } = render(<ExpeditionView collections={f.collections} onSelect={noop} />);
-      const frame = container.querySelector<HTMLElement>(".umbel-table__frame")!;
-      const scroller = container.querySelector<HTMLElement>(".umbel-table__scroll")!;
+      const frame = container.querySelector<HTMLElement>(".seply-table__frame")!;
+      const scroller = container.querySelector<HTMLElement>(".seply-table__scroll")!;
       await waitFor(() => expect(frame.dataset.moreRight).toBe(""));
       scroller.scrollLeft = 600;
       act(() => void scroller.dispatchEvent(new Event("scroll")));
       await waitFor(() => expect(frame.dataset.moreRight).toBeUndefined());
       // Every cell's content wraps at a cap rather than widening its column.
-      const cells = container.querySelectorAll(".umbel-table__cell");
-      expect(container.querySelectorAll(".umbel-table__cell > .umbel-table__cell-inner")).toHaveLength(cells.length);
+      const cells = container.querySelectorAll(".seply-table__cell");
+      expect(container.querySelectorAll(".seply-table__cell > .seply-table__cell-inner")).toHaveLength(cells.length);
     } finally {
       for (const [k, d] of Object.entries(was)) if (d) Object.defineProperty(proto, k, d);
     }
@@ -159,7 +159,7 @@ describe("View switching", () => {
     await waitFor(() => expect(drawn(container).size).toBe(24), { timeout: 5000 });
 
     rerender(<ExpeditionView {...props} viewId={f.view("models")} />);
-    const shown = () => container.querySelector<HTMLElement>(".umbel-view");
+    const shown = () => container.querySelector<HTMLElement>(".seply-view");
     expect(shown()?.dataset.viewType).toBe("comparison-table");
     expect(container.querySelector(".react-flow")).toBeNull();
 

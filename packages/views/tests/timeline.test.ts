@@ -1,8 +1,8 @@
 // The Timeline View as data: fuzzy dates at their own precision, lanes and
 // the opening window, on the synthetic trip and the compute sample.
 import { afterEach, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
-import tripFile from "@umbel/domain/fixtures/trip.json" with { type: "json" };
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
+import tripFile from "@seply/domain/fixtures/trip.json" with { type: "json" };
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";
 import { readExpedition } from "../src/live.ts";
 import { formatCalendarDate, formatWhen, parseCalendarDate, timelineModel } from "../src/timeline/items.ts";

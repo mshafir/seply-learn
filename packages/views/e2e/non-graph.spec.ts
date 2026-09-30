@@ -37,7 +37,7 @@ test("the Outline opens and closes lines, and selects without toggling", async (
   await page.getByRole("button", { name: "Open Inside a transformer" }).click();
   await expect(inside).toHaveAttribute("aria-expanded", "true");
   await page.locator('[data-concept] >> text="Compute economics"').click();
-  await expect(page.locator(".umbel-outline__line--selected")).toContainText("Compute economics");
+  await expect(page.locator(".seply-outline__line--selected")).toContainText("Compute economics");
   await expect(page).toHaveURL(/#outline\/t-econ$/);
 });
 
@@ -45,7 +45,7 @@ test("switching from a canvas View to the Rates and back", async ({ page }) => {
   await page.goto("/?instant#learn");
   await expect(page.locator("[data-settled]")).toBeVisible();
   await page.getByRole("button", { name: "Rates & estimates" }).click();
-  await expect(page.locator('.umbel-view[data-view-type="rates"]')).toBeVisible();
+  await expect(page.locator('.seply-view[data-view-type="rates"]')).toBeVisible();
   await expect(page.locator(".react-flow")).toHaveCount(0);
   await page.getByRole("button", { name: "Learning path" }).click();
   await expect(page.locator("[data-settled]")).toBeVisible();

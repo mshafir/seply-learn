@@ -7,10 +7,10 @@ import * as React from "react"
 import { CloudOffIcon, LoaderCircleIcon } from "lucide-react"
 import { Link } from "wouter"
 
-import { UmbelGlyph } from "@umbel/ui/components/brand"
-import { Button, buttonVariants } from "@umbel/ui/components/button"
-import { Input } from "@umbel/ui/components/input"
-import { SidebarTrigger } from "@umbel/ui/components/sidebar"
+import { SeplyGlyph } from "@seply/ui/components/brand"
+import { Button, buttonVariants } from "@seply/ui/components/button"
+import { Input } from "@seply/ui/components/input"
+import { SidebarTrigger } from "@seply/ui/components/sidebar"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import type { SyncHealth } from "@/lib/sync.ts"
@@ -49,7 +49,7 @@ export function ExpeditionHeader({
         aria-label="Library"
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
-        <UmbelGlyph className="size-6" />
+        <SeplyGlyph className="size-6" />
       </Link>
       <span aria-hidden className="text-muted-foreground">
         /

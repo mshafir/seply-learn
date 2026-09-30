@@ -24,7 +24,7 @@ concurrency:
 
 env:
   PR: ${{ github.event.pull_request.number }}
-  WORKER_PREVIEW: umbel-pr-${{ github.event.pull_request.number }}
+  WORKER_PREVIEW: seply-pr-${{ github.event.pull_request.number }}
   NEON_BRANCH_PREVIEW: preview/pr-${{ github.event.pull_request.number }}
 
 jobs:
@@ -91,7 +91,7 @@ jobs:
       - name: Apply database migrations
         env:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
-        run: pnpm --filter @umbel/server db:migrate
+        run: pnpm --filter @seply/server db:migrate
 
       - name: Point a Hyperdrive config at the branch
         working-directory: apps/worker
@@ -171,7 +171,7 @@ jobs:
           REDIRECT_URI: ${{ steps.signin.outputs.redirect_uri }}
         with:
           script: |
-            const marker = "<!-- umbel-preview -->"
+            const marker = "<!-- seply-preview -->"
             const body = [
               marker,
               `**Preview:** ${process.env.URL}`,
@@ -231,7 +231,7 @@ jobs:
         uses: actions/github-script@v9
         with:
           script: |
-            const marker = "<!-- umbel-preview -->"
+            const marker = "<!-- seply-preview -->"
             const { owner, repo } = context.repo
             const issue_number = context.payload.pull_request.number
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
@@ -280,20 +280,20 @@ jobs:
       - name: Apply database migrations
         env:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
-        run: pnpm --filter @umbel/server db:migrate
+        run: pnpm --filter @seply/server db:migrate
 
       - name: Point the production Hyperdrive config at it
         working-directory: apps/worker
         env:
           DATABASE_URL: ${{ steps.neon.outputs.db_url }}
-        run: node scripts/ci.mjs hyperdrive-upsert umbel-production
+        run: node scripts/ci.mjs hyperdrive-upsert seply-production
 
       - name: Work out the Worker URLs
         id: urls
         working-directory: apps/worker
         env:
           PRODUCTION_DOMAIN: ${{ vars.PRODUCTION_DOMAIN }}
-        run: node scripts/ci.mjs worker-urls umbel-learn
+        run: node scripts/ci.mjs worker-urls seply-learn
 
       # The zone must be on Cloudflare, and the token needs Zone: Read, DNS: Edit and
       # Workers Routes: Edit on it (docs/ops/deploy.md).

@@ -8,7 +8,7 @@
 // refused. A reloaded tab picks up every pending op of its user for that
 // Expedition, including another open tab's; pushing an op twice is harmless
 // (the server is idempotent by op id).
-import type { Op } from "@umbel/domain"
+import type { Op } from "@seply/domain"
 import type { ChangeMeta, OpenChange, PendingSnapshot } from "./engine.ts"
 
 /** Pending ops belong to one user editing one Expedition. */
@@ -71,7 +71,7 @@ function done(tx: IDBTransaction): Promise<void> {
 }
 
 export type IndexedDbPendingStoreOptions = {
-  /** Database name (default "umbel-sync"). */
+  /** Database name (default "seply-sync"). */
   name?: string
   /** The IDBFactory (default `globalThis.indexedDB`; tests pass fake-indexeddb's). */
   indexedDB?: IDBFactory
@@ -90,7 +90,7 @@ export class IndexedDbPendingStore implements PendingStore {
 
   constructor(private readonly opts: IndexedDbPendingStoreOptions = {}) {
     const factory = opts.indexedDB ?? globalThis.indexedDB
-    const open = factory.open(opts.name ?? "umbel-sync", DB_VERSION)
+    const open = factory.open(opts.name ?? "seply-sync", DB_VERSION)
     open.onupgradeneeded = () => {
       const db = open.result
       if (!db.objectStoreNames.contains(OPS))

@@ -1,6 +1,6 @@
-// @umbel/views: see README.md for this package's contract.
+// @seply/views: see README.md for this package's contract.
 
-// TODO(M1): replace with @umbel/domain types
+// TODO(M1): replace with @seply/domain types
 export * from "./model.ts";
 
 // Scope and structure
@@ -66,7 +66,7 @@ export {
   type Overlay,
 } from "./overlay.ts";
 
-// Live data: an Expedition's @umbel/sync collections → what the Views draw
+// Live data: an Expedition's @seply/sync collections → what the Views draw
 export { expeditionFromRows, type ExpeditionRows } from "./data.ts";
 export { readExpedition, useLiveExpedition, type ExpeditionCollections } from "./live.ts";
 

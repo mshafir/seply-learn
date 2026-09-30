@@ -61,7 +61,7 @@
     --color-foreground: var(--foreground);
     --color-background: var(--background);
 
-    /* Umbel tokens (spec 7.2). */
+    /* Seply tokens (spec 7.2). */
     --color-suggested: var(--suggested);
     --color-suggested-text: var(--suggested-text);
     --color-success: var(--success);

@@ -142,7 +142,7 @@ describe("test credentials", () => {
   it("are off on any non-local URL, even with the flag set", async () => {
     const env = {
       ...localEnv,
-      BETTER_AUTH_URL: "https://umbel-learn.example.workers.dev",
+      BETTER_AUTH_URL: "https://seply-learn.example.workers.dev",
     }
     expect(readConfig(env).testCredentials).toBe(false)
     const app = testApp(env, await testDb())
@@ -155,14 +155,14 @@ describe("test credentials", () => {
 // sign-in, Google calls back to production, production hands the encrypted
 // profile back to the preview, and the preview creates the session.
 describe("Google sign-in through the OAuth proxy", () => {
-  const PROD = "https://umbel-learn.example.workers.dev"
-  const PREVIEW = "https://umbel-pr-7.example.workers.dev"
+  const PROD = "https://seply-learn.example.workers.dev"
+  const PREVIEW = "https://seply-pr-7.example.workers.dev"
   const shared: ServerEnv = {
     BETTER_AUTH_SECRET: SECRET,
     GOOGLE_CLIENT_ID: "client-id.apps.googleusercontent.com",
     GOOGLE_CLIENT_SECRET: "client-secret",
     AUTH_PROXY_URL: PROD,
-    AUTH_TRUSTED_ORIGINS: "https://umbel-pr-*.example.workers.dev",
+    AUTH_TRUSTED_ORIGINS: "https://seply-pr-*.example.workers.dev",
   }
   const prodEnv = { ...shared, BETTER_AUTH_URL: PROD }
   const previewEnv = { ...shared, BETTER_AUTH_URL: PREVIEW }

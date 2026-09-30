@@ -75,7 +75,7 @@ export default defineConfig({
             // Test-only settings. AUTH_TEST_CREDENTIALS turns on email + password
             // sign-in; the server ignores it on any non-localhost URL.
             command: [
-              "pnpm --filter @umbel/worker exec wrangler dev",
+              "pnpm --filter @seply/worker exec wrangler dev",
               `--port ${API_PORT}`,
               `--var BETTER_AUTH_URL:http://localhost:${API_PORT}`,
               "--var BETTER_AUTH_SECRET:e2e-only-secret-not-used-anywhere-else",

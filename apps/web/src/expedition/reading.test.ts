@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { ConceptRow, RelationshipRow, SourceRow } from "@umbel/sync"
+import type { ConceptRow, RelationshipRow, SourceRow } from "@seply/sync"
 
 import {
   articleSectionsOf,

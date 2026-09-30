@@ -1,8 +1,8 @@
-// TODO(M1): replace with @umbel/domain types
+// TODO(M1): replace with @seply/domain types
 //
 // Temporary Expedition and View shapes, ported from the prototype's
 // `prototypes/sample-graphs/src/lib/types.ts` (the sample-graph file format).
-// `@umbel/domain` is being built in parallel (WP-0.4); once it lands, these
+// `@seply/domain` is being built in parallel (WP-0.4); once it lands, these
 // types are deleted and every import points at the domain package instead.
 // The prototype called an Expedition a "Graph"; this file uses CONTEXT.md's words.
 

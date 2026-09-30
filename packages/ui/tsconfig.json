@@ -10,7 +10,7 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@umbel/ui/*": ["./src/*"]
+      "@seply/ui/*": ["./src/*"]
     }
   },
   "include": ["."],

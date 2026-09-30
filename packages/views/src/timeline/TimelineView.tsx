@@ -78,10 +78,10 @@ export function TimelineView({ expedition, view, selected, onSelect, matches, co
   }, [selected, model, items]);
 
   return (
-    <div className="umbel-timeline" data-testid="timeline">
-      <div className="umbel-timeline__chart" ref={host} />
+    <div className="seply-timeline" data-testid="timeline">
+      <div className="seply-timeline__chart" ref={host} />
       {model.undated.length > 0 && (
-        <p className="umbel-timeline__undated">
+        <p className="seply-timeline__undated">
           {model.undated.length} {model.undated.length === 1 ? "Concept has" : "Concepts have"} no date and{" "}
           {model.undated.length === 1 ? "isn't" : "aren't"} shown.
         </p>
@@ -99,21 +99,21 @@ function toItem(i: TimelineItem, { dim, read }: { dim: boolean; read: boolean })
     type: i.type,
     content: label(i, read),
     className: [
-      "umbel-tl",
-      i.fuzzy && "umbel-tl--fuzzy",
-      i.ongoing && "umbel-tl--ongoing",
-      dim && "umbel-tl--dim",
+      "seply-tl",
+      i.fuzzy && "seply-tl--fuzzy",
+      i.ongoing && "seply-tl--ongoing",
+      dim && "seply-tl--dim",
     ]
       .filter(Boolean)
       .join(" "),
-    style: i.color ? `--umbel-item-color: ${i.color}` : undefined,
+    style: i.color ? `--seply-item-color: ${i.color}` : undefined,
   } as unknown as DataItem;
 }
 
 /** An item's label, built as DOM (never HTML strings: titles are user text). */
 function label(i: TimelineItem, read: boolean): HTMLElement {
   const el = document.createElement("span");
-  el.className = "umbel-tl-label";
+  el.className = "seply-tl-label";
   el.dataset.conceptId = i.conceptId;
   el.title = `${i.title} · ${i.when}`;
   if (read) {
@@ -123,7 +123,7 @@ function label(i: TimelineItem, read: boolean): HTMLElement {
   el.append(i.title);
   if (i.fuzzy || i.ongoing) {
     const when = document.createElement("span");
-    when.className = "umbel-tl-when";
+    when.className = "seply-tl-when";
     when.textContent = i.when;
     el.append(when);
   }
@@ -140,7 +140,7 @@ function check(): SVGSVGElement {
   svg.setAttribute("stroke-width", "2");
   svg.setAttribute("stroke-linecap", "round");
   svg.setAttribute("stroke-linejoin", "round");
-  svg.setAttribute("class", "umbel-tl-check");
+  svg.setAttribute("class", "seply-tl-check");
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", "Read");
   svg.dataset.testid = "read-check";

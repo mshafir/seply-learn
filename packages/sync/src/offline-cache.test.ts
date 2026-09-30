@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto"
 import { IDBFactory } from "fake-indexeddb"
-import { builtinId, emptyState, type DomainState } from "@umbel/domain"
+import { builtinId, emptyState, type DomainState } from "@seply/domain"
 import { describe, expect, it } from "vitest"
 import {
   fetchSnapshot,

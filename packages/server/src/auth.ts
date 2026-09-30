@@ -2,7 +2,7 @@
 // (spec §2.6). Google is the hosted sign-in. Previews sign in through
 // production with the OAuth proxy plugin, because Google allows no wildcard
 // redirect URIs (docs/ops/deploy.md).
-import { schema } from "@umbel/domain"
+import { schema } from "@seply/domain"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { betterAuth } from "better-auth/minimal"
 import { oAuthProxy } from "better-auth/plugins/oauth-proxy"

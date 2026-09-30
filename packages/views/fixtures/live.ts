@@ -1,10 +1,10 @@
 // Live fixtures: an Expedition file imported the way a first build is
-// (@umbel/domain's importExpeditionJson), loaded into an @umbel/sync op
+// (@seply/domain's importExpeditionJson), loaded into an @seply/sync op
 // engine, and exposed as its TanStack DB collections. Tests and the harness
 // read the Views from these, as the app does. Deterministic: fixed clock,
 // sequential ULIDs.
-import { importExpeditionJson, makeOps, ulidSequence, type ImportIdMap, type OpBody } from "@umbel/domain";
-import { createEngineCollections, OpEngine, type EngineCollections } from "@umbel/sync";
+import { importExpeditionJson, makeOps, ulidSequence, type ImportIdMap, type OpBody } from "@seply/domain";
+import { createEngineCollections, OpEngine, type EngineCollections } from "@seply/sync";
 import { computeRiskView } from "./index.ts";
 
 const T0 = Date.parse("2026-09-01T00:00:00Z");

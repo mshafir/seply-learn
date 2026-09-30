@@ -5,7 +5,7 @@
 import type * as React from "react"
 import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { cn } from "@umbel/ui/lib/utils"
+import { cn } from "@seply/ui/lib/utils"
 
 import { conceptLinkId } from "@/expedition/reading.ts"
 

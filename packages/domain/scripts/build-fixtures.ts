@@ -1,7 +1,7 @@
 // Regenerates the import fixtures in ../fixtures from the committed prototype
 // graphs, by upgrading them (version 0, the sample-graph format) to our JSON:
 //
-//   mise exec -- pnpm --filter @umbel/domain fixtures
+//   mise exec -- pnpm --filter @seply/domain fixtures
 //
 // Only public material goes here: the hand-made compute sample and the
 // Expedition generated from docs/research/knowledge-graph-learning-tools.md.

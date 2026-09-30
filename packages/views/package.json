@@ -1,5 +1,5 @@
 {
-  "name": "@umbel/views",
+  "name": "@seply/views",
   "version": "0.0.0",
   "type": "module",
   "private": true,
@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@protomaps/basemaps": "^5.7.2",
-    "@umbel/domain": "workspace:*",
-    "@umbel/sync": "workspace:*",
+    "@seply/domain": "workspace:*",
+    "@seply/sync": "workspace:*",
     "@xyflow/react": "^12.12.0",
     "d3-interpolate": "^3.0.1",
     "d3-timer": "^3.0.1",
@@ -46,8 +46,8 @@
     "@types/react-dom": "^19.2.7",
     "@types/topojson-client": "^3.1.5",
     "@types/topojson-specification": "^1.0.5",
-    "@umbel/config": "workspace:*",
-    "@umbel/ui": "workspace:*",
+    "@seply/config": "workspace:*",
+    "@seply/ui": "workspace:*",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10",
     "eslint-plugin-react-hooks": "^7.1.1",

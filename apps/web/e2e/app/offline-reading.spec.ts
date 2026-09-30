@@ -14,14 +14,14 @@ const COMPUTE = fileURLToPath(
 )
 const TITLE = "AI compute & model internals"
 
-/** The Expeditions saved for offline reading (IndexedDB "umbel-offline"). */
+/** The Expeditions saved for offline reading (IndexedDB "seply-offline"). */
 function savedOffline(
   page: Page
 ): Promise<{ expeditionId: string; savedAt: number | null }[]> {
   return page.evaluate(
     () =>
       new Promise((resolve, reject) => {
-        const open = indexedDB.open("umbel-offline")
+        const open = indexedDB.open("seply-offline")
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
           const db = open.result

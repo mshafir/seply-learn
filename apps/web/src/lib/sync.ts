@@ -1,4 +1,4 @@
-// Opens the sync client (@umbel/sync) for one Expedition and keeps it for as
+// Opens the sync client (@seply/sync) for one Expedition and keeps it for as
 // long as the screen is mounted. Pending ops live in IndexedDB, so an edit
 // made offline survives a reload and is pushed once the server is reachable.
 //
@@ -28,7 +28,7 @@ import {
   type PendingSnapshot,
   type PendingStore,
   type SyncClient,
-} from "@umbel/sync"
+} from "@seply/sync"
 
 import { offlineCache, saveForOffline } from "@/lib/offline.ts"
 
@@ -186,7 +186,7 @@ export function useSyncClient(
         {
           expeditionId,
           actor,
-          collections: { id: `umbel:${expeditionId}:${++clientCount}` },
+          collections: { id: `seply:${expeditionId}:${++clientCount}` },
         },
         { state: saved.state, headSeq: saved.entry.headSeq }
       )
@@ -208,7 +208,7 @@ export function useSyncClient(
           transport: fetchTransport(),
           store,
           // Unique per client: StrictMode and remounts briefly overlap two.
-          collections: { id: `umbel:${expeditionId}:${++clientCount}` },
+          collections: { id: `seply:${expeditionId}:${++clientCount}` },
           onError: (e) => {
             if (cancelled) return
             console.warn("sync:", e)

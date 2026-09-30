@@ -3,14 +3,14 @@
 // see concept-panel.tsx) or the View panel (view-panel.tsx).
 import * as React from "react"
 
-import { ScrollArea } from "@umbel/ui/components/scroll-area"
+import { ScrollArea } from "@seply/ui/components/scroll-area"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
-} from "@umbel/ui/components/sheet"
-import type { ReadingState } from "@umbel/domain"
-import type { ConceptRow } from "@umbel/sync"
+} from "@seply/ui/components/sheet"
+import type { ReadingState } from "@seply/domain"
+import type { ConceptRow } from "@seply/sync"
 
 import {
   ArticleContents,

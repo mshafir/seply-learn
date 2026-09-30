@@ -12,7 +12,7 @@ import type {
   RelTypeDefRow,
   SourceRow,
   ViewRow,
-} from "@umbel/sync"
+} from "@seply/sync"
 
 /** Live rows of one Expedition (domain types; tombstoned entities are absent). */
 export type ExpeditionData = {

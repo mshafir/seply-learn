@@ -46,22 +46,22 @@ Each scenario runs twice: once through the collection handlers (`collection.upda
 
 `src/engine.test.ts` covers the op engine itself: pending ops and the synchronous diff, echo acknowledgement (and redelivery), rebase with ours on top, dropping ops that no longer apply, and a local op that doesn't apply.
 
-Run: `mise exec -- pnpm --filter @umbel/sync test`.
+Run: `mise exec -- pnpm --filter @seply/sync test`.
 
 ## Harness page
 
-`pnpm --filter @umbel/sync harness` (Vite, port 5199; dev-only, outside the package's exports). The page renders Concepts from a TanStack DB live query and types bursts into c1's title (50 edits, 10 ms apart by default). It simulates a random push delay, a random echo delay, and "another client's op landed before our push" with a set probability. A `MutationObserver` records every value the title cell shows in the DOM and counts flickers with the same `findFlicker`. You can switch the edit path (handlers or `createTransaction`) and the diff delivery (`sync`, or `deferred` to see the broken wiring flicker). Per the lane rules, the evidence comes from the Vitest suite. The page was bundled (`vite build`) but not driven in a browser, and there is no Playwright test: the change-event assertions already settle the question.
+`pnpm --filter @seply/sync harness` (Vite, port 5199; dev-only, outside the package's exports). The page renders Concepts from a TanStack DB live query and types bursts into c1's title (50 edits, 10 ms apart by default). It simulates a random push delay, a random echo delay, and "another client's op landed before our push" with a set probability. A `MutationObserver` records every value the title cell shows in the DOM and counts flickers with the same `findFlicker`. You can switch the edit path (handlers or `createTransaction`) and the diff delivery (`sync`, or `deferred` to see the broken wiring flicker). Per the lane rules, the evidence comes from the Vitest suite. The page was bundled (`vite build`) but not driven in a browser, and there is no Playwright test: the change-event assertions already settle the question.
 
 ## What's in the spike code
 
-- `src/engine.ts`: `OpEngine`, with confirmed ops (server order) and pending ops. The visible state is `confirmed + pending`, folded with `@umbel/domain`'s `apply`. `receive` acknowledges and rebases, `reject` drops, and every change emits a row diff synchronously.
+- `src/engine.ts`: `OpEngine`, with confirmed ops (server order) and pending ops. The visible state is `confirmed + pending`, folded with `@seply/domain`'s `apply`. `receive` acknowledges and rebases, `reject` drops, and every change emits a row diff synchronously.
 - `src/rows.ts`: projects the Concepts and Relationships tables (live rows only).
 - `src/collections.ts`: one TanStack DB collection per table with a custom `sync`, and the shared `mutationFn`. Only Concepts are editable in the spike.
 - `src/spike/`: `SimServer`/`SimClient` (control over when pushes land and when each client pulls), and the `Recorder`/`findFlicker` detector.
 
 Left for WP-1.3: all tables with `drizzle-zod` row types, IndexedDB mirroring of pending ops, push/pull transport, Change coalescing, undo per Change, view-as-of and Proposal preview. `projectRows` rebuilds every row map per step (O(n)). That's fine for the spike; WP-1.3 should diff only the entities the ops touched. A rebase already emits one diff, so one `begin/commit` per table.
 
-**WP-1.3 update:** the spike code is now the production code (see README.md). All logged tables have collections (rows are the `@umbel/domain` state types rather than `drizzle-zod` ones: the client state has no `expedition_id` column and folds tags into rows); `RowProjection` skips entities whose identity didn't change; pending ops are mirrored to IndexedDB; push/pull go through a `SyncTransport`; Changes coalesce. `flicker.test.ts` runs against all of it, with two new suites: typing into other tables (a Relationship note, a View label) and the `SyncClient` with its own push/pull timing. Undo per Change, view-as-of and Proposal preview are later work packages.
+**WP-1.3 update:** the spike code is now the production code (see README.md). All logged tables have collections (rows are the `@seply/domain` state types rather than `drizzle-zod` ones: the client state has no `expedition_id` column and folds tags into rows); `RowProjection` skips entities whose identity didn't change; pending ops are mirrored to IndexedDB; push/pull go through a `SyncTransport`; Changes coalesce. `flicker.test.ts` runs against all of it, with two new suites: typing into other tables (a Relationship note, a View label) and the `SyncClient` with its own push/pull timing. Undo per Change, view-as-of and Proposal preview are later work packages.
 
 ## Watch list (TanStack DB is pre-1.0)
 

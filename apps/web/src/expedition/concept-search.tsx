@@ -1,8 +1,8 @@
 // Search inside the Expedition (spec §3.6, §2.8): text or `#tag`, matched on
 // the client over the Concepts already loaded (so it works offline). The
 // canvas dims everything that doesn't match; Escape clears.
-import { Badge } from "@umbel/ui/components/badge"
-import { Input } from "@umbel/ui/components/input"
+import { Badge } from "@seply/ui/components/badge"
+import { Input } from "@seply/ui/components/input"
 
 export function ConceptSearch({
   query,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { VIEW_TYPES, VIEW_TYPE_IDS } from "@umbel/domain"
+import { VIEW_TYPES, VIEW_TYPE_IDS } from "@seply/domain"
 
 import {
   getAt,

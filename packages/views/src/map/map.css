@@ -1,35 +1,35 @@
 /*
- * The Map View. Every colour is a --umbel-map-* variable over an @umbel/ui
+ * The Map View. Every colour is a --seply-map-* variable over an @seply/ui
  * token, so light, dark and .light/.dark islands follow. The coarse world's
  * colours are read from these variables and handed to MapLibre (MapView.tsx);
  * the Protomaps flavours bring the detailed basemap's own light and dark.
  */
 :where(:root, .light, .dark) {
-  --umbel-map-bg: var(--background);
-  --umbel-map-water: var(--muted);
-  --umbel-map-land: var(--background);
-  --umbel-map-border: var(--input);
-  --umbel-map-note-bg: var(--card);
-  --umbel-map-note-fg: var(--muted-foreground);
-  --umbel-map-note-border: var(--border);
-  --umbel-pin-bg: var(--card);
-  --umbel-pin-fg: var(--card-foreground);
-  --umbel-pin-selected: var(--foreground);
-  --umbel-pin-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
-  --umbel-pin-shadow: 0 1px 3px color-mix(in oklch, var(--foreground) 25%, transparent);
+  --seply-map-bg: var(--background);
+  --seply-map-water: var(--muted);
+  --seply-map-land: var(--background);
+  --seply-map-border: var(--input);
+  --seply-map-note-bg: var(--card);
+  --seply-map-note-fg: var(--muted-foreground);
+  --seply-map-note-border: var(--border);
+  --seply-pin-bg: var(--card);
+  --seply-pin-fg: var(--card-foreground);
+  --seply-pin-selected: var(--foreground);
+  --seply-pin-ring: color-mix(in oklch, var(--foreground) 20%, transparent);
+  --seply-pin-shadow: 0 1px 3px color-mix(in oklch, var(--foreground) 25%, transparent);
 }
 
-.umbel-map {
+.seply-map {
   position: relative;
   width: 100%;
   height: 100%;
-  background: var(--umbel-map-bg);
+  background: var(--seply-map-bg);
 }
-.umbel-map__canvas {
+.seply-map__canvas {
   position: absolute;
   inset: 0;
 }
-.umbel-map__notes {
+.seply-map__notes {
   position: absolute;
   left: 0.75rem;
   bottom: 0.75rem;
@@ -39,38 +39,38 @@
   gap: 0.375rem;
   pointer-events: none;
 }
-.umbel-map__note {
+.seply-map__note {
   margin: 0;
   padding: 0.25rem 0.625rem;
-  border: 1px solid var(--umbel-map-note-border);
+  border: 1px solid var(--seply-map-note-border);
   border-radius: 999px;
-  background: var(--umbel-map-note-bg);
-  color: var(--umbel-map-note-fg);
+  background: var(--seply-map-note-bg);
+  color: var(--seply-map-note-fg);
   font-size: 0.75rem;
 }
 
 /* MapLibre's own controls, on tokens. */
-.umbel-map .maplibregl-ctrl-group,
-.umbel-map .maplibregl-ctrl-attrib {
-  background: var(--umbel-map-note-bg);
-  color: var(--umbel-map-note-fg);
+.seply-map .maplibregl-ctrl-group,
+.seply-map .maplibregl-ctrl-attrib {
+  background: var(--seply-map-note-bg);
+  color: var(--seply-map-note-fg);
 }
-.umbel-map .maplibregl-ctrl-group button + button {
-  border-top-color: var(--umbel-map-note-border);
+.seply-map .maplibregl-ctrl-group button + button {
+  border-top-color: var(--seply-map-note-border);
 }
-.umbel-map .maplibregl-ctrl-attrib a {
+.seply-map .maplibregl-ctrl-attrib a {
   color: inherit;
 }
-.dark .umbel-map .maplibregl-ctrl-icon {
+.dark .seply-map .maplibregl-ctrl-icon {
   filter: invert(1);
 }
 
 /* Pins: a Kind-coloured dot centred on the place, the title to its right. */
-.umbel-pin-anchor {
+.seply-pin-anchor {
   width: 0;
   height: 0;
 }
-.umbel-pin {
+.seply-pin {
   position: absolute;
   left: -9px;
   top: -9px;
@@ -79,32 +79,32 @@
   border: 0;
   background: none;
   font: inherit;
-  color: var(--umbel-pin-fg);
+  color: var(--seply-pin-fg);
   cursor: pointer;
 }
-.umbel-pin__dot {
+.seply-pin__dot {
   display: grid;
   place-items: center;
   width: 18px;
   height: 18px;
   flex: none;
   border-radius: 999px;
-  border: 2px solid var(--umbel-pin-bg);
-  background: var(--umbel-pin-color, var(--umbel-map-note-fg));
-  color: var(--umbel-pin-bg);
-  box-shadow: var(--umbel-pin-shadow);
+  border: 2px solid var(--seply-pin-bg);
+  background: var(--seply-pin-color, var(--seply-map-note-fg));
+  color: var(--seply-pin-bg);
+  box-shadow: var(--seply-pin-shadow);
 }
-.umbel-pin__icon {
+.seply-pin__icon {
   width: 10px;
   height: 10px;
 }
-.umbel-pin--home .umbel-pin__dot {
+.seply-pin--home .seply-pin__dot {
   width: 22px;
   height: 22px;
   margin: -2px;
-  background: var(--umbel-pin-selected);
+  background: var(--seply-pin-selected);
 }
-.umbel-pin__label {
+.seply-pin__label {
   position: absolute;
   top: -1px;
   left: 21px;
@@ -113,42 +113,42 @@
   gap: 0.25rem;
   padding: 1px 6px;
   border-radius: 0.375rem;
-  background: color-mix(in oklch, var(--umbel-pin-bg) 88%, transparent);
-  box-shadow: var(--umbel-pin-shadow);
+  background: color-mix(in oklch, var(--seply-pin-bg) 88%, transparent);
+  box-shadow: var(--seply-pin-shadow);
   font-size: 0.75rem;
   line-height: 18px;
   white-space: nowrap;
 }
-.umbel-pin__label .umbel-check {
+.seply-pin__label .seply-check {
   width: 0.8125rem;
   height: 0.8125rem;
 }
-.umbel-pin--quiet .umbel-pin__label {
+.seply-pin--quiet .seply-pin__label {
   display: none;
 }
-.umbel-pin--left .umbel-pin__label {
+.seply-pin--left .seply-pin__label {
   left: auto;
   right: 21px;
 }
-.umbel-pin:hover,
-.umbel-pin:focus-visible {
+.seply-pin:hover,
+.seply-pin:focus-visible {
   z-index: 1;
 }
-.umbel-pin:hover .umbel-pin__label,
-.umbel-pin:focus-visible .umbel-pin__label {
+.seply-pin:hover .seply-pin__label,
+.seply-pin:focus-visible .seply-pin__label {
   display: inline-flex;
 }
-.umbel-pin--selected {
+.seply-pin--selected {
   z-index: 2;
 }
-.umbel-pin--selected .umbel-pin__dot {
-  box-shadow: 0 0 0 3px var(--umbel-pin-ring), var(--umbel-pin-shadow);
-  border-color: var(--umbel-pin-selected);
+.seply-pin--selected .seply-pin__dot {
+  box-shadow: 0 0 0 3px var(--seply-pin-ring), var(--seply-pin-shadow);
+  border-color: var(--seply-pin-selected);
 }
-.umbel-pin--selected .umbel-pin__label {
+.seply-pin--selected .seply-pin__label {
   font-weight: 600;
-  outline: 1px solid var(--umbel-pin-selected);
+  outline: 1px solid var(--seply-pin-selected);
 }
-.umbel-pin--dim {
+.seply-pin--dim {
   opacity: 0.3;
 }

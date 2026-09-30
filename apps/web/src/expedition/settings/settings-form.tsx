@@ -6,7 +6,7 @@
 // replaces what they show.
 import * as React from "react"
 
-import { Checkbox } from "@umbel/ui/components/checkbox"
+import { Checkbox } from "@seply/ui/components/checkbox"
 import {
   Field,
   FieldContent,
@@ -16,17 +16,17 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@umbel/ui/components/field"
-import { Input } from "@umbel/ui/components/input"
+} from "@seply/ui/components/field"
+import { Input } from "@seply/ui/components/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@umbel/ui/components/select"
-import { Switch } from "@umbel/ui/components/switch"
-import { Textarea } from "@umbel/ui/components/textarea"
+} from "@seply/ui/components/select"
+import { Switch } from "@seply/ui/components/switch"
+import { Textarea } from "@seply/ui/components/textarea"
 
 import {
   getAt,

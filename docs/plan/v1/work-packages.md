@@ -40,7 +40,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
   - Fontsource Plex Sans/Mono and Newsreader.
   - ThemeProvider with `resolvedTheme`, no-flash script, System/Light/Dark toggle.
   - Base UI Toast; Typeset prose.
-  - `packages/ui/brand` (wordmark and umbel glyph, favicon, PWA icons).
+  - `packages/ui/brand` (wordmark and glyph, favicon, PWA icons).
   - `DIVERGENCES.md` skeleton listing the 8.
 - **Done when:** a Storybook-less showcase route renders every token and component in both themes; a contrast test asserts the palette's minimums (text ≥ 4.5, suggested fills ≥ 3).
 
@@ -309,7 +309,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - milestone: M5
 - depends: WP-1.1
 - spec: 01-domain-model.md#18-visibility-roles-permissions
-- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted: `RESEND_API_KEY` secret, a sending-only key for `mail.umbel.dev`, and the `EMAIL_FROM` repo variable, `Umbel Learn <invites@mail.umbel.dev>`; the deploy passes both to the Worker); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
+- **Build:** the permissions matrix enforced in every API route; the share dialog (invite as editor or viewer); the `Mailer` (Resend when hosted: `RESEND_API_KEY` secret, a sending-only key for `mail.seply.app`, and the `EMAIL_FROM` repo variable, `Seply Learn <invites@mail.seply.app>`; the deploy passes both to the Worker); the invite link; the "Shared with you" inbox with a New badge; owner-only role changes and removal; transfer ownership; kick over the relay.
 - **Done when:** unit tests run the permissions matrix against the API routes; e2e invites a second account and shows it under Shared with you.
 
 ### WP-5.2: Visibility, public links, Fork and Trash
@@ -328,7 +328,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - **Build:** JSON export (with optional Source files) and a Markdown folder export (zip), plus an import button in the Library.
 - **Done when:** the round trip export → import preserves counts, and the Markdown folder opens in Obsidian with working links (checked by a link test).
 
-### WP-5.4: MCP server and the `umbel-learn` skill
+### WP-5.4: MCP server and the `seply-learn` skill
 - lane: B
 - milestone: M5
 - depends: WP-5.1, WP-3.5a

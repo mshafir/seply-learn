@@ -1,47 +1,47 @@
 /*
  * Quadrant View (Quadrant.tsx), with its progression ladder. Imported by
- * canvas.css; every colour is an @umbel/ui token through a --umbel-* variable.
+ * canvas.css; every colour is an @seply/ui token through a --seply-* variable.
  */
 :where(:root, .light, .dark) {
-  --umbel-quadrant-bg: var(--background);
-  --umbel-quadrant-fg: var(--foreground);
-  --umbel-quadrant-muted: var(--muted-foreground);
-  --umbel-quadrant-cell-border: var(--border);
-  --umbel-quadrant-cell-bg: color-mix(in oklch, var(--card) 60%, var(--background));
-  --umbel-quadrant-ladder-cell-bg: color-mix(in oklch, var(--muted) 60%, var(--background));
-  --umbel-quadrant-head-bg: var(--muted);
-  --umbel-quadrant-card-bg: var(--card);
-  --umbel-quadrant-card-fg: var(--card-foreground);
-  --umbel-quadrant-card-border: var(--border);
-  --umbel-quadrant-card-hover: var(--muted-foreground);
-  --umbel-quadrant-selected: var(--foreground);
-  --umbel-quadrant-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 6%, transparent);
-  --umbel-quadrant-uses-bg: color-mix(in oklch, var(--kind-orange) 12%, var(--card));
-  --umbel-quadrant-uses-fg: var(--kind-orange);
+  --seply-quadrant-bg: var(--background);
+  --seply-quadrant-fg: var(--foreground);
+  --seply-quadrant-muted: var(--muted-foreground);
+  --seply-quadrant-cell-border: var(--border);
+  --seply-quadrant-cell-bg: color-mix(in oklch, var(--card) 60%, var(--background));
+  --seply-quadrant-ladder-cell-bg: color-mix(in oklch, var(--muted) 60%, var(--background));
+  --seply-quadrant-head-bg: var(--muted);
+  --seply-quadrant-card-bg: var(--card);
+  --seply-quadrant-card-fg: var(--card-foreground);
+  --seply-quadrant-card-border: var(--border);
+  --seply-quadrant-card-hover: var(--muted-foreground);
+  --seply-quadrant-selected: var(--foreground);
+  --seply-quadrant-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 6%, transparent);
+  --seply-quadrant-uses-bg: color-mix(in oklch, var(--kind-orange) 12%, var(--card));
+  --seply-quadrant-uses-fg: var(--kind-orange);
   /* Ladder stages, early to late: plain, then warming to settled. */
-  --umbel-quadrant-stage-0: var(--muted-foreground);
-  --umbel-quadrant-stage-1: var(--kind-amber);
-  --umbel-quadrant-stage-2: var(--kind-blue);
-  --umbel-quadrant-stage-3: var(--kind-green);
+  --seply-quadrant-stage-0: var(--muted-foreground);
+  --seply-quadrant-stage-1: var(--kind-amber);
+  --seply-quadrant-stage-2: var(--kind-blue);
+  --seply-quadrant-stage-3: var(--kind-green);
 }
 
-.umbel-quadrant {
+.seply-quadrant {
   height: 100%;
   overflow: auto;
   box-sizing: border-box;
   padding: 1.5rem;
-  background: var(--umbel-quadrant-bg);
-  color: var(--umbel-quadrant-fg);
+  background: var(--seply-quadrant-bg);
+  color: var(--seply-quadrant-fg);
   font-family: var(--font-sans);
 }
-.umbel-quadrant__grid {
+.seply-quadrant__grid {
   display: grid;
   gap: 0.5rem;
 }
-.umbel-quadrant__row {
+.seply-quadrant__row {
   display: contents;
 }
-.umbel-quadrant__corner {
+.seply-quadrant__corner {
   display: flex;
   align-items: flex-end;
   padding-bottom: 0.25rem;
@@ -49,130 +49,130 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--umbel-quadrant-muted);
+  color: var(--seply-quadrant-muted);
 }
-.umbel-quadrant__head {
-  --umbel-stage: var(--umbel-quadrant-fg);
+.seply-quadrant__head {
+  --seply-stage: var(--seply-quadrant-fg);
   position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.375rem 0.625rem;
   border-radius: 0.375rem;
-  background: var(--umbel-quadrant-head-bg);
+  background: var(--seply-quadrant-head-bg);
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--umbel-stage);
+  color: var(--seply-stage);
 }
-.umbel-quadrant__stage--0 {
-  --umbel-stage: var(--umbel-quadrant-stage-0);
+.seply-quadrant__stage--0 {
+  --seply-stage: var(--seply-quadrant-stage-0);
 }
-.umbel-quadrant__stage--1 {
-  --umbel-stage: var(--umbel-quadrant-stage-1);
+.seply-quadrant__stage--1 {
+  --seply-stage: var(--seply-quadrant-stage-1);
 }
-.umbel-quadrant__stage--2 {
-  --umbel-stage: var(--umbel-quadrant-stage-2);
+.seply-quadrant__stage--2 {
+  --seply-stage: var(--seply-quadrant-stage-2);
 }
-.umbel-quadrant__stage--3 {
-  --umbel-stage: var(--umbel-quadrant-stage-3);
+.seply-quadrant__stage--3 {
+  --seply-stage: var(--seply-quadrant-stage-3);
 }
-.umbel-quadrant--ladder .umbel-quadrant__head {
-  background: color-mix(in oklch, var(--umbel-stage) 12%, var(--umbel-quadrant-bg));
+.seply-quadrant--ladder .seply-quadrant__head {
+  background: color-mix(in oklch, var(--seply-stage) 12%, var(--seply-quadrant-bg));
 }
-.umbel-quadrant__head-count {
+.seply-quadrant__head-count {
   margin-left: auto;
   font-size: 0.75rem;
   font-weight: 400;
   opacity: 0.7;
 }
 /* The ladder's arrow sits in the gap before the next stage. */
-.umbel-quadrant__arrow {
+.seply-quadrant__arrow {
   position: absolute;
   right: -0.625rem;
   z-index: 1;
   width: 0.75rem;
   height: 0.75rem;
-  color: var(--umbel-quadrant-muted);
+  color: var(--seply-quadrant-muted);
 }
-.umbel-quadrant__side {
+.seply-quadrant__side {
   padding-top: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--umbel-quadrant-muted);
+  color: var(--seply-quadrant-muted);
 }
-.umbel-quadrant__cell {
+.seply-quadrant__cell {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   min-height: 3.5rem;
   padding: 0.375rem;
-  border: 1px dashed var(--umbel-quadrant-cell-border);
+  border: 1px dashed var(--seply-quadrant-cell-border);
   border-radius: 0.5rem;
-  background: var(--umbel-quadrant-cell-bg);
+  background: var(--seply-quadrant-cell-bg);
 }
-.umbel-quadrant--ladder .umbel-quadrant__cell {
+.seply-quadrant--ladder .seply-quadrant__cell {
   border-color: transparent;
-  background: var(--umbel-quadrant-ladder-cell-bg);
+  background: var(--seply-quadrant-ladder-cell-bg);
 }
-.umbel-quadrant__card {
+.seply-quadrant__card {
   display: flex;
   align-items: flex-start;
   gap: 0.375rem;
   width: 100%;
   padding: 0.25rem 0.5rem;
-  border: 1px solid var(--umbel-quadrant-card-border);
+  border: 1px solid var(--seply-quadrant-card-border);
   border-radius: 0.375rem;
-  background: var(--umbel-quadrant-card-bg);
-  box-shadow: var(--umbel-quadrant-shadow);
+  background: var(--seply-quadrant-card-bg);
+  box-shadow: var(--seply-quadrant-shadow);
   font: inherit;
   font-size: 0.75rem;
   text-align: left;
-  color: var(--umbel-quadrant-card-fg);
+  color: var(--seply-quadrant-card-fg);
   cursor: pointer;
   transition: opacity 150ms;
 }
-.umbel-quadrant__card:hover {
-  border-color: var(--umbel-quadrant-card-hover);
+.seply-quadrant__card:hover {
+  border-color: var(--seply-quadrant-card-hover);
 }
-.umbel-quadrant__card--selected,
-.umbel-quadrant__card--selected:hover {
-  border-color: var(--umbel-quadrant-selected);
-  box-shadow: 0 0 0 1px var(--umbel-quadrant-selected);
+.seply-quadrant__card--selected,
+.seply-quadrant__card--selected:hover {
+  border-color: var(--seply-quadrant-selected);
+  box-shadow: 0 0 0 1px var(--seply-quadrant-selected);
 }
-.umbel-quadrant__card--dim {
+.seply-quadrant__card--dim {
   opacity: 0.2;
 }
-.umbel-quadrant__card .umbel-check {
+.seply-quadrant__card .seply-check {
   width: 0.875rem;
   height: 0.875rem;
   margin-top: 0.0625rem;
 }
-.umbel-quadrant__icon {
+.seply-quadrant__icon {
   flex-shrink: 0;
   width: 0.875rem;
   height: 0.875rem;
   margin-top: 0.0625rem;
 }
-.umbel-quadrant__title {
+.seply-quadrant__title {
   font-weight: 500;
   line-height: 1.25;
 }
-.umbel-quadrant__uses {
+.seply-quadrant__uses {
   flex-shrink: 0;
   margin-left: auto;
   padding: 0 0.375rem;
   border-radius: 9999px;
-  background: var(--umbel-quadrant-uses-bg);
+  background: var(--seply-quadrant-uses-bg);
   font-size: 0.625rem;
   font-weight: 600;
   line-height: 1.5;
-  color: var(--umbel-quadrant-uses-fg);
+  color: var(--seply-quadrant-uses-fg);
 }
-.umbel-quadrant__note {
+.seply-quadrant__note {
   margin: 1rem 0 0;
   font-size: 0.75rem;
-  color: var(--umbel-quadrant-muted);
+  color: var(--seply-quadrant-muted);
 }
-.umbel-quadrant__note .umbel-quadrant__uses {
+.seply-quadrant__note .seply-quadrant__uses {
   margin: 0;
 }

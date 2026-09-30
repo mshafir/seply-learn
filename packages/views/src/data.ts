@@ -1,6 +1,6 @@
 // From live rows to the shape the Views draw. Pure: no React, no collections.
 //
-// The rows are @umbel/sync's table rows (the @umbel/domain state types, live
+// The rows are @seply/sync's table rows (the @seply/domain state types, live
 // entities only). The layouts, scopes and metrics still read this package's
 // own Expedition type (model.ts), so this is the one bridge between them:
 // built-in Kinds and Relationship Types are merged with the Expedition's own
@@ -18,7 +18,7 @@ import {
   type RelTypeDefState,
   type Relationship as DomainRelationship,
   type View as DomainView,
-} from "@umbel/domain";
+} from "@seply/domain";
 import type { AttributeDef, Concept, Expedition, KindDef, Relationship, RelationshipTypeDef, View } from "./model.ts";
 
 /** The rows one Expedition's Views read, from its live collections (or any snapshot of them). */

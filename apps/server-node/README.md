@@ -1,4 +1,4 @@
-# @umbel/server-node
+# @seply/server-node
 
 **Lane:** B: Server & infra
 
@@ -8,4 +8,4 @@ Self-host entry: Node + Hono serving the SPA and API, in-process rooms with LIST
 
 ## Allowed dependencies
 
-@umbel/server, @umbel/ai, @umbel/domain. See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.
+@seply/server, @seply/ai, @seply/domain. See the dependency rule in the root CLAUDE.md; `pnpm check:deps` enforces it.

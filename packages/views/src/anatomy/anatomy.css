@@ -1,91 +1,91 @@
 /*
  * Anatomy View: nested part boxes with pinned chips. Imported by canvas.css,
- * so the app's one `@umbel/views/canvas.css` import brings it. Every colour
- * is a --umbel-* variable pointing at an @umbel/ui token.
+ * so the app's one `@seply/views/canvas.css` import brings it. Every colour
+ * is a --seply-* variable pointing at an @seply/ui token.
  */
 :where(:root, .light, .dark) {
-  --umbel-part-bg: var(--card);
-  --umbel-part-bg-odd: var(--muted);
-  --umbel-part-border: var(--border);
-  --umbel-part-fg: var(--card-foreground);
-  --umbel-part-muted: var(--muted-foreground);
+  --seply-part-bg: var(--card);
+  --seply-part-bg-odd: var(--muted);
+  --seply-part-border: var(--border);
+  --seply-part-fg: var(--card-foreground);
+  --seply-part-muted: var(--muted-foreground);
   /* Pin colours: an enum Attribute's values, least to most (for maturity:
      research, small-scale, shipped, standard). */
-  --umbel-pin-0: var(--kind-slate);
-  --umbel-pin-1: var(--kind-amber);
-  --umbel-pin-2: var(--kind-blue);
-  --umbel-pin-3: var(--kind-green);
-  --umbel-pin-none: var(--muted-foreground);
+  --seply-pin-0: var(--kind-slate);
+  --seply-pin-1: var(--kind-amber);
+  --seply-pin-2: var(--kind-blue);
+  --seply-pin-3: var(--kind-green);
+  --seply-pin-none: var(--muted-foreground);
 }
 
-.umbel-anatomy {
+.seply-anatomy {
   height: 100%;
   overflow: auto;
   padding: 1.25rem 1.5rem;
-  background: var(--umbel-canvas-bg);
-  color: var(--umbel-part-fg);
+  background: var(--seply-canvas-bg);
+  color: var(--seply-part-fg);
 }
-.umbel-anatomy__legend,
-.umbel-anatomy__unplaced {
+.seply-anatomy__legend,
+.seply-anatomy__unplaced {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.75rem;
   margin-bottom: 0.75rem;
-  color: var(--umbel-part-muted);
+  color: var(--seply-part-muted);
   font-size: 0.75rem;
 }
-.umbel-anatomy__unplaced {
+.seply-anatomy__unplaced {
   margin: 1rem 0 0;
 }
-.umbel-anatomy__key {
+.seply-anatomy__key {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
 }
-.umbel-anatomy__roots {
+.seply-anatomy__roots {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   max-width: 72rem;
 }
 
-.umbel-part {
+.seply-part {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   min-width: 10rem;
   padding: 0.65rem 0.75rem;
-  border: 1px solid var(--umbel-part-border);
+  border: 1px solid var(--seply-part-border);
   border-radius: 0.75rem;
-  background: var(--umbel-part-bg);
+  background: var(--seply-part-bg);
   cursor: pointer;
 }
-.umbel-part--odd {
-  background: var(--umbel-part-bg-odd);
+.seply-part--odd {
+  background: var(--seply-part-bg-odd);
 }
-.umbel-part--whole {
+.seply-part--whole {
   flex: 1 1 auto;
 }
-.umbel-part--selected {
-  border-color: var(--umbel-concept-selected);
-  box-shadow: 0 0 0 3px var(--umbel-concept-ring);
+.seply-part--selected {
+  border-color: var(--seply-concept-selected);
+  box-shadow: 0 0 0 3px var(--seply-concept-ring);
 }
 /* Dimming a box must not dim the boxes inside it (a match may be one), so
    only its own heading, summary and border fade. */
-.umbel-part--dim {
-  border-color: color-mix(in oklch, var(--umbel-part-border) 50%, transparent);
+.seply-part--dim {
+  border-color: color-mix(in oklch, var(--seply-part-border) 50%, transparent);
 }
-.umbel-part--dim > .umbel-part__head,
-.umbel-part--dim > .umbel-part__summary {
+.seply-part--dim > .seply-part__head,
+.seply-part--dim > .seply-part__summary {
   opacity: 0.35;
 }
-.umbel-part__head {
+.seply-part__head {
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
-.umbel-part__title {
+.seply-part__title {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -100,36 +100,36 @@
   text-align: left;
   cursor: pointer;
 }
-.umbel-part--root > .umbel-part__head .umbel-part__title {
+.seply-part--root > .seply-part__head .seply-part__title {
   font-size: 1.125rem;
 }
-.umbel-part__icon {
+.seply-part__icon {
   width: 0.9rem;
   height: 0.9rem;
   flex-shrink: 0;
 }
-.umbel-part__summary {
+.seply-part__summary {
   margin-top: -0.3rem;
-  color: var(--umbel-part-muted);
+  color: var(--seply-part-muted);
   font-size: 0.75rem;
   line-height: 1.35;
 }
-.umbel-part__pins {
+.seply-part__pins {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
 }
-.umbel-part__parts {
+.seply-part__parts {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.umbel-part__parts--stack {
+.seply-part__parts--stack {
   flex-direction: column;
 }
 
-.umbel-pin {
-  --pin: var(--umbel-pin-none);
+.seply-pin {
+  --pin: var(--seply-pin-none);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -137,43 +137,43 @@
   border: 1px solid color-mix(in oklch, var(--pin) 45%, var(--card));
   border-radius: 9999px;
   background: color-mix(in oklch, var(--pin) 14%, var(--card));
-  color: var(--umbel-part-fg);
+  color: var(--seply-part-fg);
   font: inherit;
   font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.4;
   cursor: pointer;
 }
-.umbel-pin .umbel-check {
+.seply-pin .seply-check {
   width: 0.8rem;
   height: 0.8rem;
 }
-.umbel-pin__dot {
+.seply-pin__dot {
   width: 0.5rem;
   height: 0.5rem;
   flex-shrink: 0;
   border-radius: 9999px;
   background: var(--pin);
 }
-.umbel-anatomy__key {
-  --pin: var(--umbel-pin-none);
+.seply-anatomy__key {
+  --pin: var(--seply-pin-none);
 }
-.umbel-pin--0 {
-  --pin: var(--umbel-pin-0);
+.seply-pin--0 {
+  --pin: var(--seply-pin-0);
 }
-.umbel-pin--1 {
-  --pin: var(--umbel-pin-1);
+.seply-pin--1 {
+  --pin: var(--seply-pin-1);
 }
-.umbel-pin--2 {
-  --pin: var(--umbel-pin-2);
+.seply-pin--2 {
+  --pin: var(--seply-pin-2);
 }
-.umbel-pin--3 {
-  --pin: var(--umbel-pin-3);
+.seply-pin--3 {
+  --pin: var(--seply-pin-3);
 }
-.umbel-pin--selected {
-  border-color: var(--umbel-concept-selected);
-  box-shadow: 0 0 0 2px var(--umbel-concept-ring);
+.seply-pin--selected {
+  border-color: var(--seply-concept-selected);
+  box-shadow: 0 0 0 2px var(--seply-concept-ring);
 }
-.umbel-pin--dim {
+.seply-pin--dim {
   opacity: 0.3;
 }

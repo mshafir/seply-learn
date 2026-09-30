@@ -5,7 +5,7 @@
 // its step counts and hides them with "Hide what I've read".
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import computeFile from "@umbel/domain/fixtures/compute.json" with { type: "json" };
+import computeFile from "@seply/domain/fixtures/compute.json" with { type: "json" };
 import optionsFile from "../fixtures/options.json" with { type: "json" };
 import { compute, viewOf } from "../fixtures/index.ts";
 import { openLiveFixture, type LiveFixture } from "../fixtures/live.ts";

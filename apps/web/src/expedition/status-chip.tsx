@@ -1,13 +1,13 @@
 // View-specific status, floating on the canvas (spec §3.6): e.g. "Path to
 // MLA · 7 of 11 read", with a clear button. The View reports it (the
-// `onStatus` prop of @umbel/views); clearing hands back to the View. An
+// `onStatus` prop of @seply/views); clearing hands back to the View. An
 // outline Badge with a ghost icon Button (DIVERGENCES.md, "Also listed").
 import { XIcon } from "lucide-react"
 
-import { Badge } from "@umbel/ui/components/badge"
-import { Button } from "@umbel/ui/components/button"
-import { cn } from "@umbel/ui/lib/utils"
-import type { ViewStatusChip } from "@umbel/views"
+import { Badge } from "@seply/ui/components/badge"
+import { Button } from "@seply/ui/components/button"
+import { cn } from "@seply/ui/lib/utils"
+import type { ViewStatusChip } from "@seply/views"
 
 export function StatusChip({
   status,

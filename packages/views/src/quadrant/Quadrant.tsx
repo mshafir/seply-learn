@@ -3,7 +3,7 @@
 // the cells are dashed, so empty ones read as gaps. With `progression` the x
 // headers are tinted stages with arrows between them (a maturity ladder).
 // Hovering a card lists what uses it; clicking selects it. Every colour is a
-// --umbel-* token (quadrant.css).
+// --seply-* token (quadrant.css).
 import { useMemo } from "react";
 import { ArrowRightIcon } from "lucide-react";
 import type { Expedition, View } from "../model.ts";
@@ -39,20 +39,20 @@ export function Quadrant({ expedition, view, selected, onSelect, matches, covere
         type="button"
         title={tip || undefined}
         className={cx(
-          "umbel-quadrant__card",
-          c.id === selected && "umbel-quadrant__card--selected",
-          !!matches && !matches.has(c.id) && "umbel-quadrant__card--dim",
+          "seply-quadrant__card",
+          c.id === selected && "seply-quadrant__card--selected",
+          !!matches && !matches.has(c.id) && "seply-quadrant__card--dim",
         )}
         data-concept={c.id}
         data-covered={covered?.has(c.id) || undefined}
         aria-pressed={c.id === selected}
         onClick={() => onSelect(c.id)}
       >
-        <KindIcon name={k?.icon ?? k?.id} className="umbel-quadrant__icon" style={{ color: paletteColor(k?.color) }} />
-        <span className="umbel-quadrant__title">{c.title}</span>
+        <KindIcon name={k?.icon ?? k?.id} className="seply-quadrant__icon" style={{ color: paletteColor(k?.color) }} />
+        <span className="seply-quadrant__title">{c.title}</span>
         {covered?.has(c.id) && <ReadCheck />}
         {usedBy.length > 0 && (
-          <span className="umbel-quadrant__uses" aria-label={`used by ${usedBy.length}`}>
+          <span className="seply-quadrant__uses" aria-label={`used by ${usedBy.length}`}>
             {usedBy.length}
           </span>
         )}
@@ -61,33 +61,33 @@ export function Quadrant({ expedition, view, selected, onSelect, matches, covere
   };
 
   return (
-    <div className={cx("umbel-quadrant", progression && "umbel-quadrant--ladder")} data-view-type="quadrant">
-      <div className="umbel-quadrant__grid" style={{ gridTemplateColumns: `9rem repeat(${x.values.length}, minmax(11rem, 1fr))` }}>
-        <div className="umbel-quadrant__corner">
+    <div className={cx("seply-quadrant", progression && "seply-quadrant--ladder")} data-view-type="quadrant">
+      <div className="seply-quadrant__grid" style={{ gridTemplateColumns: `9rem repeat(${x.values.length}, minmax(11rem, 1fr))` }}>
+        <div className="seply-quadrant__corner">
           {y.label} ↓ · {x.label} →
         </div>
         {x.values.map((v, i) => (
-          <div key={v.value} className={cx("umbel-quadrant__head", progression && `umbel-quadrant__stage--${i % 4}`)}>
+          <div key={v.value} className={cx("seply-quadrant__head", progression && `seply-quadrant__stage--${i % 4}`)}>
             <span>{v.label}</span>
-            <span className="umbel-quadrant__head-count">{v.count}</span>
-            {progression && i < x.values.length - 1 && <ArrowRightIcon className="umbel-quadrant__arrow" aria-hidden />}
+            <span className="seply-quadrant__head-count">{v.count}</span>
+            {progression && i < x.values.length - 1 && <ArrowRightIcon className="seply-quadrant__arrow" aria-hidden />}
           </div>
         ))}
         {y.values.map((yv, yi) => (
-          <div key={yv.value} className="umbel-quadrant__row">
-            <div className="umbel-quadrant__side">{yv.label}</div>
+          <div key={yv.value} className="seply-quadrant__row">
+            <div className="seply-quadrant__side">{yv.label}</div>
             {x.values.map((xv, xi) => (
-              <div key={xv.value} className="umbel-quadrant__cell" data-cell={`${yv.value}/${xv.value}`}>
+              <div key={xv.value} className="seply-quadrant__cell" data-cell={`${yv.value}/${xv.value}`}>
                 {cells[yi]![xi]!.map(card)}
               </div>
             ))}
           </div>
         ))}
       </div>
-      {model.placed === 0 && <p className="umbel-quadrant__note">No Concepts in this View have both {x.label} and {y.label} yet.</p>}
+      {model.placed === 0 && <p className="seply-quadrant__note">No Concepts in this View have both {x.label} and {y.label} yet.</p>}
       {evidence && model.placed > 0 && (
-        <p className="umbel-quadrant__note">
-          <span className="umbel-quadrant__uses">n</span> = how many Concepts in this Expedition use it.
+        <p className="seply-quadrant__note">
+          <span className="seply-quadrant__uses">n</span> = how many Concepts in this Expedition use it.
         </p>
       )}
     </div>

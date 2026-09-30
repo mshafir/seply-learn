@@ -1,4 +1,4 @@
-// @umbel/server: see README.md for this package's contract.
+// @seply/server: see README.md for this package's contract.
 export {
   createApp,
   requireUser,

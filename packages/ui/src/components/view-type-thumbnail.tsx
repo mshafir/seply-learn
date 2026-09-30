@@ -5,9 +5,9 @@
 // with every colour mapped to a token so it works in both themes.
 import type * as React from "react"
 
-import { cn } from "@umbel/ui/lib/utils"
+import { cn } from "@seply/ui/lib/utils"
 
-/** The View Types with an illustration (`@umbel/domain` VIEW_TYPE_IDS). */
+/** The View Types with an illustration (`@seply/domain` VIEW_TYPE_IDS). */
 export const THUMBNAIL_VIEW_TYPES = [
   "outline",
   "anatomy",

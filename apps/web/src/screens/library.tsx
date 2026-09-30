@@ -17,17 +17,17 @@ import {
 } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
-import { Alert, AlertDescription, AlertTitle } from "@umbel/ui/components/alert"
+import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import {
   Avatar,
   AvatarFallback,
   AvatarGroup,
   AvatarGroupCount,
   AvatarImage,
-} from "@umbel/ui/components/avatar"
-import { Badge } from "@umbel/ui/components/badge"
-import { Wordmark } from "@umbel/ui/components/brand"
-import { Button } from "@umbel/ui/components/button"
+} from "@seply/ui/components/avatar"
+import { Badge } from "@seply/ui/components/badge"
+import { Wordmark } from "@seply/ui/components/brand"
+import { Button } from "@seply/ui/components/button"
 import {
   Card,
   CardAction,
@@ -36,7 +36,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@umbel/ui/components/card"
+} from "@seply/ui/components/card"
 import {
   Empty,
   EmptyContent,
@@ -44,19 +44,19 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@umbel/ui/components/empty"
-import { Skeleton } from "@umbel/ui/components/skeleton"
-import { Spinner } from "@umbel/ui/components/spinner"
-import { toast } from "@umbel/ui/components/toast"
-import { Toggle } from "@umbel/ui/components/toggle"
-import { ToggleGroup, ToggleGroupItem } from "@umbel/ui/components/toggle-group"
+} from "@seply/ui/components/empty"
+import { Skeleton } from "@seply/ui/components/skeleton"
+import { Spinner } from "@seply/ui/components/spinner"
+import { toast } from "@seply/ui/components/toast"
+import { Toggle } from "@seply/ui/components/toggle"
+import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@umbel/ui/components/tooltip"
-import { ViewTypeThumbnail } from "@umbel/ui/components/view-type-thumbnail"
-import type { OfflineEntry } from "@umbel/sync"
+} from "@seply/ui/components/tooltip"
+import { ViewTypeThumbnail } from "@seply/ui/components/view-type-thumbnail"
+import type { OfflineEntry } from "@seply/sync"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { GlobalSearch } from "@/components/global-search.tsx"

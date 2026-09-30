@@ -6,7 +6,7 @@ import {
   isLive,
   schema,
   type LoggedOp,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { eq } from "drizzle-orm"
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"

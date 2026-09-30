@@ -6,8 +6,8 @@
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
 
-import { Alert, AlertDescription, AlertTitle } from "@umbel/ui/components/alert"
-import { Spinner } from "@umbel/ui/components/spinner"
+import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
+import { Spinner } from "@seply/ui/components/spinner"
 
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"

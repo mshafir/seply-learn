@@ -8,7 +8,7 @@ import {
   ulidSequence,
   type Op,
   type OpBody,
-} from "@umbel/domain"
+} from "@seply/domain"
 import { afterEach, describe, expect, it } from "vitest"
 import {
   createEngineCollections,

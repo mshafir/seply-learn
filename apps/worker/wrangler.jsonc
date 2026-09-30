@@ -1,7 +1,7 @@
 // Cloudflare Worker config. See docs/ops/deploy.md for how CI deploys it.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "umbel-learn",
+  "name": "seply-learn",
   "main": "src/index.ts",
   "compatibility_date": "2026-09-01",
   // pg needs Node APIs (net, tls, crypto). On by default from 2026-08-04; kept explicit.

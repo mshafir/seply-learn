@@ -7,7 +7,7 @@
 //
 // A push is all or nothing: one transaction appends and applies every new op,
 // or nothing is written. Retrying a push returns the same results.
-import { can, parseOp, SCHEMA_V, schema, type Op } from "@umbel/domain"
+import { can, parseOp, SCHEMA_V, schema, type Op } from "@seply/domain"
 import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"

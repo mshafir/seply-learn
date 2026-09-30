@@ -1,5 +1,5 @@
 // Display names: View Types (docs/view-types/) with their icons, and Kinds.
-import { BUILTIN_KINDS, type ViewTypeId } from "@umbel/domain"
+import { BUILTIN_KINDS, type ViewTypeId } from "@seply/domain"
 import {
   BoxesIcon,
   CalendarRangeIcon,

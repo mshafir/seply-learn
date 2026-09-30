@@ -1,5 +1,5 @@
 {
-  "extends": "@umbel/config/tsconfig.base.json",
+  "extends": "@seply/config/tsconfig.base.json",
   "compilerOptions": {
     "types": []
   },

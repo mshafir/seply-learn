@@ -20,7 +20,7 @@ import {
   type PendingMutation,
   type SyncConfig,
 } from "@tanstack/db"
-import type { Op } from "@umbel/domain"
+import type { Op } from "@seply/domain"
 import type { OpEngine, ProposeOptions } from "./engine.ts"
 import { mutationsToOps, type RowMutation } from "./mutations.ts"
 import {
@@ -90,7 +90,7 @@ export function createEngineCollections(
   engine: OpEngine,
   opts: EngineCollectionsOptions = {}
 ): EngineCollections {
-  const prefix = opts.id ?? "umbel"
+  const prefix = opts.id ?? "seply"
   const cleanups: Array<() => void> = []
 
   // Each table's sync registers here once it starts.

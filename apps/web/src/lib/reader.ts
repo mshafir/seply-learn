@@ -1,4 +1,4 @@
-// The reader's own state (spec §1.7), in context: one @umbel/sync
+// The reader's own state (spec §1.7), in context: one @seply/sync
 // ReaderClient for whoever is reading, signed in or not. <ReaderProvider>
 // (components/) opens it for the session: a signed-in reader's marks are
 // saved through /api/reader (queued in IndexedDB while offline); an anonymous
@@ -9,8 +9,8 @@ import {
   coveredConcepts,
   emptyReaderState,
   type ReaderState,
-} from "@umbel/domain"
-import type { ReaderClient } from "@umbel/sync"
+} from "@seply/domain"
+import type { ReaderClient } from "@seply/sync"
 
 import {
   personalViewSettingsStore,

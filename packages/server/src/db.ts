@@ -1,7 +1,7 @@
 // Database access. Runtimes hand the app a `connect` function; the app calls
 // it at most once per request and closes the connection when the response is
 // done. Workers must never hold a client across requests (Hyperdrive pools).
-import { schema } from "@umbel/domain"
+import { schema } from "@seply/domain"
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core"
 import { drizzle } from "drizzle-orm/node-postgres"
 import pg from "pg"

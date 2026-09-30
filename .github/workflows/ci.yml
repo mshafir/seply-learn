@@ -31,7 +31,7 @@ jobs:
         run: pnpm --filter web build
 
       - name: Bundle the Worker (dry run, no Cloudflare account needed)
-        run: pnpm --filter @umbel/worker bundle
+        run: pnpm --filter @seply/worker bundle
 
   e2e:
     name: Playwright
@@ -42,15 +42,15 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_USER: umbel
-          POSTGRES_PASSWORD: umbel
-          POSTGRES_DB: umbel_e2e
+          POSTGRES_USER: seply
+          POSTGRES_PASSWORD: seply
+          POSTGRES_DB: seply_e2e
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U umbel"
+          --health-cmd "pg_isready -U seply"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      E2E_DATABASE_URL: postgres://umbel:umbel@localhost:5432/umbel_e2e
+      E2E_DATABASE_URL: postgres://seply:seply@localhost:5432/seply_e2e
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
@@ -58,7 +58,7 @@ jobs:
       - name: Apply database migrations
         env:
           DATABASE_URL: ${{ env.E2E_DATABASE_URL }}
-        run: pnpm --filter @umbel/server db:migrate
+        run: pnpm --filter @seply/server db:migrate
 
       # The Worker serves apps/web/dist; build it before Playwright starts servers.
       - name: Build web
@@ -85,8 +85,8 @@ jobs:
       - name: Run Views harness e2e
         if: ${{ !cancelled() }}
         run: |
-          pnpm --filter @umbel/views exec playwright install chromium
-          pnpm --filter @umbel/views test:e2e
+          pnpm --filter @seply/views exec playwright install chromium
+          pnpm --filter @seply/views test:e2e
 
       - name: Upload Playwright report
         if: failure()

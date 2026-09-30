@@ -2,7 +2,7 @@
 // search columns, their triggers, GIN and pg_trgm indexes). PGlite runs
 // plpgsql triggers and loads pg_trgm as a contrib extension, so the same SQL
 // runs here and on CI's Postgres (the e2e job migrates and searches it too).
-import { schema } from "@umbel/domain"
+import { schema } from "@seply/domain"
 import { eq, sql } from "drizzle-orm"
 import { PgDialect } from "drizzle-orm/pg-core"
 import { readFileSync } from "node:fs"

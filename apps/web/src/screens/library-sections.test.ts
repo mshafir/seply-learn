@@ -1,5 +1,5 @@
-import { VIEW_TYPE_IDS } from "@umbel/domain"
-import { THUMBNAIL_VIEW_TYPES } from "@umbel/ui/components/view-type-thumbnail"
+import { VIEW_TYPE_IDS } from "@seply/domain"
+import { THUMBNAIL_VIEW_TYPES } from "@seply/ui/components/view-type-thumbnail"
 import { describe, expect, it } from "vitest"
 
 import type { CardCollaborator, LibraryCard } from "@/lib/api.ts"

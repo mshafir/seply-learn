@@ -11,11 +11,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@umbel/ui/components",
-    "utils": "@umbel/ui/lib/utils",
-    "hooks": "@umbel/ui/hooks",
-    "lib": "@umbel/ui/lib",
-    "ui": "@umbel/ui/components"
+    "components": "@seply/ui/components",
+    "utils": "@seply/ui/lib/utils",
+    "hooks": "@seply/ui/hooks",
+    "lib": "@seply/ui/lib",
+    "ui": "@seply/ui/components"
   },
   "rtl": false,
   "menuColor": "default",

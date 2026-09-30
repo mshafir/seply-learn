@@ -2,7 +2,7 @@
 // Concepts placed by two enum Attributes, one per axis, in the enum's value
 // order. With `progression`, the x axis is a ladder of stages. `evidence`
 // Relationships (model `uses` technique) are counted on each card.
-import type { ViewOverrides } from "@umbel/domain";
+import type { ViewOverrides } from "@seply/domain";
 import type { AttributeDef, Concept, Expedition, QuadrantSettings } from "../model.ts";
 
 export type QuadrantViewSettings = QuadrantSettings & ViewOverrides;

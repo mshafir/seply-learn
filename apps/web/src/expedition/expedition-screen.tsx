@@ -20,8 +20,8 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "@umbel/ui/components/alert"
-import { Button, buttonVariants } from "@umbel/ui/components/button"
+} from "@seply/ui/components/alert"
+import { Button, buttonVariants } from "@seply/ui/components/button"
 import {
   Empty,
   EmptyContent,
@@ -29,11 +29,11 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@umbel/ui/components/empty"
-import { SidebarProvider } from "@umbel/ui/components/sidebar"
-import { Skeleton } from "@umbel/ui/components/skeleton"
-import { SyncHttpError, type SyncClient } from "@umbel/sync"
-import type { ViewStatusChip } from "@umbel/views"
+} from "@seply/ui/components/empty"
+import { SidebarProvider } from "@seply/ui/components/sidebar"
+import { Skeleton } from "@seply/ui/components/skeleton"
+import { SyncHttpError, type SyncClient } from "@seply/sync"
+import type { ViewStatusChip } from "@seply/views"
 
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"

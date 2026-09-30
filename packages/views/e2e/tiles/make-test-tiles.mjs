@@ -33,7 +33,7 @@ rmSync("world.mbtiles", { force: true });
 const db = new DatabaseSync("world.mbtiles");
 db.exec("create table metadata (name text, value text); create table tiles (zoom_level int, tile_column int, tile_row int, tile_data blob);");
 const meta = {
-  name: "umbel-e2e-coarse",
+  name: "seply-e2e-coarse",
   format: "pbf",
   minzoom: "0",
   maxzoom: String(MAX),

@@ -1,7 +1,7 @@
 // The app's calls to the server's HTTP API (packages/server README), same
-// origin under /api. Push and pull go through @umbel/sync's fetchTransport.
+// origin under /api. Push and pull go through @seply/sync's fetchTransport.
 // These types mirror the server's responses: the app may not import
-// @umbel/server (dependency rule).
+// @seply/server (dependency rule).
 
 export type User = { id: string; email: string; name: string }
 

@@ -9,12 +9,12 @@ import type { Overlay } from "../overlay.ts";
 import { paletteColor } from "./color.ts";
 import { cx } from "./parts.tsx";
 
-// canvas.css points these at @umbel/ui tokens (light and dark).
+// canvas.css points these at @seply/ui tokens (light and dark).
 export const edgeColor = {
-  default: "var(--umbel-edge)",
-  raises: "var(--umbel-edge-raises)",
-  lowers: "var(--umbel-edge-lowers)",
-  bridge: "var(--umbel-edge-bridge)",
+  default: "var(--seply-edge)",
+  raises: "var(--seply-edge-raises)",
+  lowers: "var(--seply-edge-lowers)",
+  bridge: "var(--seply-edge-bridge)",
 };
 
 export function buildEdges(args: {
@@ -45,7 +45,7 @@ export function buildEdges(args: {
       source: r.from,
       target: r.to,
       type: "floating",
-      className: cx(r.synthetic && "umbel-edge--lever", enters(r.from, r.to) && "umbel-edge--entering") || undefined,
+      className: cx(r.synthetic && "seply-edge--lever", enters(r.from, r.to) && "seply-edge--entering") || undefined,
       label: on && (!overlay || touches) ? [t?.label, r.note].filter(Boolean).join(" · ") : undefined,
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       style: {
@@ -63,7 +63,7 @@ export function buildEdges(args: {
       source: b.from,
       target: b.to,
       type: "floating",
-      className: cx("umbel-edge--bridge", enters(b.from, b.to) && "umbel-edge--entering"),
+      className: cx("seply-edge--bridge", enters(b.from, b.to) && "seply-edge--entering"),
       markerEnd: { type: MarkerType.ArrowClosed, color: edgeColor.bridge, width: 14, height: 14 },
       style: { stroke: edgeColor.bridge, strokeWidth: 1.2, strokeDasharray: "2 4", opacity: dim ? 0.1 : 0.8 },
     });
