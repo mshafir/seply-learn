@@ -69,11 +69,13 @@ import {
 import { Skeleton } from "@seply/ui/components/skeleton"
 import { toast } from "@seply/ui/components/toast"
 import {
+  higherReadingState,
   keyBetween,
   parseSharedSettings,
   ulid,
   VIEW_TYPES,
   type BuildEvent,
+  type OpBody,
   type ViewTypeId,
 } from "@seply/domain"
 import {
@@ -120,6 +122,9 @@ import {
   VIEWS_BAR_HEIGHT,
 } from "@/expedition/layout.ts"
 import type { ConceptReading } from "@/expedition/concept-panel.tsx"
+import type { Editing } from "@/expedition/concept-editing.tsx"
+import { refused } from "@/expedition/refused.ts"
+import { VocabularyButton } from "@/expedition/vocabulary-dialog.tsx"
 import {
   back,
   openConcept,
@@ -592,6 +597,37 @@ function ExpeditionFrame({
       ? signInHref
       : null
 
+  // Editing in place (spec §3.7, WP-4.5): owners and editors, online.
+  const live = editable && offlineSince === null && signInHref === null
+  const commit = (ops: readonly OpBody[], label: string, origin?: "merge") => {
+    if (!ops.length) return true
+    try {
+      client.engine.propose(ops, { label, origin, coalesce: false })
+      return true
+    } catch (e) {
+      refused("Couldn't save that", e)
+      return false
+    }
+  }
+  const editing: Editing | undefined = live
+    ? {
+        client,
+        data,
+        view: view ?? undefined,
+        commit,
+        onMerged: (survivor, loser) => {
+          // Every reader's status follows on the server; ours, at once.
+          const mine = readerState.reading[survivor]?.state ?? "unread"
+          const next = higherReadingState(
+            mine,
+            readerState.reading[loser]?.state
+          )
+          if (next !== mine) reader?.markReading(expeditionId, survivor, next)
+          setPanel({ type: "concept", stack: openConcept(survivor) })
+        },
+      }
+    : undefined
+
   // History: the list, and what its actions do.
   const history = useHistory(
     expeditionId,
@@ -676,7 +712,7 @@ function ExpeditionFrame({
 
   // Suggestions: each review action is one request (and at most one Change).
   const [reviewBusy, setReviewBusy] = React.useState(false)
-  const live = client.engine.state
+  const liveState = client.engine.state
   const acceptSuggestions = (plan: AcceptPlan) => {
     if (!plan.ids.length) return
     setReviewBusy(true)
@@ -737,15 +773,15 @@ function ExpeditionFrame({
     panel?.type === "suggestions" && canReview
       ? {
           type: "suggestions",
-          groups: groupPending(live, proposals.proposals),
+          groups: groupPending(liveState, proposals.proposals),
           count: proposals.count,
           loading: proposals.loading,
           error: proposals.error,
           me: userId,
-          live,
-          preview: preview?.client.engine.state ?? live,
+          live: liveState,
+          preview: preview?.client.engine.state ?? liveState,
           busy: reviewBusy,
-          plan: (ids) => planAccept(live, proposals.proposals, ids),
+          plan: (ids) => planAccept(liveState, proposals.proposals, ids),
           onAccept: acceptSuggestions,
           onDismiss: dismissSuggestions,
         }
@@ -769,6 +805,7 @@ function ExpeditionFrame({
               canEdit: editable,
               personal,
               onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
+              editing,
             }
           : selectedConcept && place
             ? {
@@ -782,6 +819,7 @@ function ExpeditionFrame({
                 onStatus: (state) =>
                   reader?.markReading(expeditionId, selectedConcept.id, state),
                 signInHref: hintHref,
+                editing,
                 ...(editable &&
                   offlineSince === null &&
                   signInHref === null && {
@@ -938,6 +976,7 @@ function ExpeditionFrame({
             {offlineSince !== null && (
               <OfflineChip savedAt={offlineSince} onRetry={onRetry} />
             )}
+            {editing && <VocabularyButton editing={editing} />}
             <ConceptSearch
               query={query}
               onQueryChange={setQuery}

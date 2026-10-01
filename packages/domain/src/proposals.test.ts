@@ -133,6 +133,34 @@ describe("stale detection", () => {
     expect(withDependencies(h.state, [c, r], ["r"]).ids).toEqual(["c", "r"])
   })
 
+  it("handles per-View structure and merges (WP-4.5's ops)", () => {
+    const h = seeded()
+    const placement: OpBody = {
+      kind: "view.set",
+      target: "outline",
+      path: "settings.placement.leaf",
+      value: "green",
+    }
+    const it1 = item(h, "p", [placement])
+    expect(it1.base).toEqual({
+      [fieldKey("view", "outline", "settings.placement.leaf")]: null,
+    })
+    expect(isStale(staleness(h.state, it1))).toBe(false)
+    // Someone re-parents it elsewhere in this View: stale, both versions.
+    h.commit("ben", [{ ...placement, value: "black" } as OpBody])
+    expect(staleness(h.state, it1).changed[0]).toMatchObject({
+      current: "black",
+      proposed: "green",
+    })
+    // A merge tombstones the loser: items that need it are gone.
+    const r = item(h, "r", [rel("leaf", PREREQ, "black")])
+    h.commit("ben", [{ kind: "concept.delete", target: "leaf" }], "merge")
+    expect(staleness(h.state, r).gone).toEqual(["leaf"])
+    // The preview still applies what applies.
+    const p = previewProposals(h.state, [it1, r])
+    expect(p.skipped).toEqual(["r"])
+  })
+
   it("an article for a Concept deleted since is stale", () => {
     const h = seeded()
     const article = item(h, "a", [

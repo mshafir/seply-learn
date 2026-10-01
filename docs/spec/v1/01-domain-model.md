@@ -83,7 +83,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
 - **Conflicts:** last writer wins per field (or per settings path). Tags are add/remove sets *(assumed default)*. Ops carry `schema_v`, and the server upgrades old ops on replay *(assumed default)*.
 - **Deletes are tombstones.** Deleting a Concept tombstones its Relationships in the same Change, and restoring brings them back together.
 - **Removing a Kind or Relationship Type in use** first reassigns or deletes its members, in the same Change. **Attribute types are fixed.** Removing an Attribute tombstones the definition and hides its values, so undo restores them.
-- **Merge** is one Change. It moves Relationships, Tags and provenance to the surviving Concept, keeps the other's title as an alias, and tombstones it. Reading status: the survivor takes the higher status (known > read > unread).
+- **Merge** is one Change. It moves Relationships, Tags and provenance to the surviving Concept, keeps the other's title (and its aliases) as aliases, and tombstones it. Reading status: the survivor takes the higher status (known > read > unread), for every reader: the server applies it to the per-reader rows when it logs the merge Change.
 
 ## 1.4 History: Changes, undo, restore, Fork
 

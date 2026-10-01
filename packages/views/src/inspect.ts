@@ -14,6 +14,7 @@ import { rateLabel, ratesModel } from "./rates/rates.ts";
 import { anatomy, type AnatomyPart } from "./anatomy/anatomy.ts";
 import { mapModel } from "./map/pins.ts";
 import { timelineModel } from "./timeline/items.ts";
+import { withoutHidden } from "./hidden.ts";
 
 export type ViewReading = {
   /** The View as text, as a reader first sees it. */
@@ -44,12 +45,13 @@ export async function readView(state: DomainState, viewId: string): Promise<View
   const expedition = expeditionFromState(state);
   const view = expedition.views.find((v) => v.id === viewId);
   if (!view) throw new Error(`View ${viewId} not found`);
-  const lines = [`${view.label} (${view.viewType})${view.description ? `: ${view.description}` : ""}`, ...render(expedition, view)];
+  const shown = withoutHidden(expedition, view);
+  const lines = [`${view.label} (${view.viewType})${view.description ? `: ${view.description}` : ""}`, ...render(shown, view)];
   const text =
     lines.length > MAX_LINES
       ? [...lines.slice(0, MAX_LINES), `… ${lines.length - MAX_LINES} more lines`].join("\n")
       : lines.join("\n");
-  const layout = await layoutMetrics(expedition, view);
+  const layout = await layoutMetrics(shown, view);
   return layout ? { text, layout } : { text };
 }
 

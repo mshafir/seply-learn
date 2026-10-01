@@ -5,6 +5,7 @@
 // see concept-panel.tsx), the View panel (view-panel.tsx), History
 // (history-panel.tsx) or Suggestions (suggestions-panel.tsx).
 import * as React from "react"
+import { BookOpenIcon } from "lucide-react"
 
 import {
   ResizableHandle,
@@ -12,6 +13,7 @@ import {
   ResizablePanelGroup,
   usePanelRef,
 } from "@seply/ui/components/resizable"
+import { Button } from "@seply/ui/components/button"
 import { ScrollArea } from "@seply/ui/components/scroll-area"
 import { cn } from "@seply/ui/lib/utils"
 import {
@@ -43,6 +45,12 @@ import {
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
 import type { ArticleAction } from "@/expedition/concept-panel.tsx"
 import {
+  ArticleEditor,
+  ConceptEditActions,
+  ConceptEditor,
+  type Editing,
+} from "@/expedition/concept-editing.tsx"
+import {
   articleSectionsOf,
   conceptEyebrow,
   readingMinutes,
@@ -63,6 +71,8 @@ export type PanelContent =
       signInHref: string | null
       /** "Write the article" (editors, online, no article yet); absent otherwise. */
       articleAction?: ArticleAction
+      /** Editing in place (owners and editors, online); absent otherwise. */
+      editing?: Editing
     }
   | ({ type: "view" } & ViewPanelProps)
   | ({ type: "history" } & HistoryPanelProps)
@@ -258,7 +268,15 @@ function PanelBody({
       <SuggestionsPanel {...suggestions} onClose={onClose} inline={inline} />
     )
   }
-  return <ConceptBody content={content} onClose={onClose} inline={inline} />
+  return (
+    <ConceptBody
+      // A new Concept starts out reading, not editing.
+      key={content.concept.id}
+      content={content}
+      onClose={onClose}
+      inline={inline}
+    />
+  )
 }
 
 function ConceptBody({
@@ -279,7 +297,10 @@ function ConceptBody({
     onStatus,
     signInHref,
     articleAction,
+    editing,
   } = content
+  const [editMode, setEditMode] = React.useState(false)
+  const editingNow = !!editing && editMode
   const allSections = reading.data.articleSections
   const sections = React.useMemo(
     () => articleSectionsOf(concept.id, allSections),
@@ -294,6 +315,16 @@ function ConceptBody({
         title={concept.title}
         onClose={onClose}
         inline={inline}
+        actions={
+          editing && (
+            <ConceptEditActions
+              concept={concept}
+              editing={editing}
+              editMode={editingNow}
+              onEditMode={setEditMode}
+            />
+          )
+        }
       >
         {!inline && (
           <SheetDescription className="sr-only">
@@ -314,7 +345,31 @@ function ConceptBody({
       {/* Keyed by place, so each new place starts at the top. */}
       <ScrollArea key={`${concept.id}:${depth}`} className="min-h-0 flex-1">
         <div className="px-6 py-5">
-          {depth === "overview" ? (
+          {editingNow && depth === "overview" ? (
+            <div className="flex flex-col gap-6">
+              <ConceptEditor concept={concept} editing={editing} />
+              <Button
+                variant="outline"
+                onClick={() =>
+                  reading.onNavigate({
+                    conceptId: concept.id,
+                    depth: "article",
+                  })
+                }
+              >
+                <BookOpenIcon />
+                {sections.length
+                  ? `Edit the article (${sections.length === 1 ? "1 section" : `${sections.length} sections`})`
+                  : "Start an article"}
+              </Button>
+            </div>
+          ) : editingNow ? (
+            <ArticleEditor
+              concept={concept}
+              sections={sections}
+              editing={editing}
+            />
+          ) : depth === "overview" ? (
             <ConceptOverview
               concept={concept}
               reading={reading}

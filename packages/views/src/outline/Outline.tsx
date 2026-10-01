@@ -41,10 +41,12 @@ export function Outline({ expedition, view, selected, onSelect, matches, covered
   const isOpen = (id: string) => found?.has(id) || (toggled.get(id) ?? initial.has(id));
   const toggle = (id: string) => setToggled((cur) => new Map(cur).set(id, !isOpen(id)));
   // A Concept selected elsewhere (the side panel, a link, another View) is
-  // revealed: the path to it opens once, and it scrolls into view.
+  // revealed: the path to it opens once, and it scrolls into view. Moved
+  // under another line (re-parented), it is revealed there again.
   const [revealed, setRevealed] = useState<string>();
-  if (selected !== revealed) {
-    setRevealed(selected);
+  const reveal = selected ? `${selected}@${model.parentOf.get(selected) ?? ""}` : undefined;
+  if (reveal !== revealed) {
+    setRevealed(reveal);
     const path = selected ? ancestorsOf(model, [selected]) : [];
     if ([...path].some((id) => !isOpen(id))) setToggled((cur) => new Map([...cur, ...[...path].map((id) => [id, true] as const)]));
   }
@@ -52,7 +54,7 @@ export function Outline({ expedition, view, selected, onSelect, matches, covered
   useEffect(() => {
     if (!selected) return;
     root.current?.querySelector(`[data-concept="${CSS.escape(selected)}"]`)?.scrollIntoView?.({ block: "nearest" });
-  }, [selected]);
+  }, [selected, reveal]);
 
   const line = (item: OutlineItem, depth: number) => (
     <OutlineLine
