@@ -16,6 +16,9 @@ export function roomRelay(ns: DurableObjectNamespace<ExpeditionRoom>): Relay {
     async build(expeditionId, evt) {
       await room(expeditionId).build(evt)
     },
+    async poke(expeditionId, headSeq) {
+      await room(expeditionId).poke(headSeq)
+    },
     async kick(expeditionId, userId, reason) {
       await room(expeditionId).kick(userId, reason)
     },

@@ -13,7 +13,7 @@
 // app's status chip; clearing it unfocuses.
 import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Expedition, LearningPathSettings, View } from "../model.ts";
-import type { ReaderInteraction } from "../ExpeditionView.tsx";
+import type { ReaderInteraction, SuggestedInteraction } from "../ExpeditionView.tsx";
 import { learningMap, learningScope } from "../scope.ts";
 import { focusTree, learningPathOverlay, steps as stepsOf } from "../overlay.ts";
 import { readingOrder } from "../scope.ts";
@@ -36,7 +36,8 @@ export type LearningPathCanvasProps = {
   onStatus?: (status: ViewStatusChip | null) => void;
   /** Pixels the app covers at the top; the toolbar floats just below them. */
   overlayTop?: number;
-} & ReaderInteraction;
+} & ReaderInteraction &
+  SuggestedInteraction;
 
 /** Every step on the path to `focus`, known ones included, in reading order. */
 function readingOrderOf(tree: NonNullable<ReturnType<typeof focusTree>>, focus: string) {
@@ -53,6 +54,7 @@ export function LearningPathCanvas({
   onSettled,
   memory,
   covered,
+  suggested,
   personal,
   onPersonalChange,
   onMarkKnown,
@@ -209,6 +211,7 @@ export function LearningPathCanvas({
           onSettled={onSettled}
           memory={memory}
           covered={covered}
+          suggested={suggested}
           overlayTop={overlayTop ? overlayTop + toolbarHeight : undefined}
         />
       </div>

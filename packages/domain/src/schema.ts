@@ -402,14 +402,24 @@ export const proposalItems = pgTable(
     expeditionId: exp(),
     id: text("id").notNull(),
     proposalId: text("proposal_id").notNull(),
+    /** Its place in the Proposal (the order the items were suggested in). */
+    position: integer("position").notNull().default(0),
     ops: jsonb("ops").$type<OpBody[]>().notNull(),
-    /** The values the item expected to replace, by field. */
+    /**
+     * The values the item expected to replace, by field key (`proposalBase`;
+     * null: unset). Stale is computed against it, never stored.
+     */
     base: jsonb("base").$type<Record<string, unknown>>().notNull().default({}),
     status: text("status", {
       enum: ["pending", "accepted", "dismissed", "stale"],
     })
       .notNull()
       .default("pending"),
+    /** The Change that accepted it (undoing that Change makes it pending again). */
+    changeId: text("change_id"),
+    reviewedBy: text("reviewed_by"),
+    reviewedAt: ts("reviewed_at"),
+    createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [
     primaryKey({ columns: [t.expeditionId, t.id] }),

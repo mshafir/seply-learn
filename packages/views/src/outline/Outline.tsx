@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import type { Concept, Expedition, KindDef, View } from "../model.ts";
+import type { SuggestedInteraction } from "../ExpeditionView.tsx";
 import { KindIcon } from "../canvas/KindIcon.tsx";
 import { paletteColor } from "../canvas/color.ts";
 import { cx, ReadCheck } from "../canvas/parts.tsx";
@@ -23,9 +24,9 @@ export type OutlineProps = {
   covered?: ReadonlySet<string>;
   /** The reader's personal settings: `hideRead` leaves covered Concepts out. */
   personal?: Record<string, unknown>;
-};
+} & SuggestedInteraction;
 
-export function Outline({ expedition, view, selected, onSelect, matches, covered, personal }: OutlineProps) {
+export function Outline({ expedition, view, selected, onSelect, matches, covered, personal, suggested }: OutlineProps) {
   const settings = view.settings as OutlineViewSettings;
   const hideRead = personal?.hideRead === true;
   const model = useMemo(
@@ -65,6 +66,7 @@ export function Outline({ expedition, view, selected, onSelect, matches, covered
       selected={selected}
       matches={matches}
       covered={covered}
+      suggested={suggested?.concepts}
       onSelect={onSelect}
       onToggle={toggle}
     >
@@ -110,12 +112,13 @@ type LineProps = {
   selected?: string;
   matches?: Set<string>;
   covered?: ReadonlySet<string>;
+  suggested?: ReadonlySet<string>;
   onSelect: (id?: string) => void;
   onToggle: (id: string) => void;
   children?: ReactNode;
 };
 
-function OutlineLine({ item, depth, kind, open, selected, matches, covered, onSelect, onToggle, children }: LineProps) {
+function OutlineLine({ item, depth, kind, open, selected, matches, covered, suggested, onSelect, onToggle, children }: LineProps) {
   const { concept: c, folded } = item;
   const hasKids = item.children.length > 0;
   const dim = (id: string) => !!matches && !matches.has(id);
@@ -131,6 +134,7 @@ function OutlineLine({ item, depth, kind, open, selected, matches, covered, onSe
         style={{ paddingLeft: `${depth * 1.5 + 0.5}rem` }}
         data-concept={c.id}
         data-covered={covered?.has(c.id) || undefined}
+        data-suggested={suggested?.has(c.id) || undefined}
         onClick={() => onSelect(c.id)}
       >
         <Chevron open={open} label={c.title} hidden={!hasKids} onToggle={() => onToggle(c.id)} />

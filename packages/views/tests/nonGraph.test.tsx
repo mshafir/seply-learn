@@ -57,6 +57,21 @@ describe("Outline", () => {
     expect(line(container, gpu)!.className).toContain("--selected");
   });
 
+  it("marks suggested lines (WP-4.3)", () => {
+    const f = live();
+    const [capacity, gpu] = [f.concept("capacity"), f.concept("gpu-supply")];
+    const { container } = render(
+      <ExpeditionView
+        collections={f.collections}
+        viewId={f.view("outline")}
+        onSelect={noop}
+        suggested={{ concepts: new Set([capacity]), relationships: new Set() }}
+      />,
+    );
+    expect(line(container, capacity)!.dataset.suggested).toBe("true");
+    expect(line(container, gpu)?.dataset.suggested).toBeUndefined();
+  });
+
   it("checks covered Concepts, and hides them with hideRead (never the selection)", () => {
     const f = live();
     const [capacity, gpu] = [f.concept("capacity"), f.concept("gpu-supply")];

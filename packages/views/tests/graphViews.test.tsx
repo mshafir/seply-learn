@@ -171,6 +171,24 @@ describe("reading status and search in these Views", () => {
     }
   });
 
+  it("draws suggested Concepts and Relationships dashed (WP-4.3)", async () => {
+    const f = live();
+    const [capex, price] = [f.concept("capex"), f.concept("frontier-price")];
+    const { container } = render(
+      <ExpeditionView
+        collections={f.collections}
+        viewId={f.view("economics")}
+        onSelect={noop}
+        transitionMs={0}
+        suggested={{ concepts: new Set([capex]), relationships: new Set() }}
+      />,
+    );
+    await waitFor(() => expect(node(container, capex)).not.toBeNull(), { timeout: 5000 });
+    expect(node(container, capex)!.dataset.suggested).toBe("true");
+    expect(node(container, capex)!.className).toContain("seply-concept--suggested");
+    expect(node(container, price)!.dataset.suggested).toBeUndefined();
+  });
+
   it("checks covered parts and pins in the Anatomy, and keeps a box lit while a pin inside it matches", () => {
     const f = live();
     const [mla, kv, attention, embedding] = ["mla", "kv-cache", "attention", "embedding"].map(f.concept);

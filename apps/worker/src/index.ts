@@ -26,6 +26,7 @@ const rooms = () => roomRelay(bindings().EXPEDITION_ROOM)
 const relay: Relay = {
   published: (id, batch) => rooms().published(id, batch),
   build: (id, evt) => rooms().build!(id, evt),
+  poke: (id, headSeq) => rooms().poke!(id, headSeq),
   kick: (id, userId, reason) => rooms().kick!(id, userId, reason),
   agentPresence: (id, agent) => rooms().agentPresence!(id, agent),
   handleUpgrade: (req, join) => rooms().handleUpgrade!(req, join),

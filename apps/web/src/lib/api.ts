@@ -3,7 +3,7 @@
 // These types mirror the server's responses: the app may not import
 // @seply/server (dependency rule).
 
-import type { SegmentsDoc } from "@seply/domain"
+import type { ProposalView, SegmentsDoc } from "@seply/domain"
 
 export type User = { id: string; email: string; name: string }
 
@@ -574,4 +574,60 @@ export function getHistory(
   const q = new URLSearchParams({ expedition: expeditionId })
   if (before !== undefined) q.set("before", String(before))
   return call<HistoryPage>(`/history?${q}`)
+}
+
+// ─── Proposals (WP-4.3; the server's src/proposals.ts) ───────────────────
+// Reader-facing copy calls them suggestions.
+
+export type { ProposalItemView, ProposalView } from "@seply/domain"
+
+/** The Proposals with pending items, oldest first (owners and editors; 403 otherwise). */
+export async function listProposals(
+  expeditionId: string
+): Promise<ProposalView[]> {
+  return (
+    await call<{ proposals: ProposalView[] }>(
+      `/expeditions/${encodeURIComponent(expeditionId)}/proposals`
+    )
+  ).proposals
+}
+
+/** What one review action did. */
+export type ReviewResult = {
+  /** The one Change the accepted items made; null when none were accepted. */
+  changeId: string | null
+  label: string | null
+  headSeq: number
+  /** Accepted, in the order applied, dependencies included. */
+  accepted: string[]
+  /** Accepted because an accepted item needed them. */
+  included: string[]
+  dismissed: string[]
+}
+
+/**
+ * One review action: accept (one Change) and/or dismiss. A 409 `ApiError`
+ * carries `stale`, `gone` or `reviewed` item ids in its body.
+ */
+export function reviewProposals(
+  expeditionId: string,
+  body: { accept?: string[]; dismiss?: string[]; overwrite?: boolean }
+): Promise<ReviewResult> {
+  return call(
+    `/expeditions/${encodeURIComponent(expeditionId)}/proposals/review`,
+    { method: "POST", body: JSON.stringify(body) }
+  )
+}
+
+/** Makes reviewed items pending again: those an undone Change accepted, or dismissed ones. */
+export async function reopenProposals(
+  expeditionId: string,
+  body: { changeId: string } | { itemIds: string[] }
+): Promise<string[]> {
+  return (
+    await call<{ reopened: string[] }>(
+      `/expeditions/${encodeURIComponent(expeditionId)}/proposals/reopen`,
+      { method: "POST", body: JSON.stringify(body) }
+    )
+  ).reopened
 }

@@ -23,11 +23,13 @@ import { ExpeditionView } from "@seply/views";
   onPersonalChange={(key, value) => …} // optional: a View's own control changed one (e.g. "Show all steps")
   onStatus={(status) => …} // optional: { text, clear } for the floating status chip, or null
   covered={readIds} // optional: the reader's read or known Concepts (Reading status): a check in every View
+  suggested={{ concepts, relationships }} // optional: pending suggestions to draw dashed (WP-4.3)
   onMarkKnown={(id) => …} // optional: the Learning path's "I know …" marks the reader's status
   basemap={{ tiles: url }} // optional: the Map View's PMTiles (and assets, fallback styles); unset: OpenFreeMap
 />
 ```
 
+- **Suggestions** (`suggested`, WP-4.3): the app passes the Expedition with pending Proposal items applied (a preview) and which Concepts and Relationships (`from|type|to`) they create or change. Canvas Views draw those Concepts with a dashed `--suggested` border (`seply-concept--suggested`, `[data-suggested]`) and those lines dashed in `--suggested`; Outline lines and Comparison Table rows are marked `[data-suggested]` (a dashed outline, a tinted row).
 - **Reading status** (`covered`): every drawn Concept (canvas node, table row, Outline line, Quadrant card, Rates estimate) that is read or known gets a check (`[data-covered]`, `data-testid="read-check"`). The Learning path skips covered Concepts in its step counts and target badges, counts them in its status chip ("k of n read"), and with `personal.hideRead` hides them (bridged over, never the selection or focus). The Outline leaves covered Concepts out of its counts, and with `personal.hideRead` leaves them out of the tree (their unread children move up; never the selection). Without `covered`, the Learning path keeps "I know this" as local state (the harness).
 
 - **Live:** every change to the collections (a local edit, or someone else's arriving by pull) re-derives the View. Canvas Views re-run their pure layout and tween each Concept to its new place: nothing is removed and redrawn, and the view isn't refitted for data alone. Concepts that appear in a reflow (say, the steps a Learning path focus shows) wait while the others glide, then fade in (`.seply-concept--entering`, off under `prefers-reduced-motion`). A change that moves nothing just redraws; a title edit can move things, since titles order the layout's input and size the cards.

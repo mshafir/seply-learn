@@ -3,13 +3,20 @@
 // status, search inside the Expedition and the account menu. The Views bar
 // (views-bar.tsx) sits under it.
 // While a build runs, the activity indicator sits before the search. The
-// presence avatars (presence-avatars.tsx) come next, then History (owners
-// and editors, WP-4.2), which opens the History side panel. Share and
-// Suggestions arrive with their work packages.
+// presence avatars (presence-avatars.tsx) come next, then the Suggestions
+// count (owners and editors, WP-4.3), which opens the Suggestions tab, and
+// History (owners and editors, WP-4.2), which opens the History side panel.
+// Share arrives with its work package.
 import * as React from "react"
-import { CloudOffIcon, HistoryIcon, LoaderCircleIcon } from "lucide-react"
+import {
+  CloudOffIcon,
+  HistoryIcon,
+  LoaderCircleIcon,
+  SparklesIcon,
+} from "lucide-react"
 import { Link } from "wouter"
 
+import { Badge } from "@seply/ui/components/badge"
 import { SeplyGlyph } from "@seply/ui/components/brand"
 import { Button, buttonVariants } from "@seply/ui/components/button"
 import { Input } from "@seply/ui/components/input"
@@ -27,6 +34,7 @@ export function ExpeditionHeader({
   activity,
   presence,
   history,
+  suggestions,
 }: {
   title: string
   canEdit: boolean
@@ -42,6 +50,8 @@ export function ExpeditionHeader({
   presence?: React.ReactNode
   /** The History button (owners and editors); absent for everyone else. */
   history?: { open: boolean; onToggle: () => void }
+  /** The Suggestions count (owners and editors); absent for everyone else. */
+  suggestions?: { count: number; open: boolean; onToggle: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -113,6 +123,28 @@ export function ExpeditionHeader({
         </span>
       )}
       {presence}
+      {suggestions && (
+        <Button
+          variant={suggestions.open ? "secondary" : "ghost"}
+          size="sm"
+          aria-pressed={suggestions.open}
+          aria-label={
+            suggestions.count
+              ? `Suggestions · ${suggestions.count}`
+              : "Suggestions"
+          }
+          data-testid="suggestions-button"
+          onClick={suggestions.onToggle}
+        >
+          <SparklesIcon />
+          Suggestions
+          {suggestions.count > 0 && (
+            <Badge variant="progress" data-testid="suggestions-count">
+              {suggestions.count}
+            </Badge>
+          )}
+        </Button>
+      )}
       {history && (
         <Button
           variant={history.open ? "secondary" : "ghost"}

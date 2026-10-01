@@ -9,6 +9,7 @@ import { layout, nodeSize, EVIDENCE_COLUMN, type Extras, type Positions } from "
 import { topicRoots, trace, type Scope } from "../scope.ts";
 import { badgesFor, type Overlay } from "../overlay.ts";
 import { buildEdges } from "./edges.ts";
+import type { SuggestedInteraction } from "../ExpeditionView.tsx";
 import { useInheritedColorMode } from "./colorMode.ts";
 import { cx, edgeTypes, nodeTypes, type ConceptData } from "./parts.tsx";
 
@@ -34,7 +35,7 @@ export type CanvasProps = {
   memory?: PositionMemory;
   /** Concepts the reader has read or knows: drawn with a check. */
   covered?: ReadonlySet<string>;
-};
+} & SuggestedInteraction;
 
 /** The last drawn positions, by Concept id; kept by whoever switches Views. */
 export type PositionMemory = { current: Positions };
@@ -51,7 +52,7 @@ type Size = { width: number; height: number };
 
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
-function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered, overlayTop = 0 }: CanvasProps) {
+function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered, suggested, overlayTop = 0 }: CanvasProps) {
   // After a View switch, the Concepts the two Views share start where the
   // last one drew them, then glide.
   const [positions, setPositions] = useState<Positions>(() => memory?.current ?? new Map());
@@ -186,12 +187,13 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
           selected: c.id === selected,
           entering: entering.has(c.id),
           covered: !!covered?.has(c.id),
+          suggested: !!suggested?.concepts.has(c.id),
           badges: overlay ? (overlay.badges.get(c.id) ?? []) : badgesFor(view, scope, c, tr),
         },
       };
     });
 
-  const edges = buildEdges({ scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering });
+  const edges = buildEdges({ scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering, suggested: suggested?.relationships });
 
   return (
     <ReactFlow

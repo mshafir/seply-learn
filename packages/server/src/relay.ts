@@ -58,6 +58,13 @@ export interface Relay {
   /** A job's progress, for everyone in the Expedition's room. Optional. */
   build?(expeditionId: string, evt: BuildEvent): Promise<void> | void
   /**
+   * A `poke` at the current head, for everyone in the room. Sent when an
+   * Expedition's Proposals change (WP-4.3: written, reviewed, reopened), so
+   * open Suggestions tabs fetch them again; a client at that head pulls
+   * nothing. Optional.
+   */
+  poke?(expeditionId: string, headSeq: number): Promise<void> | void
+  /**
    * Accepts a WebSocket upgrade into the Expedition's room. Optional: without
    * it the live route answers 501.
    */
@@ -96,6 +103,19 @@ export async function publishCommitted(
     await relay.published(expeditionId, batch)
   } catch (err) {
     console.error("relay: published failed", err)
+  }
+}
+
+/** Pokes the room (Proposals changed). Best effort, like `publishBuild`. */
+export async function publishPoke(
+  relay: Relay,
+  expeditionId: string,
+  headSeq: number
+) {
+  try {
+    await relay.poke?.(expeditionId, headSeq)
+  } catch (err) {
+    console.error("relay: poke failed", err)
   }
 }
 

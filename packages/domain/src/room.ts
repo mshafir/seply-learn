@@ -135,7 +135,11 @@ export const RoomHello = z.object({
 
 export const RoomBuild = BuildEvent.extend({ t: z.literal("build") })
 
-/** New ops were logged: pull after your `headSeq`. */
+/**
+ * New ops were logged: pull after your `headSeq`. Also sent at the current
+ * head when the Expedition's Proposals change (WP-4.3), so open Suggestions
+ * tabs fetch them again.
+ */
 export const RoomPoke = z.object({
   t: z.literal("poke"),
   headSeq: z.number().int().min(0),

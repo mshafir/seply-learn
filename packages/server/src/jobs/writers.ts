@@ -27,9 +27,10 @@ import {
   type WriterMode,
   type WriterPlan,
 } from "@seply/ai"
-import { Id, isLive, schema, ulid, type OpBody } from "@seply/domain"
+import { Id, isLive, ulid, type OpBody } from "@seply/domain"
 import { z } from "zod"
 import { resolveAi } from "../ai.ts"
+import { addProposalItems, createProposal } from "../proposals.ts"
 import { isJobPaused } from "./host.ts"
 import {
   AI_STEP,
@@ -249,25 +250,18 @@ export const articleJob: JobDefinition<ArticleJobInput> = {
       () =>
         ctx.withDb(async (db) => {
           await db.transaction(async (tx) => {
-            await tx
-              .insert(schema.proposals)
-              .values({
-                expeditionId,
-                id: plan.proposalId,
-                author: ctx.job.startedBy,
-                origin: "ai",
-                rationale: `Write the article for ${plan.title}`,
-              })
-              .onConflictDoNothing()
-            await tx
-              .insert(schema.proposalItems)
-              .values({
-                expeditionId,
-                id: `${plan.proposalId}-1`,
-                proposalId: plan.proposalId,
-                ops: r.bodies,
-              })
-              .onConflictDoNothing()
+            await createProposal(tx, {
+              expeditionId,
+              id: plan.proposalId,
+              author: ctx.job.startedBy,
+              origin: "ai",
+              rationale: `Write the article for ${plan.title}`,
+            })
+            await addProposalItems(tx, {
+              expeditionId,
+              proposalId: plan.proposalId,
+              items: [{ id: `${plan.proposalId}-1`, ops: r.bodies }],
+            })
           })
           return plan.proposalId
         }),

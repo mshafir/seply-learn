@@ -17,12 +17,15 @@
 //   check; the Learning path skips them, and hides them with "Hide what I've
 //   read"); `onMarkKnown` is the Learning path's "I know …".
 // - `matches` (search inside the Expedition) dims every other Concept.
+// - `suggested` (the Suggestions preview, WP-4.3) draws pending items dashed;
+//   `collections` are then the preview's.
 // - The Map View's tiles come from the build's env (lib/basemap.ts).
 import type { EngineCollections } from "@seply/sync"
 import {
   canvasViewTypes,
   ExpeditionView,
   type ReaderInteraction,
+  type SuggestedInteraction,
   type ViewStatusChip,
 } from "@seply/views"
 import { basemap } from "@/lib/basemap"
@@ -44,7 +47,8 @@ export type CanvasSlotProps = {
   onStatus?: (status: ViewStatusChip | null) => void
   /** Search matches: the canvas dims every other Concept. */
   matches?: Set<string>
-} & ReaderInteraction
+} & ReaderInteraction &
+  SuggestedInteraction
 
 export function CanvasSlot({
   collections,
@@ -59,6 +63,7 @@ export function CanvasSlot({
   matches,
   covered,
   onMarkKnown,
+  suggested,
 }: CanvasSlotProps) {
   const underButton = (canvasViewTypes as readonly string[]).includes(viewType)
   return (
@@ -78,6 +83,7 @@ export function CanvasSlot({
         matches={matches}
         covered={covered}
         onMarkKnown={onMarkKnown}
+        suggested={suggested}
         basemap={basemap}
         overlayTop={underButton ? VIEW_BUTTON_AREA : undefined}
       />
