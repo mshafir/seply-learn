@@ -40,8 +40,10 @@ const rel = (from: string, to: string): OpBody => ({
 async function setup() {
   const db = await testDb()
   const published: LoggedOp[][] = []
+  const pokes: number[] = []
   const relay: Relay = {
     published: (_id, batch) => void published.push([...batch]),
+    poke: (_id, headSeq) => void pokes.push(headSeq),
   }
   const app = testApp(TEST_ENV, db, relay)
   const ada = await signUp(app, "ada")
@@ -113,7 +115,7 @@ async function setup() {
         })
       ).json()) as HistoryPage
     ).changes
-  return { db, app, ada, vic, id, push, call, list, history, published }
+  return { db, app, ada, vic, id, push, call, list, history, published, pokes }
 }
 
 describe("Proposals API", () => {
@@ -142,7 +144,7 @@ describe("Proposals API", () => {
   })
 
   it("accepting a Relationship includes its new Concept, as one Change", async () => {
-    const { db, id, ada, call, list, history, published } = await setup()
+    const { db, id, ada, call, list, history, published, pokes } = await setup()
     const res = await call(ada, "/review", { accept: ["r-kv"] })
     expect(res.status).toBe(200)
     const r = await res.json()
@@ -166,6 +168,8 @@ describe("Proposals API", () => {
     expect(published.at(-1)!.every((op) => op.changeId === r.changeId)).toBe(
       true
     )
+    // Open Suggestions tabs elsewhere hear a poke at the new head.
+    expect(pokes).toEqual([r.headSeq])
     // Still listed (one item left), with the two accepted.
     const [p] = await list(ada)
     expect(p!.status).toBe("partly")
@@ -214,7 +218,8 @@ describe("Proposals API", () => {
   })
 
   it("dismisses without a Change, and reopens dismissed and undone items", async () => {
-    const { db, id, ada, call, list, history } = await setup()
+    const ctx = await setup()
+    const { db, id, ada, call, list, history } = ctx
     const before = (await history()).length
     const d = await call(ada, "/review", { dismiss: ["s-attn"] })
     expect(d.status).toBe(200)
@@ -241,7 +246,10 @@ describe("Proposals API", () => {
     expect(await list(ada)).toEqual([])
 
     // Undo the dismissal; then (after the client undid it) the accept.
+    const { pokes } = ctx
+    const before2 = pokes.length
     const r1 = await call(ada, "/reopen", { itemIds: ["s-attn"] })
+    expect(pokes.length).toBe(before2 + 1)
     expect(await r1.json()).toEqual({ reopened: ["s-attn"] })
     const r2 = await call(ada, "/reopen", { changeId: a.changeId })
     expect((await r2.json()).reopened.sort()).toEqual(["c-kv", "r-kv"])

@@ -62,6 +62,7 @@ export {
 export {
   acceptLabel,
   addProposalItems,
+  announceProposals,
   createProposal,
   listProposals,
   ProposalError,
@@ -73,7 +74,10 @@ export {
   noopRelay,
   publishBuild,
   publishCommitted,
+  publishPoke,
+  type AgentPresence,
   type Relay,
+  type RoomAccess,
   type RoomJoin,
 } from "./relay.ts"
 export {

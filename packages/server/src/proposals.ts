@@ -21,7 +21,9 @@
 // runs in the client (WP-4.2); the web then calls `reopen` with its id.
 //
 // Writers: `createProposal` and `addProposalItems` (the article job; WP-4.4's
-// Grow asks; MCP `propose_changes` in M5).
+// Grow asks; MCP `propose_changes` in M5), then `announceProposals`.
+// Reviews and reopens poke the room themselves (`Relay.poke`): open
+// Suggestions tabs elsewhere fetch the list again.
 import {
   can,
   isStale,
@@ -44,7 +46,7 @@ import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
 import { appendOps, PushError, roleOf } from "./oplog.ts"
 import { loadState } from "./projection.ts"
-import { publishCommitted, type Relay } from "./relay.ts"
+import { publishCommitted, publishPoke, type Relay } from "./relay.ts"
 
 const { expeditions, proposals, proposalItems, users } = schema
 
@@ -413,6 +415,7 @@ export async function reviewProposals(
     return { result, logged }
   })
   await publishCommitted(relay, expeditionId, out.logged)
+  await publishPoke(relay, expeditionId, out.result.headSeq)
   return out.result
 }
 
@@ -488,6 +491,23 @@ export async function reopenProposals(
   })
 }
 
+/**
+ * Tells the Expedition's room that its Proposals changed (a `poke` at the
+ * current head), so open Suggestions tabs fetch them again. Call it after
+ * writing Proposals (`createProposal`, `addProposalItems`) outside a review.
+ */
+export async function announceProposals(
+  db: Db,
+  relay: Relay,
+  expeditionId: string
+) {
+  const [e] = await db
+    .select({ headSeq: expeditions.headSeq })
+    .from(expeditions)
+    .where(eq(expeditions.id, expeditionId))
+  if (e) await publishPoke(relay, expeditionId, e.headSeq)
+}
+
 // --- routes -----------------------------------------------------------------------
 
 export function proposalRoutes(relay: Relay) {
@@ -535,11 +555,14 @@ export function proposalRoutes(relay: Relay) {
     if (!body.success)
       return c.json({ error: "invalid body", issues: body.error.issues }, 400)
     try {
-      const reopened = await reopenProposals(await c.var.db(), {
-        expeditionId: c.req.param("id"),
+      const db = await c.var.db()
+      const expeditionId = c.req.param("id")
+      const reopened = await reopenProposals(db, {
+        expeditionId,
         userId: c.var.user.id,
         ...body.data,
       })
+      if (reopened.length) await announceProposals(db, relay, expeditionId)
       return c.json({ reopened })
     } catch (e) {
       return answer(e)

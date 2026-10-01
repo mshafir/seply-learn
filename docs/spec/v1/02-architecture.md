@@ -59,20 +59,20 @@ One WebSocket room per Expedition, behind one interface:
 
 ```ts
 Relay {
-  published(exp, batch); build(exp, evt); kick(exp, user);
-  agentPresence(exp, {userId, label, ttl}); handleUpgrade(req)
+  published(exp, batch); build(exp, evt); kick(exp, user | null, reason);
+  agentPresence(exp, {userId, label, ttlMs}); handleUpgrade(req, join)
 }
 ```
 
 - **Cloudflare:** a hand-written **hibernating Durable Object** (`ctx.acceptWebSocket`). Presence lives in socket attachments (≤16 KB), and it never touches Postgres. Outgoing messages are free.
 - **Node:** in-process rooms (`@hono/node-server` + `ws`). **Postgres LISTEN/NOTIFY** handles multi-instance fan-out: `exp_ops` fires on commit, and `exp_live` carries presence and build events, with payloads under 8 KB and a dedicated direct connection.
-- **Protocol** (JSON `{t, …}`):
-  - `hello {headSeq, presence[], builds[]}`
-  - `ops {from, to, ops[]}`, or `poke {headSeq}` for large batches and gaps
-  - `presence {view, cursor, selection[], editing?}`, at ~10–20 Hz, throttled by the client, and `leave`
+- **Protocol** (JSON `{t, …}`; the schemas are `@seply/domain`'s `room.ts`):
+  - `hello {headSeq, presence[], builds[], you?}`: `presence` is everyone else here, as participants `{id, userId, name, agent?, view, cursor, selection[], editing?}` (one per connection, so a reader with two tabs is two); `you` is this connection's participant id, given only to those who may send presence
+  - `ops {from, to, ops[]}`, or `poke {headSeq}` for large batches (over 64 KB of JSON) and gaps. `from` is the head the ops follow (exclusive): a client at `from` or later applies them, one further behind pulls
+  - `presence {view, cursor, selection[], editing?}`, at ~10–20 Hz (15), throttled by the client, and `leave`; the room fans them out with the sender's `id`, `userId` and `name`, and sends `leave {id}` when a connection leaves or closes. A `cursor` is `{x, y, on?: {id, x, y}}`: fractions of the canvas pane and, over a Concept, of that Concept's box, so it lands on the same Concept in another reader's window
   - `build {jobId, kind, viewId?, status, step, progress, previewNodes?, reason?, at}`: with `viewId` about that View (its status), without it about the whole job (queued, running, paused, complete, failed, cancelled)
-  - `kick {reason}`
-- **Who connects:** signed-in collaborators connect with presence. Signed-in viewers connect read-only. **Anonymous readers of a public or unlisted link subscribe to `ops` but send no presence** *(assumed; the research proposed it)*.
+  - `kick {reason}`, then the room closes the connection; the client doesn't reconnect until the Expedition is opened again (which checks access). `kick(exp, null)` kicks every connection that isn't a collaborator's (a Visibility change)
+- **Who connects:** signed-in collaborators (owner, editors, viewers) connect with presence and hear each other's. Other signed-in readers of a public or unlisted link connect read-only: `ops`, `poke` and `build`, no presence either way, so a link doesn't reveal who is working on it. **Anonymous readers of a public or unlisted link subscribe to `ops` (and `poke`) but send no presence** *(assumed; the research proposed it)*, and hear neither presence nor builds.
 - **Agents via MCP** appear as a participant. The MCP handler calls `agentPresence` on each tool call, with a TTL.
 - **Client:** `partysocket` for reconnect with backoff.
 

@@ -22,12 +22,13 @@ const bindings = () => env as unknown as Bindings
 
 // The app is built once per isolate; the relay and runner reach the bindings
 // when they are called.
+const rooms = () => roomRelay(bindings().EXPEDITION_ROOM)
 const relay: Relay = {
-  published: (id, batch) =>
-    roomRelay(bindings().EXPEDITION_ROOM).published(id, batch),
-  build: (id, evt) => roomRelay(bindings().EXPEDITION_ROOM).build!(id, evt),
-  handleUpgrade: (req, join) =>
-    roomRelay(bindings().EXPEDITION_ROOM).handleUpgrade!(req, join),
+  published: (id, batch) => rooms().published(id, batch),
+  build: (id, evt) => rooms().build!(id, evt),
+  kick: (id, userId, reason) => rooms().kick!(id, userId, reason),
+  agentPresence: (id, agent) => rooms().agentPresence!(id, agent),
+  handleUpgrade: (req, join) => rooms().handleUpgrade!(req, join),
 }
 const runner = (): JobRunner => workerJobRunner(bindings(), relay)
 const jobs: JobRunner = {

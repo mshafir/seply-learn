@@ -16,7 +16,13 @@
 // finishes; the header's activity indicator (build-activity.tsx) holds
 // Cancel and "Leave it building"; the spending cap pauses with Continue or
 // Stop. Builds come from the room (use-builds.ts); signed out or offline
-// there is no room, and Views show their logged status only.
+// there are none, and Views show their logged status only.
+//
+// Live (spec §2.4, WP-4.1): every reader online is in the Expedition's room
+// (use-room.ts), which brings other people's edits as they are made.
+// Collaborators also see each other: avatars in the header and cursors on
+// the canvas (presence-avatars.tsx, live-cursors.tsx), and send their View,
+// selection and pointer.
 //
 // Offline (spec §2.9), an Expedition saved on this device opens from that
 // copy, read-only, with an "Offline, as of …" chip; without a copy the
@@ -88,6 +94,13 @@ import {
 } from "@/expedition/build-state.ts"
 import { FailedViewCard } from "@/expedition/failed-view-card.tsx"
 import { useBuilds } from "@/expedition/use-builds.ts"
+import { LiveCursors } from "@/expedition/live-cursors.tsx"
+import { PresenceAvatars } from "@/expedition/presence-avatars.tsx"
+import {
+  useCursorSender,
+  usePresenceAvatars,
+} from "@/expedition/use-presence.ts"
+import { useRoom } from "@/expedition/use-room.ts"
 import { ViewSkeleton } from "@/expedition/view-skeleton.tsx"
 import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
@@ -399,6 +412,30 @@ function ExpeditionFrame({
 
   const expedition = data.expedition
 
+  // The live room, for every reader while online; kicked, the screen reopens
+  // (which checks access again).
+  const { room } = useRoom({
+    expeditionId,
+    client,
+    enabled: offlineSince === null,
+    onKicked: (reason) => {
+      toast.add({ title: "Disconnected", description: reason })
+      onRetry()
+    },
+  })
+  // Proposals changed elsewhere (another tab reviewed, an ask wrote): the
+  // server pokes the room, and the Suggestions list is fetched again.
+  React.useEffect(() => {
+    if (!room || !canReview) return
+    return room.subscribe((msg) => {
+      if (msg.t === "poke") void refreshProposals.current()
+    })
+  }, [room, canReview])
+  const selfUserId = signInHref === null ? userId : null
+  const avatars = usePresenceAvatars(room, selfUserId)
+  const paneRef = React.useRef<HTMLElement | null>(null)
+  useCursorSender(room, paneRef)
+
   // Builds: live over the room while signed in and online.
   const latest = React.useRef({
     views: data.views,
@@ -417,7 +454,7 @@ function ExpeditionFrame({
   )
   const builds = useBuilds({
     expeditionId,
-    client,
+    room,
     enabled: offlineSince === null && signInHref === null,
     onEvent: onBuildEvent,
   })
@@ -459,6 +496,16 @@ function ExpeditionFrame({
       : []
   const place = stack[stack.length - 1]
   const selectedConcept = place ? conceptById.get(place.conceptId) : undefined
+
+  // This reader's presence: the View they're on and what they've selected.
+  const viewIdHere = view?.id ?? null
+  const selectedHere = selectedConcept?.id ?? null
+  React.useEffect(() => {
+    room?.setPresence({
+      view: viewIdHere,
+      selection: selectedHere ? [selectedHere] : [],
+    })
+  }, [room, viewIdHere, selectedHere])
 
   // Continue reading: opened without a View (or Concept) in the URL, land
   // where the reader left off, once both the data and the reader's state are
@@ -856,6 +903,15 @@ function ExpeditionFrame({
               }
             : undefined
         }
+        presence={
+          <PresenceAvatars
+            avatars={avatars}
+            viewName={(id) => {
+              const v = data.views.find((x) => x.id === id)
+              return v ? v.label || viewTypeMeta(v.viewType).name : undefined
+            }}
+          />
+        }
         history={
           canViewHistory
             ? {
@@ -932,6 +988,7 @@ function ExpeditionFrame({
           onClose={() => setPanel(null)}
           canvas={
             <main
+              ref={paneRef}
               data-testid="canvas-pane"
               data-settled={view && settledViewId === view.id ? "" : undefined}
               aria-label="Canvas"
@@ -1062,6 +1119,12 @@ function ExpeditionFrame({
                   </Alert>
                 </div>
               )}
+              <LiveCursors
+                room={room}
+                paneRef={paneRef}
+                viewId={viewIdHere}
+                selfUserId={selfUserId}
+              />
             </main>
           }
         />

@@ -136,6 +136,21 @@ test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", a
   await refocus(page)
   const button = page.getByTestId("suggestions-button")
   await expect(button).toHaveAccessibleName("Suggestions · 3")
+  // A second tab: it hears reviews made in the first through the room.
+  const other = await page.context().newPage()
+  const inRoom = new Promise<void>((resolve) =>
+    other.on("websocket", (ws) => {
+      if (!ws.url().endsWith("/live")) return
+      ws.on("framereceived", (f) => {
+        if (String(f.payload).includes('"t":"hello"')) resolve()
+      })
+    })
+  )
+  await other.goto(`/e/${exp}`)
+  const otherButton = other.getByTestId("suggestions-button")
+  await expect(otherButton).toHaveAccessibleName("Suggestions · 3")
+  await inRoom
+  await page.bringToFront()
 
   // The tab: grouped by ask, with who asked; the canvas draws them dashed.
   await button.click()
@@ -175,6 +190,10 @@ test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", a
     )
   await expect.poll(pagedRow).toEqual([{ deleted: false }])
   await expect(button).toHaveAccessibleName("Suggestions · 1")
+  await expect(otherButton).toHaveAccessibleName("Suggestions · 1", {
+    timeout: 10_000,
+  })
+  await other.close()
   await expect(panel.getByTestId("suggestion")).toHaveCount(1)
 
   // Ada rewrites the summary herself: the suggestion is stale, both versions.

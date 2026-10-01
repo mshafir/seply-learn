@@ -1,4 +1,4 @@
-// Jobs and the live room over HTTP (all signed in).
+// Jobs over HTTP (all signed in). The live room is live.ts.
 //
 //   POST /expeditions/:id/jobs   { kind, input? } → 201 { job }   (useAi: owners, editors)
 //   GET  /expeditions/:id/jobs   → { jobs }, the 20 most recent  (read)
@@ -6,7 +6,6 @@
 //   POST /jobs/:id/cancel        → { job }                        (useAi)
 //   POST /jobs/:id/retry         → { job }                        (useAi)
 //   POST /jobs/:id/continue      → { job }  paused at the cap     (useAi)
-//   GET  /expeditions/:id/live   WebSocket upgrade into the room  (read)
 //
 // A job or Expedition the caller can't view is a 404; one they can view but
 // not run jobs on is a 403. Test-only kinds (the fake job) are refused unless
@@ -18,7 +17,6 @@ import { z } from "zod"
 import type { AppEnv } from "../app.ts"
 import type { Db } from "../db.ts"
 import { roleOf } from "../oplog.ts"
-import type { Relay } from "../relay.ts"
 import { JobError } from "./runner.ts"
 import { getJob, listJobs } from "./store.ts"
 import type { JobRunner } from "./types.ts"
@@ -48,7 +46,7 @@ export async function access(db: Db, expeditionId: string, userId: string) {
   }
 }
 
-export function jobRoutes(runner: JobRunner | undefined, relay: Relay) {
+export function jobRoutes(runner: JobRunner | undefined) {
   const r = new Hono<AppEnv>()
 
   const noRunner = (c: Context<AppEnv>) =>
@@ -94,22 +92,6 @@ export function jobRoutes(runner: JobRunner | undefined, relay: Relay) {
     if (!(await access(db, expeditionId, c.var.user.id)))
       return c.json({ error: "Expedition not found" }, 404)
     return c.json({ jobs: await listJobs(db, expeditionId) })
-  })
-
-  r.get("/expeditions/:id/live", async (c) => {
-    if (c.req.header("upgrade")?.toLowerCase() !== "websocket")
-      return c.json({ error: "expected a WebSocket upgrade" }, 426)
-    if (!relay.handleUpgrade)
-      return c.json({ error: "the live room is not available" }, 501)
-    const db = await c.var.db()
-    const expeditionId = c.req.param("id")
-    const a = await access(db, expeditionId, c.var.user.id)
-    if (!a) return c.json({ error: "Expedition not found" }, 404)
-    return relay.handleUpgrade(c.req.raw, {
-      expeditionId,
-      userId: c.var.user.id,
-      headSeq: a.headSeq,
-    })
   })
 
   /** The job, if the caller may take `action` on its Expedition. */

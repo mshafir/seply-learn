@@ -4,7 +4,8 @@
 //
 // - The list loads when the screen opens, again when the window regains
 //   focus, every POLL_MS while visible, and whenever `refresh` is called
-//   (after a review, an undo, or an article ask finishing). A new MCP
+//   (after a review, an undo, an article ask finishing, or a room `poke`:
+//   the server pokes the room whenever Proposals change). A new MCP
 //   Proposal arriving after the first load calls `onNewMcp` (the toast).
 // - `ingest` merges a Proposal from elsewhere: WP-4.4's Grow asks stream
 //   `data-proposal` parts (a `ProposalView`, keyed by id; a later part
