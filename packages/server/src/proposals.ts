@@ -235,6 +235,55 @@ async function readProposals(
   }))
 }
 
+/**
+ * One Proposal with all its items (reviewed ones too), or null: what a Grow
+ * ask streams as `data-proposal` parts. No access check: callers check.
+ */
+export async function readProposal(
+  db: Db,
+  expeditionId: string,
+  proposalId: string
+): Promise<ProposalView | null> {
+  const [p] = await db
+    .select({
+      id: proposals.id,
+      authorId: proposals.author,
+      name: users.name,
+      image: users.image,
+      origin: proposals.origin,
+      rationale: proposals.rationale,
+      status: proposals.status,
+      createdAt: proposals.createdAt,
+    })
+    .from(proposals)
+    .leftJoin(users, eq(users.id, proposals.author))
+    .where(
+      and(eq(proposals.expeditionId, expeditionId), eq(proposals.id, proposalId))
+    )
+  if (!p) return null
+  const items = await db
+    .select()
+    .from(proposalItems)
+    .where(
+      and(
+        eq(proposalItems.expeditionId, expeditionId),
+        eq(proposalItems.proposalId, proposalId)
+      )
+    )
+    .orderBy(asc(proposalItems.position))
+  const views = items.map(itemView)
+  return {
+    id: p.id,
+    expeditionId,
+    author: { id: p.authorId, name: p.name ?? "Someone", image: p.image },
+    origin: p.origin,
+    rationale: p.rationale,
+    status: p.status === "pending" ? proposalStatusOf(views.map((i) => i.status)) : p.status,
+    createdAt: iso(p.createdAt)!,
+    items: views,
+  }
+}
+
 // --- review ----------------------------------------------------------------------
 
 export const ReviewBody = z

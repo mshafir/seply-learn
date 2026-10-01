@@ -246,3 +246,54 @@ export function estimateArticle(input: {
     output: Math.round(ARTICLE_LENGTHS[input.length] * ARTICLE_TOKENS_PER_WORD),
   })
 }
+
+/**
+ * A Grow ask's shape: the curator's tool loop over the playbook, the Sources
+ * and the Concept set (cached after the first step), a few steps writing
+ * complete Concepts (summary and overview in each create) and Relationships.
+ */
+export const ASK_STEP = {
+  /** `_contract.md` + `grow.md`. */
+  prompt: 3_500,
+  /** One line of the Concept set, and of its Relationships, as the agent reads it. */
+  perConcept: 45,
+  perRelationship: 14,
+  steps: 6,
+  /** Output per step: a few complete Concepts, or their links. */
+  outputPerStep: 1_500,
+  /** A step's tool results, read uncached by the next. */
+  toolResult: 600,
+} as const
+
+/**
+ * One Grow ask on the curator model (spec §5.5): shown before asking, next
+ * to the reader's per-ask cap, which stops it whatever the estimate says.
+ */
+export function estimateAsk(input: {
+  provider: ProviderId
+  models: StageModels
+  /** Characters of Source text across the Expedition's Sources (0: none). */
+  sourceChars: number
+  concepts: number
+  relationships: number
+}): StageEstimate {
+  const { provider, models } = input
+  const family = tokenizerFamily(provider, models.curator)
+  const prefix =
+    ASK_STEP.prompt +
+    tokensForChars(input.sourceChars, family) +
+    input.concepts * ASK_STEP.perConcept +
+    input.relationships * ASK_STEP.perRelationship
+  let usage: TokenUsage = { ...ZERO_USAGE, cacheWrite: prefix }
+  let history = 0
+  for (let i = 0; i < ASK_STEP.steps; i++) {
+    usage = addUsage(usage, {
+      input: i ? ASK_STEP.toolResult : 0,
+      cacheRead: i ? prefix + history : 0,
+      cacheWrite: ASK_STEP.outputPerStep,
+      output: ASK_STEP.outputPerStep,
+    })
+    history += ASK_STEP.outputPerStep + ASK_STEP.toolResult
+  }
+  return stage(provider, models.curator, usage)
+}

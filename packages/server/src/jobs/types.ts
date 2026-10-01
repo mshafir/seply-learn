@@ -168,6 +168,11 @@ export interface JobContext<Input> {
   progress(evt: Progress): Promise<void>
   /** Runs `fn` over one database connection, closed afterwards. Use inside steps. */
   withDb<T>(fn: (db: Db) => Promise<T>): Promise<T>
+  /**
+   * Tells the Expedition's room its Proposals changed (a `poke`), so open
+   * Suggestions tabs fetch them again. Best effort: never throws.
+   */
+  announceProposals(): Promise<void>
   /** The runtime's services (AI setup, blobs, the ViewReader); empty when it has none. */
   services: JobServices
 }

@@ -27,7 +27,7 @@ import {
   type WriterMode,
   type WriterPlan,
 } from "@seply/ai"
-import { Id, isLive, ulid, type OpBody } from "@seply/domain"
+import { Id, isLive, type OpBody } from "@seply/domain"
 import { z } from "zod"
 import { resolveAi } from "../ai.ts"
 import { addProposalItems, createProposal } from "../proposals.ts"
@@ -212,7 +212,9 @@ export const articleJob: JobDefinition<ArticleJobInput> = {
           }
           return {
             title: c!.title,
-            proposalId: ulid(Date.now()),
+            // The job's id, so its Proposal is found from the job (Activity,
+            // the ask's stream) and a Retry suggests nothing twice.
+            proposalId: ctx.job.jobId,
             capUsd: capUsd ?? 0.5,
             whole: planSources(sources, ai.priceKey).mode === "whole",
           }
@@ -267,6 +269,7 @@ export const articleJob: JobDefinition<ArticleJobInput> = {
         }),
       { retries: 3 }
     )
+    await ctx.announceProposals()
     await ctx.progress({
       status: "running",
       step: `Suggested an article for ${plan.title}`,

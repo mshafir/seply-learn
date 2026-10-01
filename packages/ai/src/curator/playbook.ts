@@ -38,3 +38,7 @@ export const mergeInstructions = () =>
  */
 export const viewInstructions = () =>
   join(playbook("_contract"), playbook("build-view"))
+
+/** One Grow ask (spec §5.5): the contract and the Grow playbook. */
+export const growInstructions = () =>
+  join(playbook("_contract"), playbook("grow"))
