@@ -45,3 +45,7 @@ function ResizableHandle({
 }
 
 export { ResizableHandle, ResizablePanel, ResizablePanelGroup }
+
+// Not part of shadcn's file: re-exported so apps can drive a Panel (collapse,
+// expand, resize) without depending on react-resizable-panels themselves.
+export { usePanelRef } from "react-resizable-panels"

@@ -8,7 +8,7 @@ import {
 } from "@playwright/test"
 import pg from "pg"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-2.5: Reading status and Continue reading. A reader marks a Concept read
 // in one browser context and sees it in another (after a refresh), lands where
@@ -40,10 +40,7 @@ async function importCompute(page: Page): Promise<string> {
 
 /** Opens GQA from the Techniques table. */
 async function openGqa(page: Page) {
-  await page
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Techniques/ })
-    .click()
+  await openView(page, /Techniques/)
   await page
     .getByTestId("canvas-pane")
     .getByRole("rowheader", { name: GQA })
@@ -147,10 +144,7 @@ test("mark read on one device, see it on another; Continue reading lands where y
   // The Learning path checks GQA; "Hide what I've read" (a personal setting,
   // saved for this reader) takes it off the canvas.
   const gqaId = (await serverState(b, exp)).reading[0]!.conceptId
-  await b
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Learning path/ })
-    .click()
+  await openView(b, /Learning path/)
   const gqaNode = b
     .getByTestId("canvas-pane")
     .locator(`.react-flow__node [data-concept="${gqaId}"]`)

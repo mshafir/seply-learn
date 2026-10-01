@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url"
 import { expect, test, type Browser, type Page } from "@playwright/test"
 import pg from "pg"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-2.4: the View panel. Ada imports the compute fixture and Ed joins as an
 // editor, each in their own browser context. A shared setting Ada changes
@@ -52,8 +52,8 @@ async function addEditor(expeditionId: string, userId: string) {
   }
 }
 
-async function openView(page: Page, name: RegExp) {
-  await page.getByTestId("views-rail").getByRole("button", { name }).click()
+async function openSettledView(page: Page, name: RegExp) {
+  await openView(page, name)
   await expect(page.getByTestId("view-button")).toContainText(name)
   await expect(page.getByTestId("canvas-pane")).toHaveAttribute(
     "data-settled",
@@ -83,10 +83,10 @@ test("shared settings sync to another context; personal ones don't", async ({
 
     // Both open Cause & Effect ("Compute economics") and its View panel.
     await ada.page.goto(`/e/${exp}`)
-    await openView(ada.page, /Compute economics/)
+    await openSettledView(ada.page, /Compute economics/)
     const adaPanel = await openPanel(ada.page)
     await ed.page.goto(`/e/${exp}`)
-    await openView(ed.page, /Compute economics/)
+    await openSettledView(ed.page, /Compute economics/)
     const edPanel = await openPanel(ed.page)
 
     // The description comes from the View Type's doc; editors see shared settings.
@@ -124,8 +124,8 @@ test("shared settings sync to another context; personal ones don't", async ({
     )
 
     // Personal: Ada turns on "Show all steps" in the Learning path.
-    await openView(ada.page, /Learning path/)
-    await openView(ed.page, /Learning path/)
+    await openSettledView(ada.page, /Learning path/)
+    await openSettledView(ed.page, /Learning path/)
     const adaMine = adaPanel.getByTestId("personal-settings")
     const edMine = edPanel.getByTestId("personal-settings")
     const adaShowAll = adaMine.getByRole("switch", { name: "Show all steps" })
@@ -175,7 +175,7 @@ test("Duplicate, Read the View Type and the status chip", async ({
   const { page } = ada
   try {
     await importCompute(page)
-    await openView(page, /Learning path/)
+    await openSettledView(page, /Learning path/)
     const panel = await openPanel(page)
 
     // Read the View Type: its docs/view-types file, then back.
@@ -205,8 +205,10 @@ test("Duplicate, Read the View Type and the status chip", async ({
     await expect(chip).toHaveCount(0)
 
     // Duplicate: a new View next to this one, opened.
-    const rail = page.getByTestId("views-rail")
-    await expect(rail.getByRole("button")).toHaveCount(12)
+    await expect(page.getByTestId("views-bar")).toHaveAttribute(
+      "data-views",
+      "12"
+    )
     const before = page.url()
     await page.getByTestId("view-button").click()
     await page
@@ -214,7 +216,10 @@ test("Duplicate, Read the View Type and the status chip", async ({
       .getByRole("button", { name: "Duplicate" })
       .click()
     await expect(page).not.toHaveURL(before)
-    await expect(rail.getByRole("button")).toHaveCount(13)
+    await expect(page.getByTestId("views-bar")).toHaveAttribute(
+      "data-views",
+      "13"
+    )
     await expect(page.getByTestId("view-button")).toContainText(
       "Learning path (copy)"
     )

@@ -33,3 +33,30 @@ export async function widthOf(page: Page, selector: string) {
   expect(box, `${selector} is on screen`).not.toBeNull()
   return box!.width
 }
+
+/**
+ * Opens a View from the Views bar: its tab, or the "more" menu when its tab
+ * doesn't fit.
+ */
+export async function openView(page: Page, name: string | RegExp) {
+  const bar = page.getByTestId("views-bar")
+  await expect(bar).toBeVisible()
+  const tab = bar.getByRole("button", { name })
+  if (await tab.isVisible()) return tab.click()
+  await bar.getByTestId("more-views").click()
+  await page.getByRole("menuitem", { name }).click()
+}
+
+/** The side panel's width once it has finished sliding. */
+export async function settledWidthOf(page: Page, selector: string) {
+  let last = -1
+  await expect
+    .poll(async () => {
+      const w = await widthOf(page, selector)
+      const settled = Math.abs(w - last) < 0.5
+      last = w
+      return settled
+    })
+    .toBe(true)
+  return last
+}

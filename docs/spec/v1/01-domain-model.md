@@ -62,7 +62,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
   - **~18 Relationship Types**, each with a forward and an inverse label, including `corrects` for self-corrections.
 - **Colours** are stored as palette names (blue, teal, green, amber, orange, red, pink, violet, indigo, slate, brown, olive), never hex values, so dark mode works.
 - **Weight** is computed from structure; `weight_pin` is a curator override. Weight describes the **subject** and is the same for every reader. "I already know this" is Reading status, never a pin.
-- **Ordering** uses fractional index keys: article sections and the Views rail. Sibling order inside a View is per View (see §1.6). There is no `outline_key`.
+- **Ordering** uses fractional index keys: article sections and the Views bar. Sibling order inside a View is per View (see §1.6). There is no `outline_key`.
 
 ## 1.3 Operations
 
