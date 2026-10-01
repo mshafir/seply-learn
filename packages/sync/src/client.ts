@@ -162,6 +162,31 @@ export class SyncClient {
     }
   }
 
+  /**
+   * Ops the live room relayed (`ops {from, to, ops}`): applied at once when
+   * they follow our head (or overlap it), ignored when we have them already,
+   * and pulled when something is missing between.
+   */
+  receiveRelayed(msg: { from: number; to: number; ops: readonly LoggedOp[] }) {
+    if (this.disposed || msg.to <= this.engine.headSeq) return
+    if (msg.from <= this.engine.headSeq) this.engine.receive(msg.ops)
+    else this.catchUp(msg.to)
+  }
+
+  /**
+   * The room says the log reaches `headSeq` (`hello`, `poke`): pull when we
+   * are behind. A pull already in flight may have started before those ops
+   * were logged, so it pulls again after it.
+   */
+  catchUp(headSeq: number): void {
+    if (this.disposed || headSeq <= this.engine.headSeq) return
+    const after = this.pulling ?? Promise.resolve()
+    void after
+      .catch(() => {})
+      .then(() => (headSeq > this.engine.headSeq ? this.pull() : undefined))
+      .catch((e) => this.report(e))
+  }
+
   /** Pushes every pending op (and whatever is added meanwhile). */
   push(): Promise<void> {
     if (this.pushing) {

@@ -1,18 +1,44 @@
 // The live relay (spec §2.4): one room per Expedition. /push calls
 // `published` after its transaction commits; jobs call `build` with their
 // progress; `GET /api/expeditions/:id/live` hands the WebSocket upgrade to
-// `handleUpgrade`. On Cloudflare the room is a Durable Object (apps/worker,
-// WP-3.2: `hello`, `build`, `poke`); the full protocol (ops, presence, kick,
-// agent presence) and the Node rooms come with WP-4.1. Without a live relay
+// `handleUpgrade`; sharing calls `kick` when someone loses access, and the
+// MCP handler calls `agentPresence` on each tool call. On Cloudflare the room
+// is a hibernating Durable Object (apps/worker); the Node rooms come with
+// WP-6.1. The wire protocol is @seply/domain's room.ts. Without a live relay
 // the app uses `noopRelay`.
 import type { BuildEvent, LoggedOp, ReaderBatch } from "@seply/domain"
+
+/**
+ * How someone joins (spec §2.4):
+ * - `collaborator`: the owner or an invited editor or viewer. Sends presence
+ *   and hears everyone else's.
+ * - `reader`: signed in, not a collaborator, reading a public or unlisted
+ *   link. Read-only: hears `ops`, `poke` and `build`, sends no presence and
+ *   hears none.
+ * - `anonymous`: signed out, reading a public or unlisted link. Hears `ops`
+ *   and `poke` only.
+ */
+export type RoomAccess = "collaborator" | "reader" | "anonymous"
 
 /** Who is joining a room; the app has checked they may view the Expedition. */
 export type RoomJoin = {
   expeditionId: string
-  userId: string
+  /** Null for an anonymous reader. */
+  userId: string | null
+  /** Their display name (empty when anonymous). */
+  name: string
+  access: RoomAccess
   /** The Expedition's head seq when they joined (the room never reads Postgres). */
   headSeq: number
+}
+
+/** An agent via MCP, shown as a participant until `ttlMs` passes without a call. */
+export type AgentPresence = {
+  /** The user the agent acts for. */
+  userId: string
+  /** What to show, e.g. "Claude (via MCP)". */
+  label: string
+  ttlMs: number
 }
 
 export interface Relay {
@@ -36,6 +62,22 @@ export interface Relay {
    * it the live route answers 501.
    */
   handleUpgrade?(req: Request, join: RoomJoin): Promise<Response> | Response
+  /**
+   * Closes a user's connections with `kick`, e.g. when they are removed or
+   * Visibility changes. `userId` null kicks everyone who isn't a
+   * collaborator (anonymous and signed-in readers of a link). A kicked client
+   * reconnects only by opening the Expedition again, which checks access.
+   */
+  kick?(
+    expeditionId: string,
+    userId: string | null,
+    reason: string
+  ): Promise<void> | void
+  /** An agent's presence, renewed on each call. Optional. */
+  agentPresence?(
+    expeditionId: string,
+    agent: AgentPresence
+  ): Promise<void> | void
 }
 
 export const noopRelay: Relay = {

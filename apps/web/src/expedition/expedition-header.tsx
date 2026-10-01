@@ -2,9 +2,10 @@
 // the title (editors rename it in place, through the sync client), sync
 // status, search inside the Expedition and the account menu. The Views bar
 // (views-bar.tsx) sits under it.
-// While a build runs, the activity indicator sits before the search.
-// History (owners and editors, WP-4.2) opens the History side panel.
-// Presence, Share and Suggestions arrive with their work packages.
+// While a build runs, the activity indicator sits before the search. The
+// presence avatars (presence-avatars.tsx) come next, then History (owners
+// and editors, WP-4.2), which opens the History side panel. Share and
+// Suggestions arrive with their work packages.
 import * as React from "react"
 import { CloudOffIcon, HistoryIcon, LoaderCircleIcon } from "lucide-react"
 import { Link } from "wouter"
@@ -24,6 +25,7 @@ export function ExpeditionHeader({
   signInHref,
   search,
   activity,
+  presence,
   history,
 }: {
   title: string
@@ -36,6 +38,8 @@ export function ExpeditionHeader({
   search?: React.ReactNode
   /** The build activity indicator (build-activity.tsx), when building. */
   activity?: React.ReactNode
+  /** Who else is here (presence-avatars.tsx). */
+  presence?: React.ReactNode
   /** The History button (owners and editors); absent for everyone else. */
   history?: { open: boolean; onToggle: () => void }
 }) {
@@ -108,6 +112,7 @@ export function ExpeditionHeader({
           )}
         </span>
       )}
+      {presence}
       {history && (
         <Button
           variant={history.open ? "secondary" : "ghost"}
