@@ -33,6 +33,11 @@ import {
   type RelationshipGroup,
 } from "@/expedition/reading.ts"
 import type { ArticleAsk } from "@/expedition/build-state.ts"
+import {
+  WriteArticleDialog,
+  type ArticleRequest,
+} from "@/expedition/write-article-dialog.tsx"
+import type { ArticleEstimate } from "@/lib/api.ts"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
 
 /**
@@ -42,7 +47,9 @@ import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
  */
 export type ArticleAction = {
   ask: ArticleAsk | null
-  onWrite: () => void
+  /** Prices each length for the dialog that asks first. */
+  estimate: () => Promise<ArticleEstimate>
+  onWrite: (request: ArticleRequest) => void
 }
 
 /** What the Concept panel reads from, and how it moves. */
@@ -349,7 +356,7 @@ export function ConceptOverview({
         </Button>
       )}
       {sections.length === 0 && articleAction && (
-        <WriteArticle action={articleAction} />
+        <WriteArticle action={articleAction} conceptTitle={concept.title} />
       )}
       <RelationshipList
         heading="Links to"
@@ -366,8 +373,16 @@ export function ConceptOverview({
 }
 
 /** The "Write the article" button, and where its ask stands. */
-function WriteArticle({ action }: { action: ArticleAction }) {
-  const { ask, onWrite } = action
+function WriteArticle({
+  action,
+  conceptTitle,
+}: {
+  action: ArticleAction
+  conceptTitle: string
+}) {
+  const { ask, onWrite, estimate } = action
+  // Asks first: how long, at what cost (write-article-dialog.tsx).
+  const [asking, setAsking] = React.useState(false)
   if (ask?.status === "suggested")
     return (
       <p
@@ -389,7 +404,7 @@ function WriteArticle({ action }: { action: ArticleAction }) {
         variant="outline"
         className="h-auto justify-start gap-3 px-3.5 py-3 text-left"
         disabled={writing}
-        onClick={onWrite}
+        onClick={() => setAsking(true)}
       >
         {writing ? (
           <Spinner className="size-5! text-suggested-text" />
@@ -410,6 +425,13 @@ function WriteArticle({ action }: { action: ArticleAction }) {
           {ask.reason}
         </p>
       )}
+      <WriteArticleDialog
+        open={asking}
+        onOpenChange={setAsking}
+        conceptTitle={conceptTitle}
+        estimate={estimate}
+        onWrite={onWrite}
+      />
     </div>
   )
 }

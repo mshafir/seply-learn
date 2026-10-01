@@ -114,6 +114,7 @@ import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsBar } from "@/expedition/views-bar.tsx"
 import {
   ApiError,
+  estimateArticle,
   listExpeditions,
   startJob,
   type ChangeSummary,
@@ -596,9 +597,11 @@ function ExpeditionFrame({
                 signInHref === null && {
                   articleAction: {
                     ask: articleAsk(builds.log, selectedConcept.id),
-                    onWrite: () => {
+                    estimate: () => estimateArticle(expeditionId),
+                    onWrite: (request) => {
                       startJob(expeditionId, "article", {
                         conceptId: selectedConcept.id,
+                        ...request,
                       }).then(
                         builds.track,
                         failed("Couldn't start writing the article")
@@ -819,6 +822,7 @@ function ExpeditionFrame({
                     key={asOf?.change.id ?? "latest"}
                     collections={shown.collections}
                     viewId={view.id}
+                    viewType={view.viewType}
                     selectedConceptId={selectedConcept?.id ?? null}
                     onSelectConcept={(id) =>
                       setPanel(

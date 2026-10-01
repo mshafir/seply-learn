@@ -4,7 +4,10 @@
 import { describe, expect, it } from "vitest"
 import actuals from "./estimate-actuals.json" with { type: "json" }
 import {
+  ARTICLE_LENGTHS,
+  ARTICLE_TOKENS_PER_WORD,
   BUILD_CAP_MULTIPLIER,
+  estimateArticle,
   estimateBuild,
   noteStepUsage,
   SOURCE_TOKEN_CAP,
@@ -100,5 +103,21 @@ describe("estimateBuild", () => {
     })
     expect(e.stages.curator.priced).toBe(false)
     expect(e.usd).toBeGreaterThan(0)
+  })
+})
+
+describe("estimateArticle", () => {
+  const base = { provider: "gateway" as const, models: DEFAULT_MODELS.gateway }
+  it("costs more for longer articles and for more Source text", () => {
+    const at = (length: "short" | "standard" | "long", sourceChars = 40_000) =>
+      estimateArticle({ ...base, sourceChars, length }).usd
+    expect(at("short")).toBeLessThan(at("standard"))
+    expect(at("standard")).toBeLessThan(at("long"))
+    expect(at("standard", 0)).toBeLessThan(at("standard", 400_000))
+  })
+  it("prices on the writer model", () => {
+    const e = estimateArticle({ ...base, sourceChars: 0, length: "standard" })
+    expect(e.model).toBe(DEFAULT_MODELS.gateway.writer)
+    expect(e.usage.output).toBe(Math.round(ARTICLE_LENGTHS.standard * ARTICLE_TOKENS_PER_WORD))
   })
 })

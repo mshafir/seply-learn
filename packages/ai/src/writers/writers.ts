@@ -159,6 +159,8 @@ export type WriteOptions = {
   /** The understanding note, when the build has one. */
   note?: string
   goals?: readonly string[]
+  /** Articles: about this many words each ("Write the article" lengths). */
+  articleWords?: number
   /** Mints section ids (ULIDs by default). */
   newId?: () => string
   abortSignal?: AbortSignal
@@ -332,7 +334,10 @@ async function ask<S extends z.ZodType>(
       },
     ],
     output: Output.object({ schema, name: mode }),
-    maxOutputTokens: MAX_OUTPUT[mode],
+    maxOutputTokens:
+      mode === "articles" && o.articleWords
+        ? Math.max(MAX_OUTPUT.articles, Math.round(o.articleWords * 8 * o.ids.length))
+        : MAX_OUTPUT[mode],
     maxRetries: 2,
     ...(o.abortSignal && { abortSignal: o.abortSignal }),
   })
@@ -367,7 +372,11 @@ function task(o: WriteOptions, mode: WriterMode, concepts: Concept[]): string {
     mode === "overviews"
       ? `Write the **summary** (only where it says \`summary: (none)\`) and the **overview** with its \`overviewProv\` for each of these ${concepts.length} Concepts. Answer with \`{ "concepts": [ { "id", "summary"?, "overview", "overviewProv" } ] }\`, one entry per Concept, ids copied exactly.`
       : `Write the **article** for each of these ${concepts.length} Concepts: ordered sections, each with its own \`prov\`. Answer with \`{ "concepts": [ { "id", "article": [ { "heading", "md", "prov" } ] } ] }\`, one entry per Concept, ids copied exactly.`
-  return [...context, ask, ...blocks].join("\n\n")
+  const length =
+    mode === "articles" && o.articleWords
+      ? `Aim for about ${o.articleWords} words per article (the reader chose this length): fewer, shorter sections for a short one; more depth, not padding, for a long one.`
+      : ""
+  return [...context, ask, length, ...blocks].filter(Boolean).join("\n\n")
 }
 
 function conceptBlock(state: DomainState, c: Concept, mode: WriterMode, core: boolean): string {
