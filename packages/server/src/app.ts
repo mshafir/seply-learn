@@ -19,6 +19,7 @@ import { expeditionRoutes } from "./expeditions.ts"
 import { importRoutes } from "./import.ts"
 import { jobRoutes } from "./jobs/routes.ts"
 import type { JobRunner } from "./jobs/types.ts"
+import { liveRoutes } from "./live.ts"
 import { webPushRoutes } from "./push/index.ts"
 import { readerRoutes } from "./reader.ts"
 import { noopRelay, type Relay } from "./relay.ts"
@@ -185,6 +186,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
 
   const signedIn = requireUser()
   app.get("/me", signedIn, (c) => c.json({ user: c.var.user }))
+  // The live room lets anonymous readers of a link in: before sign-in is required.
+  app.route("/", liveRoutes(relay))
   app.use("/expeditions", signedIn)
   app.use("/expeditions/*", signedIn)
   app.route("/expeditions", expeditionRoutes(relay))
@@ -201,7 +204,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/ai/*", signedIn)
   app.route("/ai", aiRoutes(opts.ai))
   app.use("/jobs/*", signedIn)
-  app.route("/", jobRoutes(opts.jobs, relay))
+  app.route("/", jobRoutes(opts.jobs))
   app.route("/web-push", webPushRoutes())
   app.route("/", syncRoutes(relay))
 

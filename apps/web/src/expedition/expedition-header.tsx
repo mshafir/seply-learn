@@ -2,8 +2,9 @@
 // the title (editors rename it in place, through the sync client), sync
 // status, search inside the Expedition and the account menu. The Views bar
 // (views-bar.tsx) sits under it.
-// While a build runs, the activity indicator sits before the search.
-// Presence, Share, Suggestions and History arrive with their work packages.
+// While a build runs, the activity indicator sits before the search. The
+// presence avatars (presence-avatars.tsx) sit before the account menu.
+// Share, Suggestions and History arrive with their work packages.
 import * as React from "react"
 import { CloudOffIcon, LoaderCircleIcon } from "lucide-react"
 import { Link } from "wouter"
@@ -23,6 +24,7 @@ export function ExpeditionHeader({
   signInHref,
   search,
   activity,
+  presence,
 }: {
   title: string
   canEdit: boolean
@@ -34,6 +36,8 @@ export function ExpeditionHeader({
   search?: React.ReactNode
   /** The build activity indicator (build-activity.tsx), when building. */
   activity?: React.ReactNode
+  /** Who else is here (presence-avatars.tsx). */
+  presence?: React.ReactNode
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -104,6 +108,7 @@ export function ExpeditionHeader({
           )}
         </span>
       )}
+      {presence}
       {signInHref && (
         <Link
           href={signInHref}

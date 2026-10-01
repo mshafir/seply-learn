@@ -63,7 +63,9 @@ export {
   noopRelay,
   publishBuild,
   publishCommitted,
+  type AgentPresence,
   type Relay,
+  type RoomAccess,
   type RoomJoin,
 } from "./relay.ts"
 export {
