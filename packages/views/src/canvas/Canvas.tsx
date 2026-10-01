@@ -22,6 +22,8 @@ export type CanvasProps = {
   overlay?: Overlay;
   /** Tween length in ms when the layout changes (0 to jump). */
   transitionMs?: number;
+  /** Pixels at the top the app covers: fitting keeps Concepts below them. */
+  overlayTop?: number;
   /** Called once a layout has settled and the view is fitted. */
   onSettled?: () => void;
   /**
@@ -49,7 +51,7 @@ type Size = { width: number; height: number };
 
 const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
-function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered }: CanvasProps) {
+function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, transitionMs = 650, onSettled, memory, covered, overlayTop = 0 }: CanvasProps) {
   // After a View switch, the Concepts the two Views share start where the
   // last one drew them, then glide.
   const [positions, setPositions] = useState<Positions>(() => memory?.current ?? new Map());
@@ -80,7 +82,12 @@ function Inner({ expedition, view, scope, selected, onSelect, matches, overlay, 
   const topics = useMemo(() => (isLearningPath ? topicRoots(expedition) : undefined), [expedition, isLearningPath]);
 
   const fit = useEffectEvent((duration: number) =>
-    fitView({ duration, padding: 0.12, maxZoom: 1.4, nodes: fitIds ? fitIds.split(",").map((id) => ({ id })) : undefined }),
+    fitView({
+      duration,
+      padding: overlayTop ? { top: `${overlayTop + 16}px`, right: 0.12, bottom: 0.12, left: 0.12 } : 0.12,
+      maxZoom: 1.4,
+      nodes: fitIds ? fitIds.split(",").map((id) => ({ id })) : undefined,
+    }),
   );
   const settled = useEffectEvent(() => onSettled?.());
   const visibleNow = useEffectEvent(() =>

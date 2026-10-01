@@ -277,12 +277,7 @@ export const sourceFileHref = (expeditionId: string, sourceId: string) =>
 // --- Jobs (WP-3.2's API; packages/server README) ---------------------------
 
 export type JobStatus =
-  | "queued"
-  | "running"
-  | "paused"
-  | "complete"
-  | "failed"
-  | "cancelled"
+  "queued" | "running" | "paused" | "complete" | "failed" | "cancelled"
 
 /** A job row (the server's `Job`). */
 export type Job = {
@@ -329,10 +324,9 @@ export async function jobAction(
   action: "cancel" | "retry" | "continue"
 ): Promise<Job> {
   return (
-    await call<{ job: Job }>(
-      `/jobs/${encodeURIComponent(jobId)}/${action}`,
-      { method: "POST" }
-    )
+    await call<{ job: Job }>(`/jobs/${encodeURIComponent(jobId)}/${action}`, {
+      method: "POST",
+    })
   ).job
 }
 
@@ -404,7 +398,10 @@ export function addTextSource(
 }
 
 /** Uploads a file as a Source (25 MB cap: 413 above it; 400/415 unreadable). */
-export function uploadSource(expeditionId: string, file: File): Promise<unknown> {
+export function uploadSource(
+  expeditionId: string,
+  file: File
+): Promise<unknown> {
   const form = new FormData()
   form.set("file", file)
   return call(`/sources/${encodeURIComponent(expeditionId)}`, {
@@ -452,6 +449,25 @@ export async function estimateBuild(
       body: JSON.stringify({ sourceChars, ...(views ? { views } : {}) }),
     })
   ).estimate
+}
+
+/** "Write the article" lengths, as the server prices them. */
+export type ArticleLength = "short" | "standard" | "long"
+export type ArticleEstimate = {
+  lengths: Record<ArticleLength, { words: number; usd: number; model: string }>
+  sourceChars: number
+  /** The reader's per-ask spending cap. */
+  askCapUsd: number
+}
+
+/** What each article length would cost on this Expedition's Sources. */
+export async function estimateArticle(
+  expeditionId: string
+): Promise<ArticleEstimate> {
+  return call<ArticleEstimate>("/ai/estimate/article", {
+    method: "POST",
+    body: JSON.stringify({ expeditionId }),
+  })
 }
 
 /** A View the skim proposes (the server's `ProposedView`). */

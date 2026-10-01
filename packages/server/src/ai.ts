@@ -9,6 +9,9 @@ import {
   ByokProvider,
   DEFAULT_ASK_CAP_USD,
   DEFAULT_MODELS,
+  ARTICLE_LENGTH_IDS,
+  ARTICLE_LENGTHS,
+  estimateArticle,
   estimateBuild,
   ModelOverrides,
   PROVIDER_LABELS,
@@ -36,7 +39,10 @@ import {
 } from "./ai-keys.ts"
 import type { AppEnv } from "./app.ts"
 import { ConfigError, type ServerEnv } from "./config.ts"
+import type { BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
+import { access } from "./jobs/routes.ts"
+import { readSegments } from "./sources/store.ts"
 
 const { aiSettings } = schema
 
@@ -206,6 +212,22 @@ const SettingsBody = z
   .partial()
   .strict()
 
+const ArticleEstimateBody = z.object({ expeditionId: z.string().min(1).max(64) })
+
+/** Characters of Source text across an Expedition's Sources. */
+async function expeditionSourceChars(db: Db, blobs: BlobStore, expeditionId: string): Promise<number> {
+  const rows = await db
+    .select({ id: schema.sources.id })
+    .from(schema.sources)
+    .where(eq(schema.sources.expeditionId, expeditionId))
+  let chars = 0
+  for (const { id } of rows) {
+    const r = await readSegments(db, blobs, expeditionId, id)
+    if (r) chars += r.segments.chars
+  }
+  return chars
+}
+
 const EstimateBody = z
   .object({
     sourceChars: z.number().int().nonnegative(),
@@ -297,6 +319,29 @@ export function aiRoutes(options?: ProviderOptions) {
       views: body.data.views,
     })
     return c.json({ estimate })
+  })
+
+  // "Write the article" asks first (spec §3.7): what each length would cost
+  // on this Expedition's Sources, and the reader's per-ask cap.
+  r.post("/estimate/article", async (c) => {
+    const body = ArticleEstimateBody.safeParse(await c.req.json().catch(() => null))
+    if (!body.success)
+      return c.json({ error: "invalid body", issues: body.error.issues }, 400)
+    const db = await c.var.db()
+    const a = await access(db, body.data.expeditionId, c.var.user.id)
+    if (!a) return c.json({ error: "Expedition not found" }, 404)
+    if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
+    const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
+    if (!active)
+      return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
+    const sourceChars = await expeditionSourceChars(db, c.var.blobs(), body.data.expeditionId)
+    const lengths = Object.fromEntries(
+      ARTICLE_LENGTH_IDS.map((length) => {
+        const e = estimateArticle({ provider: active.provider, models: active.models, sourceChars, length })
+        return [length, { words: ARTICLE_LENGTHS[length], usd: e.usd, model: e.model }]
+      })
+    )
+    return c.json({ lengths, sourceChars, askCapUsd: settings.askCapUsd ?? defaultAskCapUsd })
   })
 
   return r

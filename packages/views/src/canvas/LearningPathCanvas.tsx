@@ -11,7 +11,7 @@
 // `onPersonalChange`. Without them (the harness), all of it is local state.
 // While a tree is focused, the View reports "Path to X · k of n read" for the
 // app's status chip; clearing it unfocuses.
-import { useEffect, useEffectEvent, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Expedition, LearningPathSettings, View } from "../model.ts";
 import type { ReaderInteraction } from "../ExpeditionView.tsx";
 import { learningMap, learningScope } from "../scope.ts";
@@ -34,6 +34,8 @@ export type LearningPathCanvasProps = {
   personal?: Record<string, unknown>;
   onPersonalChange?: (key: string, value: unknown) => void;
   onStatus?: (status: ViewStatusChip | null) => void;
+  /** Pixels the app covers at the top; the toolbar floats just below them. */
+  overlayTop?: number;
 } & ReaderInteraction;
 
 /** Every step on the path to `focus`, known ones included, in reading order. */
@@ -55,6 +57,7 @@ export function LearningPathCanvas({
   onPersonalChange,
   onMarkKnown,
   onStatus,
+  overlayTop,
 }: LearningPathCanvasProps) {
   const s: LearningPathSettings = view.settings;
   const map = useMemo(() => learningMap(expedition, s), [expedition, s]);
@@ -120,9 +123,26 @@ export function LearningPathCanvas({
   const canMark = !!selected && selected !== focus && treeIds.has(selected) && !known.has(selected);
   const hiddenCount = scope.concepts.length - core.size;
 
+  // Floating under the app's controls, the toolbar covers the canvas too:
+  // the canvas fits its Concepts below both.
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [toolbarHeight, setToolbarHeight] = useState(0);
+  useLayoutEffect(() => {
+    const el = toolbarRef.current;
+    if (!el || !overlayTop) return;
+    const update = () => setToolbarHeight(el.offsetHeight + 8);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [overlayTop]);
+
   return (
-    <div className="seply-lp">
-      <div className="seply-toolbar">
+    <div
+      className={overlayTop ? "seply-lp seply-lp--overlay" : "seply-lp"}
+      style={overlayTop ? ({ "--seply-overlay-top": `${overlayTop}px` } as CSSProperties) : undefined}
+    >
+      <div className="seply-toolbar" ref={toolbarRef}>
         {focus ? (
           <>
             <span>
@@ -189,6 +209,7 @@ export function LearningPathCanvas({
           onSettled={onSettled}
           memory={memory}
           covered={covered}
+          overlayTop={overlayTop ? overlayTop + toolbarHeight : undefined}
         />
       </div>
     </div>

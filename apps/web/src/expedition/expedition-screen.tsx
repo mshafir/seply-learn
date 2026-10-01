@@ -89,7 +89,13 @@ import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsBar } from "@/expedition/views-bar.tsx"
-import { ApiError, listExpeditions, startJob, type Role } from "@/lib/api.ts"
+import {
+  ApiError,
+  estimateArticle,
+  listExpeditions,
+  startJob,
+  type Role,
+} from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 import {
   useCovered,
@@ -465,9 +471,11 @@ function ExpeditionFrame({
               signInHref === null && {
                 articleAction: {
                   ask: articleAsk(builds.log, selectedConcept.id),
-                  onWrite: () => {
+                  estimate: () => estimateArticle(expeditionId),
+                  onWrite: (request) => {
                     startJob(expeditionId, "article", {
                       conceptId: selectedConcept.id,
+                      ...request,
                     }).then(
                       builds.track,
                       failed("Couldn't start writing the article")
@@ -650,6 +658,7 @@ function ExpeditionFrame({
                   <CanvasSlot
                     collections={client.collections}
                     viewId={view.id}
+                    viewType={view.viewType}
                     selectedConceptId={selectedConcept?.id ?? null}
                     onSelectConcept={(id) =>
                       setPanel(

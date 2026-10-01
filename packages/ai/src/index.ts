@@ -47,13 +47,18 @@ export {
   type TokenizerFamily,
 } from "./tokens.ts"
 export {
+  ARTICLE_LENGTH_IDS,
+  ARTICLE_LENGTHS,
+  ARTICLE_TOKENS_PER_WORD,
   BUILD_CAP_MULTIPLIER,
   DEFAULT_ASK_CAP_USD,
+  estimateArticle,
   estimateBuild,
   NOTE_OUTPUT,
   noteStepUsage,
   SOURCE_TOKEN_CAP,
   STEP,
+  type ArticleLength,
   type BuildEstimate,
   type BuildEstimateInput,
   type StageEstimate,
