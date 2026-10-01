@@ -1,54 +1,58 @@
 {
   "fixture": "ebike-chat",
-  "expeditionId": "01M3T2DZ9S3V464D7J338ANTEA",
-  "jobId": "01M3T2DZB2VCTGHNMBVQ5Q9W1J",
+  "expeditionId": "01M3VW2JYWV9RV1ETPNHX1T73X",
+  "jobId": "01M3VW2JZXYZ61VDVEEYMA6TCK",
   "status": "failed",
   "error": "1 of 2 Views couldn't be built: Running costs over time",
   "model": "anthropic/claude-opus-5.5 (the default curator)",
-  "seconds": 752,
+  "seconds": 1089,
   "costUsd": {
-    "gatewayBilled": 2.9921
+    "gatewayBilled": 4.0826
   },
   "runs": [
     {
       "attempt": 1,
-      "outcome": "killed (process exit as View 3 started)",
-      "seconds": 491,
-      "gatewayBilledUsd": 1.9166,
-      "built": [
-        "Found 47 Concepts in 1 Source",
-        "Built Compare the bikes",
-        "Built Mid-drive or hub"
-      ]
+      "outcome": "paused",
+      "seconds": 604,
+      "gatewayBilledUsd": 2.3024
     },
     {
       "attempt": 2,
-      "outcome": "failed (1 of 2 Views couldn't be built: Running costs over time)",
-      "seconds": 261,
-      "gatewayBilledUsd": 1.0755,
-      "built": [
-        "Built What to learn first",
-        "Could not build Running costs over time"
-      ]
+      "outcome": "failed",
+      "seconds": 485,
+      "gatewayBilledUsd": 1.7802
     }
   ],
   "counts": {
-    "concepts": 50,
-    "relationships": 129,
+    "concepts": 51,
+    "relationships": 148,
     "attributes": 8,
     "views": 4,
     "coreConcepts": 6,
-    "backgroundConcepts": 0
+    "backgroundConcepts": 0,
+    "withOverview": 51,
+    "coreWithArticle": 6,
+    "core": 6,
+    "sections": 26
   },
+  "unresolvedProv": [],
   "changes": [
-    "Edited",
-    "Added the Source \u201cE-bike chat\u201d",
+    "Created the Expedition",
+    "Added the Source “E-bike chat”",
     "Queued 4 Views",
-    "Found 47 Concepts in 1 Source",
+    "Found 48 Concepts in 1 Source",
     "Built Compare the bikes",
     "Built Mid-drive or hub",
     "Built What to learn first",
-    "Could not build Running costs over time"
+    "Could not build Running costs over time",
+    "Wrote overviews for Go with the Alder C5, Alder C5 and 8 more",
+    "Wrote overviews for Cedar Urban, Belt drive and 8 more",
+    "Wrote overviews for Low maintenance, Belt saves only ~200 and 8 more",
+    "Wrote overviews for The bikes compared, Theft protection and 8 more",
+    "Wrote overviews for Me, Internal gear hub and 8 more",
+    "Wrote overviews for Quiet ride",
+    "Wrote articles for Which e-bike should I buy?, Mid-drive is the safer bet and Mid-drive motor",
+    "Wrote articles for Three-year running cost, Go with the Alder C5 and Alder C5"
   ],
   "views": [
     {
@@ -74,15 +78,15 @@
         "ok": true,
         "problems": [],
         "warnings": [
-          "'Mid-drive or hub': outcome 'Motor noise' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity"
+          "'Mid-drive or hub': outcome 'Quiet ride' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity"
         ],
         "layout": {
-          "viewId": "01M3T2DZCRDKEKT31PZA2SVV81",
+          "viewId": "01M3VW2K1NHH400Z4C5MT3VCBT",
           "label": "Mid-drive or hub",
           "viewType": "cause-and-effect",
-          "shown": 13,
-          "edges": 10,
-          "crossings": 2,
+          "shown": 17,
+          "edges": 14,
+          "crossings": 1,
           "edgesThroughNodes": 1,
           "veryLongEdges": 0,
           "overlaps": 0,
@@ -101,16 +105,16 @@
         "problems": [],
         "warnings": [],
         "layout": {
-          "viewId": "01M3T2DZCR1RVVG6909B8FZXME",
+          "viewId": "01M3VW2K1N1GEWS5F8D3J0NHP5",
           "label": "What to learn first",
           "viewType": "learning-path",
-          "shown": 12,
-          "edges": 11,
-          "crossings": 2,
+          "shown": 8,
+          "edges": 7,
+          "crossings": 0,
           "edgesThroughNodes": 0,
-          "veryLongEdges": 1,
+          "veryLongEdges": 0,
           "overlaps": 0,
-          "crossTopic": 6,
+          "crossTopic": 7,
           "verdict": "reads well"
         }
       }
@@ -120,7 +124,7 @@
       "label": "Running costs over time",
       "question": "When do batteries, chains, and servicing cost kick in, and how much for each bike?",
       "status": "failed",
-      "failReason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000\u20134,000 km\" or \"battery after 3\u20134 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better.",
+      "failReason": "The chat gives no dates, only intervals (chains every 3,000–4,000 km, belt at 15,000–20,000 km, battery at 3–4 years) and three-year totals. A timeline would need a made-up purchase date. The cost breakdown fits a comparison table better.",
       "inspect": {
         "ok": true,
         "problems": [],
@@ -130,30 +134,266 @@
     }
   ],
   "stages": {
-    "attempt 2: note": {
-      "summary": "The reader is a commuter choosing an e-bike: 14 km each way, one hill of about 800 m peaking near 8 percent, rider about 80 kg, carrying a laptop bag, budget up to 3,500. They want to arrive without sweating. Two constraints surfaced later and shaped the outcome: the bike will sit at a work rack, so theft matters, and it must be carried up two flights of stairs daily, so weight matters. Their stated priorities are hill climbing, low maintenance, weight and theft protection, with price second.\n\nThey settled on a mid-drive over a hub motor for the hill and for less sweat. After comparing three mid-drives (Alder C5, Birch Metro 8, Cedar Urban) against a hub-motor contrast (Dogwood), they chose the **Alder C5**. It has a Bosch 75 Nm motor, a 500 Wh battery, a 10-speed chain drive, and weighs 24 kg at about 3,200. It was the best all-rounder, and the only one with an app-based motor lock. The Birch's belt drive was judged not worth its extra weight, since it saves only about 200 over three years. The Bosch-versus-Bafang battery question resolved to: the dealer network matters more than the cells.\n\nSeveral things are still open:\n- **Test ride.** They need to ride the hill in middle assist, check frame fit, carry the bike upstairs with the battery out, confirm the first free service and the 2-year battery warranty, and try the motor lock.\n- **Security and insurance.** The lock (Sold Secure Gold or Diamond D-lock plus a cable) and insurance (100 to 150 a year) are not yet chosen.\n- **Battery replacement.** A possible 600 to 800 replacement near year three or four needs to be budgeted.\n\nCaveats for building: the bike names appear to be illustrative placeholders, so specs and prices need checking. The belt-bike running-cost figure (650) doesn't obviously add up from its listed items. All cost and lifespan numbers are rough estimates.",
+    "attempt 1: note": {
+      "summary": "The reader commutes 14 km each way and wants an e-bike for it. They weigh about 80 kg, carry a laptop bag, and can spend up to 3,500. The route has one real hill: roughly 800 m long, peaking near 8 percent. Arriving unsweaty matters to them. Two constraints surfaced later and reshaped the comparison. The bike will sit at a work rack, so theft is a worry. They also live on the second floor with no lift, so they will carry it upstairs daily.\n\nThey chose a mid-drive over a hub motor, for gearing and less effort on the hill. Their stated priorities are hill climbing, low maintenance, weight for the stairs, and theft protection, with price second. From four candidates they picked the Alder C5. It has a Bosch Performance Line 75 Nm motor, a 500 Wh battery, a 10-speed chain drive and weighs 24 kg, for about 3,200. They took it as the best all-rounder because it supports Bosch's app-based motor lock and is light enough to carry. The trade-off they accepted is chain maintenance, about 200 more over three years than the belt-drive Birch.\n\nThe model names appear in quotes and the prices are \"around,\" so they may be illustrative rather than real listings. Running-cost and battery-life figures are rough estimates. The belt-bike total doesn't quite add up from its stated parts.\n\nStill open:\n- The test ride itself: hill feel in middle assist, frame fit, carrying it upstairs without the battery, and trying the motor lock.\n- Confirming the first free service and the battery warranty terms.\n- Buying a Sold Secure Gold or Diamond D-lock plus a front-wheel cable.\n- Deciding on insurance, about 100 to 150 a year.\n- Budgeting for a likely battery replacement around year three or four, at 600 to 800.\n- The Bosch-versus-Bafang question, settled only partly: the case for Bosch rests on the dealer network rather than battery quality.",
+      "written": null,
+      "missing": null,
+      "repairs": null,
       "review": null,
       "reason": null,
+      "warnings": null,
       "steps": null,
       "toolCalls": null,
-      "spentUsd": 0.033811
+      "spentUsdSoFar": 0.034631
+    },
+    "attempt 1: concepts": {
+      "summary": "I've built the concept set for the e-bike chat: 44 concepts in 8 topics, with every concept placed under one topic and linked to at least two others.\n\n- **The four bikes:** each one is scored against your five priorities (hill climbing, low maintenance, weight for the stairs, theft protection, then price), with the reason in a note on each score.\n- **Recorded as fact:** the reasoning behind choosing the Alder C5 is stored as fact. That covers the case for a mid-drive, the belt drive saving only about 200 over three years, and the dealer network being the real reason to prefer Bosch.\n- **Bosch versus Bafang:** your belief that Bosch batteries are better is stored as a claim. It's marked as corrected by the point that most brands use cells from the same few makers.\n- **Most important:** six concepts are marked as the ones the rest hangs on: the \"Which e-bike should I buy?\" question, the mid-drive motor, the mid-drive claim, the Alder C5, the decision to buy it, and the three-year running cost.\n\nThe money field couldn't hold ranges, so I stored the battery replacement (600–800) and insurance (100–150 a year) as plain text in a separate \"cost range\" field. I'd also set a torque value on the general mid-drive and hub motor concepts by mistake and then removed it. Torque values are recorded only on the four bikes.",
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": 11,
+      "toolCalls": 164,
+      "spentUsdSoFar": 1.1326196
+    },
+    "attempt 1: View 1: build": {
+      "summary": null,
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": "Three live mid-drive options against the reader's four must-haves plus price as a nice-to-have, all cells filled from t18 verdicts with notes, sorted by price. The Alder is marked chosen (t19), and the Birch's fail on stair weight shows. The Dogwood hub bike is left out because it was dropped early (t6). Weak spot: the theft verdicts for Birch and Cedar rest only on the removable battery and locks.",
+      "reason": null,
+      "warnings": [],
+      "steps": 2,
+      "toolCalls": 6,
+      "spentUsdSoFar": 1.3078832
+    },
+    "attempt 1: View 2: build": {
+      "summary": null,
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": "The View answers the question through three outcomes. On hill climbing, the mid-drive helps through higher torque (60–85 Nm) and through gearing, while the hub motor works against it (40–50 Nm, struggles on long climbs but is fine on an 8% hill). On a quiet ride and maintenance, the hub motor wins, and a belt drive is a mid-drive way to cut maintenance. Weak spots: the mid-drive's extra noise and maintenance appear only as the hub's advantage, since the source states those comparisons only from the hub side. 'Quiet ride' comes from the View's question, not the reader's own words. The source gives no figures for noise.",
+      "reason": null,
+      "warnings": [
+        "'Mid-drive or hub': outcome 'Hill climbing' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity",
+        "'Mid-drive or hub': outcome 'Quiet ride' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity",
+        "'Mid-drive or hub': outcome 'Maintenance I face' cites no reader turn; check it is what the reader cares about, named in their words, not an intermediate quantity"
+      ],
+      "steps": 10,
+      "toolCalls": 37,
+      "spentUsdSoFar": 1.80969
+    },
+    "attempt 1: View 3: build": {
+      "summary": null,
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": null
+    },
+    "attempt 2: note": {
+      "summary": "## Understanding note\n\nThe reader wants an e-bike for a daily commute of 14 km each way, about 6,000 km a year. The route has one real hill, around 800 m long at up to 8 percent. They weigh about 80 kg, carry a laptop bag, and have a budget of up to 3,500. Two practical constraints came up later and changed the analysis: they live on the second floor with no lift, so they will carry the bike up stairs daily, and they will leave it at a rack at work, so theft is a real concern. Arriving unsweaty matters to them.\n\nTheir stated priorities, in order of weight: hill climbing, low maintenance, carry weight, and theft protection, with price second. They learned the main trade-offs: mid-drive versus hub motor (they accepted mid-drive), battery sizing (400–500 Wh), belt versus chain (the belt saves about 200 over three years but adds weight here), and the Bosch versus Bafang debate. On that last point the real advantage is the dealer network and refinement, not the battery cells.\n\nDecision: they chose the **Alder C5**. It has a Bosch 75 Nm motor, a 500 Wh battery, weighs 24 kg, costs about 3,200, and supports the app motor-lock. The assistant presented it as the best all-rounder. The Birch was the alternative if maintenance mattered most, the Cedar if saving money did. The Dogwood hub bike was set aside early.\n\nStill open: everything on the test-ride checklist. That covers whether the hill is comfortable in mid assist, frame size and fit, whether they can carry it upstairs with the battery out, terms for the first service and battery warranty, and whether the motor-lock works in practice. Lock choice (Gold or Diamond D-lock plus cable) and insurance (100–150 a year) are recommended but not decided. The running-cost totals leave out a possible battery replacement (600–800) near year three or four. The bike names appear in quotes and the prices are approximate, so they may be illustrative. The specs need verifying against real listings.",
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 0.032111
     },
     "attempt 2: View 3: build": {
       "summary": null,
-      "review": "The View shows three shortlisted bikes as targets, each with a short numbered path of 8\u201310 steps. Every path starts from the hill and hill climbing, then torque and the two motor types, then how a mid-drive uses the chain's gears, then the Go mid-drive decision. The Birch path also adds the internal gear hub and belt drive. So the answer to the question is: understand the motor first, and the drivetrain second. The weak spot: battery size and frame style are not on any bike's path. They lead only into the overall \"Which e-bike?\" question. I had to take that question off the targets to keep the layout readable. They do matter, but you don't need them to understand the bikes, since all the options fall in the 400\u2013500 Wh range and the frame choice is still open.",
+      "written": null,
+      "missing": null,
+      "repairs": null,
+      "review": "The View answers the question with one order: learn the basics first (motor torque, mid-drive motor, battery capacity and frame style, which together make the \"Motor, battery & frame basics\" step), then the three shortlisted bikes. Each bike adds its own few steps: Bosch/Shimano plus the app motor lock for the Alder, the internal hub and belt drive for the Birch, Bafang for the Cedar. It reads cleanly. Weak spots: the hub motor and the \"mid-drive is the safer bet\" reasoning sit only on the path to the decision, not on the bike paths. The frame-style step is thin because the Source never says which frame each bike has.",
       "reason": null,
-      "steps": 16,
-      "toolCalls": 78,
-      "spentUsd": 0.9250388
+      "warnings": [],
+      "steps": 17,
+      "toolCalls": 94,
+      "spentUsdSoFar": 1.1134574
     },
     "attempt 2: View 4: build": {
       "summary": null,
+      "written": null,
+      "missing": null,
+      "repairs": null,
       "review": null,
-      "reason": "The chat never gives dates, and no purchase date is set. It only gives intervals like \"chains every 3,000\u20134,000 km\" or \"battery after 3\u20134 years.\" Placing these on a calendar would mean making up a start date. A cost table per bike would answer this better.",
+      "reason": "The chat gives no dates, only intervals (chains every 3,000–4,000 km, belt at 15,000–20,000 km, battery at 3–4 years) and three-year totals. A timeline would need a made-up purchase date. The cost breakdown fits a comparison table better.",
+      "warnings": null,
       "steps": 1,
       "toolCalls": 1,
-      "spentUsd": 1.0754898000000002
+      "spentUsdSoFar": 1.2689834
+    },
+    "attempt 2: write 2": {
+      "summary": null,
+      "written": [
+        "01M3VW59EV4D9RXFW5JH9Y7BGD",
+        "01M3VW6A4ZMJQZTS6MHQ460VJS",
+        "01M3VW4MRN5QN1VWQ4Z2BCYSVT",
+        "01M3VW59EVZ9Y69NWVHADKJ165",
+        "01M3VW6A5155D0KHWTABVDSBPC",
+        "01M3VW6A51630KP5K96DHA0A42",
+        "01M3VW6A52YXHZH1AJX1277NYM",
+        "01M3VW3XZ99EGV1RX7BHDQ00M9",
+        "01M3VW3XZ9EGS54338YDQ9KP53",
+        "01M3VW4MRPPQT6XRYW092NBN8G"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.3465674
+    },
+    "attempt 2: write 3": {
+      "summary": null,
+      "written": [
+        "01M3VW59EVWQ45SDAZ1Z49QGK9",
+        "01M3VW6A50SW9N8XW6VA4F522F",
+        "01M3VW6A514F2A1300M3DT9SJT",
+        "01M3VW3XZ9NZAVNQ14K3SP1HKX",
+        "01M3VW4MRMA6ZDK9PFK3QVG66D",
+        "01M3VW4MRMSC4F8W4887GATP7F",
+        "01M3VW4MRN65TXTP8RWDCGY48F",
+        "01M3VW4MRPAJQRZ9WKVZC1TXH7",
+        "01M3VW59EVWNHX5KEP8B60YQYP",
+        "01M3VW3XZ8BMKGWK9A74VTN663"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.3466614
+    },
+    "attempt 2: write 1": {
+      "summary": null,
+      "written": [
+        "01M3VW6A517KMY638Y7HNQY3VA",
+        "01M3VW59ETWZN25FX8WQSB16DH",
+        "01M3VW4MRNJEBZQR4RT4S4ZH9Z",
+        "01M3VW4MRPEF6FXC20G7PPVN3P",
+        "01M3VW6A50HE7E988Q791BPPFQ",
+        "01M3VW4MRNRXV5FKBXX0X4Q544",
+        "01M3VW3XZ86KW12PX2EMYD4SJC",
+        "01M3VW59ET5ZZ9SA2MZ0TJHVVR",
+        "01M3VW59EV784C6QXRWRRR0XS6",
+        "01M3VW59EVTDPBDCFA6HP66A99"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.3577534
+    },
+    "attempt 2: write 6": {
+      "summary": null,
+      "written": [
+        "01M3VWEBBMC26P1N8SP36JQ26F"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.5215974
+    },
+    "attempt 2: write 5": {
+      "summary": null,
+      "written": [
+        "01M3VW4MRM8EAH31QW3SDKRBNA",
+        "01M3VW6A4ZK3TSVVEHX6D3AHQ9",
+        "01M3VW6A50GWTHXRYE9GFPBEBN",
+        "01M3VW6A527HS27XFC0YN82SMZ",
+        "01M3VW6HBZF58ZJP6N0EBHCKTG",
+        "01M3VW4MRMXKGXJ0AMBXTETEB9",
+        "01M3VW6A50Q6JMABF6NW443DKY",
+        "01M3VW6A51NF5NMYW5N1V8GPQM",
+        "01M3VW6HBZZ0PWT237K2HFXTDB",
+        "01M3VWEBBMB50FQ9QCZRCZMG89"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.5643514
+    },
+    "attempt 2: write 4": {
+      "summary": null,
+      "written": [
+        "01M3VW3XZ90T2P5ZC0HM4JBZWH",
+        "01M3VW3XZ977ECR0BN6SZKWY7B",
+        "01M3VW3XZ9A5EGNGGX805JQ2QG",
+        "01M3VW4MRPEP5GMFXZW4JEEA8D",
+        "01M3VW59EVFKQ96MWZWNKBPFN0",
+        "01M3VW6A50XWGZPKC7748BFKS1",
+        "01M3VW6A51H78EJ2A8EF9XSBEB",
+        "01M3VW6A51SBKZF5FW2TJ05CXA",
+        "01M3VW6A51Y2W9DMNYQDV2M5KS",
+        "01M3VWEBBMVF5ARPXPSH6ZWNA8"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.5677274
+    },
+    "attempt 2: write 7": {
+      "summary": null,
+      "written": [
+        "01M3VW4MRNRXV5FKBXX0X4Q544",
+        "01M3VW4MRPEF6FXC20G7PPVN3P",
+        "01M3VW4MRNJEBZQR4RT4S4ZH9Z"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.7031634000000002
+    },
+    "attempt 2: write 8": {
+      "summary": null,
+      "written": [
+        "01M3VW6A50HE7E988Q791BPPFQ",
+        "01M3VW6A517KMY638Y7HNQY3VA",
+        "01M3VW59ETWZN25FX8WQSB16DH"
+      ],
+      "missing": [],
+      "repairs": [],
+      "review": null,
+      "reason": null,
+      "warnings": null,
+      "steps": null,
+      "toolCalls": null,
+      "spentUsdSoFar": 1.7046334000000003
     }
-  },
-  "note": "Attempt 1's stage results (the note, the Concept set, Views 1 and 2) lived in the killed process's in-memory engine; their Changes are in the log (see changes)."
+  }
 }

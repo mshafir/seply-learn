@@ -1,0 +1,155 @@
+{
+  "fixture": "research-doc",
+  "model": "anthropic/claude-sonnet-5.5",
+  "stopped": null,
+  "seconds": 473,
+  "costUsd": {
+    "meter": 0.8261,
+    "gatewayBilled": 0.8574
+  },
+  "checks": {
+    "everyConceptHasAnOverview": true,
+    "coreConceptsHaveArticles": true,
+    "everyRefResolves": true
+  },
+  "counts": {
+    "concepts": 77,
+    "withOverview": 77,
+    "overviewsFromSources": 77,
+    "core": 11,
+    "coreWithArticle": 11,
+    "sections": 45,
+    "sectionsFromSources": 45,
+    "provRefs": 272,
+    "overviewWords": {
+      "min": 80,
+      "max": 141
+    },
+    "articleWords": [
+      472,
+      381,
+      416,
+      509,
+      213,
+      382,
+      324,
+      409,
+      304,
+      408,
+      324
+    ],
+    "linksInText": 353,
+    "unlinked": 2
+  },
+  "repairs": [],
+  "batches": [
+    {
+      "n": 1,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 50478,
+      "usd": 0.1178
+    },
+    {
+      "n": 2,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 50830,
+      "usd": 0.0858
+    },
+    {
+      "n": 3,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 33793,
+      "usd": 0.0659
+    },
+    {
+      "n": 4,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 51718,
+      "usd": 0.0666
+    },
+    {
+      "n": 5,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 38432,
+      "usd": 0.0646
+    },
+    {
+      "n": 6,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 30798,
+      "usd": 0.0553
+    },
+    {
+      "n": 7,
+      "mode": "overviews",
+      "concepts": 10,
+      "written": 10,
+      "missing": [],
+      "ms": 31580,
+      "usd": 0.0529
+    },
+    {
+      "n": 8,
+      "mode": "overviews",
+      "concepts": 7,
+      "written": 7,
+      "missing": [],
+      "ms": 31483,
+      "usd": 0.0386
+    },
+    {
+      "n": 9,
+      "mode": "articles",
+      "concepts": 3,
+      "written": 3,
+      "missing": [],
+      "ms": 48951,
+      "usd": 0.1346
+    },
+    {
+      "n": 10,
+      "mode": "articles",
+      "concepts": 3,
+      "written": 3,
+      "missing": [],
+      "ms": 39227,
+      "usd": 0.0549
+    },
+    {
+      "n": 11,
+      "mode": "articles",
+      "concepts": 3,
+      "written": 3,
+      "missing": [],
+      "ms": 40009,
+      "usd": 0.0516
+    },
+    {
+      "n": 12,
+      "mode": "articles",
+      "concepts": 2,
+      "written": 2,
+      "missing": [],
+      "ms": 26169,
+      "usd": 0.0374
+    }
+  ]
+}
