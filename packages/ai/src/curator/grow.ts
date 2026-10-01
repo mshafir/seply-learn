@@ -11,7 +11,7 @@ import { z } from "zod"
 import { liveConcepts, liveRelationships } from "../checks/common.ts"
 import { memorySourceReader, type ViewReader } from "../ports.ts"
 import { createCuratorTools, type CuratorTool } from "../tools.ts"
-import { describeConcepts, type StageOptions } from "./curator.ts"
+import type { StageOptions } from "./curator.ts"
 import { runLoop, type LoopTools } from "./loop.ts"
 import { growInstructions } from "./playbook.ts"
 import { renderSourceIndex, renderSources } from "./sources.ts"
@@ -149,13 +149,26 @@ export async function grow(o: GrowOptions): Promise<GrowResult> {
           ok: false,
           error: `A suggested Concept needs its ${missing.join(" and ")}: send them in the same concept_create.`,
         }
+      const bad = badLinks(c.stage.state, v.overview)
+      if (bad) return { ok: false, error: bad }
       return base.concept_create.execute(input as never)
+    },
+  }
+
+  // An item can't be changed once it streamed: links must be right the first time.
+  const conceptUpdate: CuratorTool<never, unknown> = {
+    description: base.concept_update.description,
+    inputSchema: base.concept_update.inputSchema as never,
+    execute: async (input: unknown) => {
+      const bad = badLinks(c.stage.state, (input as { overview?: unknown })?.overview)
+      if (bad) return { ok: false, error: bad }
+      return base.concept_update.execute(input as never)
     },
   }
 
   const tools: LoopTools = {
     concept_create: conceptCreate,
-    concept_update: base.concept_update,
+    concept_update: conceptUpdate,
     relationship_add: base.relationship_add,
     search_existing: base.search_existing,
     ...(o.sources.length && { source_read: base.source_read }),
@@ -202,6 +215,19 @@ export async function grow(o: GrowOptions): Promise<GrowResult> {
 
 const nonEmpty = (v: unknown) => typeof v === "string" && v.trim().length > 0
 
+/**
+ * Why an overview's `#c/` links can't stand (they point at Concepts that
+ * don't exist yet), or null. Each suggestion streams as it is made and can't
+ * be fixed afterwards, so a broken link is refused rather than unlinked.
+ */
+export function badLinks(state: DomainState, overview: unknown): string | null {
+  if (typeof overview !== "string") return null
+  const ids = [...overview.matchAll(/\]\(#c\/([^)\s]*)\)/g)].map((m) => m[1]!)
+  const unknown = [...new Set(ids)].filter((id) => !isLive(state.concepts[id]))
+  if (!unknown.length) return null
+  return `The overview links to Concepts that don't exist: ${unknown.map((id) => `#c/${id || "(empty)"}`).join(", ")}. Link only ids from the Concept set or Concepts you have already created (their ids came back from concept_create). To link two new Concepts, create the first, then write the second's overview with the id you got back.`
+}
+
 /** view_inspect, on the reader's View only. */
 function viewInspect(t: CuratorTool<{ viewId: string }, unknown>, viewId: string): CuratorTool<never, unknown> {
   return {
@@ -213,7 +239,7 @@ function viewInspect(t: CuratorTool<{ viewId: string }, unknown>, viewId: string
 
 function growTask(o: GrowOptions, focusId: string | undefined, viewId: string | undefined): string {
   const { state, ask } = o
-  const parts = [`## The Concept set\n\n${describeConcepts(state)}`]
+  const parts = [`## The Concept set\n\n${conceptIndex(state)}`]
   if (focusId) parts.push(`## The Concept it is about\n\n${neighbourhood(state, focusId)}`)
   if (viewId) {
     const v = state.views[viewId]!
@@ -235,6 +261,35 @@ function growTask(o: GrowOptions, focusId: string | undefined, viewId: string | 
     `Source ids: ${o.sources.length ? o.sources.map((s) => `${s.id} (${s.title})`).join(", ") : "none"}. Answer it following the playbook: search, then create complete Concepts and link them, then one short sentence and no tool calls.`
   )
   return parts.join("\n\n")
+}
+
+/**
+ * The Concept set, lean: an Expedition can have hundreds of Concepts and the
+ * whole list is read on every step (cached), so each is `id | title | Kind |
+ * Tags | aliases`, then the Relationships; summaries come from
+ * search_existing and, for the Concept an ask is about, below.
+ */
+export function conceptIndex(state: DomainState): string {
+  const cs = liveConcepts(state)
+  if (!cs.length) return "(no Concepts yet)"
+  const short = (id: string) => id.replace(/^builtin:/, "")
+  const lines = cs.map((c) =>
+    [
+      `${c.id} | ${c.title} | ${short(c.kind)}`,
+      c.tags.length ? `#${c.tags.join(" #")}` : "",
+      c.aliases.length ? `aka ${c.aliases.join("; ")}` : "",
+    ]
+      .filter(Boolean)
+      .join(" | ")
+  )
+  const rels = liveRelationships(state).map((r) => `${r.from} -${short(r.type)}-> ${r.to}`)
+  return [
+    `Concepts (${cs.length}): id | title | Kind | Tags | aliases (search_existing gives summaries)`,
+    ...lines,
+    "",
+    `Relationships (${rels.length}):`,
+    ...rels,
+  ].join("\n")
 }
 
 /** One Concept with its summary, overview and every Relationship, both ways. */

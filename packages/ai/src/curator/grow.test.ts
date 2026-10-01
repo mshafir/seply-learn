@@ -155,6 +155,42 @@ describe("grow", () => {
     expect(user).toContain("Add what's missing to understand this: Add what's missing to understand QLoRA.")
   })
 
+  it("refuses overview links to Concepts that don't exist, and reads a lean Concept set", async () => {
+    const { state } = loadCompute()
+    const qlora = byTitle(state, "QLoRA")
+    const kept: GrowItem[] = []
+    const model = scriptedModel((t) => {
+      if (t.step === 0)
+        return {
+          calls: [
+            // The other new Concept's id isn't known yet: refused.
+            { tool: "concept_create", input: { ...NF4, overview: "Builds on [double quantization](#c/) and [QLoRA](#c/" + qlora + ")." } },
+          ],
+        }
+      if (t.step === 1)
+        return { calls: [{ tool: "concept_create", input: { ...NF4, overview: "Stored in 4 bits for [QLoRA](#c/" + qlora + ")." } }] }
+      if (t.step === 2)
+        return { calls: [{ tool: "concept_update", input: { id: qlora, overview: "See [nothing](#c/nope)." } }] }
+      return { text: "Done." }
+    })
+    await grow({
+      model,
+      state,
+      sources: [],
+      whole: true,
+      ask: { text: "Add NF4" },
+      onItems: async (items) => void kept.push(...items),
+    })
+    const err = (step: number) => (model.turns[step]!.results[0]!.output as { error?: string }).error
+    expect(err(1)).toMatch(/links to Concepts that don't exist: #c\/\(empty\)/)
+    expect(err(3)).toMatch(/#c\/nope/)
+    expect(kept).toHaveLength(1)
+    // The list is ids, titles, Kinds, Tags and aliases: no summaries.
+    const user = model.turns[0]!.user
+    expect(user).toContain(`${qlora} | QLoRA | idea | #technique`)
+    expect(user).not.toContain("LoRA over a 4-bit quantized base: fine-tune large models on one GPU")
+  })
+
   it("refuses a Concept that is gone", async () => {
     const { state } = loadCompute()
     await expect(

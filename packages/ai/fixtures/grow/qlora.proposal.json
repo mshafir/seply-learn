@@ -1,0 +1,271 @@
+{
+  "id": "01M3WA6G1DKJH42KZRZ5VN679K",
+  "expeditionId": "01M3WA6F9ESF8G4WW8AFJTAXE5",
+  "author": {
+    "id": "real-grow-01M3WA6F91H4AM2C36AQ888TZC",
+    "name": "Real grow",
+    "image": null
+  },
+  "origin": "ai",
+  "rationale": "What would I need to understand QLoRA?",
+  "status": "pending",
+  "createdAt": "2026-10-01T18:04:03.562Z",
+  "items": [
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-1",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 1,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "note": "QLoRA stores the frozen base model in 4-bit; you need to know what quantizing weights does and costs.",
+            "prov": []
+          },
+          "target": "01M3WA6F9YM23BNWFD07KT0TBB|builtin:prerequisite|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-2",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 2,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "note": "QLoRA mixes formats: weights stored in 4-bit, dequantized to BF16 for compute, adapters trained in higher precision.",
+            "prov": []
+          },
+          "target": "01M3WA6F9YA731EJNY9PEYVZQG|builtin:prerequisite|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-3",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 3,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "note": "QLoRA is a cheaper way to do fine-tuning such as SFT; it changes how, not what, you train.",
+            "prov": []
+          },
+          "target": "01M3WA6F9Y85ZZ0007X6X0QMVP|builtin:prerequisite|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-4",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 4,
+      "ops": [
+        {
+          "kind": "concept.create",
+          "value": {
+            "kind": "builtin:idea",
+            "prov": [],
+            "tags": [
+              "training",
+              "cost"
+            ],
+            "title": "Fine-tuning memory footprint",
+            "summary": "Full fine-tuning must hold weights, gradients and optimizer states in GPU memory, several times the model size.",
+            "overview": "Training a model needs far more memory than running it. Besides the weights, full fine-tuning keeps a gradient for every parameter and, with Adam-style optimizers, two extra state values per parameter, plus activations saved for the backward pass. Together these come to several times the weights alone, which puts full fine-tuning of large models out of reach of a single GPU. This is the problem parameter-efficient methods attack. [LoRA](#c/01M3WA6F9YYFHA71GDVPN5JXEQ) freezes the base so only small adapters need gradients and optimizer state. [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) then goes after what is left, the frozen weights themselves, by storing them in 4-bit. Knowing where the memory goes is the reason each part of QLoRA exists.",
+            "overviewProv": []
+          },
+          "target": "01M3WA7G45XX9E3YY6YKPW8Q37"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-5",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 5,
+      "ops": [
+        {
+          "kind": "concept.create",
+          "value": {
+            "kind": "builtin:idea",
+            "prov": [],
+            "tags": [
+              "technique"
+            ],
+            "title": "4-bit NormalFloat (NF4)",
+            "aliases": [
+              "NF4"
+            ],
+            "summary": "A 4-bit data type whose levels are spaced for normally distributed weights, introduced with QLoRA.",
+            "overview": "NF4 is the storage format QLoRA uses for the frozen base model. Trained network weights roughly follow a zero-centred normal distribution, so NF4 places its 16 levels at the quantiles of a normal distribution rather than spacing them evenly. That way each level is used about equally often. Weights are scaled block by block (each block of weights gets its own scale) so they fit the range. Compared with plain INT4 or FP4, this keeps more information in the same 4 bits, which helps QLoRA get close to 16-bit fine-tuning quality. It is a specific case of [weight quantization](#c/01M3WA6F9YM23BNWFD07KT0TBB). During the forward and backward passes, weights are dequantized to BF16 for compute, so the [numeric precision](#c/01M3WA6F9YA731EJNY9PEYVZQG) of storage and compute differ.",
+            "overviewProv": []
+          },
+          "target": "01M3WA7G469BZEVN033MHK2FVS"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-6",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 6,
+      "ops": [
+        {
+          "kind": "concept.create",
+          "value": {
+            "kind": "builtin:idea",
+            "prov": [],
+            "tags": [
+              "technique"
+            ],
+            "title": "Double quantization",
+            "summary": "Quantizing the per-block scale constants themselves, saving further memory in QLoRA.",
+            "overview": "Block-wise [weight quantization](#c/01M3WA6F9YM23BNWFD07KT0TBB) stores one scale constant for each small block of weights. With small blocks these constants add a noticeable overhead on top of the 4-bit weights. Double quantization, one of QLoRA's three ingredients, compresses those constants too: it quantizes them to 8 bits, with their own second-level scales. The saving per parameter is small, but across a model with tens of billions of parameters it adds up to gigabytes. That matters when the goal of [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) is to fit a large model onto one GPU.",
+            "overviewProv": []
+          },
+          "target": "01M3WA7G46WGP2FT413P80CQN0"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-7",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 7,
+      "ops": [
+        {
+          "kind": "concept.create",
+          "value": {
+            "kind": "builtin:idea",
+            "prov": [],
+            "tags": [
+              "technique"
+            ],
+            "title": "Paged optimizers",
+            "summary": "Optimizer state that spills to CPU memory during memory spikes instead of crashing training.",
+            "overview": "Paged optimizers are QLoRA's answer to sudden memory spikes, such as a long sequence with gradient checkpointing. These spikes can otherwise crash a run that normally fits on the GPU. The optimizer state is put in unified memory, which pages automatically between GPU and CPU RAM, the way an operating system pages to disk. When the GPU runs short, pages move out, and they come back when needed. It is the same paging idea behind [PagedAttention](#c/01M3WA6F9YBVP5FDTPHXMSKV9N), applied here to training rather than serving. It makes [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) fine-tuning dependable on a single card.",
+            "overviewProv": []
+          },
+          "target": "01M3WA7G46SSX7H0S50FFMCCS0"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:36.367Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-8",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 8,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "prov": []
+          },
+          "target": "01M3WA7G45XX9E3YY6YKPW8Q37|builtin:part-of|01M3WA6F9Y8HYPP9GNMTAXJ8B0"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:45.006Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-9",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 9,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "note": "QLoRA exists to shrink fine-tuning memory; each of its parts targets one piece of the footprint.",
+            "prov": []
+          },
+          "target": "01M3WA7G45XX9E3YY6YKPW8Q37|builtin:prerequisite|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:45.006Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-10",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 10,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "prov": []
+          },
+          "target": "01M3WA7G469BZEVN033MHK2FVS|builtin:part-of|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:45.006Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-11",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 11,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "prov": []
+          },
+          "target": "01M3WA7G46WGP2FT413P80CQN0|builtin:part-of|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:45.006Z"
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-12",
+      "proposalId": "01M3WA6G1DKJH42KZRZ5VN679K",
+      "position": 12,
+      "ops": [
+        {
+          "kind": "relationship.add",
+          "value": {
+            "prov": []
+          },
+          "target": "01M3WA7G46SSX7H0S50FFMCCS0|builtin:part-of|01M3WA6F9YWAVE9D9JH21AAA1C"
+        }
+      ],
+      "base": {},
+      "status": "pending",
+      "changeId": null,
+      "createdAt": "2026-10-01T18:04:45.006Z"
+    }
+  ]
+}
