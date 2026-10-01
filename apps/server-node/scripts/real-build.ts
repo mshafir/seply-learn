@@ -13,6 +13,8 @@
 //                        then wake the job (Workflows' restart semantics)
 //   --kill-at-view <n>   exit the process as View n starts building (a hard
 //                        kill); rerun with --resume <jobId> to Retry it
+//   --continue <jobId>   Continue a job paused at the spending cap (raises the
+//                        cap once, as the reader's Continue does)
 //   --resume <jobId>     mark an interrupted job failed and Retry it (the
 //                        summary adds up time, cost and stages across runs)
 //   --summarize <expeditionId>  no build: inspect and export it again
@@ -105,7 +107,8 @@ const fixture = FIXTURES[name]
 if (!fixture) throw new Error(`fixture: one of ${Object.keys(FIXTURES).join(", ")}`)
 const crashAt = opt("--crash-at-view") ? Number(opt("--crash-at-view")) : null
 const killAt = opt("--kill-at-view") ? Number(opt("--kill-at-view")) : null
-const resume = opt("--resume")
+const cont = opt("--continue")
+const resume = opt("--resume") ?? cont
 const summarizeOnly = opt("--summarize")
 if (opt("--model")) process.env.AI_MODEL_CURATOR = opt("--model")
 const url = process.env.DATABASE_URL
@@ -180,9 +183,14 @@ if (summarizeOnly) {
   expeditionId = row.expeditionId
   // The process that ran it is gone: a durable engine would resume the
   // attempt; the in-process one can't, so mark it failed and Retry.
-  await db.update(schema.jobs).set({ status: "failed", error: "Interrupted" }).where(eq(schema.jobs.id, resume))
-  job = await runner.retry(db, resume)
-  console.log(`resumed job ${job.id} as attempt ${job.attempt}`)
+  if (cont) {
+    job = await runner.continue(db, cont)
+    console.log(`continued job ${job.id} as attempt ${job.attempt} (cap raised ${job.capRaises}×)`)
+  } else {
+    await db.update(schema.jobs).set({ status: "failed", error: "Interrupted" }).where(eq(schema.jobs.id, resume))
+    job = await runner.retry(db, resume)
+    console.log(`resumed job ${job.id} as attempt ${job.attempt}`)
+  }
 } else {
   const userId = `real-build-${ulid(Date.now())}`
   await db.insert(schema.users).values({ id: userId, name: "Real build", email: `${userId}@example.com` })
