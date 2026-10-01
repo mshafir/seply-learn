@@ -284,6 +284,23 @@
   flex: 1;
   min-height: 0;
 }
+/* Under the app's floating controls (overlayTop): the canvas takes the whole
+   height and the toolbar floats over it, like the app's View card. */
+.seply-lp--overlay {
+  position: relative;
+}
+.seply-lp--overlay > .seply-toolbar {
+  position: absolute;
+  top: var(--seply-overlay-top);
+  left: 1rem;
+  right: 1rem;
+  z-index: 5;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  border: 1px solid var(--seply-toolbar-border);
+  border-radius: 0.625rem;
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--foreground) 10%, transparent);
+}
 .seply-toolbar {
   display: flex;
   flex-wrap: wrap;

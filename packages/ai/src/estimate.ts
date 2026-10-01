@@ -212,3 +212,37 @@ export function estimateBuild(input: BuildEstimateInput): BuildEstimate {
     capUsd: usd * BUILD_CAP_MULTIPLIER,
   }
 }
+
+/** "Write the article" (spec §3.7): the lengths a reader picks, in words. */
+export const ARTICLE_LENGTHS = { short: 300, standard: 600, long: 1_200 } as const
+export type ArticleLength = keyof typeof ARTICLE_LENGTHS
+export const ARTICLE_LENGTH_IDS = Object.keys(ARTICLE_LENGTHS) as ArticleLength[]
+
+/**
+ * Output tokens per article word: the markdown, its sections' JSON and
+ * provenance, and the model's reasoning. Fitted to the real writers' runs
+ * (fixtures/builds/*.written.summary.json: about 1,800 tokens for a
+ * 400-word article).
+ */
+export const ARTICLE_TOKENS_PER_WORD = 4.5
+
+/**
+ * One "Write the article" ask: one writer call that reads the Sources (cache
+ * written) and writes one article of about `ARTICLE_LENGTHS[length]` words.
+ */
+export function estimateArticle(input: {
+  provider: ProviderId
+  models: StageModels
+  /** Characters of Source text across the Expedition's Sources (0: none). */
+  sourceChars: number
+  length: ArticleLength
+}): StageEstimate {
+  const { provider, models } = input
+  const source = tokensForChars(input.sourceChars, tokenizerFamily(provider, models.writer))
+  return stage(provider, models.writer, {
+    ...ZERO_USAGE,
+    input: STEP.writerPrompt,
+    cacheWrite: source,
+    output: Math.round(ARTICLE_LENGTHS[input.length] * ARTICLE_TOKENS_PER_WORD),
+  })
+}

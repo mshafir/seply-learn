@@ -98,10 +98,10 @@ test("read a Concept: overview, in-text link, back, article, provenance", async 
   await expect(title).toHaveText("Grouped-Query Attention (GQA)")
   await expect(panel.getByTestId("panel-back")).toHaveCount(0)
 
-  // The article reads wider: the panel slides from 520 to 760 px.
+  // The article reads wider: the panel slides from 520 to 860 px.
   expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(520)
   await panel.getByRole("button", { name: /Read the full article/ }).click()
-  expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(760)
+  expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(860)
 
   // The article: one provenance badge per section.
   await expect(panel.getByTestId("panel-eyebrow")).toHaveText(

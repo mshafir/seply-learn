@@ -49,6 +49,15 @@ export {
 } from "./store.ts"
 export { monotonicUlid } from "./ids.ts"
 export {
+  HistoryError,
+  restoreInEngine,
+  stateAsOfIn,
+  undoInEngine,
+  type HistoryActionOptions,
+  type HistoryActionResult,
+  type HistoryErrorReason,
+} from "./history.ts"
+export {
   projectRows,
   rowOf,
   RowProjection,

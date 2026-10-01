@@ -3,10 +3,11 @@
 // status, search inside the Expedition and the account menu. The Views bar
 // (views-bar.tsx) sits under it.
 // While a build runs, the activity indicator sits before the search. The
-// presence avatars (presence-avatars.tsx) sit before the account menu.
-// Share, Suggestions and History arrive with their work packages.
+// presence avatars (presence-avatars.tsx) come next, then History (owners
+// and editors, WP-4.2), which opens the History side panel. Share and
+// Suggestions arrive with their work packages.
 import * as React from "react"
-import { CloudOffIcon, LoaderCircleIcon } from "lucide-react"
+import { CloudOffIcon, HistoryIcon, LoaderCircleIcon } from "lucide-react"
 import { Link } from "wouter"
 
 import { SeplyGlyph } from "@seply/ui/components/brand"
@@ -25,6 +26,7 @@ export function ExpeditionHeader({
   search,
   activity,
   presence,
+  history,
 }: {
   title: string
   canEdit: boolean
@@ -38,6 +40,8 @@ export function ExpeditionHeader({
   activity?: React.ReactNode
   /** Who else is here (presence-avatars.tsx). */
   presence?: React.ReactNode
+  /** The History button (owners and editors); absent for everyone else. */
+  history?: { open: boolean; onToggle: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -109,6 +113,18 @@ export function ExpeditionHeader({
         </span>
       )}
       {presence}
+      {history && (
+        <Button
+          variant={history.open ? "secondary" : "ghost"}
+          size="sm"
+          aria-pressed={history.open}
+          data-testid="history-button"
+          onClick={history.onToggle}
+        >
+          <HistoryIcon />
+          History
+        </Button>
+      )}
       {signInHref && (
         <Link
           href={signInHref}

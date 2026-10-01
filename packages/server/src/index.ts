@@ -145,6 +145,13 @@ export {
 } from "./search.ts"
 export { PushBody, PullQuery, PUSH_LIMIT } from "./sync.ts"
 export {
+  HISTORY_LIMIT,
+  HistoryQuery,
+  readHistory,
+  type ChangeSummary,
+  type HistoryPage,
+} from "./history.ts"
+export {
   aiRoutes,
   MAX_ASK_CAP_USD,
   readAiSettings,

@@ -16,6 +16,7 @@ import {
 } from "./config.ts"
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
+import { historyRoutes } from "./history.ts"
 import { importRoutes } from "./import.ts"
 import { jobRoutes } from "./jobs/routes.ts"
 import type { JobRunner } from "./jobs/types.ts"
@@ -207,6 +208,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/", jobRoutes(opts.jobs))
   app.route("/web-push", webPushRoutes())
   app.route("/", syncRoutes(relay))
+  app.route("/", historyRoutes())
 
   app.notFound((c) => c.json({ error: "not found" }, 404))
   return app
