@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url"
 import { expect, test, type Page } from "@playwright/test"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-2.6: search. Sign in with the test credentials and import the compute
 // fixture. From the Library, the command dialog finds a Concept by its title
@@ -105,10 +105,7 @@ test("search inside an Expedition highlights matches on the canvas", async ({
   await page.setViewportSize({ width: 1440, height: 900 })
   await importCompute(page)
 
-  await page
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Compute economics/ })
-    .click()
+  await openView(page, /Compute economics/)
   const canvas = page.getByTestId("canvas-pane")
   await expect(canvas).toHaveAttribute("data-settled", "")
   const nodes = canvas.locator(".seply-concept")

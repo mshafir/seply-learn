@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url"
 import { expect, test } from "@playwright/test"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-3.6: "Write the article", the Concept action (spec §3.7, §5.5). An
 // editor opens a Concept with no article and asks for one: it starts an
@@ -29,10 +29,7 @@ test("Write the article: starts the ask, and says why it couldn't", async ({
   const toast = page.getByRole("dialog", { name: /^Imported/ })
   await toast.locator("[data-slot=toast-close]").click()
 
-  await page
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Techniques/ })
-    .click()
+  await openView(page, /Techniques/)
   const canvas = page.getByTestId("canvas-pane")
   const panel = page.getByTestId("side-panel")
 

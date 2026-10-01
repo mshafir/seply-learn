@@ -39,6 +39,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   - optional goal chips ("learn it", "decide", "plan")
 
   Sources stack up in a list. **No link fetching in v1**; share links can't be read without the assistant's login, so the copy says "paste the conversation instead".
+
 - **The prompt alone** produces background knowledge (provenance empty).
 - **The cost estimate** (e.g. "~420k tokens, about $1.10") shows before continuing. It uses the reader's key, or the instance key, depending on the instance mode. Over the token cap, the reader picks which Sources or sections to include.
 - **Next** runs the **skim** (≈10–20 s) and starts **extraction in the background** at the same moment.
@@ -52,7 +53,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 ## 3.5 Building (canvas 02c, 02d, 02e)
 
-- **The Expedition opens immediately.** The Views rail shows each View's status (queued / building with a step label and progress / ready / failed).
+- **The Expedition opens immediately.** The Views bar shows each View's status (queued / building with a step label and progress / ready / failed).
 - **Building never blocks.** The first finished View opens by itself, other Views keep building, and a toast announces each one as it finishes.
 - **Skeletons per View Type,** shown while each View streams in:
   - Graph Views stream nodes into reserved slots.
@@ -67,10 +68,10 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 ## 3.6 Expedition screen (canvas 03)
 
-- **Three panes:**
-  1. the **Views rail** (272 px), where each entry shows the View's name and question, reorderable
+- **Layout:**
+  1. the **Views bar** under the header: a tab per View (its View Type's icon and its name), reorderable. Hovering or focusing a tab shows a card with the View's question, what its View Type is and its build status. Tabs that don't fit go into a "N more" menu that shows each View's icon, name and question at full length; the open View always keeps its tab.
   2. the **canvas**, as wide as possible
-  3. the **side panel** (440 px by default; the reader can drag its edge to resize it, 320 px up to whatever leaves the canvas 360 px, and the width is kept per browser), which opens on selection; a Sheet on narrow screens
+  3. the **side panel**, which slides open on selection and shut when closed. It is 520 px by default and widens to 760 px while the reader reads a Concept's full article, narrowing again on the way back. The reader can drag its edge to resize it, from 320 px up to whatever leaves the canvas 360 px; the reading and article widths are each kept per browser. Dragging it below 320 px closes it. A Sheet on narrow screens (under 1024 px).
 - **An Expedition opens on its best View** (chosen by a curator; by default the first to finish building), or on the reader's last position.
 - **There's no toolbar above the canvas.** A **floating View button** (icon, name, question, settings icon) opens the **View panel**, which has:
   - the description
@@ -96,6 +97,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   3. **article**: sections
 
   In-text links navigate the panel.
+
 - **Provenance per article section** (and for the overview) is marked as either:
   - **"From the chat, turn 14"**, linking to the segment in the Source viewer
   - **"Background knowledge"**
@@ -120,7 +122,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 ## 3.9 History and sharing (canvas 06, amended)
 
-- **History** (owners and editors) lists **Changes** with author, label and time ("Accepted 12 suggestions · Ana · 2h ago"). Each Change has **Undo**, **View as of here** (read-only) and **Restore to here**. Undo reports any edits it kept because they changed since. *(The canvas's Snapshot list and diff are replaced by this.)*
+- **History** (owners and editors) lists **Changes** with author, label and time ("Accepted 12 suggestions · Ana · 2h ago"). Each Change has **Undo**, **View as of here** (read-only) and **Restore to here**. Undo reports any edits it kept because they changed since. _(The canvas's Snapshot list and diff are replaced by this.)_
 - **Share dialog:**
   - **Invite** by email as editor or viewer. An **email** is sent when a mailer is configured, and a **copyable invite link** is always offered. The invitee finds it under "Shared with you" with a **New** badge. Editors can invite. Only the owner changes roles or removes people.
   - **Visibility:** private / unlisted / public, **owner only**. A public or unlisted link shows the **latest state**, live.

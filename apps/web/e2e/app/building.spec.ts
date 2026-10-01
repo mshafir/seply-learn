@@ -4,7 +4,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 
 // WP-3.7: the Building UX (spec §3.5) against WP-3.2's stubbed `fake` job
 // (test credentials are on in the e2e Worker). The Expedition opens while it
-// builds: the rail's statuses (queued → building → ready / failed), the
+// builds: the Views bar's statuses (queued → building → ready / failed), the
 // skeleton with streamed Concepts, the first ready View opening by itself,
 // toasts, the failed-View card and Retry; Cancel and what it leaves behind;
 // the spending-cap pause (Continue, Stop); "Leave it building"; and the
@@ -36,9 +36,17 @@ async function startFake(page: Page, id: string, input: FakeInput) {
   expect(res.status()).toBe(201)
 }
 
-const rail = (page: Page) => page.getByTestId("rail-view")
+const rail = (page: Page) =>
+  page.getByTestId("views-bar").getByTestId("view-tab")
 const railView = (page: Page, n: number) =>
   rail(page).filter({ hasText: `Test View ${n}` })
+/** A View's tab card (hover): its step, progress or reason. */
+async function cardOf(page: Page, n: number) {
+  await railView(page, n).hover()
+  const card = page.getByTestId("view-card")
+  await expect(card).toContainText(`Test View ${n}`)
+  return card
+}
 
 test("queued → building → ready and failed → retry, with toasts and the first View opening by itself", async ({
   page,
@@ -50,11 +58,13 @@ test("queued → building → ready and failed → retry, with toasts and the fi
   // Three Views, 2.5 s each; View 3 fails on every try of this attempt.
   await startFake(page, id, { views: 3, stepMs: 2500, failView: { n: 3 } })
 
-  // The rail: View 1 building (step and progress), the others queued.
+  // The Views bar: View 1 building (step and progress), the others queued.
   await expect(rail(page)).toHaveCount(3)
   await expect(railView(page, 1)).toHaveAttribute("data-status", "building")
-  await expect(railView(page, 1)).toContainText("Building Test View 1")
-  await expect(railView(page, 1).getByRole("progressbar")).toBeVisible()
+  const firstCard = await cardOf(page, 1)
+  await expect(firstCard).toContainText("Building Test View 1")
+  await expect(firstCard.getByRole("progressbar")).toBeVisible()
+  await page.mouse.move(0, 400)
   await expect(railView(page, 2)).toHaveAttribute("data-status", "queued")
   await expect(railView(page, 3)).toHaveAttribute("data-status", "queued")
 
@@ -96,22 +106,23 @@ test("queued → building → ready and failed → retry, with toasts and the fi
   await expect(toast2).toBeVisible()
   await toast2.getByRole("button", { name: "Open" }).click()
   await expect(page).toHaveURL(new RegExp(`/e/${id}/.+`))
-  await expect(
-    railView(page, 2).getByRole("button", { name: /Test View 2/ })
-  ).toHaveAttribute("aria-current", "page")
+  await expect(railView(page, 2)).toHaveAttribute("aria-current", "page")
 
-  // View 3 fails: the reason in the rail and a toast; the others are untouched.
+  // View 3 fails: the reason in its tab's card and a toast; the others are untouched.
   const reason = "Forced failure while building Test View 3"
   await expect(railView(page, 3)).toHaveAttribute("data-status", "failed", {
     timeout: 20_000,
   })
-  await expect(railView(page, 3).getByTestId("build-reason")).toHaveText(reason)
+  await expect((await cardOf(page, 3)).getByTestId("build-reason")).toHaveText(
+    reason
+  )
+  await page.mouse.move(0, 400)
   await expect(page.getByText("Couldn't build Test View 3")).toBeVisible()
   await expect(railView(page, 1)).toHaveAttribute("data-status", "ready")
   await expect(page.getByTestId("build-activity")).toHaveCount(0)
 
   // Its card: the reason, Retry, Try another View, Remove.
-  await railView(page, 3).getByRole("button").click()
+  await railView(page, 3).click()
   const card = page.getByTestId("failed-view")
   await expect(card.getByTestId("failed-reason")).toHaveText(reason)
   await expect(
@@ -164,7 +175,7 @@ test("Cancel keeps the finished Views; the rest are not built and can be removed
   await expect(railView(page, 1)).toHaveAttribute("data-status", "ready")
   for (const n of [2, 3]) {
     await expect(railView(page, n)).toHaveAttribute("data-status", "stopped")
-    await expect(railView(page, n)).toContainText("Not built")
+    await expect(await cardOf(page, n)).toContainText("Not built")
   }
 
   // The job never commits after a cancel: the Views stay as they were.
@@ -172,7 +183,7 @@ test("Cancel keeps the finished Views; the rest are not built and can be removed
   await expect(railView(page, 2)).toHaveAttribute("data-status", "stopped")
 
   // A View it left behind: Retry is offered; Remove takes it off the rail.
-  await railView(page, 3).getByRole("button").click()
+  await railView(page, 3).click()
   const card = page.getByTestId("failed-view")
   await expect(card).toContainText("Test View 3 wasn't built")
   await expect(card.getByRole("button", { name: "Retry" })).toBeEnabled()
@@ -197,7 +208,10 @@ test("the spending cap pauses the build: Continue goes on, Stop keeps what's bui
     "paused"
   )
   await expect(railView(page, 1)).toHaveAttribute("data-status", "ready")
-  await expect(railView(page, 2)).toContainText("Paused at the spending cap")
+  await expect(await cardOf(page, 2)).toContainText(
+    "Paused at the spending cap"
+  )
+  await page.mouse.move(0, 400)
   await screenshot(page, testInfo, "cap-paused")
 
   await paused.getByRole("button", { name: "Continue" }).click()

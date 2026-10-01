@@ -40,7 +40,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@seply/ui/components/empty"
-import { SidebarProvider } from "@seply/ui/components/sidebar"
 import { Skeleton } from "@seply/ui/components/skeleton"
 import { toast } from "@seply/ui/components/toast"
 import {
@@ -74,7 +73,7 @@ import { kindLabel, VIEW_TYPE_META, viewTypeMeta } from "@/expedition/labels.ts"
 import {
   HEADER_HEIGHT,
   INLINE_PANEL_QUERY,
-  RAIL_WIDTH,
+  VIEWS_BAR_HEIGHT,
 } from "@/expedition/layout.ts"
 import type { ConceptReading } from "@/expedition/concept-panel.tsx"
 import {
@@ -89,7 +88,7 @@ import { SourceViewer, type SourceTarget } from "@/expedition/source-viewer.tsx"
 import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
-import { ViewsRail } from "@/expedition/views-rail.tsx"
+import { ViewsBar } from "@/expedition/views-bar.tsx"
 import { ApiError, listExpeditions, startJob, type Role } from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
 import {
@@ -105,8 +104,8 @@ import { useSyncClient, type SyncHealth } from "@/lib/sync.ts"
 import { useMediaQuery } from "@/lib/use-media-query.ts"
 
 const frameStyle = {
-  "--sidebar-width": RAIL_WIDTH,
   "--header-height": HEADER_HEIGHT,
+  "--views-bar-height": VIEWS_BAR_HEIGHT,
 } as React.CSSProperties
 
 /** Signed-out readers pull as nobody; they never push. */
@@ -131,9 +130,9 @@ export function ExpeditionScreen({
   const signInHref = user ? null : signInHrefFor(expeditionId)
 
   return (
-    <SidebarProvider
+    <div
       style={frameStyle}
-      className="h-svh min-h-0 flex-col overflow-hidden"
+      className="flex h-svh min-h-0 flex-col overflow-hidden"
     >
       {state.status === "ready" || state.status === "cached" ? (
         <ExpeditionFrame
@@ -188,7 +187,7 @@ export function ExpeditionScreen({
           </div>
         </>
       )}
-    </SidebarProvider>
+    </div>
   )
 }
 
@@ -591,16 +590,16 @@ function ExpeditionFrame({
           </>
         }
       />
+      <ViewsBar
+        views={data.views}
+        selectedViewId={view?.id ?? null}
+        buildOf={buildOf}
+        onSelectView={(id) => {
+          setResumed(false)
+          navigate(`/e/${expeditionId}/${id}`)
+        }}
+      />
       <div className="flex min-h-0 flex-1">
-        <ViewsRail
-          views={data.views}
-          selectedViewId={view?.id ?? null}
-          buildOf={buildOf}
-          onSelectView={(id) => {
-            setResumed(false)
-            navigate(`/e/${expeditionId}/${id}`)
-          }}
-        />
         <SidePanel
           content={content}
           inline={inlinePanel}

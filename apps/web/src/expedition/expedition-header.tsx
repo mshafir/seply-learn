@@ -1,7 +1,7 @@
 // The Expedition screen's header (spec §3.6): the way back to the Library,
 // the title (editors rename it in place, through the sync client), sync
-// status, search inside the Expedition and the account menu. Render it
-// inside a SidebarProvider (its trigger opens the Views rail on phones).
+// status, search inside the Expedition and the account menu. The Views bar
+// (views-bar.tsx) sits under it.
 // While a build runs, the activity indicator sits before the search.
 // Presence, Share, Suggestions and History arrive with their work packages.
 import * as React from "react"
@@ -11,7 +11,6 @@ import { Link } from "wouter"
 import { SeplyGlyph } from "@seply/ui/components/brand"
 import { Button, buttonVariants } from "@seply/ui/components/button"
 import { Input } from "@seply/ui/components/input"
-import { SidebarTrigger } from "@seply/ui/components/sidebar"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import type { SyncHealth } from "@/lib/sync.ts"
@@ -47,7 +46,6 @@ export function ExpeditionHeader({
 
   return (
     <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
-      <SidebarTrigger className="md:hidden" aria-label="Views" />
       <Link
         href="/"
         aria-label="Library"

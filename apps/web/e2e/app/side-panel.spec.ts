@@ -1,7 +1,13 @@
 import { fileURLToPath } from "node:url"
 import { expect, test } from "@playwright/test"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import {
+  needsDatabase,
+  openView,
+  screenshot,
+  settledWidthOf,
+  signUp,
+} from "./helpers.ts"
 
 // WP-1.7: the side panel reads a Concept. Sign in with the test credentials,
 // import the compute fixture, open GQA from the Techniques table, follow an
@@ -30,10 +36,7 @@ test("read a Concept: overview, in-text link, back, article, provenance", async 
   await toast.locator("[data-slot=toast-close]").click()
 
   // Open GQA from the Techniques table.
-  await page
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Techniques/ })
-    .click()
+  await openView(page, /Techniques/)
   const canvas = page.getByTestId("canvas-pane")
   await canvas
     .getByRole("rowheader", { name: "Grouped-Query Attention (GQA)" })
@@ -95,8 +98,12 @@ test("read a Concept: overview, in-text link, back, article, provenance", async 
   await expect(title).toHaveText("Grouped-Query Attention (GQA)")
   await expect(panel.getByTestId("panel-back")).toHaveCount(0)
 
-  // The article: one provenance badge per section.
+  // The article reads wider: the panel slides from 520 to 760 px.
+  expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(520)
   await panel.getByRole("button", { name: /Read the full article/ }).click()
+  expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(760)
+
+  // The article: one provenance badge per section.
   await expect(panel.getByTestId("panel-eyebrow")).toHaveText(
     /^Article · \d+ min$/
   )
@@ -117,6 +124,8 @@ test("read a Concept: overview, in-text link, back, article, provenance", async 
   await expect(panel.getByTestId("panel-back")).toHaveText("Back to overview")
   await panel.getByTestId("panel-back").click()
   await expect(panel.getByTestId("concept-overview")).toBeVisible()
+  // Back to the overview: narrower again.
+  expect(await settledWidthOf(page, "[data-testid=side-panel]")).toBe(520)
   await linksTo
     .getByRole("link", { name: "Multi-head Latent Attention (MLA)" })
     .click()

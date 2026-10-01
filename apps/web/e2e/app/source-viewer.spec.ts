@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 import { expect, test, type Page } from "@playwright/test"
 import { makeOps, ulid } from "@seply/domain"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-3.1: a provenance link opens the right turn in the Source viewer.
 // Import the compute fixture, add a synthetic pasted chat as a Source
@@ -105,10 +105,7 @@ test("a provenance link opens the cited turn in the Source viewer", async ({
   expect(push.status()).toBe(200)
 
   await page.reload()
-  await page
-    .getByTestId("views-rail")
-    .getByRole("button", { name: /Techniques/ })
-    .click()
+  await openView(page, /Techniques/)
   await page
     .getByTestId("canvas-pane")
     .getByRole("rowheader", { name: GQA })

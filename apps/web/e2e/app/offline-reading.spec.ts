@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url"
 import { expect, test, type Page } from "@playwright/test"
 
-import { needsDatabase, screenshot, signUp } from "./helpers.ts"
+import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 
 // WP-2.7: offline reading (spec §2.9). Open the compute fixture, go offline,
 // reload: the service worker serves the app and the Expedition opens from
@@ -85,10 +85,12 @@ test("an opened Expedition reads offline after a reload, read-only, with the chi
     header.getByRole("button", { name: /Rename the Expedition/ })
   ).toHaveCount(0)
 
-  // It reads: the Views rail, a View on the canvas, a Concept's article.
-  const rail = page.getByTestId("views-rail")
-  await expect(rail.getByRole("button")).toHaveCount(12)
-  await rail.getByRole("button", { name: /Learning path/ }).click()
+  // It reads: the Views bar, a View on the canvas, a Concept's article.
+  await expect(page.getByTestId("views-bar")).toHaveAttribute(
+    "data-views",
+    "12"
+  )
+  await openView(page, /Learning path/)
   const canvas = page.getByTestId("canvas-pane")
   await expect(canvas).toHaveAttribute("data-settled", "")
   const node = canvas.locator(".react-flow__node").first()

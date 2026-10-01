@@ -1,5 +1,7 @@
-// The side panel (spec §3.6): 440 px on the right by default and resizable
-// by dragging its edge, opened by a selection; a Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
+// The side panel (spec §3.6): on the right, opened by a selection, sliding
+// open and shut; 520 px by default, wider (760 px) while reading a full
+// article, and resizable by dragging its edge (each width kept per browser).
+// A Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
 // see concept-panel.tsx) or the View panel (view-panel.tsx).
 import * as React from "react"
 
@@ -7,8 +9,10 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
+  usePanelRef,
 } from "@seply/ui/components/resizable"
 import { ScrollArea } from "@seply/ui/components/scroll-area"
+import { cn } from "@seply/ui/lib/utils"
 import {
   Sheet,
   SheetContent,
@@ -53,34 +57,52 @@ export type PanelContent =
     }
   | ({ type: "view" } & ViewPanelProps)
 
-const DEFAULT_WIDTH = 440
+/** The panel's widths, per mode: reading, and the wider full article. */
+const DEFAULT_WIDTH = { reading: 520, article: 760 } as const
+type WidthMode = keyof typeof DEFAULT_WIDTH
 const MIN_WIDTH = 320
 /** The canvas always keeps at least this much. */
 const MIN_CANVAS_WIDTH = 360
-/** The reader's own width, per browser. Storage failures read as the default. */
-const WIDTH_KEY = "seply:side-panel-width"
+/** Open, close and widen take this long (the CSS transition below). */
+const SLIDE_MS = 280
+/** The reader's own widths, per browser. Storage failures read as defaults. */
+const widthKey = (mode: WidthMode) =>
+  mode === "reading"
+    ? "seply:side-panel-width"
+    : "seply:side-panel-width:article"
 
-function savedWidth() {
+function savedWidth(mode: WidthMode) {
   try {
-    const n = Number(localStorage.getItem(WIDTH_KEY))
-    return Number.isFinite(n) && n >= MIN_WIDTH ? n : DEFAULT_WIDTH
+    const n = Number(localStorage.getItem(widthKey(mode)))
+    return Number.isFinite(n) && n >= MIN_WIDTH ? n : DEFAULT_WIDTH[mode]
   } catch {
-    return DEFAULT_WIDTH
+    return DEFAULT_WIDTH[mode]
   }
 }
 
-function saveWidth(px: number) {
+function saveWidth(mode: WidthMode, px: number) {
   try {
-    localStorage.setItem(WIDTH_KEY, String(Math.round(px)))
+    localStorage.setItem(widthKey(mode), String(Math.round(px)))
   } catch {
     // Not saved: the next open starts at the default.
   }
 }
 
+const modeOf = (content: PanelContent | null): WidthMode =>
+  content?.type === "concept" && content.depth === "article"
+    ? "article"
+    : "reading"
+
 /**
  * The canvas with the side panel beside it: inline and resizable on wide
  * windows, a modal Sheet on narrow ones. The canvas stays mounted as the
  * panel opens and closes.
+ *
+ * Inline, the panel is always mounted, collapsed when nothing is selected.
+ * Opening, closing and switching to the full article (which reads wider)
+ * slide: the panels' flex-grow transitions for a moment around each change
+ * the app makes, and never while the reader drags the edge. Dragging below
+ * the minimum closes the panel.
  */
 export function SidePanel({
   canvas,
@@ -94,41 +116,82 @@ export function SidePanel({
   onClose: () => void
 }) {
   const open = inline && !!content
-  const [width] = React.useState(savedWidth)
+  const mode = modeOf(content)
+  const panelRef = usePanelRef()
+  const [sliding, setSliding] = React.useState(false)
+  const slidingRef = React.useRef(false)
+
+  // What the panel shows while it slides shut: the last content it had.
+  const [shown, setShown] = React.useState(content)
+  if (content && content !== shown) setShown(content)
+
+  React.useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+    slidingRef.current = true
+    setSliding(true)
+    if (open) panel.resize(savedWidth(mode))
+    else panel.collapse()
+    const done = window.setTimeout(() => {
+      slidingRef.current = false
+      setSliding(false)
+      if (!open) setShown(null)
+    }, SLIDE_MS + 40)
+    return () => window.clearTimeout(done)
+  }, [open, mode, panelRef])
+
   return (
     <>
-      <ResizablePanelGroup orientation="horizontal" className="min-w-0 flex-1">
+      <ResizablePanelGroup
+        orientation="horizontal"
+        className={cn(
+          "min-w-0 flex-1",
+          sliding &&
+            "[&>[data-panel]]:transition-[flex-grow] [&>[data-panel]]:duration-(--slide-ms) [&>[data-panel]]:ease-out motion-reduce:[&>[data-panel]]:transition-none"
+        )}
+        style={{ "--slide-ms": `${SLIDE_MS}ms` } as React.CSSProperties}
+      >
         <ResizablePanel id="canvas-panel" minSize={MIN_CANVAS_WIDTH}>
           {canvas}
         </ResizablePanel>
-        {open && (
-          <>
-            {/* Zero-width, so the panel's border is the only line and the
-                panel stays 440 px; the grab area overlaps both sides. */}
-            <ResizableHandle
-              id="side-panel-handle"
-              aria-label="Resize the side panel"
-              className="z-10 w-0 after:w-2"
-            />
-            <ResizablePanel
-              id="side-panel-frame"
-              defaultSize={width}
-              minSize={MIN_WIDTH}
-              groupResizeBehavior="preserve-pixel-size"
-              onResize={(size, _id, prev) => {
-                if (prev) saveWidth(size.inPixels)
-              }}
+        {/* Zero-width, so the panel's border is the only line; the grab
+            area overlaps both sides. */}
+        <ResizableHandle
+          id="side-panel-handle"
+          aria-label="Resize the side panel"
+          disabled={!open}
+          className={cn("z-10 w-0 after:w-2", !open && "invisible")}
+        />
+        <ResizablePanel
+          id="side-panel-frame"
+          panelRef={panelRef}
+          defaultSize={0}
+          collapsible
+          collapsedSize={0}
+          minSize={MIN_WIDTH}
+          groupResizeBehavior="preserve-pixel-size"
+          onResize={(size, _id, prev) => {
+            if (!prev || slidingRef.current || !open) return
+            if (size.inPixels === 0) onClose()
+            else saveWidth(mode, size.inPixels)
+          }}
+        >
+          {inline && shown && (
+            <aside
+              data-testid="side-panel"
+              data-open={open ? "" : undefined}
+              aria-label={shown.type === "view" ? "View" : "Concept"}
+              aria-hidden={!open || undefined}
+              inert={!open}
+              className="flex h-full min-w-(--side-panel-min) flex-col border-l bg-card text-card-foreground"
+              style={
+                { "--side-panel-min": `${MIN_WIDTH}px` } as React.CSSProperties
+              }
             >
-              <aside
-                data-testid="side-panel"
-                aria-label={content.type === "view" ? "View" : "Concept"}
-                className="flex h-full flex-col border-l bg-card text-card-foreground"
-              >
-                <PanelBody content={content} onClose={onClose} inline />
-              </aside>
-            </ResizablePanel>
-          </>
-        )}
+              <PanelBody content={shown} onClose={onClose} inline />
+            </aside>
+          )}
+        </ResizablePanel>
       </ResizablePanelGroup>
       {!inline && (
         <Sheet open={!!content} onOpenChange={(o) => !o && onClose()}>
@@ -136,7 +199,12 @@ export function SidePanel({
             side="right"
             data-testid="side-panel"
             showCloseButton={false}
-            className="gap-0 p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-110"
+            className={cn(
+              "gap-0 p-0 transition-[max-width] duration-300 data-[side=right]:w-full",
+              mode === "article"
+                ? "data-[side=right]:sm:max-w-190"
+                : "data-[side=right]:sm:max-w-130"
+            )}
           >
             {content && <PanelBody content={content} onClose={onClose} />}
           </SheetContent>
