@@ -10,17 +10,25 @@ import {
   ApplyError,
   actionForOp,
   can,
+  higherReadingState,
+  mergedPairs,
   schema,
   type ChangeOrigin,
   type LoggedOp,
   type Op,
   type Role,
 } from "@seply/domain"
-import { and, asc, eq, gt, inArray } from "drizzle-orm"
+import { and, asc, eq, gt, inArray, sql } from "drizzle-orm"
 import type { Db } from "./db.ts"
 import { loadState, writeState } from "./projection.ts"
 
-const { expeditions, collaborators, ops: opsTable, changes } = schema
+const {
+  expeditions,
+  collaborators,
+  ops: opsTable,
+  changes,
+  readingStatus,
+} = schema
 
 /** Changes a client may start through /push. Builds, AI and imports are server-side. */
 export const CLIENT_ORIGINS = ["human", "restore", "merge"] as const
@@ -180,6 +188,7 @@ export async function appendOps(
 
   await recordChanges(tx, expeditionId, userId, logged, args.changes ?? [], now)
   await writeState(tx, before, after)
+  await carryReadingStatus(tx, expeditionId, logged, args.changes ?? [], now)
   await tx
     .update(expeditions)
     .set({ headSeq: seq })
@@ -255,6 +264,78 @@ async function recordChanges(
       })
     }
   }
+}
+
+/**
+ * Merges (spec §1.3): every reader's Reading status of a merged Concept
+ * moves to the survivor, which takes the higher of the two (known > read >
+ * unread). Per-reader rows are outside the log, so the server does this for
+ * all readers when it logs a merge Change; the loser's rows stay, for undo.
+ */
+async function carryReadingStatus(
+  tx: Db,
+  expeditionId: string,
+  logged: readonly LoggedOp[],
+  infos: readonly ChangeInfo[],
+  now: () => Date
+) {
+  const merges = new Set(
+    infos.filter((c) => c.origin === "merge").map((c) => c.id)
+  )
+  if (!merges.size) return
+  const pairs = mergedPairs(
+    logged
+      .filter((op) => merges.has(op.changeId))
+      .map((op) => ({
+        kind: op.kind,
+        target: op.target,
+        path: "path" in op ? op.path : undefined,
+      }))
+  )
+  if (!pairs.length) return
+  const ids = [...new Set(pairs.flatMap((p) => [p.survivor, p.loser]))]
+  const rows = await tx
+    .select({
+      userId: readingStatus.userId,
+      conceptId: readingStatus.conceptId,
+      state: readingStatus.state,
+    })
+    .from(readingStatus)
+    .where(
+      and(
+        eq(readingStatus.expeditionId, expeditionId),
+        inArray(readingStatus.conceptId, ids)
+      )
+    )
+  // In order, so a chain of merges (A into B, then B into C) carries through.
+  const state = new Map(rows.map((r) => [`${r.userId}|${r.conceptId}`, r]))
+  const users = new Set(rows.map((r) => r.userId))
+  const at = now().toISOString()
+  const changed = new Map<string, typeof readingStatus.$inferInsert>()
+  for (const { survivor, loser } of pairs) {
+    for (const userId of users) {
+      const from = state.get(`${userId}|${loser}`)?.state
+      if (!from || from === "unread") continue
+      const was = state.get(`${userId}|${survivor}`)?.state
+      const next = higherReadingState(was, from)
+      if (next === was) continue
+      const row = { userId, expeditionId, conceptId: survivor, state: next, at }
+      state.set(`${userId}|${survivor}`, row)
+      changed.set(`${userId}|${survivor}`, row)
+    }
+  }
+  if (changed.size)
+    await tx
+      .insert(readingStatus)
+      .values([...changed.values()])
+      .onConflictDoUpdate({
+        target: [
+          readingStatus.userId,
+          readingStatus.expeditionId,
+          readingStatus.conceptId,
+        ],
+        set: { state: sql`excluded.state`, at: sql`excluded.at` },
+      })
 }
 
 export const PULL_LIMIT = 1000
