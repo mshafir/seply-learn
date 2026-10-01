@@ -11,12 +11,15 @@ export function PanelHeader({
   title,
   onClose,
   inline,
+  actions,
   children,
 }: {
   eyebrow: string
   title: string
   onClose: () => void
   inline: boolean
+  /** Buttons before Close (the Concept panel's Edit and actions menu). */
+  actions?: React.ReactNode
   children?: React.ReactNode
 }) {
   // Inside a Sheet the title labels the dialog.
@@ -31,6 +34,7 @@ export function PanelHeader({
           {eyebrow}
         </span>
         <div className="flex-1" />
+        {actions}
         <Button
           variant="ghost"
           size="icon-sm"

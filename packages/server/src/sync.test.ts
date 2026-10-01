@@ -3,6 +3,7 @@ import {
   applyAll,
   emptyState,
   makeOps,
+  mergeConcepts,
   stateAt,
   sampleToState,
   schema,
@@ -394,6 +395,73 @@ describe("POST /push", () => {
       ops: opsFor(ed, [concept("c2", "B")], "shared"),
     })
     expect(res.status).toBe(409)
+  })
+})
+
+describe("a merge Change", () => {
+  it("carries every reader's Reading status to the survivor, the higher one winning", async () => {
+    const { db, app, id, ada, opsFor, push } = await setup()
+    const ed = await signUp(app, "ed")
+    const created = opsFor(ada, [
+      concept("c1", "KV cache"),
+      concept("c2", "Key-value cache"),
+    ])
+    expect((await push(ada, { expeditionId: id, ops: created })).status).toBe(
+      200
+    )
+    const at = "2026-09-01T00:00:00.000Z"
+    await db.insert(schema.readingStatus).values([
+      { userId: ada.id, expeditionId: id, conceptId: "c1", state: "read", at },
+      { userId: ada.id, expeditionId: id, conceptId: "c2", state: "known", at },
+      { userId: ed.id, expeditionId: id, conceptId: "c1", state: "known", at },
+      { userId: ed.id, expeditionId: id, conceptId: "c2", state: "read", at },
+    ])
+    const state = (await loadState(db, id))!
+    const ops = opsFor(ada, mergeConcepts(state, "c1", "c2"))
+    const res = await push(ada, {
+      expeditionId: id,
+      ops,
+      changes: [{ id: ops[0]!.changeId, origin: "merge", label: "Merged" }],
+    })
+    expect(res.status).toBe(200)
+    const rows = await db
+      .select()
+      .from(schema.readingStatus)
+      .where(
+        and(
+          eq(schema.readingStatus.expeditionId, id),
+          eq(schema.readingStatus.conceptId, "c1")
+        )
+      )
+    const by = Object.fromEntries(rows.map((r) => [r.userId, r.state]))
+    expect(by).toEqual({ [ada.id]: "known", [ed.id]: "known" })
+  })
+
+  it("leaves Reading status alone for other Changes", async () => {
+    const { db, id, ada, opsFor, push } = await setup()
+    const created = opsFor(ada, [concept("c1", "A"), concept("c2", "B")])
+    await push(ada, { expeditionId: id, ops: created })
+    const at = "2026-09-01T00:00:00.000Z"
+    await db
+      .insert(schema.readingStatus)
+      .values([
+        {
+          userId: ada.id,
+          expeditionId: id,
+          conceptId: "c2",
+          state: "known",
+          at,
+        },
+      ])
+    const state = (await loadState(db, id))!
+    // The same ops, not marked as a merge.
+    const ops = opsFor(ada, mergeConcepts(state, "c1", "c2"))
+    await push(ada, { expeditionId: id, ops })
+    const rows = await db
+      .select()
+      .from(schema.readingStatus)
+      .where(eq(schema.readingStatus.conceptId, "c1"))
+    expect(rows).toEqual([])
   })
 })
 

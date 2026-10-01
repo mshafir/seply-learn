@@ -55,6 +55,14 @@ describe("readView", () => {
     expect(r.layout).toBeUndefined();
   });
 
+  it("leaves out the Concepts a View hides (per-View hide), in that View only", async () => {
+    const hidden = edit(state, [{ kind: "view.set", target: view("techniques"), path: "settings.hide", value: [concept("gqa")] }]);
+    const r = await readView(hidden, view("techniques"));
+    expect((await readView(state, view("techniques"))).text).toMatch(/GQA/);
+    expect(r.text).not.toMatch(/Grouped-query attention|\bGQA\b/);
+    expect((await readView(hidden, view("models"))).text).toBe((await readView(state, view("models"))).text);
+  });
+
   it("reads Cause & Effect as the outcome, its causes, and the levers with what they act on", async () => {
     const r = await readView(state, view("economics"));
     expect(r.text).toContain("Outcome: Frontier inference price & scarcity. Causes: Compute demand (raises it)");

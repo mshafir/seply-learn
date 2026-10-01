@@ -9,7 +9,14 @@
 // - Both forms are generated from the View Type's Zod schemas (settings/).
 // - "Read the View Type" shows its docs/view-types file in the panel.
 import * as React from "react"
-import { ArrowLeftIcon, BookOpenIcon, CopyIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  BookOpenIcon,
+  CopyIcon,
+  EyeIcon,
+  StarIcon,
+  Undo2Icon,
+} from "lucide-react"
 
 import { Button } from "@seply/ui/components/button"
 import { ScrollArea } from "@seply/ui/components/scroll-area"
@@ -18,13 +25,17 @@ import { SheetDescription } from "@seply/ui/components/sheet"
 import {
   BUILTIN_KINDS,
   BUILTIN_REL_TYPES,
+  hideInView,
   keyBetween,
   parseSharedSettings,
   ulid,
   VIEW_TYPES,
+  type ViewOverrides,
 } from "@seply/domain"
 import type { EngineCollections, ViewRow } from "@seply/sync"
 
+import type { Editing } from "@/expedition/concept-editing.tsx"
+import { refused } from "@/expedition/refused.ts"
 import { viewTypeMeta } from "@/expedition/labels.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { Prose } from "@/expedition/prose.tsx"
@@ -48,6 +59,8 @@ export type ViewPanelProps = {
   }
   /** A copy of the View was made: open it. */
   onDuplicated: (viewId: string) => void
+  /** Editing in place (owners and editors, online): best View, hidden Concepts, placements. */
+  editing?: Editing
 }
 
 export function ViewPanel({
@@ -102,6 +115,7 @@ function ViewSettings({
   personal,
   onDuplicated,
   onReadType,
+  editing,
 }: ViewPanelProps & { onReadType: () => void }) {
   const spec = VIEW_TYPES[view.viewType]
   const doc = viewTypeDoc(view.viewType)
@@ -195,6 +209,8 @@ function ViewSettings({
         </section>
       )}
 
+      {editing && <ViewStructure view={view} editing={editing} />}
+
       <section
         aria-labelledby="your-settings-title"
         className="flex flex-col gap-4"
@@ -237,6 +253,132 @@ function ViewSettings({
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * Editors: whether the Expedition opens on this View (its best View), the
+ * Concepts hidden here and the ones placed differently here, each with a way
+ * back (spec §1.6, §3.6).
+ */
+function ViewStructure({ view, editing }: { view: ViewRow; editing: Editing }) {
+  const { data, client } = editing
+  const name = view.label || viewTypeMeta(view.viewType).name
+  const best = data.expedition?.bestViewId === view.id
+  const byId = new Map(data.concepts.map((c) => [c.id, c]))
+  const s = view.settings as ViewOverrides
+  const hidden = (s.hide ?? []).filter((id) => byId.has(id))
+  const placed = Object.entries(s.placement ?? {}).filter(
+    ([id, p]) => byId.has(id) && byId.has(p)
+  )
+  const live = () => client.engine.state.views[view.id]!
+
+  const makeBest = () => {
+    const exp = data.expedition
+    if (!exp) return
+    try {
+      client.collections.expeditions.update(exp.id, (d) => {
+        d.bestViewId = view.id
+      })
+    } catch (e) {
+      refused("Couldn't change the best View", e)
+    }
+  }
+
+  return (
+    <section
+      aria-labelledby="view-structure-title"
+      data-testid="view-structure"
+      className="flex flex-col gap-4"
+    >
+      <SectionTitle
+        id="view-structure-title"
+        hint="For everyone. Concepts are hidden, moved and ordered from their panel."
+      >
+        This View
+      </SectionTitle>
+      {best ? (
+        <p className="flex items-center gap-2 text-sm" data-testid="best-view">
+          <StarIcon className="size-4 text-primary" />
+          The Expedition opens on this View.
+        </p>
+      ) : (
+        <Button
+          variant="outline"
+          className="self-start"
+          data-testid="best-view"
+          onClick={makeBest}
+        >
+          <StarIcon />
+          Open the Expedition on this View
+        </Button>
+      )}
+      {hidden.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <h4 className="text-sm font-medium">Hidden here</h4>
+          <ul className="flex flex-col gap-1" data-testid="hidden-concepts">
+            {hidden.map((id) => (
+              <li key={id} className="flex items-center gap-2 text-sm">
+                <span className="min-w-0 flex-1 truncate">
+                  {byId.get(id)!.title}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label={`Show ${byId.get(id)!.title} again`}
+                  onClick={() =>
+                    editing.commit(
+                      hideInView(live(), id, false),
+                      `Showed ${byId.get(id)!.title} in ${name}`
+                    )
+                  }
+                >
+                  <EyeIcon />
+                  Show
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {placed.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <h4 className="text-sm font-medium">Placed differently here</h4>
+          <ul className="flex flex-col gap-1" data-testid="placed-concepts">
+            {placed.map(([id, parent]) => (
+              <li key={id} className="flex items-center gap-2 text-sm">
+                <span className="min-w-0 flex-1 truncate">
+                  {byId.get(id)!.title}{" "}
+                  <span className="text-muted-foreground">under</span>{" "}
+                  {byId.get(parent)!.title}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  aria-label={`Put ${byId.get(id)!.title} back under its shared parent`}
+                  onClick={() =>
+                    editing.commit(
+                      [
+                        {
+                          kind: "view.set",
+                          target: view.id,
+                          path: `settings.placement.${id}`,
+                          value: null,
+                        },
+                      ],
+                      `Put ${byId.get(id)!.title} back in ${name}`
+                    )
+                  }
+                >
+                  <Undo2Icon />
+                  Reset
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
   )
 }
 
