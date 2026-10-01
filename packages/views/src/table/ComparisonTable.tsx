@@ -9,6 +9,7 @@
 // can swap it in; see the README.
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { Expedition, View } from "../model.ts";
+import type { SuggestedInteraction } from "../ExpeditionView.tsx";
 import { comparisonTable, type TableCell } from "../table.ts";
 import { KindIcon } from "../canvas/KindIcon.tsx";
 import { paletteColor } from "../canvas/color.ts";
@@ -23,9 +24,9 @@ export type ComparisonTableProps = {
   matches?: Set<string>;
   /** Concepts the reader has read or knows: a check by the option's name. */
   covered?: ReadonlySet<string>;
-};
+} & SuggestedInteraction;
 
-export function ComparisonTable({ expedition, view, selected, onSelect, matches, covered }: ComparisonTableProps) {
+export function ComparisonTable({ expedition, view, selected, onSelect, matches, covered, suggested }: ComparisonTableProps) {
   const model = useMemo(() => comparisonTable(expedition, view.settings), [expedition, view.settings]);
   const kinds = useMemo(() => new Map(expedition.kinds.map((k) => [k.id, k])), [expedition]);
   const relTypes = useMemo(() => new Map(expedition.relationshipTypes.map((t) => [t.id, t])), [expedition]);
@@ -93,6 +94,7 @@ export function ComparisonTable({ expedition, view, selected, onSelect, matches,
                     key={row.concept.id}
                     data-concept={row.concept.id}
                     data-covered={covered?.has(row.concept.id) || undefined}
+                    data-suggested={suggested?.concepts.has(row.concept.id) || undefined}
                     onClick={() => onSelect(row.concept.id)}
                     data-selected={row.concept.id === selected}
                     className={cx(

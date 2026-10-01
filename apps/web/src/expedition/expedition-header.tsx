@@ -3,12 +3,19 @@
 // status, search inside the Expedition and the account menu. The Views bar
 // (views-bar.tsx) sits under it.
 // While a build runs, the activity indicator sits before the search.
-// History (owners and editors, WP-4.2) opens the History side panel.
-// Presence, Share and Suggestions arrive with their work packages.
+// History (owners and editors, WP-4.2) opens the History side panel, and
+// the Suggestions count (owners and editors, WP-4.3) the Suggestions tab.
+// Presence and Share arrive with their work packages.
 import * as React from "react"
-import { CloudOffIcon, HistoryIcon, LoaderCircleIcon } from "lucide-react"
+import {
+  CloudOffIcon,
+  HistoryIcon,
+  LoaderCircleIcon,
+  SparklesIcon,
+} from "lucide-react"
 import { Link } from "wouter"
 
+import { Badge } from "@seply/ui/components/badge"
 import { SeplyGlyph } from "@seply/ui/components/brand"
 import { Button, buttonVariants } from "@seply/ui/components/button"
 import { Input } from "@seply/ui/components/input"
@@ -25,6 +32,7 @@ export function ExpeditionHeader({
   search,
   activity,
   history,
+  suggestions,
 }: {
   title: string
   canEdit: boolean
@@ -38,6 +46,8 @@ export function ExpeditionHeader({
   activity?: React.ReactNode
   /** The History button (owners and editors); absent for everyone else. */
   history?: { open: boolean; onToggle: () => void }
+  /** The Suggestions count (owners and editors); absent for everyone else. */
+  suggestions?: { count: number; open: boolean; onToggle: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -107,6 +117,28 @@ export function ExpeditionHeader({
             </>
           )}
         </span>
+      )}
+      {suggestions && (
+        <Button
+          variant={suggestions.open ? "secondary" : "ghost"}
+          size="sm"
+          aria-pressed={suggestions.open}
+          aria-label={
+            suggestions.count
+              ? `Suggestions · ${suggestions.count}`
+              : "Suggestions"
+          }
+          data-testid="suggestions-button"
+          onClick={suggestions.onToggle}
+        >
+          <SparklesIcon />
+          Suggestions
+          {suggestions.count > 0 && (
+            <Badge variant="progress" data-testid="suggestions-count">
+              {suggestions.count}
+            </Badge>
+          )}
+        </Button>
       )}
       {history && (
         <Button

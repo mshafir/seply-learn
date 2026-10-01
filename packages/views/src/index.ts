@@ -81,6 +81,7 @@ export {
   ViewRenderer,
   type ExpeditionViewProps,
   type ReaderInteraction,
+  type SuggestedInteraction,
   type ViewInteraction,
   type ViewStatusChip,
   type ViewRendererProps,

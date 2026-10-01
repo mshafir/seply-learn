@@ -19,6 +19,7 @@ export {
 } from "./apply.ts"
 export * from "./fields.ts"
 export * from "./history.ts"
+export * from "./proposals.ts"
 export * from "./commands.ts"
 export * from "./permissions.ts"
 export * from "./sample.ts"

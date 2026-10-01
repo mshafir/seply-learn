@@ -150,3 +150,10 @@
   color: var(--seply-outline-muted);
   font-size: 0.875rem;
 }
+
+/* A line a pending suggestion creates or changes (WP-4.3). */
+.seply-outline__line[data-suggested] {
+  outline: 1.5px dashed var(--suggested);
+  outline-offset: -2px;
+  border-radius: 6px;
+}

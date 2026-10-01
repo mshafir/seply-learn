@@ -27,6 +27,15 @@
 // toast what they did; "View as of here" swaps the canvas and panels to a
 // read-only replay of the log (a cached-style client over that state), with
 // a banner to go back to the latest or restore.
+//
+// Suggestions (spec §3.8, WP-4.3): owners and editors online see the
+// pending suggestions' count in the header, which opens the Suggestions tab.
+// While it is open (and while reading a Concept opened from it), the canvas
+// and panels read a preview: the live state with every pending item applied
+// (use-proposals.ts), drawn dashed, read-only. Each accept is one Change
+// (the server appends it; we pull it), with Undo in its toast and in
+// History; undoing it makes its items pending again. A new MCP Proposal
+// arrives with a toast.
 import * as React from "react"
 import {
   CirclePauseIcon,
@@ -113,11 +122,23 @@ import { useHistory } from "@/expedition/use-history.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsBar } from "@/expedition/views-bar.tsx"
 import {
+  groupPending,
+  itemsPhrase,
+  planAccept,
+  proposalBy,
+  suggestionsCount,
+  type AcceptPlan,
+} from "@/expedition/suggestions.ts"
+import { usePreview, useProposals } from "@/expedition/use-proposals.ts"
+import {
   ApiError,
   estimateArticle,
   listExpeditions,
+  reopenProposals,
+  reviewProposals,
   startJob,
   type ChangeSummary,
+  type ProposalView,
   type Role,
 } from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
@@ -270,11 +291,12 @@ function useRole(expeditionId: string, signedIn: boolean): Role | null {
   return signedIn ? role : null
 }
 
-/** What the side panel shows: a Concept (with its back stack), the View or History. */
+/** What the side panel shows: a Concept (with its back stack), the View, History or Suggestions. */
 type Panel =
   | { type: "concept"; stack: BackStack }
   | { type: "view" }
   | { type: "history" }
+  | { type: "suggestions" }
   | null
 
 /** "View as of here": a read-only client over the replayed state. */
@@ -311,11 +333,6 @@ function ExpeditionFrame({
   // "View as of here" shows a replay instead of the live client, read-only.
   const [asOf, setAsOf] = React.useState<AsOf | null>(null)
   React.useEffect(() => () => asOf?.client.dispose(), [asOf])
-  const shown = asOf?.client ?? client
-  const editable = canEdit && !asOf
-  const canViewHistory = canEdit && client.hasHistory
-  const data = useExpeditionData(shown.collections)
-  const inlinePanel = useMediaQuery(INLINE_PANEL_QUERY)
   // A Concept picked in global search arrives as ?concept=<id>.
   const [conceptParam] = React.useState(() =>
     new URLSearchParams(window.location.search).get("concept")
@@ -323,6 +340,47 @@ function ExpeditionFrame({
   const [panel, setPanel] = React.useState<Panel>(() =>
     conceptParam ? { type: "concept", stack: openConcept(conceptParam) } : null
   )
+
+  // Suggestions: owners and editors, online. A new MCP Proposal gets a toast.
+  const canReview = canEdit && offlineSince === null && signInHref === null
+  const proposals = useProposals({
+    expeditionId,
+    enabled: canReview,
+    onNewMcp: (p: ProposalView) =>
+      toast.add({
+        title: `${proposalBy(p, userId)} suggested ${itemsPhrase(
+          client.engine.state,
+          p.items.filter((i) => i.status === "pending")
+        )}`,
+        description: p.rationale,
+        actionProps: {
+          children: "Review",
+          onClick: () => setPanel({ type: "suggestions" }),
+        },
+      }),
+  })
+  const refreshProposals = React.useRef(proposals.refresh)
+  React.useEffect(() => {
+    refreshProposals.current = proposals.refresh
+  })
+  // The preview: on with the Suggestions tab, and kept while reading a
+  // Concept opened from it (a new Concept exists only there).
+  const [previewing, setPreviewing] = React.useState(false)
+  const panelType = panel?.type ?? null
+  if (panelType === "suggestions" && !previewing) setPreviewing(true)
+  if (previewing && panelType !== "suggestions" && panelType !== "concept")
+    setPreviewing(false)
+  const preview = usePreview(
+    client,
+    proposals.proposals,
+    previewing && canReview && !asOf
+  )
+
+  const shown = asOf?.client ?? preview?.client ?? client
+  const editable = canEdit && !asOf && !preview
+  const canViewHistory = canEdit && client.hasHistory
+  const data = useExpeditionData(shown.collections)
+  const inlinePanel = useMediaQuery(INLINE_PANEL_QUERY)
   // A provenance link opened in a new tab arrives as ?source=<id>&segment=<id>.
   const [sourceTarget, setSourceTarget] = React.useState<SourceTarget | null>(
     () => {
@@ -347,10 +405,14 @@ function ExpeditionFrame({
     viewId: null as string | null,
   })
   const onBuildEvent = React.useCallback(
-    (evt: BuildEvent) =>
+    (evt: BuildEvent) => {
+      // An article ask that finished has a new suggestion waiting.
+      if (!evt.viewId && evt.kind === "article" && evt.status === "complete")
+        void refreshProposals.current()
       announce(evt, latest.current, (id) =>
         navigate(`/e/${expeditionId}/${id}`)
-      ),
+      )
+    },
     [expeditionId, navigate]
   )
   const builds = useBuilds({
@@ -500,7 +562,7 @@ function ExpeditionFrame({
       description: e instanceof Error ? e.message : String(e),
       type: "error",
     })
-  const undoChange = (change: ChangeSummary) => {
+  const undoChange = (change: Pick<ChangeSummary, "id" | "label">) => {
     setHistoryBusy(true)
     client
       .undo(change.id, { label: undoLabel(change) })
@@ -518,6 +580,13 @@ function ExpeditionFrame({
                 description: kept ?? "It has already been undone.",
               }
         )
+        // Undoing an accept makes its suggestions pending again.
+        if (r.ops.length && canReview)
+          reopenProposals(expeditionId, { changeId: change.id })
+            .then((ids) => {
+              if (ids.length) void proposals.refresh()
+            })
+            .catch(historyFailed("Couldn't bring the suggestions back"))
       }, historyFailed("Couldn't undo"))
       .finally(() => setHistoryBusy(false))
   }
@@ -558,59 +627,133 @@ function ExpeditionFrame({
       .finally(() => setHistoryBusy(false))
   }
 
+  // Suggestions: each review action is one request (and at most one Change).
+  const [reviewBusy, setReviewBusy] = React.useState(false)
+  const live = client.engine.state
+  const acceptSuggestions = (plan: AcceptPlan) => {
+    if (!plan.ids.length) return
+    setReviewBusy(true)
+    reviewProposals(expeditionId, {
+      accept: plan.ids,
+      overwrite: plan.stale.length > 0,
+    })
+      .then(async (r) => {
+        // Bring the new Change in before the preview drops the items.
+        await client.pull().catch(() => {})
+        await proposals.refresh()
+        const n = r.accepted.length
+        toast.add({
+          title: r.label ?? `Accepted ${suggestionsCount(n)}`,
+          description: r.included.length
+            ? `Including ${suggestionsCount(r.included.length)} ${r.included.length === 1 ? "it" : "they"} needed.`
+            : undefined,
+          type: "success",
+          actionProps: r.changeId
+            ? {
+                children: "Undo",
+                onClick: () =>
+                  undoChange({
+                    id: r.changeId!,
+                    label: r.label ?? "Accepted suggestions",
+                  }),
+              }
+            : undefined,
+        })
+      }, failedReview("Couldn't accept"))
+      .finally(() => setReviewBusy(false))
+  }
+  const dismissSuggestions = (ids: string[]) => {
+    setReviewBusy(true)
+    reviewProposals(expeditionId, { dismiss: ids })
+      .then(async () => {
+        await proposals.refresh()
+        toast.add({
+          title: `Dismissed ${suggestionsCount(ids.length)}`,
+          actionProps: {
+            children: "Undo",
+            onClick: () =>
+              reopenProposals(expeditionId, { itemIds: ids }).then(
+                () => proposals.refresh(),
+                failed("Couldn't bring them back")
+              ),
+          },
+        })
+      }, failedReview("Couldn't dismiss"))
+      .finally(() => setReviewBusy(false))
+  }
+  const failedReview = (title: string) => (e: unknown) => {
+    failed(title)(e)
+    void proposals.refresh()
+  }
+
   const content: PanelContent | null =
-    panel?.type === "history" && canViewHistory
+    panel?.type === "suggestions" && canReview
       ? {
-          type: "history",
-          history,
+          type: "suggestions",
+          groups: groupPending(live, proposals.proposals),
+          count: proposals.count,
+          loading: proposals.loading,
+          error: proposals.error,
           me: userId,
-          asOfId: asOf?.change.id ?? null,
-          busy: historyBusy,
-          onUndo: undoChange,
-          onViewAsOf: viewAsOf,
-          onRestore: restoreChange,
+          live,
+          preview: preview?.client.engine.state ?? live,
+          busy: reviewBusy,
+          plan: (ids) => planAccept(live, proposals.proposals, ids),
+          onAccept: acceptSuggestions,
+          onDismiss: dismissSuggestions,
         }
-      : panel?.type === "view" && view
+      : panel?.type === "history" && canViewHistory
         ? {
-            type: "view",
-            view,
-            data,
-            collections: shown.collections,
-            canEdit: editable,
-            personal,
-            onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
+            type: "history",
+            history,
+            me: userId,
+            asOfId: asOf?.change.id ?? null,
+            busy: historyBusy,
+            onUndo: undoChange,
+            onViewAsOf: viewAsOf,
+            onRestore: restoreChange,
           }
-        : selectedConcept && place
+        : panel?.type === "view" && view
           ? {
-              type: "concept",
-              concept: selectedConcept,
-              depth: place.depth,
-              kindLabel: kindLabel(selectedConcept.kind, data.kindDefs),
-              reading,
-              status:
-                readerState.reading[selectedConcept.id]?.state ?? "unread",
-              onStatus: (state) =>
-                reader?.markReading(expeditionId, selectedConcept.id, state),
-              signInHref: hintHref,
-              ...(editable &&
-                offlineSince === null &&
-                signInHref === null && {
-                  articleAction: {
-                    ask: articleAsk(builds.log, selectedConcept.id),
-                    estimate: () => estimateArticle(expeditionId),
-                    onWrite: (request) => {
-                      startJob(expeditionId, "article", {
-                        conceptId: selectedConcept.id,
-                        ...request,
-                      }).then(
-                        builds.track,
-                        failed("Couldn't start writing the article")
-                      )
-                    },
-                  },
-                }),
+              type: "view",
+              view,
+              data,
+              collections: shown.collections,
+              canEdit: editable,
+              personal,
+              onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
             }
-          : null
+          : selectedConcept && place
+            ? {
+                type: "concept",
+                concept: selectedConcept,
+                depth: place.depth,
+                kindLabel: kindLabel(selectedConcept.kind, data.kindDefs),
+                reading,
+                status:
+                  readerState.reading[selectedConcept.id]?.state ?? "unread",
+                onStatus: (state) =>
+                  reader?.markReading(expeditionId, selectedConcept.id, state),
+                signInHref: hintHref,
+                ...(editable &&
+                  offlineSince === null &&
+                  signInHref === null && {
+                    articleAction: {
+                      ask: articleAsk(builds.log, selectedConcept.id),
+                      estimate: () => estimateArticle(expeditionId),
+                      onWrite: (request) => {
+                        startJob(expeditionId, "article", {
+                          conceptId: selectedConcept.id,
+                          ...request,
+                        }).then(
+                          builds.track,
+                          failed("Couldn't start writing the article")
+                        )
+                      },
+                    },
+                  }),
+              }
+            : null
 
   const failed = (title: string) => (e: unknown) => {
     toast.add({
@@ -701,6 +844,18 @@ function ExpeditionFrame({
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        suggestions={
+          canReview
+            ? {
+                count: proposals.count,
+                open: panel?.type === "suggestions",
+                onToggle: () =>
+                  setPanel((p) =>
+                    p?.type === "suggestions" ? null : { type: "suggestions" }
+                  ),
+              }
+            : undefined
+        }
         history={
           canViewHistory
             ? {
@@ -836,6 +991,7 @@ function ExpeditionFrame({
                     matches={matches}
                     covered={covered}
                     onMarkKnown={markKnown}
+                    suggested={preview?.suggested}
                   />
                   <ViewButton
                     view={view}

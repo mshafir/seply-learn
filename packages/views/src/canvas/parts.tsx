@@ -22,6 +22,8 @@ export type ConceptData = {
   entering?: boolean;
   /** The reader has read or knows it: a check. */
   covered?: boolean;
+  /** A pending suggestion creates or changes it: dashed in `--suggested`. */
+  suggested?: boolean;
   badges: Badge[];
 };
 
@@ -30,7 +32,7 @@ const weightClass = (w: number) =>
   w > 1 ? "seply-concept--focal" : w > 0.6 ? "seply-concept--major" : w > 0.3 ? "seply-concept--medium" : "seply-concept--minor";
 
 export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
-  const { concept, kind, weight, dim, selected, entering, covered, badges } = data;
+  const { concept, kind, weight, dim, selected, entering, covered, suggested, badges } = data;
   const size = nodeSize(weight, concept.title);
   return (
     <div
@@ -43,9 +45,11 @@ export function ConceptNode({ data }: NodeProps<Node<ConceptData>>) {
         dim && "seply-concept--dim",
         selected && "seply-concept--selected",
         entering && "seply-concept--entering",
+        suggested && "seply-concept--suggested",
       )}
       data-concept={concept.id}
       data-covered={covered || undefined}
+      data-suggested={suggested || undefined}
     >
       <Handle type="target" position={Position.Left} className="seply-handle" />
       <KindIcon name={kind?.icon ?? kind?.id} className="seply-concept__icon" style={{ color: paletteColor(kind?.color) }} />

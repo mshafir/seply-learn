@@ -52,7 +52,19 @@ export type ViewInteraction = {
   overlayTop?: number;
   /** The Map View's tiles, from the app's config. Unset: the fallback style (OpenFreeMap). */
   basemap?: BasemapConfig;
-} & ReaderInteraction;
+} & ReaderInteraction &
+  SuggestedInteraction;
+
+/**
+ * Pending suggestions previewed on the View (spec §3.8, WP-4.3): the app
+ * passes the Expedition with them applied, and these say which Concepts and
+ * Relationships (`from|type|to`) are suggested, so they're drawn dashed in
+ * `--suggested`. Canvas Views dash Concepts and lines; Outline lines and
+ * table rows are marked `data-suggested`.
+ */
+export type SuggestedInteraction = {
+  suggested?: { concepts: ReadonlySet<string>; relationships: ReadonlySet<string> };
+};
 
 /**
  * The reader's Reading status (spec §1.7, §4.2), from the app. Every View

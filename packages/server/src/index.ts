@@ -60,6 +60,16 @@ export {
   type ImportResponse,
 } from "./import.ts"
 export {
+  acceptLabel,
+  addProposalItems,
+  createProposal,
+  listProposals,
+  ProposalError,
+  reopenProposals,
+  reviewProposals,
+  type ReviewResult,
+} from "./proposals.ts"
+export {
   noopRelay,
   publishBuild,
   publishCommitted,

@@ -2,8 +2,8 @@
 // open and shut; 520 px by default, wider (860 px) while reading a full
 // article, and resizable by dragging its edge (each width kept per browser).
 // A Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
-// see concept-panel.tsx), the View panel (view-panel.tsx) or History
-// (history-panel.tsx).
+// see concept-panel.tsx), the View panel (view-panel.tsx), History
+// (history-panel.tsx) or Suggestions (suggestions-panel.tsx).
 import * as React from "react"
 
 import {
@@ -36,6 +36,10 @@ import {
   type HistoryPanelProps,
 } from "@/expedition/history-panel.tsx"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
+import {
+  SuggestionsPanel,
+  type SuggestionsPanelProps,
+} from "@/expedition/suggestions-panel.tsx"
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
 import type { ArticleAction } from "@/expedition/concept-panel.tsx"
 import {
@@ -62,6 +66,7 @@ export type PanelContent =
     }
   | ({ type: "view" } & ViewPanelProps)
   | ({ type: "history" } & HistoryPanelProps)
+  | ({ type: "suggestions" } & SuggestionsPanelProps)
 
 /** The panel's widths, per mode: reading, and the wider full article. */
 const DEFAULT_WIDTH = { reading: 520, article: 860 } as const
@@ -224,6 +229,7 @@ const PANEL_LABEL: Record<PanelContent["type"], string> = {
   concept: "Concept",
   view: "View",
   history: "History",
+  suggestions: "Suggestions",
 }
 
 function PanelBody({
@@ -244,6 +250,13 @@ function PanelBody({
     const { type: _type, ...history } = content
     void _type
     return <HistoryPanel {...history} onClose={onClose} inline={inline} />
+  }
+  if (content.type === "suggestions") {
+    const { type: _type, ...suggestions } = content
+    void _type
+    return (
+      <SuggestionsPanel {...suggestions} onClose={onClose} inline={inline} />
+    )
   }
   return <ConceptBody content={content} onClose={onClose} inline={inline} />
 }

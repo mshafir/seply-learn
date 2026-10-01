@@ -36,6 +36,13 @@
       "when": 1790800728862,
       "tag": "0004_job_pause",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790870468867,
+      "tag": "0005_proposal_review",
+      "breakpoints": true
     }
   ]
 }

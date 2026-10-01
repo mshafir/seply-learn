@@ -37,7 +37,7 @@ export const changeMeta = (
 const quoted = (label: string) => `“${label}”`
 
 /** The label of the Change an undo makes. */
-export const undoLabel = (change: ChangeSummary) =>
+export const undoLabel = (change: Pick<ChangeSummary, "label">) =>
   `Undid ${quoted(change.label)}`
 
 /** The label of the Change "Restore to here" makes. */

@@ -15,6 +15,7 @@ export const edgeColor = {
   raises: "var(--seply-edge-raises)",
   lowers: "var(--seply-edge-lowers)",
   bridge: "var(--seply-edge-bridge)",
+  suggested: "var(--suggested)",
 };
 
 export function buildEdges(args: {
@@ -29,8 +30,10 @@ export function buildEdges(args: {
   overlay?: Overlay;
   /** Concepts appearing in the current reflow; their lines fade in with them. */
   entering?: Set<string>;
+  /** Suggested Relationships (`from|type|to`): dashed in `--suggested`. */
+  suggested?: ReadonlySet<string>;
 }): Edge[] {
-  const { scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering } = args;
+  const { scope, ce, relTypes, shown, tr, selected, lit, matches, overlay, entering, suggested } = args;
   const enters = (from: string, to: string) => !!entering && (entering.has(from) || entering.has(to));
   const edges: Edge[] = drawnRelationships(scope, ce, { shown, tr, selected }).map((r, i) => {
     const t = relTypes.get(r.type);
@@ -39,19 +42,28 @@ export function buildEdges(args: {
     const dim = (matches && !(matches.has(r.from) && matches.has(r.to))) || ((overlay ? lit : selected) && !on);
     // Cause & Effect carries the sign in colour: raises vs lowers. Elsewhere
     // the Relationship Type's colour (Expedition data) is used.
-    const color = ce ? (sign(ce, r.type) > 0 ? edgeColor.raises : edgeColor.lowers) : (paletteColor(t?.color) ?? edgeColor.default);
+    const proposed = !!suggested?.has(`${r.from}|${r.type}|${r.to}`);
+    const color = proposed
+      ? edgeColor.suggested
+      : ce
+        ? sign(ce, r.type) > 0
+          ? edgeColor.raises
+          : edgeColor.lowers
+        : (paletteColor(t?.color) ?? edgeColor.default);
     return {
       id: `${r.from}-${r.type}-${r.to}-${i}`,
       source: r.from,
       target: r.to,
       type: "floating",
-      className: cx(r.synthetic && "seply-edge--lever", enters(r.from, r.to) && "seply-edge--entering") || undefined,
+      className:
+        cx(r.synthetic && "seply-edge--lever", enters(r.from, r.to) && "seply-edge--entering", proposed && "seply-edge--suggested") ||
+        undefined,
       label: on && (!overlay || touches) ? [t?.label, r.note].filter(Boolean).join(" · ") : undefined,
       markerEnd: { type: MarkerType.ArrowClosed, color, width: 16, height: 16 },
       style: {
         stroke: color,
         strokeWidth: on ? 2.4 : 1.4,
-        strokeDasharray: t?.dashed ? "6 4" : undefined,
+        strokeDasharray: proposed ? "5 4" : t?.dashed ? "6 4" : undefined,
         opacity: dim ? 0.1 : 0.85,
       },
     };

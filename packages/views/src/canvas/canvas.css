@@ -150,6 +150,19 @@
   border-color: var(--seply-concept-selected);
   box-shadow: 0 0 0 2px var(--seply-concept-ring);
 }
+/* A pending suggestion (WP-4.3): dashed in the suggested colour. */
+.seply-concept--suggested {
+  border-style: dashed;
+  border-color: var(--suggested);
+  background: color-mix(in oklch, var(--suggested) 8%, var(--seply-concept-bg));
+}
+/* Table rows a pending suggestion creates or changes. */
+.seply-table__row[data-suggested] > * {
+  background: color-mix(in oklch, var(--suggested) 8%, transparent);
+}
+.seply-table__row[data-suggested] > :first-child {
+  box-shadow: inset 3px 0 0 var(--suggested);
+}
 /* A Concept (and its lines) appearing in a reflow, say when a Learning path
    focus shows more steps: it waits while the others glide, then fades in,
    so nothing is drawn over a Concept still on its way. --seply-enter-ms is

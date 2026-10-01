@@ -18,6 +18,7 @@ import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
 import { historyRoutes } from "./history.ts"
 import { importRoutes } from "./import.ts"
+import { proposalRoutes } from "./proposals.ts"
 import { jobRoutes } from "./jobs/routes.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import { webPushRoutes } from "./push/index.ts"
@@ -190,6 +191,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/expeditions/*", signedIn)
   app.route("/expeditions", expeditionRoutes(relay))
   app.route("/expeditions", createFlowRoutes(relay, opts.ai, opts.jobs))
+  app.route("/expeditions", proposalRoutes(relay))
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)
