@@ -6,12 +6,15 @@
 // presence avatars (presence-avatars.tsx) come next, then the Suggestions
 // count (owners and editors, WP-4.3), which opens the Suggestions tab, and
 // History (owners and editors, WP-4.2), which opens the History side panel.
+// Ask (owners and editors, WP-4.4) opens Grow's Ask tab, where they ask the
+// AI about the Expedition; it spins while one of their asks runs.
 // Share arrives with its work package.
 import * as React from "react"
 import {
   CloudOffIcon,
   HistoryIcon,
   LoaderCircleIcon,
+  MessageCircleQuestionIcon,
   SparklesIcon,
 } from "lucide-react"
 import { Link } from "wouter"
@@ -20,6 +23,7 @@ import { Badge } from "@seply/ui/components/badge"
 import { SeplyGlyph } from "@seply/ui/components/brand"
 import { Button, buttonVariants } from "@seply/ui/components/button"
 import { Input } from "@seply/ui/components/input"
+import { Spinner } from "@seply/ui/components/spinner"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import type { SyncHealth } from "@/lib/sync.ts"
@@ -35,6 +39,7 @@ export function ExpeditionHeader({
   presence,
   history,
   suggestions,
+  ask,
 }: {
   title: string
   canEdit: boolean
@@ -52,6 +57,8 @@ export function ExpeditionHeader({
   history?: { open: boolean; onToggle: () => void }
   /** The Suggestions count (owners and editors); absent for everyone else. */
   suggestions?: { count: number; open: boolean; onToggle: () => void }
+  /** Ask, Grow's Ask tab (owners and editors); absent for everyone else. */
+  ask?: { open: boolean; asking: boolean; onToggle: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -123,6 +130,18 @@ export function ExpeditionHeader({
         </span>
       )}
       {presence}
+      {ask && (
+        <Button
+          variant={ask.open ? "secondary" : "ghost"}
+          size="sm"
+          aria-pressed={ask.open}
+          data-testid="ask-button"
+          onClick={ask.onToggle}
+        >
+          {ask.asking ? <Spinner /> : <MessageCircleQuestionIcon />}
+          Ask
+        </Button>
+      )}
       {suggestions && (
         <Button
           variant={suggestions.open ? "secondary" : "ghost"}

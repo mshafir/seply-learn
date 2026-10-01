@@ -42,6 +42,13 @@
 // (the server appends it; we pull it), with Undo in its toast and in
 // History; undoing it makes its items pending again. A new MCP Proposal
 // arrives with a toast.
+//
+// Grow (spec §3.8, §5.5, WP-4.4): owners and editors online ask the curator
+// agent from the Ask tab (the header's Ask opens it) or a Concept action.
+// The side panel's Grow tabs are Ask, Suggestions and Activity; each ask
+// streams its suggestions (use-asks.ts) into the Suggestions list and, while
+// the panel is open, dashed onto the canvas. "Write the article" is one of
+// the Concept actions, and its ask shows in Ask and Activity too.
 import * as React from "react"
 import {
   CirclePauseIcon,
@@ -70,6 +77,7 @@ import { Skeleton } from "@seply/ui/components/skeleton"
 import { toast } from "@seply/ui/components/toast"
 import {
   higherReadingState,
+  isLive,
   keyBetween,
   parseSharedSettings,
   ulid,
@@ -148,6 +156,15 @@ import {
   type AcceptPlan,
 } from "@/expedition/suggestions.ts"
 import { usePreview, useProposals } from "@/expedition/use-proposals.ts"
+import { useAsks } from "@/expedition/use-asks.ts"
+import {
+  actionRationale,
+  askStatus,
+  costCopy,
+  isAsking,
+  type SessionAsk,
+} from "@/expedition/asks.ts"
+import type { GrowTab } from "@/expedition/grow-panel.tsx"
 import {
   ApiError,
   estimateArticle,
@@ -314,7 +331,7 @@ type Panel =
   | { type: "concept"; stack: BackStack }
   | { type: "view" }
   | { type: "history" }
-  | { type: "suggestions" }
+  | { type: "suggestions"; tab?: GrowTab }
   | null
 
 /** "View as of here": a read-only client over the replayed state. */
@@ -373,7 +390,7 @@ function ExpeditionFrame({
         description: p.rationale,
         actionProps: {
           children: "Review",
-          onClick: () => setPanel({ type: "suggestions" }),
+          onClick: () => setPanel({ type: "suggestions", tab: "suggestions" }),
         },
       }),
   })
@@ -464,6 +481,39 @@ function ExpeditionFrame({
     onEvent: onBuildEvent,
   })
   const buildOf = (v: ViewRow) => viewBuild(v, builds.log)
+
+  // Grow: this tab's asks, each streaming its Proposal into the list.
+  const growTab: GrowTab | null =
+    panel?.type === "suggestions" ? (panel.tab ?? "suggestions") : null
+  const growTabRef = React.useRef(growTab)
+  React.useEffect(() => {
+    growTabRef.current = growTab
+  })
+  const asks = useAsks({
+    expeditionId,
+    enabled: canReview,
+    me: signInHref === null ? userId : null,
+    onProposal: proposals.ingest,
+    onJob: builds.track,
+    onEnded: (ask: SessionAsk) => {
+      void refreshProposals.current()
+      // The article's own toast says it (announce); a Grow ask's, unless its tab is open.
+      if (ask.kind !== "grow" || growTabRef.current === "ask") return
+      toast.add({
+        title: ask.rationale,
+        description: askStatus(ask, 0),
+        actionProps: {
+          children: "Review",
+          onClick: () => setPanel({ type: "suggestions", tab: "ask" }),
+        },
+      })
+    },
+  })
+  const { loadEstimate, refreshActivity } = asks
+  React.useEffect(() => {
+    if (growTab === "ask") loadEstimate()
+    if (growTab === "activity") void refreshActivity()
+  }, [growTab, loadEstimate, refreshActivity])
   const summary = buildSummary(data.views, builds.log)
 
   // The URL's View, else the best View once ready, else the first ready one
@@ -784,6 +834,32 @@ function ExpeditionFrame({
           plan: (ids) => planAccept(liveState, proposals.proposals, ids),
           onAccept: acceptSuggestions,
           onDismiss: dismissSuggestions,
+          tab: growTab ?? "suggestions",
+          onTab: (tab) => setPanel({ type: "suggestions", tab }),
+          ask: {
+            asks: asks.asks,
+            streamed: asks.streamed,
+            preview: preview?.client.engine.state ?? liveState,
+            estimate: asks.estimate,
+            estimateError: asks.estimateError,
+            onAsk: (text) =>
+              asks.ask({ ask: text, ...(view && { viewId: view.id }) }, text),
+            onStop: (jobId) =>
+              void asks.stop(jobId).catch(failed("Couldn't stop the ask")),
+            onContinue: (jobId) =>
+              void asks
+                .resume(jobId)
+                .catch(failed("Couldn't continue the ask")),
+            onReview: () =>
+              setPanel({ type: "suggestions", tab: "suggestions" }),
+          },
+          activity: {
+            activity: asks.activity,
+            error: asks.activityError,
+            me: userId,
+            onStop: (jobId) =>
+              void asks.stop(jobId).catch(failed("Couldn't stop the ask")),
+          },
         }
       : panel?.type === "history" && canViewHistory
         ? {
@@ -820,9 +896,11 @@ function ExpeditionFrame({
                   reader?.markReading(expeditionId, selectedConcept.id, state),
                 signInHref: hintHref,
                 editing,
-                ...(editable &&
-                  offlineSince === null &&
-                  signInHref === null && {
+                // Asks suggest; they never edit. So they're there while
+                // previewing too, for Concepts that exist (not suggested ones).
+                ...(canReview &&
+                  !asOf &&
+                  isLive(liveState.concepts[selectedConcept.id]) && {
                     articleAction: {
                       ask: articleAsk(builds.log, selectedConcept.id),
                       estimate: () => estimateArticle(expeditionId),
@@ -830,10 +908,46 @@ function ExpeditionFrame({
                         startJob(expeditionId, "article", {
                           conceptId: selectedConcept.id,
                           ...request,
-                        }).then(
-                          builds.track,
-                          failed("Couldn't start writing the article")
-                        )
+                        }).then((job) => {
+                          builds.track(job)
+                          asks.follow(
+                            job,
+                            `Write the article for ${selectedConcept.title}`
+                          )
+                        }, failed("Couldn't start writing the article"))
+                      },
+                    },
+                    growActions: {
+                      asking: (action) =>
+                        asks.asks.findLast(
+                          (a) =>
+                            a.action === action &&
+                            a.conceptId === selectedConcept.id &&
+                            isAsking(a.status)
+                        ) ?? null,
+                      cost: asks.estimate ? costCopy(asks.estimate) : null,
+                      ...(asks.estimateError instanceof ApiError &&
+                        asks.estimateError.status === 409 && {
+                          noKey:
+                            asks.estimateError.body.error === "no-key"
+                              ? ("no-key" as const)
+                              : ("not-configured" as const),
+                        }),
+                      loadEstimate: asks.loadEstimate,
+                      onAsk: (action) => {
+                        asks
+                          .ask(
+                            {
+                              action,
+                              conceptId: selectedConcept.id,
+                              ...(view && { viewId: view.id }),
+                            },
+                            actionRationale(action, selectedConcept.title)
+                          )
+                          .then(
+                            () => setPanel({ type: "suggestions", tab: "ask" }),
+                            failed("Couldn't ask")
+                          )
                       },
                     },
                   }),
@@ -933,10 +1047,28 @@ function ExpeditionFrame({
           canReview
             ? {
                 count: proposals.count,
-                open: panel?.type === "suggestions",
+                open: growTab === "suggestions" || growTab === "activity",
                 onToggle: () =>
                   setPanel((p) =>
-                    p?.type === "suggestions" ? null : { type: "suggestions" }
+                    p?.type === "suggestions" && p.tab !== "ask"
+                      ? null
+                      : { type: "suggestions", tab: "suggestions" }
+                  ),
+              }
+            : undefined
+        }
+        ask={
+          canReview
+            ? {
+                open: growTab === "ask",
+                asking: asks.asks.some(
+                  (a) => a.kind === "grow" && isAsking(a.status)
+                ),
+                onToggle: () =>
+                  setPanel((p) =>
+                    p?.type === "suggestions" && p.tab === "ask"
+                      ? null
+                      : { type: "suggestions", tab: "ask" }
                   ),
               }
             : undefined
@@ -1193,6 +1325,8 @@ function announce(
       if (k.startsWith(`${evt.jobId}/`)) announced.delete(k)
     return
   }
+  // Grow asks report in the Ask tab (and their own toast, use-asks.ts).
+  if (evt.kind === "grow") return
   const once = `${evt.jobId}/${evt.viewId ?? ""}/${evt.status}`
   if (announced.has(once)) return
   announced.add(once)

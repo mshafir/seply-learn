@@ -42,8 +42,16 @@ import {
   SuggestionsPanel,
   type SuggestionsPanelProps,
 } from "@/expedition/suggestions-panel.tsx"
+import {
+  ActivityPanel,
+  AskPanel,
+  GrowTabs,
+  type ActivityPanelProps,
+  type AskPanelProps,
+  type GrowTab,
+} from "@/expedition/grow-panel.tsx"
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
-import type { ArticleAction } from "@/expedition/concept-panel.tsx"
+import type { ArticleAction, GrowActions } from "@/expedition/concept-panel.tsx"
 import {
   ArticleEditor,
   ConceptEditActions,
@@ -71,12 +79,20 @@ export type PanelContent =
       signInHref: string | null
       /** "Write the article" (editors, online, no article yet); absent otherwise. */
       articleAction?: ArticleAction
+      /** Grow's other Concept actions (owners and editors, online); absent otherwise. */
+      growActions?: GrowActions
       /** Editing in place (owners and editors, online); absent otherwise. */
       editing?: Editing
     }
   | ({ type: "view" } & ViewPanelProps)
   | ({ type: "history" } & HistoryPanelProps)
-  | ({ type: "suggestions" } & SuggestionsPanelProps)
+  | ({ type: "suggestions" } & SuggestionsPanelProps & {
+        /** Grow's tabs (grow-panel.tsx): Ask, Suggestions, Activity. */
+        tab: GrowTab
+        onTab: (tab: GrowTab) => void
+        ask: AskPanelProps
+        activity: ActivityPanelProps
+      })
 
 /** The panel's widths, per mode: reading, and the wider full article. */
 const DEFAULT_WIDTH = { reading: 520, article: 860 } as const
@@ -262,10 +278,27 @@ function PanelBody({
     return <HistoryPanel {...history} onClose={onClose} inline={inline} />
   }
   if (content.type === "suggestions") {
-    const { type: _type, ...suggestions } = content
+    const { type: _type, tab, onTab, ask, activity, ...suggestions } = content
     void _type
+    const nav = <GrowTabs tab={tab} count={suggestions.count} onTab={onTab} />
+    if (tab === "ask")
+      return <AskPanel {...ask} nav={nav} onClose={onClose} inline={inline} />
+    if (tab === "activity")
+      return (
+        <ActivityPanel
+          {...activity}
+          nav={nav}
+          onClose={onClose}
+          inline={inline}
+        />
+      )
     return (
-      <SuggestionsPanel {...suggestions} onClose={onClose} inline={inline} />
+      <SuggestionsPanel
+        {...suggestions}
+        nav={nav}
+        onClose={onClose}
+        inline={inline}
+      />
     )
   }
   return (
@@ -297,6 +330,7 @@ function ConceptBody({
     onStatus,
     signInHref,
     articleAction,
+    growActions,
     editing,
   } = content
   const [editMode, setEditMode] = React.useState(false)
@@ -375,6 +409,7 @@ function ConceptBody({
               reading={reading}
               sections={sections}
               articleAction={articleAction}
+              growActions={growActions}
             />
           ) : (
             <ConceptArticle reading={reading} sections={sections} />

@@ -10,6 +10,9 @@ import {
   BookOpenIcon,
   CheckCheckIcon,
   CheckIcon,
+  CompassIcon,
+  LightbulbIcon,
+  ListPlusIcon,
   PenLineIcon,
 } from "lucide-react"
 import { Link } from "wouter"
@@ -37,7 +40,8 @@ import {
   WriteArticleDialog,
   type ArticleRequest,
 } from "@/expedition/write-article-dialog.tsx"
-import type { ArticleEstimate } from "@/lib/api.ts"
+import type { ArticleEstimate, GrowAction } from "@/lib/api.ts"
+import { GROW_ACTIONS, type SessionAsk } from "@/expedition/asks.ts"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
 
 /**
@@ -50,6 +54,22 @@ export type ArticleAction = {
   /** Prices each length for the dialog that asks first. */
   estimate: () => Promise<ArticleEstimate>
   onWrite: (request: ArticleRequest) => void
+}
+
+/**
+ * The other Concept actions (spec §3.7, §5.5): preset Grow asks about this
+ * Concept. What comes back is suggested (a Proposal), never written.
+ */
+export type GrowActions = {
+  /** This tab's running ask of `action` about this Concept, if any. */
+  asking: (action: GrowAction) => SessionAsk | null
+  onAsk: (action: GrowAction) => void
+  /** What an ask costs ("About $0.12 an ask, at most $0.50 (your cap)"). */
+  cost: string | null
+  /** Loads the estimate behind `cost`. */
+  loadEstimate: () => void
+  /** No AI to ask with: no key of the reader's, or none on this server. */
+  noKey?: "no-key" | "not-configured"
 }
 
 /** What the Concept panel reads from, and how it moves. */
@@ -291,11 +311,13 @@ export function ConceptOverview({
   reading,
   sections,
   articleAction,
+  growActions,
 }: {
   concept: ConceptRow
   reading: ConceptReading
   sections: readonly ArticleSectionRow[]
   articleAction?: ArticleAction
+  growActions?: GrowActions
 }) {
   const { data, conceptById, onNavigate } = reading
   const attributes = attributeItems(concept, data.attributeDefs)
@@ -355,8 +377,23 @@ export function ConceptOverview({
           </span>
         </Button>
       )}
-      {sections.length === 0 && articleAction && (
-        <WriteArticle action={articleAction} conceptTitle={concept.title} />
+      {growActions ? (
+        <ConceptActions
+          actions={growActions}
+          article={
+            sections.length === 0 && articleAction ? (
+              <WriteArticle
+                action={articleAction}
+                conceptTitle={concept.title}
+              />
+            ) : null
+          }
+        />
+      ) : (
+        sections.length === 0 &&
+        articleAction && (
+          <WriteArticle action={articleAction} conceptTitle={concept.title} />
+        )
       )}
       <RelationshipList
         heading="Links to"
@@ -369,6 +406,79 @@ export function ConceptOverview({
         onNavigate={onNavigate}
       />
     </div>
+  )
+}
+
+const ACTION_ICON: Record<GrowAction, typeof ListPlusIcon> = {
+  missing: ListPlusIcon,
+  examples: LightbulbIcon,
+  related: CompassIcon,
+}
+
+/**
+ * Grow's Concept actions (spec §3.7): "Add what's missing to understand
+ * this", "Add examples", "Write the article" (it asks first, in its dialog)
+ * and "Suggest related", with what an ask costs under them.
+ */
+function ConceptActions({
+  actions,
+  article,
+}: {
+  actions: GrowActions
+  article: React.ReactNode
+}) {
+  const { asking, onAsk, cost, loadEstimate, noKey } = actions
+  React.useEffect(() => loadEstimate(), [loadEstimate])
+  const [missing, examples, related] = GROW_ACTIONS.map((a) => {
+    const running = asking(a.action)
+    const Icon = ACTION_ICON[a.action]
+    return (
+      <Button
+        key={a.action}
+        variant="outline"
+        className="justify-start"
+        data-testid={`grow-${a.action}`}
+        data-state={running ? "asking" : "idle"}
+        disabled={!!running || !!noKey}
+        onClick={() => onAsk(a.action)}
+      >
+        {running ? (
+          <Spinner className="text-suggested-text" />
+        ) : (
+          <Icon className="text-primary" />
+        )}
+        {running ? "Asking…" : a.label}
+      </Button>
+    )
+  })
+  return (
+    <section
+      data-testid="grow-actions"
+      aria-label="Grow"
+      className="flex flex-col gap-2"
+    >
+      <h3 className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
+        Grow
+      </h3>
+      {missing}
+      {examples}
+      {article}
+      {related}
+      <p data-testid="grow-cost" className="text-xs text-muted-foreground">
+        {noKey === "no-key" ? (
+          <>
+            No AI key: <Link href="/settings">add one in Settings</Link>.{" "}
+          </>
+        ) : noKey ? (
+          "This server has no AI configured. "
+        ) : cost ? (
+          `${cost}. `
+        ) : (
+          ""
+        )}
+        Suggested for review before anything is added.
+      </p>
+    </section>
   )
 }
 

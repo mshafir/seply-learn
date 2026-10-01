@@ -39,10 +39,10 @@ export const EMPTY_LOG: BuildLog = { events: {}, previews: {}, jobs: null }
 const OPEN: readonly JobStatus[] = ["queued", "running", "paused"]
 
 /**
- * Job kinds that are asks about one Concept (the "Write the article" action,
- * WP-3.6), not builds: they never show as the build in the header or rail.
+ * Job kinds that are asks (Grow, WP-4.4; "Write the article", WP-3.6), not
+ * builds: they never show as the build in the header or rail.
  */
-export const ASK_KINDS: ReadonlySet<string> = new Set(["article"])
+export const ASK_KINDS: ReadonlySet<string> = new Set(["article", "grow"])
 
 /** Build jobs only (not asks), newest first. */
 const buildJobs = (log: BuildLog) =>

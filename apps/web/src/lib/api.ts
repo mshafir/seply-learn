@@ -631,3 +631,122 @@ export async function reopenProposals(
     )
   ).reopened
 }
+
+// --- Grow (WP-4.4) ---------------------------------------------------------------
+
+/** The Concept actions that are Grow asks (the server's `GROW_ACTIONS`). */
+export type GrowAction = "missing" | "examples" | "related"
+
+/** A `grow` job's input: words from the Ask box, or a Concept action. */
+export type GrowInput = {
+  ask?: string
+  action?: GrowAction
+  conceptId?: string
+  viewId?: string
+}
+
+/** One ask, as Activity lists it (the server's `AskView`). */
+export type AskView = {
+  jobId: string
+  kind: "grow" | "article"
+  rationale: string
+  author: { id: string; name: string; image: string | null }
+  status: JobStatus
+  step: string | null
+  error: string | null
+  createdAt: string
+  updatedAt: string
+  items: { pending: number; accepted: number; dismissed: number }
+}
+
+/** Activity: the newest asks first (owners and editors). */
+export async function listAsks(expeditionId: string): Promise<AskView[]> {
+  return (
+    await call<{ asks: AskView[] }>(
+      `/expeditions/${encodeURIComponent(expeditionId)}/asks`
+    )
+  ).asks
+}
+
+/** What one Grow ask would cost here, and the reader's per-ask cap. */
+export type AskEstimate = {
+  usd: number
+  model: string
+  sourceChars: number
+  askCapUsd: number
+  /** Whose key pays: the reader's own, or this instance's. */
+  keySource: "reader" | "instance"
+}
+
+export function estimateAsk(expeditionId: string): Promise<AskEstimate> {
+  return call<AskEstimate>("/ai/estimate/ask", {
+    method: "POST",
+    body: JSON.stringify({ expeditionId }),
+  })
+}
+
+/** One part of an ask's stream (an AI SDK UI message stream chunk). */
+export type AskStreamPart =
+  | { type: "start"; messageId: string }
+  | { type: "data-proposal"; id: string; data: ProposalView }
+  | {
+      type: "data-ask"
+      id: string
+      data: Pick<Job, "status" | "step" | "error">
+    }
+  | { type: "finish" }
+
+/**
+ * Follows one ask (GET /expeditions/:id/asks/:jobId/stream): calls `onPart`
+ * for each part until the ask ends (or pauses at its cap), the stream drops,
+ * or `signal` aborts. Resolves when it stops; throws when it can't open.
+ */
+export async function streamAsk(
+  expeditionId: string,
+  jobId: string,
+  onPart: (part: AskStreamPart) => void,
+  signal?: AbortSignal
+): Promise<void> {
+  const res = await fetch(
+    `/api/expeditions/${encodeURIComponent(expeditionId)}/asks/${encodeURIComponent(jobId)}/stream`,
+    { credentials: "include", signal }
+  )
+  if (!res.ok || !res.body) {
+    const body = await res.json().catch(() => ({}))
+    throw new ApiError(res.status, body.error ?? `HTTP ${res.status}`, body)
+  }
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader()
+  let buffer = ""
+  try {
+    for (;;) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += value
+      const events = buffer.split("\n\n")
+      buffer = events.pop() ?? ""
+      for (const part of parseSseEvents(events)) onPart(part)
+    }
+  } catch (e) {
+    if (signal?.aborted) return
+    throw e
+  }
+}
+
+/** The parts in complete SSE events (`data: <json>` lines; `[DONE]` is skipped). */
+export function parseSseEvents(events: readonly string[]): AskStreamPart[] {
+  const out: AskStreamPart[] = []
+  for (const event of events) {
+    const data = event
+      .split("\n")
+      .filter((l) => l.startsWith("data:"))
+      .map((l) => l.slice(5).trimStart())
+      .join("\n")
+    if (!data || data === "[DONE]") continue
+    try {
+      out.push(JSON.parse(data) as AskStreamPart)
+    } catch {
+      // Not ours: skip it.
+    }
+  }
+  return out
+}
