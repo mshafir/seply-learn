@@ -28,6 +28,14 @@ import {
   type EngineCollectionsOptions,
 } from "./collections.ts"
 import { OpEngine, type EngineOptions } from "./engine.ts"
+import {
+  HistoryError,
+  restoreInEngine,
+  stateAsOfIn,
+  undoInEngine,
+  type HistoryActionOptions,
+  type HistoryActionResult,
+} from "./history.ts"
 import type { PendingStore } from "./store.ts"
 import { SyncHttpError, type SyncTransport } from "./transport.ts"
 
@@ -263,6 +271,65 @@ export class SyncClient {
   private report(e: unknown): void {
     this.lastError = e
     this.opts.onError?.(e)
+  }
+
+  // --- History (spec §1.4; history.ts) ------------------------------------
+
+  /** Whether this client holds the whole log, so History works (not a saved offline copy). */
+  get hasHistory(): boolean {
+    return this.engine.hasFullLog
+  }
+
+  /**
+   * Undo a Change: push what is pending and pull, then revert only the fields
+   * that still hold its value, as a new Change (pushed). `kept` lists the
+   * edits left alone because they changed since. Throws `HistoryError` while
+   * edits are still pending (offline), and what the first push or pull
+   * throws; once proposed, the new Change is pushed like any edit.
+   */
+  async undo(
+    changeId: string,
+    opts: HistoryActionOptions = {}
+  ): Promise<HistoryActionResult> {
+    await this.settle()
+    const r = undoInEngine(this.engine, changeId, this.stamp(opts))
+    if (r.ops.length) await this.pushSoon()
+    return r
+  }
+
+  /** Restore to here: as `undo`, appending the ops that bring the state back to `seq`. */
+  async restoreTo(
+    seq: number,
+    opts: HistoryActionOptions = {}
+  ): Promise<HistoryActionResult> {
+    await this.settle()
+    const r = restoreInEngine(this.engine, seq, this.stamp(opts))
+    if (r.ops.length) await this.pushSoon()
+    return r
+  }
+
+  /** "View as of": the confirmed state up to and including `seq` (nothing is written). */
+  stateAsOf(seq: number): DomainState {
+    return stateAsOfIn(this.engine, seq)
+  }
+
+  /** Pushes now; a failure leaves the ops pending (retried like any edit). */
+  private async pushSoon(): Promise<void> {
+    await this.push().catch((e) => this.report(e))
+  }
+
+  /** Pushes and pulls, so History acts on the final log; refuses with ops still pending. */
+  private async settle(): Promise<void> {
+    if (!this.hasHistory) throw new HistoryError("no-log")
+    await this.sync()
+    if (this.engine.pending.length) throw new HistoryError("pending")
+  }
+
+  private stamp(opts: HistoryActionOptions): HistoryActionOptions {
+    return {
+      ...opts,
+      at: opts.at ?? new Date((this.opts.now ?? Date.now)()).toISOString(),
+    }
   }
 
   /** Waits for queued pending-op writes (e.g. before a test "reloads"). */

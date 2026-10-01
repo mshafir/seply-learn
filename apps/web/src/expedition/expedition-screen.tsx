@@ -21,8 +21,19 @@
 // Offline (spec §2.9), an Expedition saved on this device opens from that
 // copy, read-only, with an "Offline, as of …" chip; without a copy the
 // screen says it can't reach the server. Either way it keeps retrying.
+//
+// History (spec §3.9, WP-4.2): owners and editors open the History panel
+// from the header. Undo and Restore to here go through the sync client and
+// toast what they did; "View as of here" swaps the canvas and panels to a
+// read-only replay of the log (a cached-style client over that state), with
+// a banner to go back to the latest or restore.
 import * as React from "react"
-import { CirclePauseIcon, RotateCwIcon, SearchXIcon } from "lucide-react"
+import {
+  CirclePauseIcon,
+  HistoryIcon,
+  RotateCwIcon,
+  SearchXIcon,
+} from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import {
@@ -50,7 +61,12 @@ import {
   type BuildEvent,
   type ViewTypeId,
 } from "@seply/domain"
-import { SyncHttpError, type SyncClient, type ViewRow } from "@seply/sync"
+import {
+  openCachedClient,
+  SyncHttpError,
+  type SyncClient,
+  type ViewRow,
+} from "@seply/sync"
 import type { ViewStatusChip } from "@seply/views"
 
 import { BuildActivity } from "@/expedition/build-activity.tsx"
@@ -68,6 +84,12 @@ import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { resumeFrom, samePlace, type Place } from "@/expedition/continue.ts"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
+import {
+  changeMeta,
+  keptMessage,
+  restoreLabel,
+  undoLabel,
+} from "@/expedition/history.ts"
 import { OfflineChip } from "@/expedition/offline-chip.tsx"
 import { kindLabel, VIEW_TYPE_META, viewTypeMeta } from "@/expedition/labels.ts"
 import {
@@ -87,6 +109,7 @@ import { SidePanel, type PanelContent } from "@/expedition/side-panel.tsx"
 import { SourceViewer, type SourceTarget } from "@/expedition/source-viewer.tsx"
 import { StatusChip } from "@/expedition/status-chip.tsx"
 import { useExpeditionData } from "@/expedition/use-expedition-data.ts"
+import { useHistory } from "@/expedition/use-history.ts"
 import { ViewButton } from "@/expedition/view-button.tsx"
 import { ViewsBar } from "@/expedition/views-bar.tsx"
 import {
@@ -94,6 +117,7 @@ import {
   estimateArticle,
   listExpeditions,
   startJob,
+  type ChangeSummary,
   type Role,
 } from "@/lib/api.ts"
 import { usePersonalViewSettings } from "@/lib/personal-view-settings.ts"
@@ -246,8 +270,17 @@ function useRole(expeditionId: string, signedIn: boolean): Role | null {
   return signedIn ? role : null
 }
 
-/** What the side panel shows: a Concept (with its back stack) or the View. */
-type Panel = { type: "concept"; stack: BackStack } | { type: "view" } | null
+/** What the side panel shows: a Concept (with its back stack), the View or History. */
+type Panel =
+  | { type: "concept"; stack: BackStack }
+  | { type: "view" }
+  | { type: "history" }
+  | null
+
+/** "View as of here": a read-only client over the replayed state. */
+type AsOf = { change: ChangeSummary; client: SyncClient }
+
+let asOfCount = 0
 
 /** How long the screen waits on a place before saving it as the position. */
 const POSITION_DELAY_MS = 800
@@ -275,7 +308,13 @@ function ExpeditionFrame({
   onRetry: () => void
 }) {
   const [, navigate] = useLocation()
-  const data = useExpeditionData(client.collections)
+  // "View as of here" shows a replay instead of the live client, read-only.
+  const [asOf, setAsOf] = React.useState<AsOf | null>(null)
+  React.useEffect(() => () => asOf?.client.dispose(), [asOf])
+  const shown = asOf?.client ?? client
+  const editable = canEdit && !asOf
+  const canViewHistory = canEdit && client.hasHistory
+  const data = useExpeditionData(shown.collections)
   const inlinePanel = useMediaQuery(INLINE_PANEL_QUERY)
   // A Concept picked in global search arrives as ?concept=<id>.
   const [conceptParam] = React.useState(() =>
@@ -444,47 +483,134 @@ function ExpeditionFrame({
       ? signInHref
       : null
 
+  // History: the list, and what its actions do.
+  const history = useHistory(
+    expeditionId,
+    client,
+    canViewHistory && (panel?.type === "history" || !!asOf)
+  )
+  const [historyBusy, setHistoryBusy] = React.useState(false)
+  const nameOf = (id: string) =>
+    id === userId
+      ? "you"
+      : (history.changes.find((c) => c.author.id === id)?.author.name ?? null)
+  const historyFailed = (title: string) => (e: unknown) =>
+    toast.add({
+      title,
+      description: e instanceof Error ? e.message : String(e),
+      type: "error",
+    })
+  const undoChange = (change: ChangeSummary) => {
+    setHistoryBusy(true)
+    client
+      .undo(change.id, { label: undoLabel(change) })
+      .then((r) => {
+        const kept = keptMessage(r.kept, nameOf)
+        toast.add(
+          r.ops.length
+            ? {
+                title: `Undid “${change.label}”`,
+                description: kept ?? undefined,
+                type: "success",
+              }
+            : {
+                title: "Nothing to undo",
+                description: kept ?? "It has already been undone.",
+              }
+        )
+      }, historyFailed("Couldn't undo"))
+      .finally(() => setHistoryBusy(false))
+  }
+  const viewAsOf = (change: ChangeSummary) => {
+    try {
+      const replay = openCachedClient(
+        {
+          expeditionId,
+          actor: userId,
+          collections: { id: `seply:${expeditionId}:as-of:${++asOfCount}` },
+        },
+        { state: client.stateAsOf(change.lastSeq), headSeq: change.lastSeq }
+      )
+      setAsOf({ change, client: replay })
+    } catch (e) {
+      historyFailed("Couldn't show that point")(e)
+    }
+  }
+  const restoreChange = (change: ChangeSummary) => {
+    setHistoryBusy(true)
+    client
+      .restoreTo(change.lastSeq, { label: restoreLabel(change) })
+      .then((r) => {
+        setAsOf(null)
+        toast.add(
+          r.ops.length
+            ? {
+                title: `Restored to “${change.label}”`,
+                description: "Restoring is a Change too: undo it in History.",
+                type: "success",
+              }
+            : {
+                title: "Nothing to restore",
+                description: "Nothing changed since.",
+              }
+        )
+      }, historyFailed("Couldn't restore"))
+      .finally(() => setHistoryBusy(false))
+  }
+
   const content: PanelContent | null =
-    panel?.type === "view" && view
+    panel?.type === "history" && canViewHistory
       ? {
-          type: "view",
-          view,
-          data,
-          collections: client.collections,
-          canEdit,
-          personal,
-          onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
+          type: "history",
+          history,
+          me: userId,
+          asOfId: asOf?.change.id ?? null,
+          busy: historyBusy,
+          onUndo: undoChange,
+          onViewAsOf: viewAsOf,
+          onRestore: restoreChange,
         }
-      : selectedConcept && place
+      : panel?.type === "view" && view
         ? {
-            type: "concept",
-            concept: selectedConcept,
-            depth: place.depth,
-            kindLabel: kindLabel(selectedConcept.kind, data.kindDefs),
-            reading,
-            status: readerState.reading[selectedConcept.id]?.state ?? "unread",
-            onStatus: (state) =>
-              reader?.markReading(expeditionId, selectedConcept.id, state),
-            signInHref: hintHref,
-            ...(canEdit &&
-              offlineSince === null &&
-              signInHref === null && {
-                articleAction: {
-                  ask: articleAsk(builds.log, selectedConcept.id),
-                  estimate: () => estimateArticle(expeditionId),
-                  onWrite: (request) => {
-                    startJob(expeditionId, "article", {
-                      conceptId: selectedConcept.id,
-                      ...request,
-                    }).then(
-                      builds.track,
-                      failed("Couldn't start writing the article")
-                    )
-                  },
-                },
-              }),
+            type: "view",
+            view,
+            data,
+            collections: shown.collections,
+            canEdit: editable,
+            personal,
+            onDuplicated: (id) => navigate(`/e/${expeditionId}/${id}`),
           }
-        : null
+        : selectedConcept && place
+          ? {
+              type: "concept",
+              concept: selectedConcept,
+              depth: place.depth,
+              kindLabel: kindLabel(selectedConcept.kind, data.kindDefs),
+              reading,
+              status:
+                readerState.reading[selectedConcept.id]?.state ?? "unread",
+              onStatus: (state) =>
+                reader?.markReading(expeditionId, selectedConcept.id, state),
+              signInHref: hintHref,
+              ...(editable &&
+                offlineSince === null &&
+                signInHref === null && {
+                  articleAction: {
+                    ask: articleAsk(builds.log, selectedConcept.id),
+                    estimate: () => estimateArticle(expeditionId),
+                    onWrite: (request) => {
+                      startJob(expeditionId, "article", {
+                        conceptId: selectedConcept.id,
+                        ...request,
+                      }).then(
+                        builds.track,
+                        failed("Couldn't start writing the article")
+                      )
+                    },
+                  },
+                }),
+            }
+          : null
 
   const failed = (title: string) => (e: unknown) => {
     toast.add({
@@ -571,16 +697,27 @@ function ExpeditionFrame({
     <>
       <ExpeditionHeader
         title={expedition?.title ?? ""}
-        canEdit={canEdit}
+        canEdit={editable}
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        history={
+          canViewHistory
+            ? {
+                open: panel?.type === "history",
+                onToggle: () =>
+                  setPanel((p) =>
+                    p?.type === "history" ? null : { type: "history" }
+                  ),
+              }
+            : undefined
+        }
         activity={
           <BuildActivity
             summary={summary}
             views={data.views}
             buildOf={buildOf}
-            canEdit={canEdit}
+            canEdit={editable}
             onCancel={cancelJob}
             onContinue={continueJob}
           />
@@ -607,6 +744,32 @@ function ExpeditionFrame({
           navigate(`/e/${expeditionId}/${id}`)
         }}
       />
+      {asOf && (
+        <Alert
+          data-testid="as-of-banner"
+          role="status"
+          className="shrink-0 rounded-none border-x-0 border-t-0 bg-muted px-4"
+        >
+          <HistoryIcon />
+          <AlertTitle>As of “{asOf.change.label}”</AlertTitle>
+          <AlertDescription>
+            {changeMeta(asOf.change, userId)} · read-only
+          </AlertDescription>
+          <AlertAction className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={historyBusy}
+              onClick={() => restoreChange(asOf.change)}
+            >
+              Restore to here
+            </Button>
+            <Button size="sm" onClick={() => setAsOf(null)}>
+              Back to latest
+            </Button>
+          </AlertAction>
+        </Alert>
+      )}
       <div className="flex min-h-0 flex-1">
         <SidePanel
           content={content}
@@ -627,7 +790,7 @@ function ExpeditionFrame({
                       view={view}
                       status={build.status}
                       reason={build.reason}
-                      canEdit={canEdit}
+                      canEdit={editable}
                       onRetry={retryJob}
                       onTryAnother={(t) => tryAnother(view, t)}
                       onRemove={() => removeView(view)}
@@ -656,7 +819,8 @@ function ExpeditionFrame({
               ) : view ? (
                 <>
                   <CanvasSlot
-                    collections={client.collections}
+                    key={asOf?.change.id ?? "latest"}
+                    collections={shown.collections}
                     viewId={view.id}
                     viewType={view.viewType}
                     selectedConceptId={selectedConcept?.id ?? null}
@@ -725,11 +889,11 @@ function ExpeditionFrame({
                     <AlertTitle>Paused at the spending cap</AlertTitle>
                     <AlertDescription>
                       {job.reason ?? "The build reached its spending cap"}.{" "}
-                      {canEdit
+                      {editable
                         ? "Continue to spend as much again, or stop and keep the finished Views."
                         : "An editor can continue it."}
                     </AlertDescription>
-                    {canEdit && (
+                    {editable && (
                       <AlertAction className="flex gap-2">
                         <Button size="sm" variant="outline" onClick={cancelJob}>
                           Stop

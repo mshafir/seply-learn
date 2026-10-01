@@ -2,7 +2,8 @@
 // open and shut; 520 px by default, wider (860 px) while reading a full
 // article, and resizable by dragging its edge (each width kept per browser).
 // A Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
-// see concept-panel.tsx) or the View panel (view-panel.tsx).
+// see concept-panel.tsx), the View panel (view-panel.tsx) or History
+// (history-panel.tsx).
 import * as React from "react"
 
 import {
@@ -30,6 +31,10 @@ import {
   ReadingStatusControl,
   type ConceptReading,
 } from "@/expedition/concept-panel.tsx"
+import {
+  HistoryPanel,
+  type HistoryPanelProps,
+} from "@/expedition/history-panel.tsx"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
 import type { ArticleAction } from "@/expedition/concept-panel.tsx"
@@ -56,6 +61,7 @@ export type PanelContent =
       articleAction?: ArticleAction
     }
   | ({ type: "view" } & ViewPanelProps)
+  | ({ type: "history" } & HistoryPanelProps)
 
 /** The panel's widths, per mode: reading, and the wider full article. */
 const DEFAULT_WIDTH = { reading: 520, article: 860 } as const
@@ -180,7 +186,7 @@ export function SidePanel({
             <aside
               data-testid="side-panel"
               data-open={open ? "" : undefined}
-              aria-label={shown.type === "view" ? "View" : "Concept"}
+              aria-label={PANEL_LABEL[shown.type]}
               aria-hidden={!open || undefined}
               inert={!open}
               className="flex h-full min-w-(--side-panel-min) flex-col border-l bg-card text-card-foreground"
@@ -214,6 +220,12 @@ export function SidePanel({
   )
 }
 
+const PANEL_LABEL: Record<PanelContent["type"], string> = {
+  concept: "Concept",
+  view: "View",
+  history: "History",
+}
+
 function PanelBody({
   content,
   onClose,
@@ -227,6 +239,11 @@ function PanelBody({
     const { type: _type, ...view } = content
     void _type
     return <ViewPanel {...view} onClose={onClose} inline={inline} />
+  }
+  if (content.type === "history") {
+    const { type: _type, ...history } = content
+    void _type
+    return <HistoryPanel {...history} onClose={onClose} inline={inline} />
   }
   return <ConceptBody content={content} onClose={onClose} inline={inline} />
 }
