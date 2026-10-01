@@ -57,6 +57,9 @@ export {
 // (also `@seply/views/inspect`, without React)
 export { expeditionFromState, MAX_LINES, readView, type ViewReading } from "./inspect.ts";
 
+// Per-View hide, for the View Types that don't read it themselves
+export { withoutHidden } from "./hidden.ts";
+
 // Overlays
 export {
   actsOn,

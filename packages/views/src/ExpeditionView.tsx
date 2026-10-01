@@ -7,7 +7,7 @@
 // - Switching Views: the incoming View fades in, and a canvas View tweens
 //   each Concept from where the previous View drew it (by Concept id), then
 //   fits. Positions are only ever held in memory for that tween.
-import { lazy, Suspense, useEffect, useEffectEvent, useRef } from "react";
+import { lazy, Suspense, useEffect, useEffectEvent, useMemo, useRef } from "react";
 import { useLiveExpedition, type ExpeditionCollections } from "./live.ts";
 import { isCanvasView, type Expedition, type View } from "./model.ts";
 import type { Positions } from "./layouts.ts";
@@ -19,6 +19,7 @@ import { Quadrant } from "./quadrant/Quadrant.tsx";
 import { Rates } from "./rates/Rates.tsx";
 import { Anatomy } from "./anatomy/Anatomy.tsx";
 import type { BasemapConfig } from "./map/basemap.ts";
+import { withoutHidden } from "./hidden.ts";
 
 // Map (MapLibre) and Timeline (vis-timeline) are large: they load with their View.
 const MapView = lazy(() => import("./map/MapView.tsx").then((m) => ({ default: m.MapView })));
@@ -88,7 +89,9 @@ export type ViewRendererProps = ViewInteraction & {
 };
 
 /** One View of an Expedition you already have (not live): what ExpeditionView renders. */
-export function ViewRenderer({ expedition, view, ...rest }: ViewRendererProps) {
+export function ViewRenderer({ expedition: all, view, ...rest }: ViewRendererProps) {
+  // The Concepts this View hides (per-View `hide`) are left out.
+  const expedition = useMemo(() => withoutHidden(all, view), [all, view]);
   // Shared by every canvas this renderer mounts, so a View switch tweens.
   const memory = useRef<Positions>(new Map()) as PositionMemory;
   // Views with no layout to wait for are settled as soon as they're shown.
