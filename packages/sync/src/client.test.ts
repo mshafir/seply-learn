@@ -356,3 +356,72 @@ describe("pull", () => {
     expect(c.collections.concepts.size).toBe(27)
   })
 })
+
+describe("relayed ops (the live room)", () => {
+  /** Wraps a transport to count pulls. */
+  function counting(t: ReturnType<FakeServer["transport"]>) {
+    const counted = { ...t, pulls: 0 }
+    counted.pull = async (req) => {
+      counted.pulls += 1
+      return t.pull(req)
+    }
+    return counted
+  }
+
+  it("applies ops that follow our head without pulling, and skips ones we have", async () => {
+    const s = server()
+    const transport = counting(s.transport("ada"))
+    const c = await openSyncClient({
+      expeditionId: EXP,
+      actor: "ada",
+      transport,
+      store: new MemoryPendingStore(),
+      autoPush: false,
+      collections: { id: `relay:${Math.random()}` },
+    })
+    open.push(c)
+    const pulls = transport.pulls
+    const from = s.log.length
+    s.seed([setTitle("c1", "Live")], "ed")
+    c.receiveRelayed({ from, to: s.log.length, ops: s.log.slice(from) })
+    expect(c.collections.concepts.get("c1")?.title).toBe("Live")
+    expect(c.engine.headSeq).toBe(s.log.length)
+    // The same ops again (our own push's echo, a reconnect): nothing changes.
+    c.receiveRelayed({ from, to: s.log.length, ops: s.log.slice(from) })
+    c.catchUp(s.log.length)
+    await Promise.resolve()
+    expect(transport.pulls).toBe(pulls)
+  })
+
+  it("pulls when ops are missing before the relayed ones", async () => {
+    const s = server()
+    const transport = counting(s.transport("ada"))
+    const c = await openSyncClient({
+      expeditionId: EXP,
+      actor: "ada",
+      transport,
+      store: new MemoryPendingStore(),
+      autoPush: false,
+      collections: { id: `relay:${Math.random()}` },
+    })
+    open.push(c)
+    s.seed([setTitle("c1", "Missed")], "ed")
+    const from = s.log.length
+    s.seed([setTitle("c2", "Relayed")], "ed")
+    c.receiveRelayed({ from, to: s.log.length, ops: s.log.slice(from) })
+    await expect.poll(() => c.engine.headSeq).toBe(s.log.length)
+    expect(c.collections.concepts.get("c1")?.title).toBe("Missed")
+    expect(c.collections.concepts.get("c2")?.title).toBe("Relayed")
+  })
+
+  it("catches up after a pull already in flight", async () => {
+    const s = server()
+    const c = (await client(s, "ada")).c
+    const inFlight = c.pull()
+    s.seed([setTitle("c1", "Logged meanwhile")], "ed")
+    c.catchUp(s.log.length)
+    await inFlight
+    await expect.poll(() => c.engine.headSeq).toBe(s.log.length)
+    expect(c.collections.concepts.get("c1")?.title).toBe("Logged meanwhile")
+  })
+})

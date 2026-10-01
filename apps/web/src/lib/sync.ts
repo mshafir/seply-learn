@@ -14,9 +14,9 @@
 // was saved) and keeps retrying; once the server answers, the live client
 // replaces it.
 //
-// Until the live relay (WP-4.1) pushes other people's and other tabs' edits,
-// an open client pulls every few seconds while the page is visible, and at
-// once when it becomes visible again.
+// Other people's and other tabs' edits arrive through the live room
+// (expedition/use-room.ts), which also pulls now and then while it can't
+// connect.
 import * as React from "react"
 import {
   fetchTransport,
@@ -85,9 +85,6 @@ export function isRetryable(error: unknown): boolean {
 
 let clientCount = 0
 
-/** How often an open client pulls while the page is visible (no relay yet). */
-export const POLL_MS = 3000
-
 /** How long after a change the offline copy is saved again. */
 const OFFLINE_SAVE_MS = 1500
 
@@ -123,22 +120,6 @@ function keepOffline(actor: string, client: SyncClient): () => void {
   }
 }
 
-/** Pulls now and then, while the page is visible. Returns a stop function. */
-function pollWhileVisible(client: SyncClient): () => void {
-  const visible = () =>
-    typeof document === "undefined" || document.visibilityState === "visible"
-  const pull = () => {
-    // A failed poll changes nothing; the next one tries again.
-    if (visible()) client.pull().catch(() => {})
-  }
-  const timer = setInterval(pull, POLL_MS)
-  document.addEventListener("visibilitychange", pull)
-  return () => {
-    clearInterval(timer)
-    document.removeEventListener("visibilitychange", pull)
-  }
-}
-
 export function useSyncClient(
   expeditionId: string,
   actor: string
@@ -159,7 +140,6 @@ export function useSyncClient(
     let client: SyncClient | null = null
     let cached: { client: SyncClient; savedAt: number } | null = null
     let timer: ReturnType<typeof setTimeout> | null = null
-    let stopPolling: (() => void) | null = null
     let stopKeeping: (() => void) | null = null
     let attempt = 0
     let inFlight = false
@@ -223,7 +203,6 @@ export function useSyncClient(
         client = opened
         cached?.client.dispose()
         cached = null
-        stopPolling = pollWhileVisible(opened)
         stopKeeping = keepOffline(actor, opened)
         setHealth((h) => ({ ...h, offline: false }))
         setState({ status: "ready", client: opened })
@@ -256,7 +235,6 @@ export function useSyncClient(
       cancelled = true
       window.removeEventListener("online", onOnline)
       if (timer) clearTimeout(timer)
-      stopPolling?.()
       stopKeeping?.()
       client?.dispose()
       cached?.client.dispose()

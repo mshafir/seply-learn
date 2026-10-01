@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm"
 import { beforeEach, describe, expect, it } from "vitest"
 import type { Db } from "../db.ts"
 import { loadState } from "../projection.ts"
-import type { Relay, RoomJoin } from "../relay.ts"
+import type { Relay } from "../relay.ts"
 import {
   signUp,
   testApp,
@@ -27,7 +27,6 @@ type Setup = {
   events: BuildEvent[]
   published: LoggedOp[][]
   notes: { userId: string; note: JobNotification }[]
-  joins: RoomJoin[]
   ada: TestUser
   exp: string
 }
@@ -37,14 +36,9 @@ async function setup(): Promise<Setup> {
   const events: BuildEvent[] = []
   const published: LoggedOp[][] = []
   const notes: Setup["notes"] = []
-  const joins: RoomJoin[] = []
   const relay: Relay = {
     published: (_e, batch) => void published.push([...batch]),
     build: (_e, evt) => void events.push(evt),
-    handleUpgrade: (_req, join) => {
-      joins.push(join)
-      return new Response("upgraded")
-    },
   }
   const deps = {
     connect: async () => ({ db, close: async () => {} }),
@@ -63,7 +57,7 @@ async function setup(): Promise<Setup> {
     body: JSON.stringify({ title: "Compute" }),
   })
   const { id: exp } = (await created.json()) as { id: string }
-  return { db, app, engine, events, published, notes, joins, ada, exp }
+  return { db, app, engine, events, published, notes, ada, exp }
 }
 
 async function start(s: Setup, input: unknown, who = s.ada) {
@@ -451,39 +445,5 @@ describe("job routes", () => {
       body: JSON.stringify({ kind: "fake" }),
     })
     expect(res.status).toBe(501)
-  })
-})
-
-describe("the live route", () => {
-  it("hands a viewer's upgrade to the relay with the head seq, and refuses others", async () => {
-    const s = await setup()
-    const ws = { ...s.ada.headers, upgrade: "websocket" }
-    const res = await s.app.request(`/api/expeditions/${s.exp}/live`, {
-      headers: ws,
-    })
-    expect(await res.text()).toBe("upgraded")
-    expect(s.joins).toEqual([
-      { expeditionId: s.exp, userId: s.ada.id, headSeq: 1 },
-    ])
-
-    const plain = await s.app.request(`/api/expeditions/${s.exp}/live`, {
-      headers: s.ada.headers,
-    })
-    expect(plain.status).toBe(426)
-    const eve = await signUp(s.app, "eve")
-    const stranger = await s.app.request(`/api/expeditions/${s.exp}/live`, {
-      headers: { ...eve.headers, upgrade: "websocket" },
-    })
-    expect(stranger.status).toBe(404)
-    const anon = await s.app.request(`/api/expeditions/${s.exp}/live`, {
-      headers: { upgrade: "websocket" },
-    })
-    expect(anon.status).toBe(401)
-
-    const noRoom = testApp(TEST_ENV, s.db)
-    const res501 = await noRoom.request(`/api/expeditions/${s.exp}/live`, {
-      headers: ws,
-    })
-    expect(res501.status).toBe(501)
   })
 })
