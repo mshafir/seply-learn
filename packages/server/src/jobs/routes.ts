@@ -29,7 +29,7 @@ const StartBody = z.object({
 })
 
 /** The caller's access to an Expedition, or null when it isn't there for them. */
-async function access(db: Db, expeditionId: string, userId: string) {
+export async function access(db: Db, expeditionId: string, userId: string) {
   const [exp] = await db
     .select({
       visibility: schema.expeditions.visibility,

@@ -23,7 +23,7 @@ const COMPUTE = fileURLToPath(
 )
 const WIDE = { width: 1440, height: 900 }
 const PANEL = 520
-const ARTICLE = 760
+const ARTICLE = 860
 
 test("sign in, import the compute fixture, and open it in three panes", async ({
   page,

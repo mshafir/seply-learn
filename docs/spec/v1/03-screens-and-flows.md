@@ -71,9 +71,9 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **Layout:**
   1. the **Views bar** under the header: a tab per View (its View Type's icon and its name), reorderable. Hovering or focusing a tab shows a card with the View's question, what its View Type is and its build status. Tabs that don't fit go into a "N more" menu that shows each View's icon, name and question at full length; the open View always keeps its tab.
   2. the **canvas**, as wide as possible
-  3. the **side panel**, which slides open on selection and shut when closed. It is 520 px by default and widens to 760 px while the reader reads a Concept's full article, narrowing again on the way back. The reader can drag its edge to resize it, from 320 px up to whatever leaves the canvas 360 px; the reading and article widths are each kept per browser. Dragging it below 320 px closes it. A Sheet on narrow screens (under 1024 px).
+  3. the **side panel**, which slides open on selection and shut when closed. It is 520 px by default and widens to 860 px while the reader reads a Concept's full article, narrowing again on the way back. The reader can drag its edge to resize it, from 320 px up to whatever leaves the canvas 360 px; the reading and article widths are each kept per browser. Dragging it below 320 px closes it. A Sheet on narrow screens (under 1024 px).
 - **An Expedition opens on its best View** (chosen by a curator; by default the first to finish building), or on the reader's last position.
-- **There's no toolbar above the canvas.** A **floating View button** (icon, name, question, settings icon) opens the **View panel**, which has:
+- **There's no toolbar above the canvas.** A **floating View button** (icon, name, question, settings icon) sits over the canvas's top-left corner. On graph Views (Evidence, Cause & Effect, Lineage, Learning path) the diagram fills the canvas under it and fits its Concepts below it, and a View's own controls (the Learning path's "To understand …" bar) float just under it; Views with headers or axes (tables, Outline, Timeline, Map, …) start below it. It opens the **View panel**, which has:
   - the description
   - **shared settings**: what the View includes; editors only
   - **your settings**: e.g. "Show all steps", "Hide what I've read"
@@ -107,6 +107,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   - Re-parenting asks **"Just this View"** or **"Everywhere"**.
   - Edits coalesce into Changes.
 - **Actions for editors** (preset asks to the curator agent): "Add what's missing to understand this", "Add examples", "Write the article", "Suggest related".
+  - **"Write the article" asks first**, in a dialog: Short (about 300 words), Standard (about 600) or Long (about 1,200), each with its cost estimate on this Expedition's Sources. Cancel spends nothing. A length over the reader's per-ask cap says so, and confirming it lets that one ask spend up to half again its estimate.
 
 ## 3.8 Grow and Suggestions (canvas 05)
 

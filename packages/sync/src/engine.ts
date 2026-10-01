@@ -72,6 +72,8 @@ export type ProposeOptions = {
   changeId?: string
   /** false: always start a new Change (default true for human edits). */
   coalesce?: boolean
+  /** true: the Change ends here; later edits never join it (undo, restore). */
+  close?: boolean
 }
 
 export type EngineOptions = {
@@ -95,6 +97,7 @@ export class OpEngine {
   private confirmedState: DomainState
   private confirmedSeq: number
   private readonly confirmedIds = new Set<string>()
+  private readonly confirmedLog: LoggedOp[] = []
   private readonly pendingOps: Op[] = []
   private readonly changeMetas = new Map<string, ChangeMeta>()
   private openChange: OpenChange | null = null
@@ -109,7 +112,7 @@ export class OpEngine {
   constructor(
     base: DomainState,
     private readonly opts: EngineOptions,
-    baseSeq = 0
+    private readonly baseSeq = 0
   ) {
     this.confirmedState = base
     this.confirmedSeq = baseSeq
@@ -139,6 +142,18 @@ export class OpEngine {
   }
   get headSeq(): number {
     return this.confirmedSeq
+  }
+  /**
+   * The confirmed ops this engine has received, in `serverSeq` order (the
+   * log after `baseSeq`). History replays it: it is the whole log only when
+   * the engine started from an empty state at 0 (`hasFullLog`).
+   */
+  get log(): readonly LoggedOp[] {
+    return this.confirmedLog
+  }
+  /** Whether `log` is the Expedition's whole log (undo and "view as of" need it). */
+  get hasFullLog(): boolean {
+    return this.baseSeq === 0
   }
   get open(): OpenChange | null {
     return this.openChange
@@ -229,7 +244,9 @@ export class OpEngine {
         autoLabel: false,
       })
     }
-    this.openChange = { id: changeId, origin, subject, lastAt: at }
+    this.openChange = options.close
+      ? null
+      : { id: changeId, origin, subject, lastAt: at }
     this.publish(next)
     this.persist()
     return ops
@@ -250,6 +267,7 @@ export class OpEngine {
       base = apply(base, op)
       this.confirmedSeq = op.serverSeq
       this.confirmedIds.add(op.opId)
+      this.confirmedLog.push(op)
     }
     this.confirmedState = base
     const before = this.pendingOps.length

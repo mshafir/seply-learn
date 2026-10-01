@@ -1,8 +1,9 @@
 // The side panel (spec §3.6): on the right, opened by a selection, sliding
-// open and shut; 520 px by default, wider (760 px) while reading a full
+// open and shut; 520 px by default, wider (860 px) while reading a full
 // article, and resizable by dragging its edge (each width kept per browser).
 // A Sheet on narrow windows. It holds the Concept panel (reading, spec §3.7:
-// see concept-panel.tsx) or the View panel (view-panel.tsx).
+// see concept-panel.tsx), the View panel (view-panel.tsx) or History
+// (history-panel.tsx).
 import * as React from "react"
 import { BookOpenIcon } from "lucide-react"
 
@@ -32,6 +33,10 @@ import {
   ReadingStatusControl,
   type ConceptReading,
 } from "@/expedition/concept-panel.tsx"
+import {
+  HistoryPanel,
+  type HistoryPanelProps,
+} from "@/expedition/history-panel.tsx"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { ViewPanel, type ViewPanelProps } from "@/expedition/view-panel.tsx"
 import type { ArticleAction } from "@/expedition/concept-panel.tsx"
@@ -66,9 +71,10 @@ export type PanelContent =
       editing?: Editing
     }
   | ({ type: "view" } & ViewPanelProps)
+  | ({ type: "history" } & HistoryPanelProps)
 
 /** The panel's widths, per mode: reading, and the wider full article. */
-const DEFAULT_WIDTH = { reading: 520, article: 760 } as const
+const DEFAULT_WIDTH = { reading: 520, article: 860 } as const
 type WidthMode = keyof typeof DEFAULT_WIDTH
 const MIN_WIDTH = 320
 /** The canvas always keeps at least this much. */
@@ -190,7 +196,7 @@ export function SidePanel({
             <aside
               data-testid="side-panel"
               data-open={open ? "" : undefined}
-              aria-label={shown.type === "view" ? "View" : "Concept"}
+              aria-label={PANEL_LABEL[shown.type]}
               aria-hidden={!open || undefined}
               inert={!open}
               className="flex h-full min-w-(--side-panel-min) flex-col border-l bg-card text-card-foreground"
@@ -212,7 +218,7 @@ export function SidePanel({
             className={cn(
               "gap-0 p-0 transition-[max-width] duration-300 data-[side=right]:w-full",
               mode === "article"
-                ? "data-[side=right]:sm:max-w-190"
+                ? "data-[side=right]:sm:max-w-215"
                 : "data-[side=right]:sm:max-w-130"
             )}
           >
@@ -222,6 +228,12 @@ export function SidePanel({
       )}
     </>
   )
+}
+
+const PANEL_LABEL: Record<PanelContent["type"], string> = {
+  concept: "Concept",
+  view: "View",
+  history: "History",
 }
 
 function PanelBody({
@@ -237,6 +249,11 @@ function PanelBody({
     const { type: _type, ...view } = content
     void _type
     return <ViewPanel {...view} onClose={onClose} inline={inline} />
+  }
+  if (content.type === "history") {
+    const { type: _type, ...history } = content
+    void _type
+    return <HistoryPanel {...history} onClose={onClose} inline={inline} />
   }
   return (
     <ConceptBody
