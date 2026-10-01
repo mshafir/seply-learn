@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest"
 import type { AiOverview } from "./ai.ts"
 import { resolveAi } from "./ai.ts"
 import { importMasterKey, loadKey, openKey, sealKey } from "./ai-keys.ts"
+import { memoryBlobStore } from "./blobs.ts"
 import type { ServerEnv } from "./config.ts"
 import { signUp, TEST_ENV, testApp, testDb } from "./test-harness.ts"
 
@@ -284,5 +285,55 @@ describe("settings", () => {
     const app = testApp({ ...TEST_ENV, AI_KEY_MODE: "shared" }, db)
     const ada = await signUp(app, "ada")
     expect((await app.request("/api/ai", { headers: ada.headers })).status).toBe(503)
+  })
+})
+
+describe("POST /ai/estimate/article", () => {
+  it("prices each article length on the Expedition's Sources, for those who may use AI", async () => {
+    const db = await testDb()
+    const app = testApp(INSTANCE_ENV, db, undefined, { blobs: memoryBlobStore() })
+    const ada = await signUp(app, "ada")
+    const ed = await signUp(app, "ed")
+    const created = await app.request("/api/expeditions", {
+      method: "POST",
+      headers: ada.headers,
+      body: JSON.stringify({ title: "Tides" }),
+    })
+    const { id } = (await created.json()) as { id: string }
+    const ask = (user = ada) =>
+      app.request("/api/ai/estimate/article", {
+        method: "POST",
+        headers: user.headers,
+        body: JSON.stringify({ expeditionId: id }),
+      })
+    type Out = {
+      lengths: Record<"short" | "standard" | "long", { words: number; usd: number }>
+      sourceChars: number
+      askCapUsd: number
+    }
+
+    const before = (await (await ask()).json()) as Out
+    expect(before.sourceChars).toBe(0)
+    expect(before.askCapUsd).toBe(DEFAULT_ASK_CAP_USD)
+
+    const text = "## Spring tides\n\nThe Sun and Moon line up.\n\n".repeat(400)
+    const pasted = await app.request(`/api/sources/${id}`, {
+      method: "POST",
+      headers: ada.headers,
+      body: JSON.stringify({ type: "paste", text }),
+    })
+    expect(pasted.status).toBe(201)
+
+    const out = (await (await ask()).json()) as Out
+    expect(out.sourceChars).toBeGreaterThan(5_000)
+    const { short, standard, long } = out.lengths
+    expect([short.words, standard.words, long.words]).toEqual([300, 600, 1200])
+    expect(short.usd).toBeGreaterThan(0)
+    expect(standard.usd).toBeGreaterThan(short.usd)
+    expect(long.usd).toBeGreaterThan(standard.usd)
+    expect(standard.usd).toBeGreaterThan(before.lengths.standard.usd)
+
+    // Someone who can't see the Expedition gets nothing.
+    expect((await ask(ed)).status).toBe(404)
   })
 })

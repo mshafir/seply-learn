@@ -12,6 +12,8 @@
 //   Proposal (reader copy: a suggestion) for an editor to accept, never a
 //   Change.
 import {
+  ARTICLE_LENGTH_IDS,
+  ARTICLE_LENGTHS,
   combineSpend,
   planSources,
   planWriters,
@@ -19,6 +21,7 @@ import {
   unresolvedProv,
   writeBatch,
   writerLabel,
+  type ArticleLength,
   type SpendState,
   type WriteResult,
   type WriterMode,
@@ -171,6 +174,8 @@ export async function runWriters(
 
 export const ArticleJobInput = z.strictObject({
   conceptId: Id,
+  /** How long the reader asked for (about ARTICLE_LENGTHS words). */
+  length: z.enum(ARTICLE_LENGTH_IDS as [ArticleLength, ...ArticleLength[]]).optional(),
   /** The ask's spending cap; the reader's per-ask cap by default (spec §5.5). */
   capUsd: z.number().positive().max(20).optional(),
 })
@@ -228,6 +233,7 @@ export const articleJob: JobDefinition<ArticleJobInput> = {
             sources,
             ids: [ctx.input.conceptId],
             whole: plan.whole,
+            articleWords: ARTICLE_LENGTHS[ctx.input.length ?? "standard"],
           })
           const bad = unresolvedProv(out.bodies, sources)
           if (bad.length) throw new Error("The article cites segments that don't exist")

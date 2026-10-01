@@ -17,6 +17,7 @@ export type ViewCanvasProps = {
   personal?: Record<string, unknown>;
   onPersonalChange?: (key: string, value: unknown) => void;
   onStatus?: (status: ViewStatusChip | null) => void;
+  overlayTop?: number;
 } & ReaderInteraction;
 
 /** Any canvas View (Evidence, Cause & Effect, Lineage, Learning path), scoped from its settings. */
