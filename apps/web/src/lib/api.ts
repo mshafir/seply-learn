@@ -528,3 +528,34 @@ export function startBuild(
     body: JSON.stringify({ goals }),
   })
 }
+
+/** One Change as History lists it (the server's `ChangeSummary`). */
+export type ChangeSummary = {
+  id: string
+  author: { id: string; name: string; image: string | null }
+  origin: "human" | "build" | "ai" | "mcp" | "import" | "restore" | "merge"
+  label: string
+  /** When it started, ISO 8601. */
+  at: string
+  /** Its first and last ops' serverSeq ("view as of" replays up to `lastSeq`). */
+  firstSeq: number
+  lastSeq: number
+}
+
+export type HistoryPage = {
+  headSeq: number
+  /** Newest first. */
+  changes: ChangeSummary[]
+  /** Older Changes remain: pass the last one's `firstSeq` as `before`. */
+  more: boolean
+}
+
+/** An Expedition's Changes, newest first (owners and editors; 403 otherwise). */
+export function getHistory(
+  expeditionId: string,
+  before?: number
+): Promise<HistoryPage> {
+  const q = new URLSearchParams({ expedition: expeditionId })
+  if (before !== undefined) q.set("before", String(before))
+  return call<HistoryPage>(`/history?${q}`)
+}
