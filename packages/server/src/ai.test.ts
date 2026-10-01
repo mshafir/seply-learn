@@ -337,3 +337,44 @@ describe("POST /ai/estimate/article", () => {
     expect((await ask(ed)).status).toBe(404)
   })
 })
+
+describe("POST /ai/estimate/ask", () => {
+  it("prices a Grow ask on the Expedition, with the reader's per-ask cap", async () => {
+    const db = await testDb()
+    const app = testApp(INSTANCE_ENV, db, undefined, { blobs: memoryBlobStore() })
+    const ada = await signUp(app, "ada")
+    const ed = await signUp(app, "ed")
+    const created = await app.request("/api/expeditions", {
+      method: "POST",
+      headers: ada.headers,
+      body: JSON.stringify({ title: "Tides" }),
+    })
+    const { id } = (await created.json()) as { id: string }
+    const ask = (user = ada) =>
+      app.request("/api/ai/estimate/ask", {
+        method: "POST",
+        headers: user.headers,
+        body: JSON.stringify({ expeditionId: id }),
+      })
+    type Out = { usd: number; model: string; sourceChars: number; askCapUsd: number; keySource: string }
+    const before = (await (await ask()).json()) as Out
+    expect(before).toMatchObject({ sourceChars: 0, askCapUsd: DEFAULT_ASK_CAP_USD, keySource: "instance" })
+    expect(before.usd).toBeGreaterThan(0)
+
+    await app.request(`/api/sources/${id}`, {
+      method: "POST",
+      headers: ada.headers,
+      body: JSON.stringify({ type: "paste", text: "## Spring tides\n\nThe Sun and Moon line up.\n\n".repeat(400) }),
+    })
+    const after = (await (await ask()).json()) as Out
+    expect(after.usd).toBeGreaterThan(before.usd)
+
+    await app.request("/api/ai/settings", {
+      method: "PATCH",
+      headers: ada.headers,
+      body: JSON.stringify({ askCapUsd: 2 }),
+    })
+    expect(((await (await ask()).json()) as Out).askCapUsd).toBe(2)
+    expect((await ask(ed)).status).toBe(404)
+  })
+})

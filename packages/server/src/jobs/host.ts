@@ -14,6 +14,7 @@ import { SpendingCapReached } from "@seply/ai"
 import { makeOps, ulid, type BuildEvent, type Op } from "@seply/domain"
 import type { Db } from "../db.ts"
 import { appendOps } from "../oplog.ts"
+import { announceProposals } from "../proposals.ts"
 import { publishBuild, publishCommitted } from "../relay.ts"
 import { updateOpenJob } from "./store.ts"
 import {
@@ -172,6 +173,14 @@ export async function runJob(
     )
   }
 
+  const announce = async () => {
+    try {
+      await withDb((db) => announceProposals(db, deps.relay, job.expeditionId))
+    } catch (err) {
+      console.error("jobs: announcing Proposals failed", err)
+    }
+  }
+
   const ctx: JobContext<unknown> = {
     job,
     input,
@@ -179,6 +188,7 @@ export async function runJob(
     commit,
     progress,
     withDb,
+    announceProposals: announce,
     services: deps.services ?? {},
   }
 

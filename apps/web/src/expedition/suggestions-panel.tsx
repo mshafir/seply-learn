@@ -79,6 +79,8 @@ export type SuggestionsPanelProps = {
   /** Accept, as planned (stale items in it are overwritten). */
   onAccept: (plan: AcceptPlan) => void
   onDismiss: (ids: string[]) => void
+  /** The Grow tabs (grow-panel.tsx), under the description. */
+  nav?: React.ReactNode
 }
 
 const KIND_ICON: Record<ItemKind, typeof SparklesIcon> = {
@@ -102,6 +104,7 @@ export function SuggestionsPanel({
   plan,
   onAccept,
   onDismiss,
+  nav,
 }: SuggestionsPanelProps & { onClose: () => void; inline: boolean }) {
   const Description = inline ? "p" : SheetDescription
   const [confirm, setConfirm] = React.useState<AcceptPlan | null>(null)
@@ -130,6 +133,7 @@ export function SuggestionsPanel({
           What AI asks and agents suggested, shown dashed on the canvas. Each
           accept is a Change you can undo.
         </Description>
+        {nav}
         {groups.length > 1 && (
           <div>
             <Button

@@ -12,7 +12,9 @@ import {
   ARTICLE_LENGTH_IDS,
   ARTICLE_LENGTHS,
   estimateArticle,
+  estimateAsk,
   estimateBuild,
+  growSize,
   ModelOverrides,
   PROVIDER_LABELS,
   stageModels,
@@ -42,6 +44,7 @@ import { ConfigError, type ServerEnv } from "./config.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
 import { access } from "./jobs/routes.ts"
+import { loadState } from "./projection.ts"
 import { readSegments } from "./sources/store.ts"
 
 const { aiSettings } = schema
@@ -342,6 +345,32 @@ export function aiRoutes(options?: ProviderOptions) {
       })
     )
     return c.json({ lengths, sourceChars, askCapUsd: settings.askCapUsd ?? defaultAskCapUsd })
+  })
+
+  // A Grow ask (spec §3.8, §5.5): what one would cost on this Expedition (its
+  // Sources and Concept set), next to the reader's per-ask cap.
+  r.post("/estimate/ask", async (c) => {
+    const body = ArticleEstimateBody.safeParse(await c.req.json().catch(() => null))
+    if (!body.success)
+      return c.json({ error: "invalid body", issues: body.error.issues }, 400)
+    const db = await c.var.db()
+    const a = await access(db, body.data.expeditionId, c.var.user.id)
+    if (!a) return c.json({ error: "Expedition not found" }, 404)
+    if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
+    const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
+    if (!active)
+      return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
+    const state = await loadState(db, body.data.expeditionId)
+    if (!state) return c.json({ error: "Expedition not found" }, 404)
+    const sourceChars = await expeditionSourceChars(db, c.var.blobs(), body.data.expeditionId)
+    const e = estimateAsk({ provider: active.provider, models: active.models, sourceChars, ...growSize(state) })
+    return c.json({
+      usd: e.usd,
+      model: e.model,
+      sourceChars,
+      askCapUsd: settings.askCapUsd ?? defaultAskCapUsd,
+      keySource: mode === "byok" ? "reader" : "instance",
+    })
   })
 
   return r

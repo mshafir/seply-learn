@@ -50,9 +50,11 @@ export {
   ARTICLE_LENGTH_IDS,
   ARTICLE_LENGTHS,
   ARTICLE_TOKENS_PER_WORD,
+  ASK_STEP,
   BUILD_CAP_MULTIPLIER,
   DEFAULT_ASK_CAP_USD,
   estimateArticle,
+  estimateAsk,
   estimateBuild,
   NOTE_OUTPUT,
   noteStepUsage,
@@ -134,6 +136,21 @@ export {
 } from "./curator/sources.ts"
 export { rollCache, runLoop, type LoopOptions, type LoopResult } from "./curator/loop.ts"
 export { playbook, viewTypeDoc } from "./curator/playbook.ts"
+// Grow (spec §5.5): the curator scoped to one ask, writing to one Proposal
+export {
+  grow,
+  GROW_ACTION_LABELS,
+  GROW_ACTIONS,
+  GROW_MAX_STEPS,
+  growRationale,
+  growSize,
+  itemsFrom,
+  type GrowAction,
+  type GrowAsk,
+  type GrowItem,
+  type GrowOptions,
+  type GrowResult,
+} from "./curator/grow.ts"
 export { PLAYBOOK_FILES, VIEW_TYPE_DOCS } from "./playbook/generated.ts"
 export type { LanguageModelV4 } from "@ai-sdk/provider"
 // The skim (spec §5.2 step 2) and the playbook it reads

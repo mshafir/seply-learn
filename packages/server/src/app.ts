@@ -19,6 +19,7 @@ import { expeditionRoutes } from "./expeditions.ts"
 import { historyRoutes } from "./history.ts"
 import { importRoutes } from "./import.ts"
 import { proposalRoutes } from "./proposals.ts"
+import { askRoutes } from "./asks.ts"
 import { jobRoutes } from "./jobs/routes.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import { liveRoutes } from "./live.ts"
@@ -34,6 +35,11 @@ export type SessionUser = { id: string; email: string; name: string }
 export type AppVariables = {
   /** Connects on first call; the connection is closed after the response. */
   db: () => Promise<Db>
+  /**
+   * Keeps the connection open until `p` settles, for a response that goes on
+   * after the handler returns (a stream).
+   */
+  hold: (p: Promise<unknown>) => void
   config: () => ServerConfig
   auth: () => Promise<Auth>
   /** The blob store (Source files and segments); throws when there is none. */
@@ -81,6 +87,14 @@ async function afterResponse(c: Context, p: Promise<unknown>) {
   else await p
 }
 
+function hasExecutionCtx(c: Context): boolean {
+  try {
+    return !!c.executionCtx
+  } catch {
+    return false
+  }
+}
+
 function resources<Env extends ServerEnv>(
   opts: AppOptions<Env>
 ): MiddlewareHandler<AppEnv> {
@@ -88,6 +102,7 @@ function resources<Env extends ServerEnv>(
     let conn: Promise<DbConnection | null> | undefined
     let config: ServerConfig | undefined
     let auth: Promise<Auth> | undefined
+    const held: Promise<unknown>[] = []
     const db = async () => {
       conn ??= opts.connect(c.env as Env)
       const got = await conn
@@ -96,6 +111,7 @@ function resources<Env extends ServerEnv>(
     }
     const getConfig = () => (config ??= readConfig(c.env ?? {}))
     c.set("db", db)
+    c.set("hold", (p) => void held.push(p))
     c.set("config", getConfig)
     let store: BlobStore | null | undefined
     c.set("blobs", () => {
@@ -108,10 +124,18 @@ function resources<Env extends ServerEnv>(
       await next()
     } finally {
       if (conn) {
-        const closing = conn
-          .then((got) => got?.close())
-          .catch((err) => console.error("db: close failed", err))
-        await afterResponse(c, closing)
+        const open = conn
+        const close = () =>
+          open
+            .then((got) => got?.close())
+            .catch((err) => console.error("db: close failed", err))
+        if (held.length) {
+          // A stream still reads: close when it ends, never before (and
+          // never await it here, or the response waits for its own end).
+          const closing = Promise.allSettled(held).then(close)
+          if (hasExecutionCtx(c)) c.executionCtx.waitUntil(closing)
+          else void closing
+        } else await afterResponse(c, close())
       }
     }
   }
@@ -195,6 +219,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/expeditions", expeditionRoutes(relay))
   app.route("/expeditions", createFlowRoutes(relay, opts.ai, opts.jobs))
   app.route("/expeditions", proposalRoutes(relay))
+  app.route("/expeditions", askRoutes())
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)

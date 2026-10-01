@@ -65,6 +65,7 @@ export {
   announceProposals,
   createProposal,
   listProposals,
+  readProposal,
   ProposalError,
   reopenProposals,
   reviewProposals,
@@ -114,6 +115,15 @@ export {
   BuildViewChoice,
 } from "./jobs/build.ts"
 export { JOB_KINDS } from "./jobs/registry.ts"
+export { growJob, GrowJobInput, GrowScript } from "./jobs/grow.ts"
+export {
+  ASK_KINDS,
+  askRoutes,
+  listAsks,
+  STREAM_POLL_MS,
+  type AskStreamPart,
+  type AskView,
+} from "./asks.ts"
 export {
   encryptPayload,
   notifyUser,

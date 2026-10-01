@@ -1,0 +1,179 @@
+{
+  "ask": "What would I need to understand QLoRA?",
+  "fixture": "packages/domain/fixtures/compute.json (201 Concepts, 425 Relationships, no Source text)",
+  "model": "anthropic/claude-opus-5.5 (default curator)",
+  "jobStatus": "complete",
+  "jobError": null,
+  "seconds": 47,
+  "costUsd": {
+    "gatewayBilled": 0.3509,
+    "meter": 0.3509,
+    "cap": 0.5
+  },
+  "pausedAtCap": [],
+  "calls": 4,
+  "usage": {
+    "input": 10,
+    "cacheRead": 126944,
+    "cacheWrite": 45824,
+    "output": 4818
+  },
+  "agentLastWords": "To understand QLoRA you need LoRA, which was already linked to it, plus a few more ideas, so I've made suggestions for you to accept or reject. There were no Sources to draw on, so all of these are background knowledge.\n\n**Links to Concepts you already had.** These are suggested as needed to understand QLoRA:\n- **Weight quantization**, because QLoRA stores the frozen base model in 4-bit.\n- **Numeric precision**, because QLoRA stores weights in 4-bit but computes in BF16.\n- **Supervised fine-tuning (SFT)**, because QLoRA is a cheaper way to do fine-tuning.\n\n**New prerequisite:**\n- **Fine-tuning memory footprint**: full fine-tuning has to hold the weights, gradients and optimizer states in GPU memory at once. It goes under Training.\n\n**QLoRA's three parts, as new Concepts placed under QLoRA:**\n- **4-bit NormalFloat (NF4)**: a 4-bit format designed for how model weights are typically spread.\n- **Double quantization**: compresses the scaling numbers stored alongside the 4-bit weights, to save more memory.\n- **Paged optimizers**: move optimizer state to CPU memory during memory spikes instead of crashing training.",
+  "streamed": [
+    {
+      "at": 35.4,
+      "step": "Suggested 7 changes so far"
+    },
+    {
+      "at": 44,
+      "step": "Suggested 12 changes so far"
+    }
+  ],
+  "items": [
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-1",
+      "position": 1,
+      "kind": "new Relationship",
+      "title": "Weight quantization -prerequisite-> QLoRA",
+      "fromIsNew": false,
+      "toIsNew": false,
+      "note": "QLoRA stores the frozen base model in 4-bit; you need to know what quantizing weights does and costs."
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-2",
+      "position": 2,
+      "kind": "new Relationship",
+      "title": "Numeric precision -prerequisite-> QLoRA",
+      "fromIsNew": false,
+      "toIsNew": false,
+      "note": "QLoRA mixes formats: weights stored in 4-bit, dequantized to BF16 for compute, adapters trained in higher precision."
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-3",
+      "position": 3,
+      "kind": "new Relationship",
+      "title": "Supervised fine-tuning (SFT) -prerequisite-> QLoRA",
+      "fromIsNew": false,
+      "toIsNew": false,
+      "note": "QLoRA is a cheaper way to do fine-tuning such as SFT; it changes how, not what, you train."
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-4",
+      "position": 4,
+      "kind": "new Concept",
+      "title": "Fine-tuning memory footprint",
+      "conceptKind": "idea",
+      "tags": [
+        "training",
+        "cost"
+      ],
+      "summary": "Full fine-tuning must hold weights, gradients and optimizer states in GPU memory, several times the model size.",
+      "overview": "Training a model needs far more memory than running it. Besides the weights, full fine-tuning keeps a gradient for every parameter and, with Adam-style optimizers, two extra state values per parameter, plus activations saved for the backward pass. Together these come to several times the weights alone, which puts full fine-tuning of large models out of reach of a single GPU. This is the problem parameter-efficient methods attack. [LoRA](#c/01M3WA6F9YYFHA71GDVPN5JXEQ) freezes the base so only small adapters need gradients and optimizer state. [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) then goes after what is left, the frozen weights themselves, by storing them in 4-bit. Knowing where the memory goes is the reason each part of QLoRA exists.",
+      "overviewWords": 110,
+      "prov": [],
+      "more": []
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-5",
+      "position": 5,
+      "kind": "new Concept",
+      "title": "4-bit NormalFloat (NF4)",
+      "conceptKind": "idea",
+      "tags": [
+        "technique"
+      ],
+      "summary": "A 4-bit data type whose levels are spaced for normally distributed weights, introduced with QLoRA.",
+      "overview": "NF4 is the storage format QLoRA uses for the frozen base model. Trained network weights roughly follow a zero-centred normal distribution, so NF4 places its 16 levels at the quantiles of a normal distribution rather than spacing them evenly. That way each level is used about equally often. Weights are scaled block by block (each block of weights gets its own scale) so they fit the range. Compared with plain INT4 or FP4, this keeps more information in the same 4 bits, which helps QLoRA get close to 16-bit fine-tuning quality. It is a specific case of [weight quantization](#c/01M3WA6F9YM23BNWFD07KT0TBB). During the forward and backward passes, weights are dequantized to BF16 for compute, so the [numeric precision](#c/01M3WA6F9YA731EJNY9PEYVZQG) of storage and compute differ.",
+      "overviewWords": 121,
+      "prov": [],
+      "more": []
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-6",
+      "position": 6,
+      "kind": "new Concept",
+      "title": "Double quantization",
+      "conceptKind": "idea",
+      "tags": [
+        "technique"
+      ],
+      "summary": "Quantizing the per-block scale constants themselves, saving further memory in QLoRA.",
+      "overview": "Block-wise [weight quantization](#c/01M3WA6F9YM23BNWFD07KT0TBB) stores one scale constant for each small block of weights. With small blocks these constants add a noticeable overhead on top of the 4-bit weights. Double quantization, one of QLoRA's three ingredients, compresses those constants too: it quantizes them to 8 bits, with their own second-level scales. The saving per parameter is small, but across a model with tens of billions of parameters it adds up to gigabytes. That matters when the goal of [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) is to fit a large model onto one GPU.",
+      "overviewWords": 87,
+      "prov": [],
+      "more": []
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-7",
+      "position": 7,
+      "kind": "new Concept",
+      "title": "Paged optimizers",
+      "conceptKind": "idea",
+      "tags": [
+        "technique"
+      ],
+      "summary": "Optimizer state that spills to CPU memory during memory spikes instead of crashing training.",
+      "overview": "Paged optimizers are QLoRA's answer to sudden memory spikes, such as a long sequence with gradient checkpointing. These spikes can otherwise crash a run that normally fits on the GPU. The optimizer state is put in unified memory, which pages automatically between GPU and CPU RAM, the way an operating system pages to disk. When the GPU runs short, pages move out, and they come back when needed. It is the same paging idea behind [PagedAttention](#c/01M3WA6F9YBVP5FDTPHXMSKV9N), applied here to training rather than serving. It makes [QLoRA](#c/01M3WA6F9YWAVE9D9JH21AAA1C) fine-tuning dependable on a single card.",
+      "overviewWords": 92,
+      "prov": [],
+      "more": []
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-8",
+      "position": 8,
+      "kind": "new Relationship",
+      "title": "Fine-tuning memory footprint -part-of-> Training",
+      "fromIsNew": true,
+      "toIsNew": false,
+      "note": null
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-9",
+      "position": 9,
+      "kind": "new Relationship",
+      "title": "Fine-tuning memory footprint -prerequisite-> QLoRA",
+      "fromIsNew": true,
+      "toIsNew": false,
+      "note": "QLoRA exists to shrink fine-tuning memory; each of its parts targets one piece of the footprint."
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-10",
+      "position": 10,
+      "kind": "new Relationship",
+      "title": "4-bit NormalFloat (NF4) -part-of-> QLoRA",
+      "fromIsNew": true,
+      "toIsNew": false,
+      "note": null
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-11",
+      "position": 11,
+      "kind": "new Relationship",
+      "title": "Double quantization -part-of-> QLoRA",
+      "fromIsNew": true,
+      "toIsNew": false,
+      "note": null
+    },
+    {
+      "id": "01M3WA6G1DKJH42KZRZ5VN679K-12",
+      "position": 12,
+      "kind": "new Relationship",
+      "title": "Paged optimizers -part-of-> QLoRA",
+      "fromIsNew": true,
+      "toIsNew": false,
+      "note": null
+    }
+  ],
+  "counts": {
+    "items": 12,
+    "newConcepts": 4,
+    "relationships": 8,
+    "edits": 0
+  },
+  "doneWhen": {
+    "itemsStreamedWhileRunning": true,
+    "everyNewConceptHasSummaryAndOverview": true,
+    "allApplyWhenAccepted": true,
+    "expeditionUntouched": true
+  }
+}
