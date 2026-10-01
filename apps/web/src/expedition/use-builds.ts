@@ -80,7 +80,8 @@ export function useBuilds({
         })
     }
 
-    // The room has said hello already: start from what it keeps.
+    // The room is open, so it may have said hello already: start from what
+    // it keeps.
     void Promise.resolve().then(() => {
       if (stopped) return
       const builds = [...room.builds.values()]
