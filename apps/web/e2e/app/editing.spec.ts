@@ -351,8 +351,12 @@ test("edit an overview in the rich editor: bold, a Concept link, a list", async 
   const sections = panel(page)
     .getByTestId("article-editor")
     .getByRole("textbox", { name: "Text" })
-  await expect(sections.locator("table").first()).toBeVisible()
+  const table = sections.locator("table").first()
+  await expect(table).toBeVisible()
   await expect(sections.first()).not.toContainText("|---")
-  await sections.locator("table").first().scrollIntoViewIfNeeded()
+  // Its editor, not the table, so nothing scrolls sideways.
+  await table.evaluate((t) =>
+    t.closest("[data-slot=markdown-editor]")!.scrollIntoView()
+  )
   await screenshot(page, testInfo, "markdown-editor-table")
 })

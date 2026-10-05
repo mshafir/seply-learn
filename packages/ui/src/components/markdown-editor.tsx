@@ -637,7 +637,7 @@ export function MarkdownEditor({
         <div
           data-slot="markdown-editor"
           className={cn(
-            "rounded-lg border border-input bg-transparent transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
+            "min-w-0 rounded-lg border border-input bg-transparent transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 dark:bg-input/30",
             className
           )}
           onBlur={(e) => {
@@ -662,7 +662,7 @@ export function MarkdownEditor({
             placeholder={placeholder}
             data-testid="markdown-editor-content"
             className={cn(
-              "typeset max-h-[60vh] min-h-32 overflow-y-auto px-3 py-2 text-base outline-none",
+              "typeset max-h-[60vh] min-h-32 min-w-0 overflow-y-auto px-3 py-2 text-base outline-none",
               "[&_:is(td,th)>*]:mt-0 [&_a]:text-primary [&>:first-child]:mt-0",
               "[&_[data-slate-placeholder]]:text-muted-foreground"
             )}
