@@ -1,6 +1,6 @@
-// The floating View button (spec §3.6): icon, name, question and a settings
-// icon, over the canvas's top-left corner. It opens the View panel. A
-// two-line outline Button (the inventory's "Button (outline, lg, two-line)").
+// The floating View button (spec §3.6): icon, name and a settings icon, over
+// the canvas's top-left corner. It opens the View panel, which carries the
+// question and description. An outline Button.
 import { SlidersHorizontalIcon } from "lucide-react"
 
 import { Button } from "@seply/ui/components/button"
@@ -40,14 +40,7 @@ export function ViewButton({
       <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
         <Icon className="size-5!" />
       </span>
-      <span className="flex min-w-0 flex-col items-start text-left">
-        <span className="text-sm font-semibold">{name}</span>
-        {view.question && (
-          <span className="max-w-full truncate font-reading text-sm font-normal text-muted-foreground">
-            {view.question}
-          </span>
-        )}
-      </span>
+      <span className="min-w-0 truncate text-sm font-semibold">{name}</span>
       <span className="ml-1 flex items-center self-stretch border-l pl-3 text-muted-foreground">
         <SlidersHorizontalIcon />
       </span>

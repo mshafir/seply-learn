@@ -8,7 +8,8 @@
 // Concepts get a check, step counts skip them, and "I know …" marks the
 // reader's status (`onMarkKnown`). "Show all steps" and "Hide what I've read"
 // are the reader's personal settings when the app passes `personal` and
-// `onPersonalChange`. Without them (the harness), all of it is local state.
+// `onPersonalChange` (set in its View panel, so the canvas shows no checkbox).
+// Without them (the harness), all of it is local state, with a checkbox here.
 // While a tree is focused, the View reports "Path to X · k of n read" for the
 // app's status chip; clearing it unfocuses.
 import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
@@ -125,6 +126,12 @@ export function LearningPathCanvas({
   const canMark = !!selected && selected !== focus && treeIds.has(selected) && !known.has(selected);
   const hiddenCount = scope.concepts.length - core.size;
 
+  // The bar shows only what acts on the focus (and local "Known" chips).
+  // "Show all steps" is the app's personal setting (its View panel); the
+  // checkbox here is only for hosts without one (the harness).
+  const ownToggle = !onPersonalChange;
+  const hasBar = !!focus || (!readingStatus && known.size > 0) || ownToggle;
+
   // Floating under the app's controls, the toolbar covers the canvas too:
   // the canvas fits its Concepts below both.
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -137,14 +144,14 @@ export function LearningPathCanvas({
     const observer = new ResizeObserver(update);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [overlayTop]);
+  }, [overlayTop, hasBar]);
 
   return (
     <div
       className={overlayTop ? "seply-lp seply-lp--overlay" : "seply-lp"}
       style={overlayTop ? ({ "--seply-overlay-top": `${overlayTop}px` } as CSSProperties) : undefined}
     >
-      <div className="seply-toolbar" ref={toolbarRef}>
+      <div className="seply-toolbar" ref={toolbarRef} hidden={!hasBar}>
         {focus ? (
           <>
             <span>
@@ -169,11 +176,7 @@ export function LearningPathCanvas({
               </span>
             )}
           </>
-        ) : (
-          <span className="seply-toolbar__muted">
-            {targets.size} techniques and the foundations they share. Click one to see what it takes, in order.
-          </span>
-        )}
+        ) : null}
         {!readingStatus && known.size > 0 && (
           <span className="seply-toolbar__chips">
             Known:
@@ -193,10 +196,12 @@ export function LearningPathCanvas({
             ))}
           </span>
         )}
-        <label className="seply-toolbar__toggle">
-          <input type="checkbox" checked={showAll} onChange={(e) => toggleShowAll(e.target.checked)} />
-          Show all steps ({hiddenCount} more)
-        </label>
+        {ownToggle && (
+          <label className="seply-toolbar__toggle">
+            <input type="checkbox" checked={showAll} onChange={(e) => toggleShowAll(e.target.checked)} />
+            Show all steps ({hiddenCount} more)
+          </label>
+        )}
       </div>
       <div className="seply-lp__canvas">
         <Canvas
@@ -212,7 +217,7 @@ export function LearningPathCanvas({
           memory={memory}
           covered={covered}
           suggested={suggested}
-          overlayTop={overlayTop ? overlayTop + toolbarHeight : undefined}
+          overlayTop={overlayTop ? overlayTop + (hasBar ? toolbarHeight : 0) : undefined}
         />
       </div>
     </div>

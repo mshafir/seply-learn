@@ -438,9 +438,12 @@ function ViewTypeReading({
   )
 }
 
-/** What the settings forms offer for ids: Relationship Types, Kinds, Concepts. */
+/**
+ * What the settings forms offer: Relationship Types, Kinds, Concepts and
+ * Attributes for ids, and the Tags Concepts carry.
+ */
 function useRefOptions(data: ExpeditionData): RefOptions {
-  const { relTypeDefs, kindDefs, concepts } = data
+  const { relTypeDefs, kindDefs, concepts, attributeDefs } = data
   return React.useMemo(() => {
     // Built-ins, then the Expedition's own rows (which may relabel or hide one).
     const merge = (
@@ -465,6 +468,13 @@ function useRefOptions(data: ExpeditionData): RefOptions {
       concepts: [...concepts]
         .map((c) => ({ id: c.id, label: c.title }))
         .sort((a, b) => a.label.localeCompare(b.label)),
+      attributes: attributeDefs
+        .filter((d) => !d.deletedAt)
+        .map((d) => ({ id: d.id, label: d.label }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+      tags: [...new Set(concepts.flatMap((c) => c.tags))]
+        .sort((a, b) => a.localeCompare(b))
+        .map((t) => ({ id: t, label: `#${t}` })),
     }
-  }, [relTypeDefs, kindDefs, concepts])
+  }, [relTypeDefs, kindDefs, concepts, attributeDefs])
 }

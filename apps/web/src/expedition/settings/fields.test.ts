@@ -39,7 +39,10 @@ describe("settingsFields", () => {
     const t = byKey(targets.fields)
     expect(t["targets.kinds"]!.control).toEqual({ type: "refs", ref: "kinds" })
     expect(t["targets.tags"]!.control).toEqual({ type: "tags" })
-    expect(t["targets.hasAttribute"]!.control).toEqual({ type: "text" })
+    expect(t["targets.hasAttribute"]!.control).toEqual({
+      type: "ref",
+      ref: "attributes",
+    })
   })
 
   it("leaves the structure overrides out", () => {

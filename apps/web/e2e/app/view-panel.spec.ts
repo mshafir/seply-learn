@@ -112,12 +112,14 @@ test("shared settings sync to another context; personal ones don't", async ({
     ).toHaveText(/Risk/, {
       timeout: 15_000,
     })
-    // …and a text setting, written on Enter.
+    // …and an Attribute setting, picked from a searchable combobox.
     const rankBy = adaShared.getByLabel("Rank by", { exact: true })
-    await rankBy.fill("impact")
-    await rankBy.press("Enter")
+    await rankBy.click()
+    await rankBy.fill("Total")
+    await ada.page.getByRole("option", { name: "Total params" }).click()
+    await expect(rankBy).toHaveValue("Total params")
     await expect(edShared.getByLabel("Rank by", { exact: true })).toHaveValue(
-      "impact",
+      "Total params",
       {
         timeout: 15_000,
       }
@@ -132,10 +134,10 @@ test("shared settings sync to another context; personal ones don't", async ({
     await expect(adaShowAll).not.toBeChecked()
     await adaShowAll.click()
     await expect(adaShowAll).toBeChecked()
-    // The View's own control follows the reader's setting.
+    // The setting lives in the View panel only: no checkbox on the canvas.
     await expect(
       ada.page.getByTestId("canvas-pane").getByLabel(/Show all steps/)
-    ).toBeChecked()
+    ).toHaveCount(0)
     await screenshot(ada.page, testInfo, "view-panel-personal")
 
     // Ed's stays off, even after a pull and a reload.

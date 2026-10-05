@@ -8,7 +8,7 @@
 //   panel; `null` clears the selection.
 // - The View button floats over the top-left corner. Canvas Views (Evidence,
 //   Cause & Effect, Lineage, Learning path) draw under it and fit their
-//   Concepts below it (`overlayTop`); the others start below it (pt-21), so
+//   Concepts below it (`overlayTop`); the others start below it (pt-19), so
 //   it never covers a table header or a timeline axis.
 // - `personal` is the reader's personal settings for the View; a View's own
 //   control changing one calls `onPersonalChange`. `onStatus` receives the
@@ -30,8 +30,8 @@ import {
 } from "@seply/views"
 import { basemap } from "@/lib/basemap"
 
-/** The height the View button covers (top-4 + the button + a gap: pt-21). */
-const VIEW_BUTTON_AREA = 84
+/** The height the View button covers (top-4 + the button + a gap: pt-19). */
+const VIEW_BUTTON_AREA = 76
 
 export type CanvasSlotProps = {
   collections: EngineCollections
@@ -69,7 +69,7 @@ export function CanvasSlot({
   return (
     <div
       data-testid="canvas-view"
-      className={underButton ? "size-full" : "size-full pt-21"}
+      className={underButton ? "size-full" : "size-full pt-19"}
     >
       <ExpeditionView
         collections={collections}
