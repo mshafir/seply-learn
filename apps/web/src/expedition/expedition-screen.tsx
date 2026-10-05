@@ -218,7 +218,7 @@ export function ExpeditionScreen({
   return (
     <div
       style={frameStyle}
-      className="flex h-svh min-h-0 flex-col overflow-hidden"
+      className="flex h-svh min-h-0 flex-col overflow-clip"
     >
       {state.status === "ready" || state.status === "cached" ? (
         <ExpeditionFrame

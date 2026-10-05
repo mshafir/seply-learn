@@ -62,16 +62,19 @@ export function ViewsBar({
       data-views={views.length}
       className="relative flex h-(--views-bar-height) shrink-0 items-center border-b bg-card px-2"
     >
-      {/* Every tab, laid out off screen, to measure what fits. */}
+      {/* Every tab, laid out unseen, to measure what fits. The zero-size,
+          clipped box keeps the row (often wider than the window) from
+          widening the page (#105). */}
       <div
-        ref={measureRef}
         aria-hidden
         inert
-        className="pointer-events-none invisible absolute top-0 left-0 flex gap-1"
+        className="pointer-events-none invisible absolute top-0 left-0 size-0 overflow-hidden"
       >
-        {views.map((view) => (
-          <ViewTab key={view.id} view={view} build={build(view)} measuring />
-        ))}
+        <div ref={measureRef} className="flex w-max gap-1">
+          {views.map((view) => (
+            <ViewTab key={view.id} view={view} build={build(view)} measuring />
+          ))}
+        </div>
       </div>
       <div
         ref={containerRef}
