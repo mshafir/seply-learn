@@ -50,6 +50,9 @@ export const pruneStack = (
   exists: (conceptId: string) => boolean
 ): BackStack => stack.filter((e) => exists(e.conceptId))
 
+/** The href of an in-text link to a Concept: `#c/<id>`. */
+export const conceptHref = (conceptId: string) => `#c/${conceptId}`
+
 /** The Concept id of an in-text link (`#c/<id>`), or null for any other href. */
 export function conceptLinkId(href: string | undefined): string | null {
   const match = href?.match(/^#c\/(.+)$/)

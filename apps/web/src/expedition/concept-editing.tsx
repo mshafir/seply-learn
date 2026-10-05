@@ -104,6 +104,7 @@ import {
   placeInView,
   relTypeVocabulary,
 } from "@/expedition/editing.ts"
+import { ConceptMarkdownEditor } from "@/expedition/markdown-field.tsx"
 import { relTypeLabels } from "@/expedition/reading.ts"
 import { refused } from "@/expedition/refused.ts"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
@@ -585,6 +586,40 @@ function TextField({
   )
 }
 
+/** A markdown field: the rich editor, which writes when it loses focus. */
+function MarkdownField({
+  label,
+  value,
+  concepts,
+  description,
+  onCommit,
+}: {
+  label: string
+  value: string
+  concepts: readonly ConceptRow[]
+  description?: string
+  onCommit: (value: string) => void
+}) {
+  const id = React.useId()
+  return (
+    <Field>
+      <FieldLabel id={`${id}-label`}>{label}</FieldLabel>
+      <ConceptMarkdownEditor
+        value={value}
+        concepts={concepts}
+        aria-labelledby={`${id}-label`}
+        aria-describedby={description ? `${id}-description` : undefined}
+        onCommit={onCommit}
+      />
+      {description && (
+        <FieldDescription id={`${id}-description`}>
+          {description}
+        </FieldDescription>
+      )}
+    </Field>
+  )
+}
+
 const UNSET = "__unset"
 
 /** The overview depth in edit mode: fields, Attributes, Relationships. */
@@ -659,13 +694,11 @@ export function ConceptEditor({
             })
           }
         />
-        <TextField
+        <MarkdownField
           label="Overview"
-          name="overview"
           value={concept.overview ?? ""}
-          multiline
-          rows={8}
-          description="One deep paragraph, in Markdown. Link a Concept with [title](#c/id)."
+          concepts={data.concepts}
+          description="One deep paragraph. Link other Concepts from the toolbar."
           onCommit={(v) =>
             set("Couldn't save the overview", (d) => {
               d.overview = optional(v)
@@ -1032,18 +1065,15 @@ export function ArticleEditor({
               <Trash2Icon />
             </Button>
           </div>
-          <Textarea
-            key={s.md}
+          <ConceptMarkdownEditor
             aria-label="Text"
-            rows={8}
-            defaultValue={s.md}
-            onBlur={(e) => {
-              const v = e.currentTarget.value
-              if (v !== s.md)
-                setSection(s.id, (d) => {
-                  d.md = v
-                })
-            }}
+            value={s.md}
+            concepts={editing.data.concepts}
+            onCommit={(v) =>
+              setSection(s.id, (d) => {
+                d.md = v
+              })
+            }
           />
         </section>
       ))}
