@@ -91,6 +91,25 @@ test("sign in, import the compute fixture, and open it in three panes", async ({
   expect(await widthOf(page, "[data-testid=canvas-pane]")).toBe(WIDE.width)
   await expect(page.getByTestId("side-panel")).toHaveCount(0)
 
+  // Nothing makes the screen wider than the window (#105): the shell has no
+  // sideways scroll, so focusing or clicking far-right content can't shift
+  // the header and Views bar.
+  const shell = page.locator("div.h-svh").first()
+  const sideways = () =>
+    shell.evaluate((el) => ({
+      extra: el.scrollWidth - el.clientWidth,
+      left: el.scrollLeft,
+      page: document.scrollingElement?.scrollLeft ?? 0,
+    }))
+  expect(await sideways()).toEqual({ extra: 0, left: 0, page: 0 })
+  await openView(page, /Anatomy/)
+  await shell.evaluate((el) => {
+    // What a click or focus on far-right content does.
+    el.scrollLeft = 10_000
+  })
+  expect(await sideways()).toEqual({ extra: 0, left: 0, page: 0 })
+  await openView(page, /Outline/)
+
   // The Learning path draws on the canvas.
   const canvas = page.getByTestId("canvas-pane")
   await openView(page, /Learning path/)
