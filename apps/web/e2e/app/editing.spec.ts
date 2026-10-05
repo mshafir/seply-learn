@@ -344,8 +344,12 @@ test("edit an overview in the rich editor: bold, a Concept link, a list", async 
   await line(page, "Block diffusion").locator("[data-concept]").first().click()
   await expect(title(page)).toHaveText("Block diffusion")
   await check()
-  await link.click()
-  await expect(title(page)).toHaveText("Gemini Diffusion")
+  // Retried: the panel can re-render under the first click while it syncs.
+  await expect(async () => {
+    if ((await title(page).textContent()) !== "Gemini Diffusion")
+      await link.click({ timeout: 2_000 })
+    await expect(title(page)).toHaveText("Gemini Diffusion", { timeout: 2_000 })
+  }).toPass({ timeout: 15_000 })
 
   // An article section's table and lists edit as a table and lists.
   await openView(page, /Anatomy/)
