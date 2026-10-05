@@ -202,6 +202,12 @@ test("edit fields and Relationships in place, hide in one View, remove a Kind in
     .fill("Blocks left to right, denoised inside")
   await editor.getByLabel("Also called").fill("BD3-LM, semi-autoregressive")
   await editor.getByLabel("Also called").press("Enter")
+  // Tags: a combobox; typing a new one offers to add it.
+  const tags = editor.getByRole("combobox", { name: "Tags" })
+  await tags.click()
+  await tags.fill("#diffusion-lm")
+  await page.getByRole("option", { name: "Add “diffusion-lm”" }).click()
+  await expect(editor.getByText(/diffusion-lm/).first()).toBeVisible()
   await editor.getByRole("button", { name: "Pick a Concept" }).click()
   await page.getByPlaceholder("Search Concepts").fill("Gemini Diffusion")
   await page.getByRole("option", { name: /Gemini Diffusion/ }).click()
@@ -216,6 +222,9 @@ test("edit fields and Relationships in place, hide in one View, remove a Kind in
   )
   await expect(panel(page)).toContainText(
     "Blocks left to right, denoised inside"
+  )
+  await expect(panel(page).getByRole("list", { name: "Tags" })).toContainText(
+    "diffusion-lm"
   )
   await expect(
     panel(page).getByRole("region", { name: "Links to" })

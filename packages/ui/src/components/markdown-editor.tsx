@@ -71,15 +71,8 @@ import {
 import { cn } from "cn"
 
 import { Button } from "@seply/ui/components/button"
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@seply/ui/components/combobox"
 import { Input } from "@seply/ui/components/input"
+import { SearchCombobox } from "@seply/ui/components/multi-combobox"
 import {
   Popover,
   PopoverContent,
@@ -471,30 +464,17 @@ function LinkForm({
       }}
     >
       {targets && targets.length > 0 && (
-        <Combobox
-          items={[...targets]}
-          itemToStringLabel={(t: LinkTarget) => t.label}
-          onValueChange={(t: LinkTarget | null) => {
-            if (t) apply(t.href, t.label)
+        <SearchCombobox
+          aria-label={`Link to one of the ${targetsNoun}`}
+          placeholder={`Search ${targetsNoun}`}
+          empty="No matches"
+          options={targets.map((t) => ({ id: t.href, label: t.label }))}
+          value={null}
+          onValueChange={(href) => {
+            const target = targets.find((t) => t.href === href)
+            if (target) apply(target.href, target.label)
           }}
-        >
-          <ComboboxInput
-            aria-label={`Link to one of the ${targetsNoun}`}
-            placeholder={`Search ${targetsNoun}`}
-            showTrigger={false}
-            className="w-full"
-          />
-          <ComboboxContent>
-            <ComboboxEmpty>No matches.</ComboboxEmpty>
-            <ComboboxList>
-              {(t: LinkTarget) => (
-                <ComboboxItem key={t.href} value={t}>
-                  {t.label}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
+        />
       )}
       <div className="flex gap-2">
         <Input

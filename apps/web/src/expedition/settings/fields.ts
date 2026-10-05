@@ -5,8 +5,9 @@
 //
 // - booleans → a switch; enums → a select; numbers and strings → an input
 // - lists of ids that the View Type's `refs` name (Relationship Types, Kinds,
-//   Concepts) → a checkbox list; a single id they name → a select
-// - lists of plain strings (tags) → comma-separated text
+//   Concepts, Attributes) → a multi-select combobox; a single id they name →
+//   a searchable combobox
+// - lists of plain strings (tags) → a multi-select combobox that can add Tags
 // - objects (filters) → a group of the fields above
 // - anything else (column lists, lanes, date ranges) → JSON, still checked
 //   against the schema before it is written
@@ -14,7 +15,7 @@
 //   are left out: they are edited on the canvas, not in a form.
 import { OVERRIDE_KEYS, type SettingsRefs } from "@seply/domain"
 
-export type RefKind = "relTypes" | "kinds" | "concepts"
+export type RefKind = "relTypes" | "kinds" | "concepts" | "attributes"
 
 export type FieldControl =
   | { type: "boolean" }
@@ -109,7 +110,7 @@ const LABELS: Record<string, string> = {
 
 function refAt(refs: SettingsRefs | undefined, dotted: string): RefKind | null {
   if (!refs) return null
-  for (const kind of ["relTypes", "kinds", "concepts"] as const)
+  for (const kind of ["relTypes", "kinds", "concepts", "attributes"] as const)
     if (refs[kind].includes(dotted)) return kind
   return null
 }
