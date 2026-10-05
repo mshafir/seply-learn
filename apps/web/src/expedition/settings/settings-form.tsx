@@ -6,7 +6,6 @@
 // replaces what they show.
 import * as React from "react"
 
-import { Checkbox } from "@seply/ui/components/checkbox"
 import {
   Field,
   FieldContent,
@@ -18,6 +17,10 @@ import {
   FieldSet,
 } from "@seply/ui/components/field"
 import { Input } from "@seply/ui/components/input"
+import {
+  MultiCombobox,
+  SearchCombobox,
+} from "@seply/ui/components/multi-combobox"
 import {
   Select,
   SelectContent,
@@ -37,7 +40,8 @@ import {
 } from "@/expedition/settings/fields.ts"
 
 export type RefOption = { id: string; label: string }
-export type RefOptions = Record<RefKind, RefOption[]>
+/** What each kind of reference offers, plus the Expedition's Tags. */
+export type RefOptions = Record<RefKind | "tags", RefOption[]>
 
 export type SettingsFormProps = {
   /** Distinguishes this form's control ids ("shared", "personal"). */
@@ -123,12 +127,8 @@ function SettingControl(props: ControlProps) {
         </Field>
       )
 
-    case "enum":
-    case "ref": {
-      const items: RefOption[] =
-        control.type === "enum"
-          ? control.options.map((o) => ({ id: o, label: humanize(o) }))
-          : withUnknown(options[control.ref], value)
+    case "enum": {
+      const items = control.options.map((o) => ({ id: o, label: humanize(o) }))
       const list = field.optional
         ? [{ id: NONE, label: "None" }, ...items]
         : items
@@ -158,41 +158,39 @@ function SettingControl(props: ControlProps) {
       )
     }
 
+    case "ref":
+      return (
+        <Field data-invalid={!!error || undefined}>
+          <FieldLabel htmlFor={id}>{field.label}</FieldLabel>
+          <SearchCombobox
+            id={id}
+            options={options[control.ref]}
+            value={typeof value === "string" ? value : null}
+            onValueChange={(v) => write(field.path, v ?? undefined)}
+            placeholder={field.optional ? "None" : "Choose…"}
+          />
+          <FieldError>{error}</FieldError>
+        </Field>
+      )
+
     case "refs": {
       const selected = Array.isArray(value) ? (value as string[]) : []
-      const items = withUnknown(options[control.ref], selected)
-      const toggle = (itemId: string, on: boolean) => {
-        const next = on
-          ? [...selected, itemId]
-          : selected.filter((s) => s !== itemId)
-        write(field.path, next.length || !field.optional ? next : undefined)
-      }
       return (
-        <FieldSet data-invalid={!!error || undefined}>
-          <FieldLegend variant="label">{field.label}</FieldLegend>
-          <FieldDescription>{selected.length} chosen</FieldDescription>
-          <div
-            data-slot="checkbox-group"
-            className="flex max-h-56 flex-col gap-2 overflow-y-auto rounded-lg border p-3"
-          >
-            {items.map((o) => {
-              const itemId = `${id}-${o.id}`
-              return (
-                <Field key={o.id} orientation="horizontal">
-                  <Checkbox
-                    id={itemId}
-                    checked={selected.includes(o.id)}
-                    onCheckedChange={(on) => toggle(o.id, on)}
-                  />
-                  <FieldLabel htmlFor={itemId} className="font-normal">
-                    {o.label}
-                  </FieldLabel>
-                </Field>
+        <Field data-invalid={!!error || undefined}>
+          <FieldLabel htmlFor={id}>{field.label}</FieldLabel>
+          <MultiCombobox
+            id={id}
+            options={options[control.ref]}
+            value={selected}
+            onValueChange={(next) =>
+              write(
+                field.path,
+                next.length || !field.optional ? next : undefined
               )
-            })}
-          </div>
+            }
+          />
           <FieldError>{error}</FieldError>
-        </FieldSet>
+        </Field>
       )
     }
 
@@ -208,20 +206,29 @@ function SettingControl(props: ControlProps) {
         </FieldSet>
       )
 
-    case "tags":
+    case "tags": {
+      const selected = Array.isArray(value) ? (value as string[]) : []
       return (
-        <TextField
-          id={id}
-          field={field}
-          error={error}
-          text={Array.isArray(value) ? (value as string[]).join(", ") : ""}
-          description="Comma-separated"
-          onCommit={(text) => {
-            const tags = parseTags(text)
-            write(field.path, tags.length || !field.optional ? tags : undefined)
-          }}
-        />
+        <Field data-invalid={!!error || undefined}>
+          <FieldLabel htmlFor={id}>{field.label}</FieldLabel>
+          <MultiCombobox
+            id={id}
+            options={options.tags}
+            value={selected}
+            onValueChange={(next) =>
+              write(
+                field.path,
+                next.length || !field.optional ? next : undefined
+              )
+            }
+            placeholder="#tag"
+            empty="Type to add a Tag"
+            create={(text) => parseTags(text)[0] ?? null}
+          />
+          <FieldError>{error}</FieldError>
+        </Field>
       )
+    }
 
     case "number":
       return (
@@ -278,14 +285,6 @@ function SettingControl(props: ControlProps) {
 }
 
 /** Options, plus any chosen id they don't list (e.g. a hidden Kind). */
-function withUnknown(options: RefOption[], chosen: unknown): RefOption[] {
-  const ids = new Set(options.map((o) => o.id))
-  const extra = (Array.isArray(chosen) ? chosen : [chosen]).filter(
-    (c): c is string => typeof c === "string" && !ids.has(c)
-  )
-  return [...options, ...extra.map((c) => ({ id: c, label: c }))]
-}
-
 function TextField({
   id,
   field,

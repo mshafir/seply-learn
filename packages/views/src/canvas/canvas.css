@@ -302,7 +302,10 @@
 .seply-lp--overlay {
   position: relative;
 }
-.seply-lp--overlay > .seply-toolbar {
+.seply-lp--overlay > .seply-toolbar[hidden] {
+  display: none;
+}
+.seply-toolbar {
   position: absolute;
   top: var(--seply-overlay-top);
   left: 1rem;

@@ -83,6 +83,10 @@ import {
 } from "@seply/ui/components/select"
 import { Textarea } from "@seply/ui/components/textarea"
 import { toast } from "@seply/ui/components/toast"
+import {
+  MultiCombobox,
+  SearchCombobox,
+} from "@seply/ui/components/multi-combobox"
 import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
 import type {
   ArticleSectionRow,
@@ -600,6 +604,14 @@ export function ConceptEditor({
     (k) => !k.hidden || k.id === concept.kind
   )
   const optional = (v: string) => (v.trim() ? v : undefined)
+  // Every Tag in the Expedition, to pick from (typing adds a new one).
+  const tagOptions = React.useMemo(
+    () =>
+      [...new Set(data.concepts.flatMap((c) => c.tags))]
+        .sort((x, y) => x.localeCompare(y))
+        .map((t) => ({ id: t, label: `#${t}` })),
+    [data.concepts]
+  )
 
   return (
     <form
@@ -620,28 +632,19 @@ export function ConceptEditor({
           }}
         />
         <Field>
-          <FieldLabel>Kind</FieldLabel>
-          <Select
-            items={kinds.map((k) => ({ value: k.id, label: k.label }))}
+          <FieldLabel htmlFor="concept-kind">Kind</FieldLabel>
+          <SearchCombobox
+            id="concept-kind"
+            aria-label="Kind"
+            options={kinds.map((k) => ({ id: k.id, label: k.label }))}
             value={concept.kind}
             onValueChange={(v) => {
-              if (typeof v === "string" && v !== concept.kind)
+              if (v && v !== concept.kind)
                 set("Couldn't change the Kind", (d) => {
                   d.kind = v
                 })
             }}
-          >
-            <SelectTrigger aria-label="Kind" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {kinds.map((k) => (
-                <SelectItem key={k.id} value={k.id}>
-                  {k.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </Field>
         <TextField
           label="Summary"
@@ -680,17 +683,23 @@ export function ConceptEditor({
             })
           }
         />
-        <TextField
-          label="Tags"
-          name="tags"
-          value={concept.tags.join(", ")}
-          placeholder="#tag, #another"
-          onCommit={(v) =>
-            set("Couldn't save the Tags", (d) => {
-              d.tags = parseTags(v)
-            })
-          }
-        />
+        <Field>
+          <FieldLabel htmlFor="concept-tags">Tags</FieldLabel>
+          <MultiCombobox
+            id="concept-tags"
+            aria-label="Tags"
+            options={tagOptions}
+            value={concept.tags}
+            onValueChange={(tags) =>
+              set("Couldn't save the Tags", (d) => {
+                d.tags = tags
+              })
+            }
+            placeholder="#tag"
+            empty="Type to add a Tag"
+            create={(text) => parseTags(text)[0] ?? null}
+          />
+        </Field>
       </FieldGroup>
       <AttributeFields concept={concept} editing={editing} />
       <RelationshipEditor concept={concept} editing={editing} data={data} />
