@@ -598,16 +598,18 @@ export type ReviewResult = {
   changeId: string | null
   label: string | null
   headSeq: number
-  /** Accepted, in the order applied, dependencies included. */
+  /** Accepted, in the order applied. */
   accepted: string[]
-  /** Accepted because an accepted item needed them. */
-  included: string[]
+  /** Dismissed: those asked, and every item that depended on them. */
   dismissed: string[]
+  /** Dismissed because they depended on a dismissed one (a Concept's Relationships). */
+  cascaded: string[]
 }
 
 /**
  * One review action: accept (one Change) and/or dismiss. A 409 `ApiError`
- * carries `stale`, `gone` or `reviewed` item ids in its body.
+ * carries `stale`, `gone`, `reviewed` or `waiting` item ids in its body
+ * (`waiting`: they need a suggested Concept that isn't accepted with them).
  */
 export function reviewProposals(
   expeditionId: string,

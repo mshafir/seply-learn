@@ -2,14 +2,18 @@ import { describe, expect, it } from "vitest"
 import { fieldKey } from "./fields.ts"
 import type { OpBody } from "./ops.ts"
 import {
+  acceptable,
   isStale,
   itemRefs,
   orderItems,
   previewProposals,
   proposalBase,
+  proposalEntries,
   proposalStatusOf,
   staleness,
+  waiting,
   withDependencies,
+  withDependents,
   type ProposalItemLike,
 } from "./proposals.ts"
 import { isLive, relKey } from "./state.ts"
@@ -268,5 +272,174 @@ describe("proposalStatusOf", () => {
     expect(proposalStatusOf(["accepted", "accepted"])).toBe("accepted")
     expect(proposalStatusOf(["dismissed", "dismissed"])).toBe("rejected")
     expect(proposalStatusOf(["accepted", "dismissed"])).toBe("partly")
+  })
+})
+
+describe("Concept packages", () => {
+  // Grow-style: two new Concepts, each with a Relationship to the map; one
+  // Relationship between them; one between Concepts already in the map.
+  const pool = (h: ReturnType<typeof seeded>) => [
+    item(h, "r-map", [rel("black", PREREQ, "green")]),
+    item(h, "c-oolong", [
+      concept("oolong", "Oolong", { summary: "Partly oxidised" }),
+    ]),
+    item(h, "c-tie", [concept("tie", "Tieguanyin")]),
+    item(h, "r-oolong", [rel("oolong", PART_OF, "topic")]),
+    item(h, "r-between", [rel("tie", PART_OF, "oolong")]),
+    item(h, "r-tie", [rel("leaf", PREREQ, "tie")]),
+    item(h, "a-oolong", [
+      {
+        kind: "section.create",
+        target: "s1",
+        value: { conceptId: "oolong", orderKey: "i", heading: "", md: "…" },
+      },
+    ]),
+    item(h, "a-oolong-edit", [
+      { kind: "section.set", target: "s1", path: "md", value: "More" },
+    ] as OpBody[]),
+    item(h, "e-green", [set("green", "summary", "Steamed")]),
+  ]
+
+  it("groups a new Concept with its article and its Relationships to the map", () => {
+    const h = seeded()
+    expect(proposalEntries(h.state, pool(h))).toEqual([
+      {
+        id: "r-map",
+        kind: "item",
+        concepts: [],
+        items: ["r-map"],
+        relationships: [],
+        waitsFor: [],
+      },
+      {
+        id: "c-oolong",
+        kind: "package",
+        concepts: ["oolong"],
+        items: ["c-oolong", "a-oolong", "a-oolong-edit"],
+        relationships: ["r-oolong"],
+        waitsFor: [],
+      },
+      {
+        id: "c-tie",
+        kind: "package",
+        concepts: ["tie"],
+        items: ["c-tie"],
+        relationships: ["r-tie"],
+        waitsFor: [],
+      },
+      {
+        id: "r-between",
+        kind: "item",
+        concepts: [],
+        items: ["r-between"],
+        relationships: [],
+        waitsFor: ["tie", "oolong"],
+      },
+      {
+        id: "e-green",
+        kind: "item",
+        concepts: [],
+        items: ["e-green"],
+        relationships: [],
+        waitsFor: [],
+      },
+    ])
+  })
+
+  it("a Relationship between suggested Concepts stays its own entry and waits until both are in the map", () => {
+    const h = seeded()
+    const items = pool(h)
+    const accepted: string[] = []
+    const accept = (ids: string[]) => {
+      h.commit(
+        "ana",
+        orderItems(
+          h.state,
+          items.filter((i) => ids.includes(i.id))
+        ).flatMap((i) => i.ops)
+      )
+      accepted.push(...ids)
+    }
+    const between = () =>
+      proposalEntries(
+        h.state,
+        items.map((i) => ({
+          ...i,
+          status: accepted.includes(i.id) ? ("accepted" as const) : undefined,
+        }))
+      ).find((e) => e.id === "r-between")
+    accept(["c-oolong", "r-oolong"])
+    expect(between()).toMatchObject({ kind: "item", waitsFor: ["tie"] })
+    accept(["c-tie", "r-tie"])
+    expect(between()).toMatchObject({ kind: "item", waitsFor: [] })
+    expect(waiting(h.state, items, ["r-between"]).size).toBe(0)
+  })
+
+  it("refuses an item alone until what it needs is in the map or accepted with it", () => {
+    const h = seeded()
+    const items = pool(h)
+    expect(waiting(h.state, items, ["r-between"])).toEqual(
+      new Map([["r-between", ["tie", "oolong"]]])
+    )
+    expect(waiting(h.state, items, ["r-oolong"])).toEqual(
+      new Map([["r-oolong", ["oolong"]]])
+    )
+    expect(waiting(h.state, items, ["a-oolong-edit"])).toEqual(
+      new Map([["a-oolong-edit", ["s1"]]])
+    )
+    expect(
+      waiting(h.state, items, ["c-oolong", "c-tie", "r-between"]).size
+    ).toBe(0)
+    expect(waiting(h.state, items, ["r-map", "e-green"]).size).toBe(0)
+  })
+
+  it("Accept all takes everything that can go in together, in an order that applies", () => {
+    const h = seeded()
+    const items = pool(h)
+    const all = acceptable(
+      h.state,
+      items,
+      items.map((i) => i.id)
+    )
+    expect(all.left).toEqual([])
+    expect(all.ids.indexOf("c-tie")).toBeLessThan(all.ids.indexOf("r-between"))
+    expect(all.ids.indexOf("c-oolong")).toBeLessThan(
+      all.ids.indexOf("r-between")
+    )
+    h.commit(
+      "ana",
+      all.ids.flatMap((id) => items.find((i) => i.id === id)!.ops)
+    )
+    expect(
+      isLive(h.state.relationships[relKey("tie", PART_OF, "oolong")])
+    ).toBe(true)
+  })
+
+  it("leaves out what waits for a Concept that isn't accepted with it, or is gone", () => {
+    const h = seeded()
+    const items = pool(h)
+    expect(
+      acceptable(h.state, items, ["c-oolong", "r-oolong", "r-between"])
+    ).toEqual({ ids: ["c-oolong", "r-oolong"], left: ["r-between"] })
+    h.commit("ben", [{ kind: "concept.delete", target: "leaf" }])
+    expect(
+      acceptable(h.state, items, ["c-tie", "r-tie", "c-oolong", "r-between"])
+    ).toEqual({ ids: ["c-oolong", "c-tie", "r-between"], left: ["r-tie"] })
+  })
+
+  it("dismissing a Concept dismisses everything that depends on it", () => {
+    const h = seeded()
+    const items = pool(h)
+    expect(withDependents(h.state, items, ["c-oolong"])).toEqual([
+      "c-oolong",
+      "r-oolong",
+      "r-between",
+      "a-oolong",
+      "a-oolong-edit",
+    ])
+    expect(withDependents(h.state, items, ["r-tie"])).toEqual(["r-tie"])
+    // A Concept already in the map keeps what needs it.
+    h.commit("ana", [...items.find((i) => i.id === "c-tie")!.ops])
+    expect(withDependents(h.state, items, ["c-tie"])).toEqual(["c-tie"])
   })
 })

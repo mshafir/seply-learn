@@ -13,11 +13,13 @@ import {
 import {
   countPending,
   describeItem,
+  entryIds,
   groupPending,
   itemsPhrase,
   planAccept,
   proposalBy,
   staleVersions,
+  waitsForPhrase,
 } from "@/expedition/suggestions.ts"
 
 const AT = "2026-10-01T00:00:00.000Z"
@@ -72,50 +74,83 @@ function proposal(
 }
 
 describe("Suggestions", () => {
-  it("groups pending items by ask, leaving reviewed ones out", () => {
+  it("groups pending items by ask into Concept packages, leaving reviewed ones out", () => {
     const s = base()
     const p1 = proposal(s, "p1", [
       ["c", [idea("kv", "KV cache")]],
       ["r", [rel("kv", "attn")]],
+      ["c2", [idea("rope", "RoPE")]],
+      ["r2", [rel("rope", "attn")]],
+      ["between", [rel("rope", "kv")]],
     ])
-    p1.items[0]!.status = "accepted"
+    p1.items[2]!.status = "accepted"
+    p1.items[3]!.status = "accepted"
     const p2 = proposal(s, "p2", [["d", [set("mla", "summary", "x")]]], {
       rationale: "Add examples",
     })
-    const groups = groupPending(s, [p1, p2])
+    const now = applyOps(s, [idea("rope", "RoPE"), rel("rope", "attn")])
+    const groups = groupPending(now, [p1, p2])
     expect(
-      groups.map((g) => [g.proposal.rationale, g.items.map((i) => i.item.id)])
+      groups.map((g) => [
+        g.proposal.rationale,
+        g.count,
+        g.entries.map((e) => [
+          e.kind,
+          e.items.map((i) => i.item.id),
+          e.relationships.map((i) => i.item.id),
+          e.waitsFor,
+        ]),
+      ])
     ).toEqual([
-      ["What would I need to understand MLA?", ["r"]],
-      ["Add examples", ["d"]],
+      [
+        "What would I need to understand MLA?",
+        3,
+        [
+          ["package", ["c"], ["r"], []],
+          // Between two suggested Concepts: its own entry, waiting for KV cache.
+          ["item", ["between"], [], ["kv"]],
+        ],
+      ],
+      ["Add examples", 1, [["item", ["d"], [], []]]],
     ])
-    expect(countPending([p1, p2])).toBe(2)
+    expect(countPending([p1, p2])).toBe(4)
+    expect(entryIds(groups[0]!.entries[0]!, new Set(["r"]))).toEqual(["c"])
+    expect(
+      waitsForPhrase(applyOps(now, [idea("kv", "KV cache")]), ["kv"])
+    ).toBe("Accept KV cache first")
+    expect(
+      waitsForPhrase(applyOps(now, [idea("kv", "KV cache")]), ["kv", "rope"])
+    ).toBe("Accept KV cache and RoPE first")
   })
 
-  it("plans an accept with its dependencies, and stale items to overwrite", () => {
+  it("plans an accept in an order that applies, with stale items to overwrite", () => {
     const s = base()
     const p = proposal(s, "p1", [
-      ["c", [idea("kv", "KV cache")]],
       ["r", [rel("kv", "attn")]],
+      ["c", [idea("kv", "KV cache")]],
       ["e", [set("attn", "summary", "Mixes values")]],
     ])
-    expect(planAccept(s, [p], ["r"])).toEqual({
+    expect(planAccept(s, [p], ["r", "c"], { dismiss: [] })).toMatchObject({
       ids: ["c", "r"],
-      added: ["c"],
+      dismiss: [],
       stale: [],
       skipped: [],
+      counts: { concepts: 1, relationships: 1, between: 0, other: 0 },
+      all: false,
     })
+    // A Relationship alone waits for its Concept: left out.
+    expect(planAccept(s, [p], ["r"])).toMatchObject({ ids: [], skipped: ["r"] })
     const now = applyOps(s, [set("attn", "summary", "Ada's words")])
-    expect(planAccept(now, [p], ["e", "r"])).toEqual({
+    expect(planAccept(now, [p], ["e", "r", "c"], { all: true })).toMatchObject({
       ids: ["c", "r", "e"],
-      added: ["c"],
       stale: ["e"],
       skipped: [],
+      counts: { concepts: 1, relationships: 1, between: 0, other: 1 },
+      all: true,
     })
-    const [stale] = groupPending(now, [p])[0]!.items.filter(
-      (i) => i.item.id === "e"
-    )
-    expect(staleVersions(now, stale!.staleness.changed[0]!)).toEqual({
+    const stale = groupPending(now, [p])[0]!.entries.find((e) => e.id === "e")!
+      .items[0]!
+    expect(staleVersions(now, stale.staleness.changed[0]!)).toEqual({
       field: "summary",
       now: "Ada's words",
       suggested: "Mixes values",
@@ -129,9 +164,8 @@ describe("Suggestions", () => {
       ["e", [set("mla", "summary", "x")]],
     ])
     const gone = applyOps(s, [{ kind: "concept.delete", target: "mla" }])
-    expect(planAccept(gone, [p], ["r", "e"])).toEqual({
+    expect(planAccept(gone, [p], ["r", "e"])).toMatchObject({
       ids: [],
-      added: [],
       stale: [],
       skipped: ["r", "e"],
     })

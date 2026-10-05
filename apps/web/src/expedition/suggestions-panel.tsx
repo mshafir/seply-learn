@@ -1,13 +1,23 @@
-// The Suggestions tab (spec §3.8, WP-4.3), opened from the header's
-// Suggestions count (owners and editors). Pending Proposal items, grouped by
-// ask (its rationale and who asked), each in plain words, with Accept and
-// Dismiss; each ask has Accept all and Dismiss all, and the header Accept
-// all takes everything. While the tab is open the canvas draws them dashed.
+// The Suggestions tab (spec §3.8), opened from the header's Suggestions
+// count (owners and editors). Pending Proposal items, grouped by ask (its
+// rationale and who asked) and, within it, into entries (suggestions.ts):
 //
-// - **Dependencies:** accepting an item that needs another (a Relationship
-//   to a new Concept) includes it. When an accept brings anything along,
-//   overwrites anything, or has to leave something out, a dialog shows it
-//   before confirming.
+// - **A Concept package:** a suggested new Concept (with its article and
+//   edits) and, nested under it with a checkbox each, its Relationships to
+//   Concepts already in the Expedition. Accept takes them as one Change;
+//   unticked Relationships are dismissed in the same action. Dismiss
+//   dismisses the package and everything that depends on its Concept.
+// - **A Relationship between suggested Concepts:** faded, and its Accept
+//   off, until those Concepts are accepted; hovering or focusing it says
+//   which ("Accept NF4 and QLoRA first"). It can still be dismissed.
+// - Anything else: one item, with Accept and Dismiss.
+//
+// Each ask has Accept all and Dismiss all, and the header Accept all takes
+// everything; Accept all confirms in a dialog that says what it takes. While
+// the tab is open the canvas draws every pending item dashed.
+//
+// - **Left out:** when an accept overwrites anything or has to leave
+//   something out, a dialog shows it before confirming.
 // - **Stale:** an item whose fields changed since it was suggested says
 //   "Changed since suggested" with both versions; accepting it is an
 //   explicit overwrite. One whose Concept was deleted can only be dismissed.
@@ -28,6 +38,7 @@ import {
 
 import { Badge } from "@seply/ui/components/badge"
 import { Button } from "@seply/ui/components/button"
+import { Checkbox } from "@seply/ui/components/checkbox"
 import {
   Dialog,
   DialogClose,
@@ -47,18 +58,26 @@ import {
 import { ScrollArea } from "@seply/ui/components/scroll-area"
 import { SheetDescription } from "@seply/ui/components/sheet"
 import { Skeleton } from "@seply/ui/components/skeleton"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@seply/ui/components/tooltip"
 import type { DomainState } from "@seply/domain"
 
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import {
   describeItem,
+  entryIds,
   proposalBy,
   staleVersions,
   suggestionsCount,
+  waitsForPhrase,
   type AcceptPlan,
   type ItemKind,
   type PendingItem,
+  type SuggestionEntry,
   type SuggestionGroup,
 } from "@/expedition/suggestions.ts"
 
@@ -74,8 +93,11 @@ export type SuggestionsPanelProps = {
   preview: DomainState
   /** A review is running: the actions wait. */
   busy: boolean
-  /** What accepting these items would do (dependencies, stale, left out). */
-  plan: (ids: string[]) => AcceptPlan
+  /** What accepting these items would do (order, stale, left out). */
+  plan: (
+    ids: string[],
+    opts?: { dismiss?: string[]; all?: boolean }
+  ) => AcceptPlan
   /** Accept, as planned (stale items in it are overwritten). */
   onAccept: (plan: AcceptPlan) => void
   onDismiss: (ids: string[]) => void
@@ -112,15 +134,19 @@ export function SuggestionsPanel({
     (item: PendingItem["item"]) => describeItem(preview, item),
     [preview]
   )
-  const accept = (ids: string[]) => {
-    const p = plan(ids)
-    if (p.added.length || p.stale.length || p.skipped.length) setConfirm(p)
+  const accept: AcceptFn = (ids, opts) => {
+    const p = plan(ids, opts)
+    if (p.all || p.stale.length || p.skipped.length) setConfirm(p)
     else if (p.ids.length) onAccept(p)
   }
   const byId = new Map(
-    groups.flatMap((g) => g.items.map((i) => [i.item.id, i] as const))
+    groups.flatMap((g) =>
+      g.entries.flatMap((e) =>
+        [...e.items, ...e.relationships].map((i) => [i.item.id, i] as const)
+      )
+    )
   )
-  const all = groups.flatMap((g) => g.items.map((i) => i.item.id))
+  const all = groups.flatMap((g) => g.entries.flatMap((e) => entryIds(e)))
   return (
     <>
       <PanelHeader
@@ -140,7 +166,7 @@ export function SuggestionsPanel({
               size="sm"
               disabled={busy}
               data-testid="accept-everything"
-              onClick={() => accept(all)}
+              onClick={() => accept(all, { all: true })}
             >
               <CheckIcon />
               Accept all {count}
@@ -181,6 +207,7 @@ export function SuggestionsPanel({
                 group={g}
                 me={me}
                 live={live}
+                preview={preview}
                 busy={busy}
                 describe={describe}
                 onAccept={accept}
@@ -205,10 +232,17 @@ export function SuggestionsPanel({
   )
 }
 
+type AcceptFn = (
+  ids: string[],
+  opts?: { dismiss?: string[]; all?: boolean }
+) => void
+type Describe = (item: PendingItem["item"]) => ReturnType<typeof describeItem>
+
 function Group({
   group,
   me,
   live,
+  preview,
   busy,
   describe,
   onAccept,
@@ -217,13 +251,14 @@ function Group({
   group: SuggestionGroup
   me: string | null
   live: DomainState
+  preview: DomainState
   busy: boolean
-  describe: (item: PendingItem["item"]) => ReturnType<typeof describeItem>
-  onAccept: (ids: string[]) => void
+  describe: Describe
+  onAccept: AcceptFn
   onDismiss: (ids: string[]) => void
 }) {
-  const { proposal, items } = group
-  const ids = items.map((i) => i.item.id)
+  const { proposal, entries, count } = group
+  const ids = entries.flatMap((e) => entryIds(e))
   return (
     <section
       data-testid="suggestion-group"
@@ -240,29 +275,30 @@ function Group({
         </h3>
         <p className="text-xs text-muted-foreground">
           {proposalBy(proposal, me)} · {relativeTime(proposal.createdAt)} ·{" "}
-          {suggestionsCount(items.length)}
+          {suggestionsCount(count)}
         </p>
       </div>
       <ul className="flex flex-col gap-1">
-        {items.map((i) => (
-          <Item
-            key={i.item.id}
-            pending={i}
+        {entries.map((e) => (
+          <Entry
+            key={e.id}
+            entry={e}
             live={live}
+            preview={preview}
             busy={busy}
             describe={describe}
-            onAccept={() => onAccept([i.item.id])}
-            onDismiss={() => onDismiss([i.item.id])}
+            onAccept={onAccept}
+            onDismiss={onDismiss}
           />
         ))}
       </ul>
-      {items.length > 1 && (
+      {count > 1 && (
         <div className="flex gap-2">
           <Button
             size="sm"
             variant="outline"
             disabled={busy}
-            onClick={() => onAccept(ids)}
+            onClick={() => onAccept(ids, { all: true })}
           >
             <CheckIcon />
             Accept all
@@ -281,20 +317,181 @@ function Group({
   )
 }
 
-function Item({
-  pending,
+/** One entry: a Concept package with its Relationships, or one item. */
+function Entry({
+  entry,
   live,
+  preview,
   busy,
   describe,
   onAccept,
   onDismiss,
 }: {
+  entry: SuggestionEntry
+  live: DomainState
+  preview: DomainState
+  busy: boolean
+  describe: Describe
+  onAccept: AcceptFn
+  onDismiss: (ids: string[]) => void
+}) {
+  // The package's Relationships the reader unticked: dismissed on accept.
+  const [leftOut, setLeftOut] = React.useState<ReadonlySet<string>>(
+    () => new Set()
+  )
+  const [head, ...rest] = entry.items
+  if (!head) return null
+  const waiting = entry.waitsFor.length > 0
+  const why = waiting ? waitsForPhrase(preview, entry.waitsFor) : ""
+  const gone = entry.items.some((i) => i.staleness.gone.length > 0)
+  const changed = entry.items.some((i) => i.staleness.changed.length > 0)
+  const goneRel = (i: PendingItem) => i.staleness.gone.length > 0
+  const rels = entry.relationships
+  const unticked = rels.map((i) => i.item.id).filter((id) => leftOut.has(id))
+  const toggle = (id: string, on: boolean) =>
+    setLeftOut((s) => {
+      const next = new Set(s)
+      if (on) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  // A Relationship that can't apply is neither accepted nor dismissed: it
+  // stays, to be dismissed on its own.
+  const accept = () =>
+    onAccept(
+      entryIds(
+        entry,
+        new Set([...leftOut, ...rels.filter(goneRel).map((i) => i.item.id)])
+      ),
+      { dismiss: unticked }
+    )
+  const body = <ItemBody pending={head} live={live} describe={describe} />
+  return (
+    <li
+      data-testid="suggestion"
+      data-item-id={head.item.id}
+      data-entry={entry.kind}
+      data-waiting={waiting || undefined}
+      data-stale={gone ? "gone" : changed ? "changed" : undefined}
+      className="flex flex-col gap-2 rounded-lg border border-dashed border-suggested/60 px-3 py-2"
+    >
+      {waiting ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <div
+                tabIndex={0}
+                data-testid="suggestion-waiting"
+                aria-label={`${describe(head.item).title}. ${why}.`}
+                className="flex gap-3 rounded-md opacity-50 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              />
+            }
+          >
+            {body}
+          </TooltipTrigger>
+          <TooltipContent data-testid="waiting-reason">{why}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <div className="flex gap-3">{body}</div>
+      )}
+      {rest.map((i) => (
+        <div
+          key={i.item.id}
+          data-testid="suggestion-part"
+          data-item-id={i.item.id}
+          className="flex gap-3 border-t border-dashed border-suggested/40 pt-2"
+        >
+          <ItemBody pending={i} live={live} describe={describe} />
+        </div>
+      ))}
+      {rels.length > 0 && (
+        <ul
+          data-testid="suggestion-relationships"
+          aria-label="Its Relationships"
+          className="flex flex-col gap-1.5 border-t border-dashed border-suggested/40 pt-2"
+        >
+          {rels.map((i) => {
+            const d = describe(i.item)
+            const off = goneRel(i)
+            return (
+              <li
+                key={i.item.id}
+                data-testid="suggestion-relationship"
+                data-item-id={i.item.id}
+                className="flex items-start gap-2 text-sm"
+              >
+                <Checkbox
+                  className="mt-0.5"
+                  checked={!off && !leftOut.has(i.item.id)}
+                  disabled={busy || off}
+                  aria-label={d.title}
+                  onCheckedChange={(v) => toggle(i.item.id, v === true)}
+                />
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="break-words">{d.title}</span>
+                  {d.detail && (
+                    <span className="line-clamp-2 text-xs text-muted-foreground">
+                      {d.detail}
+                    </span>
+                  )}
+                  {off && (
+                    <span
+                      role="note"
+                      className="flex items-center gap-1 text-xs text-destructive"
+                    >
+                      <TriangleAlertIcon className="size-3 shrink-0" />
+                      Can't be added: what it needs was deleted since.
+                    </span>
+                  )}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {unticked.length > 0 && (
+        <p
+          data-testid="left-out-note"
+          className="text-xs text-muted-foreground"
+        >
+          Unticked Relationships are dismissed when you accept.
+        </p>
+      )}
+      <div className="-ml-2 flex gap-1">
+        {!gone && (
+          <Button
+            size="xs"
+            variant="ghost"
+            disabled={busy || waiting}
+            onClick={accept}
+          >
+            <CheckIcon />
+            {changed ? "Accept and overwrite" : "Accept"}
+          </Button>
+        )}
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={busy}
+          onClick={() => onDismiss(entry.items.map((i) => i.item.id))}
+        >
+          <XIcon />
+          Dismiss
+        </Button>
+      </div>
+    </li>
+  )
+}
+
+/** One item in plain words, with whether it's stale. */
+function ItemBody({
+  pending,
+  live,
+  describe,
+}: {
   pending: PendingItem
   live: DomainState
-  busy: boolean
-  describe: (item: PendingItem["item"]) => ReturnType<typeof describeItem>
-  onAccept: () => void
-  onDismiss: () => void
+  describe: Describe
 }) {
   const { item, staleness } = pending
   const d = describe(item)
@@ -302,12 +499,7 @@ function Item({
   const gone = staleness.gone.length > 0
   const changed = staleness.changed.length > 0
   return (
-    <li
-      data-testid="suggestion"
-      data-item-id={item.id}
-      data-stale={gone ? "gone" : changed ? "changed" : undefined}
-      className="flex gap-3 rounded-lg border border-dashed border-suggested/60 px-3 py-2"
-    >
+    <>
       <Icon className="mt-0.5 size-4 shrink-0 text-suggested-text" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-xs text-muted-foreground">{d.label}</span>
@@ -363,25 +555,8 @@ function Item({
             </div>
           )
         )}
-        <div className="-ml-2 flex gap-1">
-          {!gone && (
-            <Button
-              size="xs"
-              variant="ghost"
-              disabled={busy}
-              onClick={onAccept}
-            >
-              <CheckIcon />
-              {changed ? "Accept and overwrite" : "Accept"}
-            </Button>
-          )}
-          <Button size="xs" variant="ghost" disabled={busy} onClick={onDismiss}>
-            <XIcon />
-            Dismiss
-          </Button>
-        </div>
       </div>
-    </li>
+    </>
   )
 }
 
@@ -427,16 +602,15 @@ function ConfirmAccept({
                   : "What these need was deleted since. Dismiss them instead."}
               </DialogDescription>
             </DialogHeader>
-            {plan.added.length > 0 && (
-              <div data-testid="confirm-added" className="flex flex-col gap-1">
-                <p className="text-sm font-medium">
-                  Also adds what{" "}
-                  {plan.added.length === 1 ? "it needs" : "they need"}:
-                </p>
-                <ul className="flex flex-col gap-0.5">
-                  {plan.added.map(line)}
-                </ul>
-              </div>
+            {plan.all && n > 0 && (
+              <ul
+                data-testid="confirm-all"
+                className="flex list-disc flex-col gap-0.5 pl-5 text-sm"
+              >
+                {allLines(plan.counts).map((l) => (
+                  <li key={l}>{l}</li>
+                ))}
+              </ul>
             )}
             {plan.stale.length > 0 && (
               <div data-testid="confirm-stale" className="flex flex-col gap-1">
@@ -472,7 +646,8 @@ function ConfirmAccept({
                 className="flex flex-col gap-1"
               >
                 <p className="text-sm font-medium">
-                  Left out (what they need was deleted):
+                  Left out (what they need was deleted, or isn't accepted with
+                  them):
                 </p>
                 <ul className="flex flex-col gap-0.5">
                   {plan.skipped.map(line)}
@@ -497,4 +672,29 @@ function ConfirmAccept({
       </DialogContent>
     </Dialog>
   )
+}
+
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n === 1 ? one : many}`
+
+/** Accept all in the tab's terms: the packages first, then what they unlock. */
+function allLines(c: AcceptPlan["counts"]): string[] {
+  const lines: string[] = []
+  if (c.concepts)
+    lines.push(
+      `${plural(c.concepts, "new Concept", "new Concepts")}${
+        c.relationships
+          ? `, with ${plural(c.relationships, "Relationship", "Relationships")} to Concepts already here`
+          : ""
+      }`
+    )
+  else if (c.relationships)
+    lines.push(plural(c.relationships, "Relationship", "Relationships"))
+  if (c.between)
+    lines.push(
+      `then ${plural(c.between, "Relationship", "Relationships")} between new Concepts`
+    )
+  if (c.other)
+    lines.push(plural(c.other, "other suggestion", "other suggestions"))
+  return lines
 }

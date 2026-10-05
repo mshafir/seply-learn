@@ -6,11 +6,11 @@ import pg from "pg"
 import { needsDatabase, openView, screenshot, signUp } from "./helpers.ts"
 
 // WP-4.3: Proposals and the Suggestions tab. Ada imports the compute fixture
-// and an ask's Proposal is seeded (what WP-4.4's Grow will write): a new
+// and an ask's Proposal is seeded (what WP-4.4's Grow writes): a new
 // Concept, a Relationship from it to MLA, and a new MLA summary. The header
-// counts them; the tab groups them under the ask, and the canvas draws them
-// dashed. Accepting the Relationship includes its new Concept, shown before
-// confirming, as one Change. Ada then rewrites MLA's summary herself, so
+// counts them; the tab groups them under the ask, the new Concept as a
+// package with its Relationship nested under it, and the canvas draws them
+// dashed. Accepting the package is one Change. Ada then rewrites MLA's summary herself, so
 // the suggested one is stale and shows both versions; she dismisses it,
 // and the toast's Undo brings it back. Undoing the accept from History
 // makes both items pending again. Last, an MCP Proposal arriving (seeded:
@@ -69,7 +69,7 @@ const node = (page: Page, title: string) =>
     hasText: title,
   })
 
-test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", async ({
+test("suggestions: accept a package, stale, dismiss, undo; MCP toast", async ({
   page,
 }, testInfo) => {
   test.setTimeout(90_000)
@@ -164,9 +164,11 @@ test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", a
   const item = (id: string) =>
     panel.locator(`[data-testid=suggestion][data-item-id="${id}"]`)
   await expect(item("c-paged")).toContainText(`New Concept${PAGED}`)
-  await expect(item("r-paged")).toContainText(
-    `${PAGED} is needed to understand ${MLA}`
-  )
+  await expect(item("c-paged")).toHaveAttribute("data-entry", "package")
+  await expect(
+    item("c-paged").getByTestId("suggestion-relationship")
+  ).toContainText(`${PAGED} is needed to understand ${MLA}`)
+  await expect(panel.getByTestId("suggestion")).toHaveCount(2)
   await expect(
     node(page, MLA).locator("[data-concept]").first()
   ).toHaveAttribute("data-suggested", "true", {
@@ -174,12 +176,8 @@ test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", a
   })
   await screenshot(page, testInfo, "suggestions-tab")
 
-  // Accept the Relationship: its new Concept comes too, shown first.
-  await item("r-paged").getByRole("button", { name: "Accept" }).click()
-  const confirm = page.getByTestId("confirm-accept")
-  await expect(confirm.getByTestId("confirm-added")).toContainText(PAGED)
-  await screenshot(page, testInfo, "suggestions-dependencies")
-  await confirm.getByRole("button", { name: "Accept 2" }).click()
+  // Accept the package: the Concept and its Relationship, as one Change.
+  await item("c-paged").getByRole("button", { name: "Accept" }).click()
   await expect(
     page.getByRole("dialog", { name: "Accepted 2 suggestions" })
   ).toBeVisible()
@@ -296,5 +294,197 @@ test("suggestions: accept with dependencies, stale, dismiss, undo; MCP toast", a
   ).toHaveText("FlashAttention")
   await expect(button).toHaveAccessibleName("Suggestions · 4")
 
+  expect(errors).toEqual([])
+})
+
+/** An ask Grow could have written about QLoRA (fixtures/grow/qlora.proposal.json, cut down). */
+const QLORA_ASK = "What would I need to understand QLoRA?"
+const NF4 = "4-bit NormalFloat (NF4)"
+const DQ = "Double quantization"
+const PART_OF = "builtin:part-of"
+
+test("suggestions: Concept packages, waiting Relationships, cascading dismissals, Accept all", async ({
+  page,
+}, testInfo) => {
+  test.setTimeout(90_000)
+  const errors: string[] = []
+  page.on("pageerror", (err) => errors.push(err.message))
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await signUp(page, "Ada")
+  const me = (await (await page.request.get("/api/me")).json()).user.id
+  await page.goto("/")
+  await page.getByTestId("import-file").setInputFiles(COMPUTE)
+  await expect(page).toHaveURL(/\/e\/[^/]+$/)
+  await page
+    .getByRole("dialog", { name: /^Imported/ })
+    .locator("[data-slot=toast-close]")
+    .click()
+  const exp = new URL(page.url()).pathname.split("/")[2]!
+  const idOf = async (title: string) =>
+    (
+      await sql<{ id: string }>(
+        "select id from concepts where expedition_id = $1 and title = $2",
+        [exp, title]
+      )
+    )[0]!.id
+  const qlora = await idOf("QLoRA")
+  const quant = await idOf("Weight quantization")
+  const nf4 = ulid(Date.now())
+  const dq = ulid(Date.now() + 1)
+  const create = (id: string, title: string): OpBody => ({
+    kind: "concept.create",
+    target: id,
+    value: {
+      title,
+      kind: "builtin:idea",
+      summary: `${title}, in one line.`,
+    },
+  })
+  const link = (from: string, type: string, to: string): OpBody => ({
+    kind: "relationship.add",
+    target: relKey(from, type, to),
+    value: {},
+  })
+  await seedProposal(
+    exp,
+    me,
+    { id: "p-grow", origin: "ai", rationale: QLORA_ASK },
+    [
+      { id: "g-1", ops: [link(quant, PREREQ, qlora)] },
+      { id: "g-2", ops: [create(nf4, NF4)] },
+      { id: "g-3", ops: [create(dq, DQ)] },
+      { id: "g-4", ops: [link(nf4, PART_OF, qlora)] },
+      { id: "g-5", ops: [link(dq, PART_OF, qlora)] },
+      { id: "g-6", ops: [link(nf4, PREREQ, dq)] },
+    ]
+  )
+  await openView(page, /Learning path/)
+  await refocus(page)
+  const button = page.getByTestId("suggestions-button")
+  await expect(button).toHaveAccessibleName("Suggestions · 6")
+  await button.click()
+  const panel = page.getByTestId("side-panel")
+  const entry = (id: string) =>
+    panel.locator(`[data-testid=suggestion][data-item-id="${id}"]`)
+
+  // Two packages, each with its Relationship to QLoRA nested under it; the
+  // Relationship between the two new Concepts on its own, faded; the one
+  // between Concepts already here, ordinary.
+  await expect(panel.getByTestId("suggestion")).toHaveCount(4)
+  await expect(entry("g-1")).toHaveAttribute("data-entry", "item")
+  await expect(entry("g-2")).toHaveAttribute("data-entry", "package")
+  await expect(
+    entry("g-2").getByTestId("suggestion-relationship")
+  ).toContainText(`${NF4} is part of QLoRA`)
+  await expect(
+    entry("g-3").getByTestId("suggestion-relationship")
+  ).toContainText(`${DQ} is part of QLoRA`)
+  const between = entry("g-6")
+  await expect(between).toHaveAttribute("data-waiting", "true")
+  await expect(between.getByRole("button", { name: "Accept" })).toBeDisabled()
+  await between.getByTestId("suggestion-waiting").hover()
+  await expect(page.getByTestId("waiting-reason")).toHaveText(
+    `Accept ${NF4} and ${DQ} first`
+  )
+  await screenshot(page, testInfo, "suggestions-packages")
+  await page.mouse.move(0, 0)
+
+  // Dismissing NF4 dismisses what needs it; Undo brings them all back.
+  await entry("g-2").getByRole("button", { name: "Dismiss" }).click()
+  const dismissed = page.getByRole("dialog", {
+    name: "Dismissed 3 suggestions",
+  })
+  await expect(dismissed).toContainText(
+    "Including 2 suggestions that needed it."
+  )
+  await expect(panel.getByTestId("suggestion")).toHaveCount(2)
+  await expect(entry("g-6")).toHaveCount(0)
+  const statuses = () =>
+    sql<{ id: string; status: string }>(
+      "select id, status from proposal_items where expedition_id = $1 and proposal_id = 'p-grow' order by position",
+      [exp]
+    )
+  await expect
+    .poll(async () => (await statuses()).map((r) => r.status))
+    .toEqual([
+      "pending",
+      "dismissed",
+      "pending",
+      "dismissed",
+      "pending",
+      "dismissed",
+    ])
+  await dismissed.getByRole("button", { name: "Undo" }).click()
+  await expect(panel.getByTestId("suggestion")).toHaveCount(4)
+  await expect(button).toHaveAccessibleName("Suggestions · 6")
+
+  // Accept all says what it takes, in order; cancelled here.
+  await panel.getByRole("button", { name: "Accept all" }).click()
+  const confirm = page.getByTestId("confirm-accept")
+  await expect(confirm.getByTestId("confirm-all")).toHaveText(
+    [
+      "2 new Concepts, with 2 Relationships to Concepts already here",
+      "then 1 Relationship between new Concepts",
+      "1 other suggestion",
+    ].join("")
+  )
+  await screenshot(page, testInfo, "suggestions-accept-all")
+  await confirm.getByRole("button", { name: "Cancel" }).click()
+
+  // Accept NF4 without its Relationship (unticked: dismissed with it). The
+  // one between the new Concepts still waits, now only for Double quantization.
+  await entry("g-2")
+    .getByRole("checkbox", { name: `${NF4} is part of QLoRA` })
+    .click()
+  await expect(entry("g-2").getByTestId("left-out-note")).toBeVisible()
+  await entry("g-2").getByRole("button", { name: "Accept" }).click()
+  await expect(
+    page.getByRole("dialog", { name: "Accepted 1 suggestion" })
+  ).toBeVisible()
+  await expect
+    .poll(async () => (await statuses()).map((r) => r.status))
+    .toEqual([
+      "pending",
+      "accepted",
+      "pending",
+      "dismissed",
+      "pending",
+      "pending",
+    ])
+  await expect(entry("g-6")).toHaveAttribute("data-waiting", "true")
+  // Keyboard focus says it too.
+  await entry("g-3").getByRole("button", { name: "Dismiss" }).focus()
+  await page.keyboard.press("Tab")
+  await expect(entry("g-6").getByTestId("suggestion-waiting")).toBeFocused()
+  await expect(page.getByTestId("waiting-reason")).toHaveText(
+    `Accept ${DQ} first`
+  )
+
+  // Accept Double quantization: the Relationship between them is active.
+  await entry("g-3").getByRole("button", { name: "Accept" }).click()
+  await expect(
+    page.getByRole("dialog", { name: "Accepted 2 suggestions" })
+  ).toBeVisible()
+  await expect(entry("g-6")).not.toHaveAttribute("data-waiting", "true")
+  await expect(
+    entry("g-6").getByRole("button", { name: "Accept" })
+  ).toBeEnabled()
+  await screenshot(page, testInfo, "suggestions-unlocked")
+
+  // Accept all takes the rest, as one Change.
+  await panel.getByRole("button", { name: "Accept all" }).click()
+  await expect(confirm.getByTestId("confirm-all")).toHaveText(
+    "2 other suggestions"
+  )
+  await confirm.getByRole("button", { name: "Accept 2" }).click()
+  await expect(
+    page.getByRole("dialog", { name: "Accepted 2 suggestions" }).last()
+  ).toBeVisible()
+  await expect(panel).toContainText("Nothing to review")
+  const live = await sql<{ n: number }>(
+    "select count(*)::int as n from relationships where expedition_id = $1 and deleted_at is null and (from_id = $2 or to_id = $2)",
+    [exp, dq]
+  )
+  expect(live).toEqual([{ n: 2 }])
   expect(errors).toEqual([])
 })

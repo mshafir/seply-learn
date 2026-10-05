@@ -768,6 +768,7 @@ function ExpeditionFrame({
     setReviewBusy(true)
     reviewProposals(expeditionId, {
       accept: plan.ids,
+      ...(plan.dismiss.length && { dismiss: plan.dismiss }),
       overwrite: plan.stale.length > 0,
     })
       .then(async (r) => {
@@ -777,8 +778,8 @@ function ExpeditionFrame({
         const n = r.accepted.length
         toast.add({
           title: r.label ?? `Accepted ${suggestionsCount(n)}`,
-          description: r.included.length
-            ? `Including ${suggestionsCount(r.included.length)} ${r.included.length === 1 ? "it" : "they"} needed.`
+          description: r.dismissed.length
+            ? `Left out and dismissed ${suggestionsCount(r.dismissed.length)}.`
             : undefined,
           type: "success",
           actionProps: r.changeId
@@ -798,14 +799,18 @@ function ExpeditionFrame({
   const dismissSuggestions = (ids: string[]) => {
     setReviewBusy(true)
     reviewProposals(expeditionId, { dismiss: ids })
-      .then(async () => {
+      .then(async (r) => {
         await proposals.refresh()
         toast.add({
-          title: `Dismissed ${suggestionsCount(ids.length)}`,
+          title: `Dismissed ${suggestionsCount(r.dismissed.length)}`,
+          // Dismissing a Concept dismisses what depended on it.
+          description: r.cascaded.length
+            ? `Including ${suggestionsCount(r.cascaded.length)} that needed ${ids.length === 1 ? "it" : "them"}.`
+            : undefined,
           actionProps: {
             children: "Undo",
             onClick: () =>
-              reopenProposals(expeditionId, { itemIds: ids }).then(
+              reopenProposals(expeditionId, { itemIds: r.dismissed }).then(
                 () => proposals.refresh(),
                 failed("Couldn't bring them back")
               ),
@@ -831,7 +836,8 @@ function ExpeditionFrame({
           live: liveState,
           preview: preview?.client.engine.state ?? liveState,
           busy: reviewBusy,
-          plan: (ids) => planAccept(liveState, proposals.proposals, ids),
+          plan: (ids, opts) =>
+            planAccept(liveState, proposals.proposals, ids, opts),
           onAccept: acceptSuggestions,
           onDismiss: dismissSuggestions,
           tab: growTab ?? "suggestions",
