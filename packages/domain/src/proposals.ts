@@ -345,6 +345,240 @@ export function orderItems<T extends ProposalItemLike>(
   return out
 }
 
+// --- packages: how the Suggestions tab groups items ------------------------------
+//
+// Items stay one per reviewable unit as stored (spec §1.5). The tab groups
+// them, derived from their ops:
+//
+// - **A Concept package** per suggested new Concept: the item that creates
+//   it, with the items that only add to it (its article, edits of it), and
+//   nested under it the Relationships that connect it to Concepts in the
+//   map. Accepting the package accepts them together, as one Change; each
+//   nested Relationship can be left out.
+// - **A Relationship between suggested Concepts** (two or more of the
+//   Concepts it needs were suggested, by any item that wasn't dismissed) is
+//   its own entry. It waits (`waitsFor`) until every one of them is in the
+//   map: accepting it alone is refused until then (`waiting`).
+// - Anything else (a Relationship between Concepts in the map, an edit of
+//   one) is its own entry, as before.
+// - **Dismissing** an item that creates a Concept dismisses every item that
+//   needs that Concept (`withDependents`).
+
+/** An item as stored, with its review status (undefined: pending). */
+export type ProposalItemWithStatus = ProposalItemLike & {
+  status?: ItemReviewStatus
+}
+
+/** One entry of the Suggestions tab: a Concept package, or one item. */
+export type ProposalEntry = {
+  /** The entry's first item (a package's: the one that creates its Concept). */
+  id: string
+  kind: "package" | "item"
+  /** The Concepts a package brings into the map. */
+  concepts: string[]
+  /** Items accepted and dismissed together: a package's Concept, its article and edits; or the one item. */
+  items: string[]
+  /** A package's Relationships to Concepts in the map. Each can be left out. */
+  relationships: string[]
+  /**
+   * Suggested Concepts this entry needs that aren't in the map yet (another
+   * pending package creates them). While any are, it can't be accepted alone.
+   */
+  waitsFor: string[]
+}
+
+const isPending = (i: ProposalItemWithStatus) =>
+  i.status === undefined || i.status === "pending"
+
+const isRelationshipItem = (i: Pick<ProposalItemLike, "ops">) =>
+  i.ops.length > 0 && i.ops.every((op) => op.kind.startsWith("relationship."))
+
+/**
+ * The tab's entries for `items` (every item of the Proposals shown; reviewed
+ * ones only tell which Concepts were suggested), in the order of each
+ * entry's first pending item.
+ */
+export function proposalEntries(
+  state: DomainState,
+  items: readonly ProposalItemWithStatus[]
+): ProposalEntry[] {
+  const pending = items.filter(isPending)
+  const pos = new Map(pending.map((i, n) => [i.id, n]))
+  // Concepts a pending item creates (that aren't in the map), and Concepts
+  // any item that wasn't dismissed suggested.
+  const from = providers(pending)
+  const newConcept = (c: string) =>
+    !isLive(state.concepts[c]) && from.concepts.has(c)
+  const suggested = new Set<string>()
+  for (const i of items)
+    if (i.status !== "dismissed")
+      for (const c of itemRefs(i).creates) suggested.add(c)
+
+  const entries: ProposalEntry[] = []
+  const entryOf = new Map<string, ProposalEntry>()
+  for (const item of orderItems(state, pending)) {
+    const r = itemRefs(item)
+    // An item that changes a section another pending item creates joins
+    // that item's entry (an article's later edits).
+    const section = [...r.needsSections]
+      .filter((s) => !isLive(state.sections[s]))
+      .map((s) => from.sections.get(s))
+      .find((id) => id && id !== item.id && entryOf.has(id))
+    if (section) {
+      const e = entryOf.get(section)!
+      e.items.push(item.id)
+      entryOf.set(item.id, e)
+      continue
+    }
+    const waits = [...r.needs].filter(newConcept)
+    const creates = [...r.creates].filter((c) => !isLive(state.concepts[c]))
+    if (creates.length) {
+      const e: ProposalEntry = {
+        id: item.id,
+        kind: "package",
+        concepts: creates,
+        items: [item.id],
+        relationships: [],
+        waitsFor: waits,
+      }
+      entries.push(e)
+      entryOf.set(item.id, e)
+      continue
+    }
+    const among = [...r.needs].filter((c) => suggested.has(c))
+    const home =
+      among.length === 1 && waits.length === 1
+        ? entryOf.get(from.concepts.get(waits[0]!)!)
+        : undefined
+    if (home && home.kind === "package") {
+      if (isRelationshipItem(item)) home.relationships.push(item.id)
+      else home.items.push(item.id)
+      entryOf.set(item.id, home)
+      continue
+    }
+    const e: ProposalEntry = {
+      id: item.id,
+      kind: "item",
+      concepts: [],
+      items: [item.id],
+      relationships: [],
+      waitsFor: waits,
+    }
+    entries.push(e)
+    entryOf.set(item.id, e)
+  }
+  const byPos = (a: string, b: string) => pos.get(a)! - pos.get(b)!
+  for (const e of entries) e.relationships.sort(byPos)
+  return entries.sort((a, b) => byPos(a.id, b.id))
+}
+
+/**
+ * Of `ids` (items to accept together), those that need a Concept (or
+ * section) a pending item creates, isn't in the map, and isn't created by
+ * one of `ids`: they can't be accepted yet. Item id → what it waits for.
+ */
+export function waiting(
+  state: DomainState,
+  pool: readonly ProposalItemLike[],
+  ids: Iterable<string>
+): Map<string, string[]> {
+  const chosen = new Set(ids)
+  const all = providers(pool)
+  const mine = providers(pool.filter((i) => chosen.has(i.id)))
+  const out = new Map<string, string[]>()
+  for (const item of pool) {
+    if (!chosen.has(item.id)) continue
+    const r = itemRefs(item)
+    const w = [
+      ...[...r.needs].filter(
+        (c) =>
+          !isLive(state.concepts[c]) &&
+          all.concepts.has(c) &&
+          !mine.concepts.has(c)
+      ),
+      ...[...r.needsSections].filter(
+        (s) =>
+          !isLive(state.sections[s]) &&
+          all.sections.has(s) &&
+          !mine.sections.has(s)
+      ),
+    ]
+    if (w.length) out.set(item.id, w)
+  }
+  return out
+}
+
+/**
+ * The most of `ids` that can be accepted together, in an order that
+ * applies: without the items whose Concepts are gone (`staleness`), and
+ * without those that wait for a Concept no item left in creates (and so
+ * on). `left` are the ones taken out, in pool order.
+ */
+export function acceptable(
+  state: DomainState,
+  pool: readonly ProposalItemLike[],
+  ids: Iterable<string>
+): { ids: string[]; left: string[] } {
+  const asked = new Set(ids)
+  const keep = new Set(
+    pool
+      .filter((i) => asked.has(i.id) && !staleness(state, i, pool).gone.length)
+      .map((i) => i.id)
+  )
+  for (;;) {
+    const w = waiting(state, pool, keep)
+    if (!w.size) break
+    for (const id of w.keys()) keep.delete(id)
+  }
+  return {
+    ids: orderItems(
+      state,
+      pool.filter((i) => keep.has(i.id))
+    ).map((i) => i.id),
+    left: pool
+      .filter((i) => asked.has(i.id) && !keep.has(i.id))
+      .map((i) => i.id),
+  }
+}
+
+/**
+ * `dismissed`, plus every pending item that needs a Concept (or section)
+ * only they would have created, and so on: dismissing a Concept dismisses
+ * the Relationships, article and edits that depend on it. In pool order.
+ */
+export function withDependents(
+  state: DomainState,
+  pool: readonly ProposalItemLike[],
+  dismissed: Iterable<string>
+): string[] {
+  const out = new Set(dismissed)
+  for (;;) {
+    const gone = providers(pool.filter((i) => out.has(i.id)))
+    const left = providers(pool.filter((i) => !out.has(i.id)))
+    const more = pool.filter((i) => {
+      if (out.has(i.id)) return false
+      const r = itemRefs(i)
+      return (
+        [...r.needs].some(
+          (c) =>
+            !isLive(state.concepts[c]) &&
+            gone.concepts.has(c) &&
+            !left.concepts.has(c)
+        ) ||
+        [...r.needsSections].some(
+          (s) =>
+            !isLive(state.sections[s]) &&
+            gone.sections.has(s) &&
+            !left.sections.has(s)
+        )
+      )
+    })
+    if (!more.length) break
+    for (const i of more) out.add(i.id)
+  }
+  return pool.filter((i) => out.has(i.id)).map((i) => i.id)
+}
+
 // --- preview --------------------------------------------------------------------
 
 export type Suggested = {

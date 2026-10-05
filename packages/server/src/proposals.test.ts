@@ -1,5 +1,7 @@
-// Proposals (WP-4.3): list, review (one Change per action, dependencies
-// included, stale refused unless overwritten), dismiss and reopen.
+// Proposals (WP-4.3): list, review (one Change per action, a Relationship
+// refused until its Concepts are in the map or accepted with it, stale
+// refused unless overwritten), dismiss (cascading to what depends on it) and
+// reopen.
 import {
   makeOps,
   relKey,
@@ -143,16 +145,31 @@ describe("Proposals API", () => {
     expect((await call(vic, "/review", { dismiss: ["c-kv"] })).status).toBe(403)
   })
 
-  it("accepting a Relationship includes its new Concept, as one Change", async () => {
-    const { db, id, ada, call, list, history, published, pokes } = await setup()
+  it("refuses a Relationship whose new Concept isn't accepted with it", async () => {
+    const { db, id, ada, call, list } = await setup()
     const res = await call(ada, "/review", { accept: ["r-kv"] })
+    expect(res.status).toBe(409)
+    expect(await res.json()).toMatchObject({
+      error: "needs suggested Concepts",
+      waiting: ["r-kv"],
+    })
+    expect((await loadState(db, id))!.concepts.kv).toBeUndefined()
+    expect(
+      (await list(ada))[0]!.items.every((i) => i.status === "pending")
+    ).toBe(true)
+  })
+
+  it("accepting a Concept's package (its Concept and Relationship) is one Change", async () => {
+    const { db, id, ada, call, list, history, published, pokes } = await setup()
+    // Out of order on purpose: the server applies the Concept first.
+    const res = await call(ada, "/review", { accept: ["r-kv", "c-kv"] })
     expect(res.status).toBe(200)
     const r = await res.json()
     expect(r).toMatchObject({
       label: "Accepted 2 suggestions",
       accepted: ["c-kv", "r-kv"],
-      included: ["c-kv"],
       dismissed: [],
+      cascaded: [],
     })
     const state = (await loadState(db, id))!
     expect(state.concepts.kv?.title).toBe("KV cache")
@@ -210,7 +227,7 @@ describe("Proposals API", () => {
     const { ada, push, call } = await setup()
     await push(ada, [{ kind: "concept.delete", target: "attn" }])
     const res = await call(ada, "/review", {
-      accept: ["r-kv"],
+      accept: ["c-kv", "r-kv"],
       overwrite: true,
     })
     expect(res.status).toBe(409)
@@ -260,10 +277,81 @@ describe("Proposals API", () => {
     )
   })
 
+  it("dismissing a Concept dismisses what depends on it; Undo reopens them all", async () => {
+    const { db, id, ada, call, list } = await setup()
+    // A second new Concept and a Relationship between the two suggested ones.
+    await addProposalItems(db, {
+      expeditionId: id,
+      proposalId: "p1",
+      items: [
+        { id: "c-mla", ops: [concept("mla", "MLA")] },
+        { id: "r-between", ops: [rel("kv", "mla")] },
+      ],
+    })
+    // The Relationship between them waits for both Concepts.
+    const early = await call(ada, "/review", { accept: ["c-mla", "r-between"] })
+    expect(early.status).toBe(409)
+    expect((await early.json()).waiting).toEqual(["r-between"])
+
+    const d = await call(ada, "/review", { dismiss: ["c-kv"] })
+    expect(d.status).toBe(200)
+    expect(await d.json()).toMatchObject({
+      changeId: null,
+      dismissed: ["c-kv", "r-kv", "r-between"],
+      cascaded: ["r-kv", "r-between"],
+    })
+    const status = async () =>
+      Object.fromEntries(
+        (await list(ada))[0]!.items.map((i) => [i.id, i.status])
+      )
+    expect(await status()).toEqual({
+      "c-kv": "dismissed",
+      "r-kv": "dismissed",
+      "s-attn": "pending",
+      "c-mla": "pending",
+      "r-between": "dismissed",
+    })
+    const r = await call(ada, "/reopen", {
+      itemIds: ["c-kv", "r-kv", "r-between"],
+    })
+    expect((await r.json()).reopened.sort()).toEqual([
+      "c-kv",
+      "r-between",
+      "r-kv",
+    ])
+    // Accepting both packages and the Relationship between them is one Change.
+    const all = await call(ada, "/review", {
+      accept: ["r-between", "c-mla", "c-kv", "r-kv"],
+    })
+    expect(all.status).toBe(200)
+    expect((await all.json()).accepted).toEqual([
+      "c-kv",
+      "r-kv",
+      "c-mla",
+      "r-between",
+    ])
+    expect(
+      (await loadState(db, id))!.relationships[relKey("kv", PART_OF, "mla")]
+    ).toBeDefined()
+  })
+
+  it("Relationships left out of an accepted package are dismissed with it, and its Undo reopens them", async () => {
+    const { ada, call, list } = await setup()
+    const a = await (
+      await call(ada, "/review", { accept: ["c-kv"], dismiss: ["r-kv"] })
+    ).json()
+    expect(a).toMatchObject({ accepted: ["c-kv"], dismissed: ["r-kv"] })
+    const r = await call(ada, "/reopen", { changeId: a.changeId })
+    expect((await r.json()).reopened.sort()).toEqual(["c-kv", "r-kv"])
+    expect(
+      (await list(ada))[0]!.items.every((i) => i.status === "pending")
+    ).toBe(true)
+  })
+
   it("a needed item can't be dismissed in the same action", async () => {
     const { ada, call } = await setup()
     const res = await call(ada, "/review", {
-      accept: ["r-kv"],
+      accept: ["c-kv", "r-kv"],
       dismiss: ["c-kv"],
     })
     expect(res.status).toBe(409)

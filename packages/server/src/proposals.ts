@@ -6,19 +6,26 @@
 //   POST /expeditions/:id/proposals/review
 //        { accept?: itemId[], dismiss?: itemId[], overwrite?: boolean }
 //     → 200 ReviewResult
-//     → 409 { error, stale?: itemId[], gone?: itemId[], reviewed?: itemId[] }
+//     → 409 { error, stale?: itemId[], gone?: itemId[], reviewed?: itemId[],
+//             waiting?: itemId[] }
 //   POST /expeditions/:id/proposals/reopen  { changeId } | { itemIds }
 //     → 200 { reopened: itemId[] }
 //
-// Accepting is one transaction: the accepted items' ops (and the items they
-// depend on, `withDependencies`) are appended as ONE Change, "Accepted 3
-// suggestions", authored by the reviewer (origin `human`), and the items are
-// marked accepted with that Change's id. A stale item (a field it replaces
-// changed since) is refused unless `overwrite`; one whose Concept is gone is
-// refused always (dismiss it). Dismissing writes no ops (nothing in the
-// Expedition changes), so it is not a Change: the items are recorded as
-// dismissed, and `reopen` brings them back. Undoing an "Accepted …" Change
-// runs in the client (WP-4.2); the web then calls `reopen` with its id.
+// Accepting is one transaction: the accepted items' ops are appended, in an
+// order that applies, as ONE Change, "Accepted 3 suggestions", authored by
+// the reviewer (origin `human`), and the items are marked accepted with that
+// Change's id. An item that needs a suggested Concept which isn't in the map
+// is refused unless the item that creates it is accepted in the same request
+// (`waiting`: a Relationship waits for its Concepts' packages). A stale item
+// (a field it replaces changed since) is refused unless `overwrite`; one
+// whose Concept is gone is refused always (dismiss it). Dismissing writes no
+// ops (nothing in the Expedition changes), so it is not a Change: the items
+// are recorded as dismissed, with every pending item that depends on them
+// (`withDependents`: dismissing a Concept dismisses its Relationships), and
+// `reopen` brings them back. Items dismissed alongside an accept (a
+// package's Relationships left out) carry the accept's Change id, so undoing
+// it reopens them too. Undoing an "Accepted …" Change runs in the client
+// (WP-4.2); the web then calls `reopen` with its id.
 //
 // Writers: `createProposal` and `addProposalItems` (the article job; WP-4.4's
 // Grow asks; MCP `propose_changes` in M5), then `announceProposals`.
@@ -28,12 +35,14 @@ import {
   can,
   isStale,
   makeOps,
+  orderItems,
   proposalBase,
   proposalStatusOf,
   schema,
   staleness,
   ulid,
-  withDependencies,
+  waiting,
+  withDependents,
   type DomainState,
   type OpBody,
   type ProposalItemView,
@@ -59,6 +68,7 @@ export class ProposalError extends Error {
       stale?: string[]
       gone?: string[]
       reviewed?: string[]
+      waiting?: string[]
     }
   ) {
     super(body.message ?? body.error)
@@ -300,11 +310,12 @@ export type ReviewResult = {
   changeId: string | null
   label: string | null
   headSeq: number
-  /** Every item accepted, in the order applied (dependencies included). */
+  /** Every item accepted, in the order applied. */
   accepted: string[]
-  /** Items accepted because an accepted item needed them. */
-  included: string[]
+  /** Every item dismissed: those asked, and those that depended on them. */
   dismissed: string[]
+  /** Items dismissed because they depended on a dismissed one. */
+  cascaded: string[]
 }
 
 /** "Accepted 3 suggestions". */
@@ -351,8 +362,22 @@ export async function reviewProposals(
 
     const state = await loadState(tx, expeditionId)
     if (!state) throw new ProposalError(404, { error: "Expedition not found" })
-    const { ids: accepted, added } = withDependencies(state, pool, args.accept)
-    const dismissing = new Set(args.dismiss)
+    const waits = waiting(state, pool, args.accept)
+    if (waits.size)
+      throw new ProposalError(409, {
+        error: "needs suggested Concepts",
+        message:
+          "Accept the Concepts these suggestions need first, or with them.",
+        waiting: [...waits.keys()],
+      })
+    const byId = new Map(pool.map((i) => [i.id, i]))
+    const chosen = new Set(args.accept)
+    const accepted = orderItems(
+      state,
+      pool.filter((i) => chosen.has(i.id))
+    ).map((i) => i.id)
+    const dismissed = withDependents(state, pool, args.dismiss)
+    const dismissing = new Set(dismissed)
     const clash = accepted.filter((id) => dismissing.has(id))
     if (clash.length)
       throw new ProposalError(409, {
@@ -360,7 +385,6 @@ export async function reviewProposals(
         message: "A suggestion you accepted needs one you dismissed.",
         reviewed: clash,
       })
-    const byId = new Map(pool.map((i) => [i.id, i]))
     const stale: string[] = []
     const gone: string[] = []
     for (const id of accepted) {
@@ -431,20 +455,25 @@ export async function reviewProposals(
             inArray(proposalItems.id, accepted)
           )
         )
-    if (args.dismiss.length)
+    if (dismissed.length)
       await tx
         .update(proposalItems)
-        .set({ status: "dismissed", reviewedBy: userId, reviewedAt: at })
+        .set({
+          status: "dismissed",
+          changeId,
+          reviewedBy: userId,
+          reviewedAt: at,
+        })
         .where(
           and(
             eq(proposalItems.expeditionId, expeditionId),
-            inArray(proposalItems.id, args.dismiss)
+            inArray(proposalItems.id, dismissed)
           )
         )
     await refreshStatuses(
       tx,
       expeditionId,
-      [...accepted, ...args.dismiss].map((id) => byId.get(id)!.proposalId)
+      [...accepted, ...dismissed].map((id) => byId.get(id)!.proposalId)
     )
     if (!headSeq) {
       const [e] = await tx
@@ -458,8 +487,8 @@ export async function reviewProposals(
       label,
       headSeq,
       accepted,
-      included: added,
-      dismissed: args.dismiss,
+      dismissed,
+      cascaded: dismissed.filter((id) => !args.dismiss.includes(id)),
     }
     return { result, logged }
   })
@@ -499,8 +528,9 @@ export const ReopenBody = z.union([
 ])
 
 /**
- * Makes reviewed items pending again: those a Change accepted (after that
- * Change was undone), or dismissed ones by id (undoing a dismissal).
+ * Makes reviewed items pending again: those a Change accepted, and those
+ * dismissed with it (after that Change was undone), or dismissed ones by id
+ * (undoing a dismissal).
  */
 export async function reopenProposals(
   db: Db,
@@ -514,7 +544,7 @@ export async function reopenProposals(
     const which =
       "changeId" in args
         ? and(
-            eq(proposalItems.status, "accepted"),
+            inArray(proposalItems.status, ["accepted", "dismissed"]),
             eq(proposalItems.changeId, args.changeId)
           )
         : and(

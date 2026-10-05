@@ -114,8 +114,12 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **"Ask about this Expedition"** in the side panel, for owners and editors. The copy reads "Uses your API key", or "Uses this instance's AI" in instance-key mode.
 - **As the agent works,** its items appear **dashed on the canvas** and in the **Suggestions** tab. Each new Concept comes with a summary and overview. The ask can be stopped, and a per-ask spending cap applies (default $0.50).
 - **Suggestions tab:**
-  - Items are grouped by ask, with its author and rationale.
-  - **Accept / Dismiss per item**, or **Accept all**. Dependencies are included and shown before confirming.
+  - Items are grouped by ask, with its author and rationale, then into entries (§1.5).
+  - **A new Concept is one entry**, a package: its summary (and article, if suggested), with its Relationships to Concepts already in the Expedition nested under it, each with a checkbox (ticked). **Accept** takes the Concept and the ticked Relationships as one Change; unticked ones are dismissed with it. **Dismiss** dismisses the Concept and everything that depends on it; the toast says how many and its Undo brings them all back.
+  - **A Relationship between suggested Concepts** is its own entry, **faded, with Accept off**, until those Concepts are accepted. Hovering or focusing it says why: "Accept NF4 and QLoRA first". It can still be dismissed. Once they're accepted it reads and works like any other entry.
+  - Other items (a Relationship between Concepts already in the Expedition, an edit) are entries of their own, with **Accept / Dismiss**.
+  - **Accept all** per ask (and for everything, with more than one ask) asks first, in the tab's terms: "2 new Concepts, with 2 Relationships to Concepts already here", "then 1 Relationship between new Concepts", "1 other suggestion". It is one Change.
+  - The canvas draws every pending item dashed, faded entries included, so the reader sees where they would go.
   - Stale items show "changed since suggested" with both versions.
   - Each review action is one undoable Change.
 - **MCP Proposals** arrive with a toast ("Claude (via MCP) suggested 2 Concepts from a coding session: Review / Later").

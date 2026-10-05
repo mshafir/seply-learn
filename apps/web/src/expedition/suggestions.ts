@@ -1,14 +1,19 @@
-// What the Suggestions tab says (spec §3.8, WP-4.3): each pending item in
-// plain words ("New Concept · KV cache", "KV cache is part of Attention",
-// "Article for MLA · 3 sections"), whether it is stale ("changed since
-// suggested", with both versions), and what accepting it brings along.
+// What the Suggestions tab says (spec §1.5, §3.8): each ask's pending items
+// grouped into entries (`proposalEntries`): a package per suggested new
+// Concept, with its Relationships to Concepts already in the Expedition
+// nested under it; a Relationship between suggested Concepts on its own,
+// waiting until they're in; anything else on its own. Each in plain words
+// ("New Concept · KV cache", "KV cache is part of Attention", "Article for
+// MLA · 3 sections"), whether it is stale ("changed since suggested", with
+// both versions), and what accepting a selection does.
 // Reader-facing copy says "suggestions"; the code says Proposal.
 import {
   BUILTIN_REL_TYPE_BY_ID,
+  acceptable,
   isStale,
   parseRelKey,
+  proposalEntries,
   staleness,
-  withDependencies,
   type DomainState,
   type ProposalItemView,
   type ProposalView,
@@ -23,30 +28,69 @@ export type PendingItem = {
   staleness: Staleness
 }
 
-/** A Proposal (one ask) and its pending items, as the tab groups them. */
-export type SuggestionGroup = {
-  proposal: ProposalView
+/** One entry of the tab: a Concept package, or one item on its own. */
+export type SuggestionEntry = {
+  id: string
+  kind: "package" | "item"
+  /** Accepted and dismissed together: a package's Concept, its article and edits; or the one item. */
   items: PendingItem[]
+  /** A package's Relationships to Concepts in the Expedition; each can be left out. */
+  relationships: PendingItem[]
+  /** Suggested Concepts (ids) it needs that aren't in the Expedition yet: it can't be accepted until they are. */
+  waitsFor: string[]
 }
 
-/** The pending items of every Proposal, grouped by ask (oldest ask first). */
+/** A Proposal (one ask) and its pending entries, as the tab groups them. */
+export type SuggestionGroup = {
+  proposal: ProposalView
+  entries: SuggestionEntry[]
+  /** Its pending items. */
+  count: number
+}
+
+/** The pending items of every Proposal as entries, grouped by ask (oldest ask first). */
 export function groupPending(
   state: DomainState,
   proposals: readonly ProposalView[]
 ): SuggestionGroup[] {
   const pool = pendingPool(proposals)
-  return proposals
-    .map((proposal) => ({
-      proposal,
-      items: proposal.items
+  const pending = new Map(
+    proposals.flatMap((proposal) =>
+      proposal.items
         .filter((i) => i.status === "pending")
-        .map((item) => ({
-          item,
-          proposal,
-          staleness: staleness(state, item, pool),
-        })),
-    }))
-    .filter((g) => g.items.length > 0)
+        .map(
+          (item) =>
+            [
+              item.id,
+              { item, proposal, staleness: staleness(state, item, pool) },
+            ] as const
+        )
+    )
+  )
+  const at = (id: string) => pending.get(id)!
+  const entries = proposalEntries(
+    state,
+    proposals.flatMap((p) => p.items)
+  ).map((e): SuggestionEntry => ({
+    id: e.id,
+    kind: e.kind,
+    items: e.items.map(at),
+    relationships: e.relationships.map(at),
+    waitsFor: e.waitsFor,
+  }))
+  return proposals
+    .map((proposal) => {
+      const mine = entries.filter((e) => at(e.id).proposal.id === proposal.id)
+      return {
+        proposal,
+        entries: mine,
+        count: mine.reduce(
+          (n, e) => n + e.items.length + e.relationships.length,
+          0
+        ),
+      }
+    })
+    .filter((g) => g.entries.length > 0)
 }
 
 /** Every pending item, across Proposals. */
@@ -56,43 +100,73 @@ export const pendingPool = (proposals: readonly ProposalView[]) =>
 export const countPending = (proposals: readonly ProposalView[]) =>
   pendingPool(proposals).length
 
+/** The ids an entry accepts: its items and the Relationships not left out. */
+export const entryIds = (e: SuggestionEntry, leftOut?: ReadonlySet<string>) => [
+  ...e.items.map((i) => i.item.id),
+  ...e.relationships.map((i) => i.item.id).filter((id) => !leftOut?.has(id)),
+]
+
 export type AcceptPlan = {
   /** Everything to accept, in the order it applies. */
   ids: string[]
-  /** Items included because an accepted one needs them (shown before confirming). */
-  added: string[]
+  /** A package's Relationships left out: dismissed in the same action. */
+  dismiss: string[]
   /** Items that changed since suggested: accepting overwrites them. */
   stale: string[]
-  /** Items left out: something they need is gone. They stay pending. */
+  /** Items left out: something they need is gone, or isn't accepted with them. They stay pending. */
   skipped: string[]
+  /** What it accepts, in the tab's terms (for the Accept all dialog). */
+  counts: {
+    /** New Concepts (packages, with their articles and edits). */
+    concepts: number
+    /** Their Relationships to Concepts already in the Expedition. */
+    relationships: number
+    /** Relationships between suggested Concepts. */
+    between: number
+    /** Everything else (edits, Relationships between Concepts in the Expedition). */
+    other: number
+  }
+  /** Accept all: always confirmed in a dialog. */
+  all: boolean
 }
 
 /**
- * What accepting `selected` does: its dependencies, which of them are stale
- * (an explicit overwrite) and which can't be accepted at all.
+ * What accepting `selected` (with `dismiss`, a package's Relationships left
+ * out) does: in which order, which items are stale (an explicit overwrite)
+ * and which can't be accepted with it (gone, or waiting for a Concept that
+ * isn't accepted with it).
  */
 export function planAccept(
   state: DomainState,
   proposals: readonly ProposalView[],
-  selected: readonly string[]
+  selected: readonly string[],
+  opts: { dismiss?: readonly string[]; all?: boolean } = {}
 ): AcceptPlan {
   const pool = pendingPool(proposals)
-  const how = new Map(pool.map((i) => [i.id, staleness(state, i, pool)]))
-  const gone = (id: string) => !!how.get(id)?.gone.length
-  // An item that can't apply, or that needs one that can't, stays pending.
-  const ok: string[] = []
-  const skipped: string[] = []
-  for (const id of selected) {
-    const needs = withDependencies(state, pool, [id]).ids
-    if (needs.some(gone)) skipped.push(id)
-    else ok.push(id)
+  const { ids, left } = acceptable(state, pool, selected)
+  const byId = new Map(pool.map((i) => [i.id, i]))
+  const taking = new Set(ids)
+  const counts = { concepts: 0, relationships: 0, between: 0, other: 0 }
+  for (const e of proposalEntries(
+    state,
+    proposals.flatMap((p) => p.items)
+  )) {
+    const its = e.items.filter((id) => taking.has(id)).length
+    const rels = e.relationships.filter((id) => taking.has(id)).length
+    if (e.kind === "package") {
+      // Its article and edits go with it.
+      if (taking.has(e.id)) counts.concepts += e.concepts.length
+      counts.relationships += rels
+    } else if (e.waitsFor.length) counts.between += its
+    else counts.other += its
   }
-  const { ids, added } = withDependencies(state, pool, ok)
   return {
     ids,
-    added,
-    stale: ids.filter((id) => isStale(how.get(id)!)),
-    skipped,
+    dismiss: [...(opts.dismiss ?? [])],
+    stale: ids.filter((id) => isStale(staleness(state, byId.get(id)!, pool))),
+    skipped: left,
+    counts,
+    all: !!opts.all,
   }
 }
 
@@ -218,6 +292,19 @@ function listWords(xs: string[]) {
   return capitalize(`${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`)
 }
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+/** Why a Relationship between suggested Concepts can't be accepted yet: "Accept NF4 and QLoRA first". `state` should be the preview, so new Concepts have titles. */
+export function waitsForPhrase(
+  state: DomainState,
+  conceptIds: readonly string[]
+): string {
+  const names = conceptIds.map((id) => titleOf(state, id))
+  const list =
+    names.length <= 1
+      ? (names[0] ?? "")
+      : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
+  return `Accept ${list} first`
+}
 
 /** A stale field's two versions, as text. */
 export function staleVersions(

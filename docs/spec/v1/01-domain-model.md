@@ -99,9 +99,16 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
 
 - A **pending op batch outside the log.** It carries an author, an origin (in-app AI or MCP), a **rationale** (the ask) and items.
 - Each item records the **base**: the value it expected to replace. If the target has changed since, the item is `stale` and shows "changed since suggested" with both versions. Accepting a stale item is an explicit overwrite. New Concepts and Relationships go stale only if an endpoint was deleted.
-- **Review:** accept or dismiss per item, or accept all.
-  - Accepting a Relationship to a new Concept includes that Concept, shown before confirming.
-  - Each review action commits **one undoable Change**.
+- **Items** stay one reviewable unit each as stored (a new Concept with its summary and overview; each Relationship; an article; an existing Concept's edits). Review groups them, derived from their ops, never stored:
+  - **A Concept package** per suggested new Concept: the item that creates it, the items that only add to it (its article, edits of it), and the Relationships that connect it to Concepts already in the Expedition. They are reviewed together.
+  - **A Relationship between suggested Concepts** (two or more of its Concepts were suggested) is its own entry. It **can't be accepted until every Concept it needs is in the Expedition**, or is accepted in the same review action.
+  - Anything else (a Relationship between Concepts already in the Expedition, an edit of one) is its own entry.
+- **Review:** accept or dismiss per entry, or accept all.
+  - Accepting a package accepts its Concept and its Relationships together. Any of its Relationships can be left out first; those are dismissed in the same action.
+  - An item that needs a suggested Concept which isn't in the Expedition is refused unless the item that creates it is accepted with it. The server enforces this, for the app, the API and MCP alike.
+  - **Dismissing a Concept dismisses everything that depends on it:** its Relationships (nested or between suggested Concepts), its article and its edits. Undoing the dismissal brings them all back.
+  - Accept all accepts every package, then every Relationship that becomes acceptable, in dependency order.
+  - Each review action commits **one undoable Change**. Undoing it makes its items pending again, including Relationships left out of it.
   - Dismissed items are recorded as dismissed.
   - Proposals never expire.
 - **What creates a Proposal:**

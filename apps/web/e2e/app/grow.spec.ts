@@ -9,7 +9,8 @@ import { needsDatabase, openView, screenshot, signUp } from "./helpers.ts"
 // Worker runs `grow` jobs with a test-only script; no provider, no key): the
 // agent suggests two Concepts and three Relationships, a step at a time.
 // They stream into the Ask tab and dashed into the Techniques table while it
-// works, and the header counts them. Accept all makes one Change; its Undo
+// works, and the header counts them. Suggestions shows each new Concept as
+// a package with its Relationship to QLoRA. Accept all makes one Change; its Undo
 // takes them out again and makes them pending. A second ask is stopped
 // mid-way: what streamed is kept, nothing more arrives, and Activity says
 // who asked and that it stopped.
@@ -188,8 +189,22 @@ test("Grow: an ask streams dashed suggestions; accept all, then undo", async ({
   await expect(panel.getByTestId("panel-eyebrow")).toHaveText("Suggestions")
   const group = panel.getByTestId("suggestion-group")
   await expect(group.getByTestId("suggestion-rationale")).toHaveText(ASK)
-  await expect(group.getByTestId("suggestion")).toHaveCount(5)
+  // Two Concept packages, each with its Relationship to QLoRA, and the
+  // Relationship between Concepts already here.
+  await expect(group.getByTestId("suggestion")).toHaveCount(3)
+  const packages = group.locator("[data-testid=suggestion][data-entry=package]")
+  await expect(packages).toHaveCount(2)
+  await expect(
+    packages.first().getByTestId("suggestion-relationship")
+  ).toContainText(`${NF4} is needed to understand QLoRA`)
+  await screenshot(page, testInfo, "grow-suggestions")
   await group.getByRole("button", { name: "Accept all" }).click()
+  const confirm = page.getByTestId("confirm-accept")
+  await expect(confirm.getByTestId("confirm-all")).toHaveText(
+    "2 new Concepts, with 2 Relationships to Concepts already here" +
+      "1 other suggestion"
+  )
+  await confirm.getByRole("button", { name: "Accept 5" }).click()
   const accepted = page.getByRole("dialog", { name: "Accepted 5 suggestions" })
   await expect(accepted).toBeVisible()
   await expect.poll(nf4Rows).toEqual([{ deleted: false }])
