@@ -257,3 +257,102 @@ test("edit fields and Relationships in place, hide in one View, remove a Kind in
   await expect(page.getByTestId("panel-eyebrow")).toContainText(/idea/i)
   await saved(page)
 })
+
+test("edit an overview in the rich editor: bold, a Concept link, a list", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await signUp(page, "Editor")
+  await importCompute(page)
+  await openView(page, /Outline/)
+
+  await line(page, "Block diffusion").locator("[data-concept]").first().click()
+  await expect(title(page)).toHaveText("Block diffusion")
+  const before = (await panel(page).getByTestId("overview").innerText())
+    .trim()
+    .slice(0, 40)
+  await panel(page).getByTestId("concept-edit").click()
+  const editor = panel(page).getByTestId("concept-editor")
+  const overview = editor.getByRole("textbox", { name: "Overview" })
+  // The editor loads on demand, with the overview's markdown as rich text.
+  await expect(overview).toBeVisible()
+  await expect(overview).toContainText(before)
+  await expect(overview).not.toContainText("**")
+  await expect(overview).not.toContainText("](#c/")
+  const toolbar = editor.getByRole("toolbar", { name: "Formatting" }).first()
+
+  // At the end: a bold sentence, a Concept link, then a bulleted list.
+  // A click just past the end of the last line puts the caret at the end.
+  const lastBlock = overview.locator(":scope > *").last()
+  const box = (await lastBlock.boundingBox())!
+  await lastBlock.click({ position: { x: box.width - 2, y: box.height - 4 } })
+  await page.keyboard.press("End")
+  await page.keyboard.press("Enter")
+  await toolbar.getByRole("button", { name: "Bold" }).click()
+  await page.keyboard.type("Bold claim.")
+  await toolbar.getByRole("button", { name: "Bold" }).click()
+  await page.keyboard.press("Enter")
+  await page.keyboard.type("Compare ")
+  await toolbar.getByRole("button", { name: "Link" }).click()
+  const linkForm = page.getByTestId("link-form")
+  await linkForm.getByPlaceholder("Search Concepts").fill("Gemini Diff")
+  await page.getByRole("option", { name: "Gemini Diffusion" }).click()
+  await expect(linkForm).toHaveCount(0)
+  await expect(overview.locator("a[data-concept-link]").last()).toHaveText(
+    "Gemini Diffusion"
+  )
+  await page.keyboard.press("Enter")
+  await toolbar.getByRole("button", { name: "Bulleted list" }).click()
+  await page.keyboard.type("First point")
+  await page.keyboard.press("Enter")
+  await page.keyboard.type("Second point")
+  await screenshot(page, testInfo, "markdown-editor")
+
+  // Blur writes it; leaving Edit mode shows it rendered.
+  await title(page).click()
+  await saved(page)
+  await panel(page).getByTestId("concept-edit").click()
+  const rendered = panel(page).getByTestId("overview")
+  const link = rendered.locator(
+    'a[data-concept-link]:text-is("Gemini Diffusion")'
+  )
+  const check = async () => {
+    await expect(rendered).toContainText(before)
+    await expect(rendered.locator("strong").last()).toHaveText("Bold claim.")
+    await expect(link).toHaveCount(1)
+    await expect(rendered.locator("ul > li")).toHaveText([
+      "First point",
+      "Second point",
+    ])
+    await expect(rendered).not.toContainText("**")
+  }
+  await check()
+  await screenshot(page, testInfo, "markdown-rendered")
+
+  // Kept: after a reload it renders the same, and the link still navigates.
+  await page.reload()
+  await openView(page, /Outline/)
+  await line(page, "Block diffusion").locator("[data-concept]").first().click()
+  await expect(title(page)).toHaveText("Block diffusion")
+  await check()
+  await link.click()
+  await expect(title(page)).toHaveText("Gemini Diffusion")
+
+  // An article section's table and lists edit as a table and lists.
+  await openView(page, /Anatomy/)
+  await canvas(page)
+    .getByRole("button", { name: "KV-cache", exact: true })
+    .click()
+  await expect(title(page)).toHaveText("KV-cache")
+  await panel(page).getByTestId("concept-edit").click()
+  await panel(page)
+    .getByRole("button", { name: /^Edit the article/ })
+    .click()
+  const sections = panel(page)
+    .getByTestId("article-editor")
+    .getByRole("textbox", { name: "Text" })
+  await expect(sections.locator("table").first()).toBeVisible()
+  await expect(sections.first()).not.toContainText("|---")
+  await sections.locator("table").first().scrollIntoViewIfNeeded()
+  await screenshot(page, testInfo, "markdown-editor-table")
+})
