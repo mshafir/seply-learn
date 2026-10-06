@@ -183,7 +183,10 @@ describe("Fork", () => {
     ])
     const added = await s.call(s.ada, `/api/sources/${s.id}`, {
       method: "POST",
-      body: { type: "paste", text: "User: what is MLA?\nAssistant: A cache trick." },
+      body: {
+        type: "paste",
+        text: "User: what is MLA?\nAssistant: A cache trick.",
+      },
     })
     expect(added.status).toBe(201)
     const { source } = (await added.json()) as { source: { id: string } }
@@ -210,7 +213,10 @@ describe("Fork", () => {
       .select()
       .from(schema.expeditions)
       .where(eq(schema.expeditions.id, fork.expedition.id))
-    expect(row).toMatchObject({ ownerId: s.bob.id, forkedFrom: fork.forkedFrom })
+    expect(row).toMatchObject({
+      ownerId: s.bob.id,
+      forkedFrom: fork.forkedFrom,
+    })
 
     // A fresh history: one Change, Bob's.
     const history = (await (
@@ -221,7 +227,7 @@ describe("Fork", () => {
     ])
 
     // The same Concepts and Relationships, under fresh ids.
-    const state = await loadState(s.db, fork.expedition.id)
+    const state = (await loadState(s.db, fork.expedition.id))!
     const titles = Object.values(state.concepts)
       .filter(isLive)
       .map((c) => c.title)
@@ -245,7 +251,7 @@ describe("Fork", () => {
     await s.push(s.ada, "Renamed", [
       { kind: "expedition.set", target: s.id, path: "title", value: "Changed" },
     ])
-    expect((await loadState(s.db, fork.expedition.id)).expedition.title).toBe(
+    expect((await loadState(s.db, fork.expedition.id))!.expedition.title).toBe(
       "Compute"
     )
   })
@@ -270,7 +276,7 @@ describe("Fork", () => {
       .from(schema.changes)
       .where(eq(schema.changes.id, first))
     expect(fork.forkedFrom).toEqual({ exp: s.id, seq: change!.lastSeq })
-    const state = await loadState(s.db, fork.expedition.id)
+    const state = (await loadState(s.db, fork.expedition.id))!
     expect(state.expedition.title).toBe("Compute")
     expect(
       Object.values(state.concepts)
@@ -321,18 +327,22 @@ describe("Trash", () => {
 
     // Gone from both Libraries and unreadable; only Ada's Trash lists it.
     const library = async (u: TestUser) =>
-      ((await (await s.call(u, "/api/expeditions")).json()) as {
-        expeditions: { id: string }[]
-      }).expeditions
+      (
+        (await (await s.call(u, "/api/expeditions")).json()) as {
+          expeditions: { id: string }[]
+        }
+      ).expeditions
     const trash = async (u: TestUser) =>
-      ((await (await s.call(u, "/api/expeditions/trash")).json()) as {
-        expeditions: TrashedCard[]
-      }).expeditions
+      (
+        (await (await s.call(u, "/api/expeditions/trash")).json()) as {
+          expeditions: TrashedCard[]
+        }
+      ).expeditions
     expect(await library(s.ada)).toEqual([])
     expect(await library(s.bob)).toEqual([])
-    expect(
-      (await s.call(s.bob, `/api/pull?expedition=${s.id}`)).status
-    ).toBe(404)
+    expect((await s.call(s.bob, `/api/pull?expedition=${s.id}`)).status).toBe(
+      404
+    )
     const [card] = await trash(s.ada)
     expect(card).toMatchObject({ id: s.id, title: "Compute", purgeAfter })
     expect(await trash(s.bob)).toEqual([])

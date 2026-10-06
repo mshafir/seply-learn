@@ -5,7 +5,8 @@
 // short summary, the Concept and View counts and the date, and a pin to
 // "Keep available offline" (spec §2.9). Offline, the Library lists the
 // Expeditions saved on this device. Global search, New and Import sit in the
-// header. Trash comes with its work package.
+// header. **Trash** (WP-5.2), for owners: what I moved there, with when it
+// will be deleted for good (30 days on) and Restore.
 import * as React from "react"
 import {
   BookOpenIcon,
@@ -13,6 +14,7 @@ import {
   CompassIcon,
   PinIcon,
   PlusIcon,
+  RotateCcwIcon,
   UploadIcon,
 } from "lucide-react"
 import { Link, useLocation } from "wouter"
@@ -66,8 +68,11 @@ import {
   createExpedition,
   importExpedition,
   listExpeditions,
+  listTrash,
+  restoreExpedition,
   type ContinueReadingItem,
   type LibraryCard,
+  type TrashedCard,
 } from "@/lib/api.ts"
 import { formatAsOf, setKeptOffline, useOfflineEntries } from "@/lib/offline.ts"
 import { useUser } from "@/lib/session.ts"
@@ -335,7 +340,62 @@ const SECTION_IDS = {
   yours: "your-expeditions",
   shared: "shared-with-you",
   drafts: "drafts",
+  trash: "trash",
 } as const
+
+/**
+ * Trash (spec §3.2): my Expeditions there, soonest deleted first, each with
+ * Restore. Nobody can open them until they're restored.
+ */
+function Trash({
+  cards,
+  onRestore,
+}: {
+  cards: TrashedCard[]
+  onRestore: (card: TrashedCard) => Promise<void>
+}) {
+  const [busy, setBusy] = React.useState<string | null>(null)
+  return (
+    <ul
+      aria-label="Trash"
+      data-testid="trash-list"
+      className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,18rem),1fr))] gap-4"
+    >
+      {cards.map((card) => (
+        <li key={card.id}>
+          <Card size="sm" data-testid="trash-card" className="h-full">
+            <CardHeader>
+              <CardTitle className="font-reading text-lg font-medium text-muted-foreground">
+                {card.title || "Untitled Expedition"}
+              </CardTitle>
+              <CardDescription>
+                Moved to Trash: {when(card.deletedAt)}. Deleted for good on{" "}
+                {dateFormat.format(new Date(card.purgeAfter))}.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="mt-auto gap-3 text-muted-foreground">
+              <span data-testid="card-counts">{countsLabel(card.counts)}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                disabled={busy !== null}
+                onClick={async () => {
+                  setBusy(card.id)
+                  await onRestore(card)
+                  setBusy(null)
+                }}
+              >
+                {busy === card.id ? <Spinner /> : <RotateCcwIcon />}
+                Restore
+              </Button>
+            </CardFooter>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 function Section({
   id,
@@ -413,11 +473,14 @@ export function LibraryScreen() {
     [offline]
   )
 
+  const [trash, setTrash] = React.useState<TrashedCard[]>([])
   const load = React.useCallback(() => {
     listExpeditions().then(
       (expeditions) => setList({ status: "ready", expeditions }),
       (error: Error) => setList({ status: "error", error })
     )
+    // Trash is secondary: offline or failing, it just isn't shown.
+    listTrash().then(setTrash, () => setTrash([]))
   }, [])
   React.useEffect(load, [load])
 
@@ -453,6 +516,24 @@ export function LibraryScreen() {
           type: "error",
         })
     )
+  }
+
+  const onRestore = async (card: TrashedCard) => {
+    try {
+      await restoreExpedition(card.id)
+      toast.add({
+        title: `Restored ${card.title || "the Expedition"}`,
+        description: "Everyone it was shared with can open it again.",
+        type: "success",
+      })
+      load()
+    } catch (e) {
+      toast.add({
+        title: "Couldn't restore it",
+        description: (e as Error).message,
+        type: "error",
+      })
+    }
   }
 
   const onNew = async () => {
@@ -535,6 +616,7 @@ export function LibraryScreen() {
       count: all.shared.length,
     },
     { id: SECTION_IDS.drafts, label: "Drafts", count: all.drafts.length },
+    { id: SECTION_IDS.trash, label: "Trash", count: trash.length },
   ]
 
   return (
@@ -564,7 +646,7 @@ export function LibraryScreen() {
       </header>
 
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 lg:flex-row">
-        {list.status === "ready" && cards.length > 0 && (
+        {list.status === "ready" && (cards.length > 0 || trash.length > 0) && (
           <aside className="flex shrink-0 flex-col gap-6 lg:sticky lg:top-22 lg:w-52 lg:self-start">
             <nav
               aria-label="Library sections"
@@ -695,6 +777,16 @@ export function LibraryScreen() {
           {sections.drafts.length > 0 && (
             <Section id={SECTION_IDS.drafts} title="Drafts">
               {grid("Drafts", sections.drafts)}
+            </Section>
+          )}
+
+          {!unreachable && trash.length > 0 && (
+            <Section id={SECTION_IDS.trash} title="Trash">
+              <p className="text-muted-foreground">
+                Expeditions you deleted. Each is deleted for good, Sources
+                included, 30 days after it was moved here.
+              </p>
+              <Trash cards={trash} onRestore={onRestore} />
             </Section>
           )}
         </main>

@@ -7,12 +7,7 @@
 // The callers: the owner, an editor, a viewer, a signed-in stranger (not a
 // Collaborator) and an anonymous reader. Private Expeditions are 404 to
 // whoever can't read them, so a stranger can't tell one exists.
-import {
-  makeOps,
-  schema,
-  ulidSequence,
-  type Visibility,
-} from "@seply/domain"
+import { makeOps, schema, ulidSequence, type Visibility } from "@seply/domain"
 import { eq } from "drizzle-orm"
 import { beforeAll, describe, expect, it } from "vitest"
 import { memoryBlobStore } from "./blobs.ts"
@@ -473,8 +468,7 @@ async function check(
     expect([401, 403, 404], `${caller}: ${await res.text()}`).not.toContain(
       res.status
     )
-  else
-    expect(res.status, `${caller}: ${await res.clone().text()}`).toBe(cell)
+  else expect(res.status, `${caller}: ${await res.clone().text()}`).toBe(cell)
 }
 
 describe("the permissions matrix against the API routes", () => {

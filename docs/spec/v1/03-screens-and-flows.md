@@ -132,8 +132,11 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   - **Invite** by email as editor or viewer. An **email** is sent when a mailer is configured, and a **copyable invite link** is always offered. The invitee finds it under "Shared with you" with a **New** badge. Editors can invite. Only the owner changes roles or removes people.
     - *(WP-5.1)* An account with the invited email gets it at once; anyone else accepts through the link, which works once, for whichever signed-in account opens it first. Accepting never lowers a role. An editor cancels only the invites they sent. Anyone but the owner may **leave**. Someone removed or given another role is kicked from the live room and reopens with their new access.
   - **Visibility:** private / unlisted / public, **owner only**. A public or unlisted link shows the **latest state**, live.
+    - *(WP-5.2)* Widening it from private asks first, saying the Sources become readable too. An unlisted or public Expedition shows its link to copy. Making it private again kicks every reader of the link from the live room.
   - A plain warning: **"Anyone who can view can also see the Sources."**
   - **Fork** (anyone signed in who can view): make your own copy.
+    - *(WP-5.2)* Signed-in readers of a link open the share dialog too, read-only, to Fork. History has **Fork from here** on each Change (owners and editors: forking as of a Change needs History). A Fork's single Change reads "Forked from “…”".
+  - *(WP-5.2)* **Move to Trash** (owner only), confirmed in the dialog. In Trash nobody can open it; the Library's Trash restores it for 30 days, then a daily job purges it.
   - **Export** to JSON or a Markdown folder.
 - **Library cards** show who an Expedition is shared with.
 

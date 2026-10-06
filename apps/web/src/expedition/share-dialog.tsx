@@ -4,14 +4,25 @@
 // role, remove someone, make an editor the owner); pending invites; and the
 // plain warning that anyone who can view sees the Sources. Editors invite;
 // only the owner changes roles or removes people. Anyone but the owner may
-// leave. Visibility, Fork and Export arrive with their work packages.
+// leave. WP-5.2 adds **General access** (Visibility: private, unlisted or
+// public, the owner's to change; making it viewable beyond the people with
+// access asks first, because the Sources become readable too) with the
+// link to copy, **Fork** (anyone signed in who can view) and the owner's
+// **Move to Trash**. Signed-in readers of a link open the dialog too: they
+// see who has access and the Visibility, and can Fork. Export arrives with
+// its work package.
 import * as React from "react"
 import {
   CheckIcon,
   CopyIcon,
   CrownIcon,
   EllipsisIcon,
+  GitForkIcon,
+  GlobeIcon,
+  LinkIcon,
+  LockIcon,
   LogOutIcon,
+  Trash2Icon,
   UserMinusIcon,
   XIcon,
 } from "lucide-react"
@@ -54,19 +65,25 @@ import {
 } from "@seply/ui/components/select"
 import { Separator } from "@seply/ui/components/separator"
 import { Skeleton } from "@seply/ui/components/skeleton"
+import { Spinner } from "@seply/ui/components/spinner"
 
 import {
   changeRole,
+  forkExpedition,
   getSharing,
   invite,
   removeCollaborator,
   revokeInvite,
+  setVisibility,
   transferOwnership,
+  trashExpedition,
+  type ForkResult,
   type InviteCreated,
   type InviteRole,
   type Role,
   type Sharing,
   type SharingPerson,
+  type Visibility,
 } from "@/lib/api.ts"
 import { initials } from "@/screens/library-sections.ts"
 
@@ -81,6 +98,35 @@ const ROLE_LABEL: Record<Role, string> = {
   viewer: "Viewer",
 }
 
+const VISIBILITY: Record<
+  Visibility,
+  { label: string; hint: string; icon: typeof LockIcon }
+> = {
+  private: {
+    label: "Private",
+    hint: "Only the people with access can open it.",
+    icon: LockIcon,
+  },
+  unlisted: {
+    label: "Anyone with the link",
+    hint: "Anyone with the link can read it, without signing in.",
+    icon: LinkIcon,
+  },
+  public: {
+    label: "Public",
+    hint: "Anyone can find it in search and read it, without signing in.",
+    icon: GlobeIcon,
+  },
+}
+
+const VISIBILITY_ITEMS = (Object.keys(VISIBILITY) as Visibility[]).map(
+  (value) => ({ value, label: VISIBILITY[value].label })
+)
+
+/** The link a reader of an unlisted or public Expedition opens. */
+const expeditionLink = (expeditionId: string) =>
+  `${window.location.origin}/e/${expeditionId}`
+
 export function ShareDialog({
   open,
   onOpenChange,
@@ -89,6 +135,8 @@ export function ShareDialog({
   meId,
   onAccessChanged,
   onLeft,
+  onForked,
+  onTrashed,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -99,6 +147,10 @@ export function ShareDialog({
   onAccessChanged: () => void
   /** I left the Expedition. */
   onLeft: () => void
+  /** I forked it: open my copy. */
+  onForked: (fork: ForkResult) => void
+  /** I moved it to Trash. */
+  onTrashed: () => void
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -116,6 +168,8 @@ export function ShareDialog({
             meId={meId}
             onAccessChanged={onAccessChanged}
             onLeft={onLeft}
+            onForked={onForked}
+            onTrashed={onTrashed}
           />
         )}
       </DialogContent>
@@ -136,11 +190,15 @@ function ShareBody({
   meId,
   onAccessChanged,
   onLeft,
+  onForked,
+  onTrashed,
 }: {
   expeditionId: string
   meId: string
   onAccessChanged: () => void
   onLeft: () => void
+  onForked: (fork: ForkResult) => void
+  onTrashed: () => void
 }) {
   const [load, setLoad] = React.useState<Load>({ status: "loading" })
   const [error, setError] = React.useState<string | null>(null)
@@ -282,7 +340,280 @@ function ShareBody({
           </ul>
         </section>
       )}
+
+      <Separator />
+      <GeneralAccess
+        expeditionId={expeditionId}
+        visibility={sharing.visibility}
+        canChange={may.changeVisibility}
+        onChange={(visibility) =>
+          act(() => setVisibility(expeditionId, visibility))
+        }
+      />
+
+      {(may.fork || may.trashExpedition) && (
+        <>
+          <Separator />
+          <ExpeditionActions
+            canFork={may.fork}
+            canTrash={may.trashExpedition}
+            onFork={async () => {
+              setError(null)
+              try {
+                onForked(await forkExpedition(expeditionId))
+              } catch (err) {
+                setError(reasonOf(err))
+              }
+            }}
+            onTrash={async () => {
+              setError(null)
+              try {
+                await trashExpedition(expeditionId)
+                onTrashed()
+              } catch (err) {
+                setError(reasonOf(err))
+              }
+            }}
+          />
+        </>
+      )}
     </div>
+  )
+}
+
+/**
+ * Who can open it (spec §3.9): the owner picks private, unlisted or public;
+ * everyone else reads it. Opening it beyond the people with access asks
+ * first, since the Sources become readable too. When it is unlisted or
+ * public, the link to copy.
+ */
+function GeneralAccess({
+  expeditionId,
+  visibility,
+  canChange,
+  onChange,
+}: {
+  expeditionId: string
+  visibility: Visibility
+  canChange: boolean
+  onChange: (visibility: Visibility) => Promise<void>
+}) {
+  const [confirming, setConfirming] = React.useState<Visibility | null>(null)
+  const [busy, setBusy] = React.useState(false)
+  const shown = VISIBILITY[visibility]
+  const Icon = shown.icon
+  const apply = async (next: Visibility) => {
+    setConfirming(null)
+    setBusy(true)
+    await onChange(next)
+    setBusy(false)
+  }
+  return (
+    <section aria-label="General access" className="flex flex-col gap-2">
+      <h3 className="text-sm font-medium">General access</h3>
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+          {busy ? <Spinner /> : <Icon className="size-4" />}
+        </span>
+        <span className="min-w-0 flex-1">
+          {canChange ? (
+            <Select
+              items={VISIBILITY_ITEMS}
+              value={visibility}
+              onValueChange={(v) => {
+                const next = v as Visibility | null
+                if (!next || next === visibility) return
+                // Wider than the people with access: say what that shows.
+                if (visibility === "private") setConfirming(next)
+                else void apply(next)
+              }}
+            >
+              <SelectTrigger
+                size="sm"
+                aria-label="Who can open it"
+                data-testid="visibility-select"
+                className="w-56"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {VISIBILITY_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <span className="block text-sm" data-testid="visibility-label">
+              {shown.label}
+            </span>
+          )}
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            {shown.hint}
+          </span>
+        </span>
+      </div>
+      {confirming && (
+        <Alert data-testid="confirm-visibility">
+          <AlertDescription className="flex flex-col gap-2">
+            <span>
+              {confirming === "public"
+                ? "Anyone will be able to find it and read it, Sources included."
+                : "Anyone with the link will be able to read it, Sources included."}{" "}
+              Anyone who can view can also see the Sources.
+            </span>
+            <span className="flex gap-2">
+              <Button size="sm" onClick={() => void apply(confirming)}>
+                {confirming === "public" ? "Make it public" : "Share the link"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setConfirming(null)}
+              >
+                Cancel
+              </Button>
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+      {visibility !== "private" && (
+        <CopyLink
+          label="Expedition link"
+          testId="expedition-link"
+          link={expeditionLink(expeditionId)}
+        />
+      )}
+    </section>
+  )
+}
+
+/** Fork (anyone signed in who can view) and Move to Trash (the owner). */
+function ExpeditionActions({
+  canFork,
+  canTrash,
+  onFork,
+  onTrash,
+}: {
+  canFork: boolean
+  canTrash: boolean
+  onFork: () => Promise<void>
+  onTrash: () => Promise<void>
+}) {
+  const [busy, setBusy] = React.useState<"fork" | "trash" | null>(null)
+  const [confirming, setConfirming] = React.useState(false)
+  const run = async (which: "fork" | "trash", fn: () => Promise<void>) => {
+    setBusy(which)
+    await fn()
+    setBusy(null)
+  }
+  return (
+    <section aria-label="This Expedition" className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {canFork && (
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="fork-button"
+            disabled={!!busy}
+            onClick={() => void run("fork", onFork)}
+          >
+            {busy === "fork" ? <Spinner /> : <GitForkIcon />}
+            Fork
+          </Button>
+        )}
+        {canFork && (
+          <span className="min-w-0 flex-1 text-xs text-muted-foreground">
+            Make your own copy, with its Sources and a history of its own.
+          </span>
+        )}
+        {canTrash && (
+          <Button
+            variant="destructive"
+            size="sm"
+            data-testid="trash-button"
+            disabled={!!busy}
+            onClick={() => setConfirming(true)}
+          >
+            <Trash2Icon />
+            Move to Trash
+          </Button>
+        )}
+      </div>
+      {confirming && (
+        <Alert variant="destructive" data-testid="confirm-trash">
+          <AlertDescription className="flex flex-col gap-2">
+            <span>
+              Move it to Trash? Nobody can open it there. You can restore it
+              from the Library for 30 days; after that it is deleted for good,
+              Sources included. Forks are kept.
+            </span>
+            <span className="flex gap-2">
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={!!busy}
+                onClick={() => {
+                  setConfirming(false)
+                  void run("trash", onTrash)
+                }}
+              >
+                Move to Trash
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setConfirming(false)}
+              >
+                Cancel
+              </Button>
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+    </section>
+  )
+}
+
+/** A read-only link with Copy. */
+function CopyLink({
+  label,
+  testId,
+  link,
+}: {
+  label: string
+  testId: string
+  link: string
+}) {
+  const [copied, setCopied] = React.useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+    } catch {
+      // No clipboard (an insecure origin): the link is selectable.
+    }
+  }
+  return (
+    <InputGroup>
+      <InputGroupInput
+        readOnly
+        aria-label={label}
+        data-testid={testId}
+        value={link}
+        onFocus={(e) => e.currentTarget.select()}
+      />
+      <InputGroupAddon align="inline-end">
+        <InputGroupButton
+          aria-label={`Copy the ${label.toLowerCase()}`}
+          onClick={copy}
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
+          {copied ? "Copied" : "Copy"}
+        </InputGroupButton>
+      </InputGroupAddon>
+    </InputGroup>
   )
 }
 
@@ -343,15 +674,6 @@ function InviteForm({
 }
 
 function InviteSent({ sent }: { sent: InviteCreated }) {
-  const [copied, setCopied] = React.useState(false)
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(sent.link)
-      setCopied(true)
-    } catch {
-      // No clipboard (an insecure origin): the link is selectable.
-    }
-  }
   const who = sent.invite.email
   return (
     <Alert data-testid="invite-sent">
@@ -366,21 +688,7 @@ function InviteSent({ sent }: { sent: InviteCreated }) {
             ? "You can also send them this link:"
             : "It works once."}
         </span>
-        <InputGroup>
-          <InputGroupInput
-            readOnly
-            aria-label="Invite link"
-            data-testid="invite-link"
-            value={sent.link}
-            onFocus={(e) => e.currentTarget.select()}
-          />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton aria-label="Copy the invite link" onClick={copy}>
-              {copied ? <CheckIcon /> : <CopyIcon />}
-              {copied ? "Copied" : "Copy"}
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <CopyLink label="Invite link" testId="invite-link" link={sent.link} />
       </AlertDescription>
     </Alert>
   )

@@ -126,8 +126,14 @@ export async function restoreExpedition(
       .set({ deletedAt: null })
       .where(eq(expeditions.id, exp.id))
     await tx.delete(trash).where(eq(trash.expeditionId, exp.id))
-    const { deletedAt: _d, ...summary } = exp
-    return { ...summary, role: role as Role }
+    return {
+      id: exp.id,
+      title: exp.title,
+      summary: exp.summary,
+      visibility: exp.visibility,
+      status: exp.status,
+      role: role as Role,
+    }
   })
 }
 
@@ -166,8 +172,13 @@ export async function listTrash(
   )
   const cards = await libraryCards(
     db,
-    rows.map(({ deletedAt: _d, purgeAfter: _p, ...r }) => ({
-      ...r,
+    rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      summary: r.summary,
+      visibility: r.visibility,
+      status: r.status,
+      role: r.role,
       seenAt: new Date(0).toISOString(),
     }))
   )
@@ -265,7 +276,12 @@ export function trashRoutes(relay: Relay) {
       expeditionId,
       userId: c.var.user.id,
     })
-    await kickAll(db, relay, expeditionId, "The owner moved this Expedition to Trash")
+    await kickAll(
+      db,
+      relay,
+      expeditionId,
+      "The owner moved this Expedition to Trash"
+    )
     return c.json(out)
   })
 

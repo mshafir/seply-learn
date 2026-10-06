@@ -6,7 +6,7 @@
 
 Cloudflare entry: the Worker (SPA assets + app), the Expedition Durable Object (live room) and the build Workflow.
 
-Today (WP-1.1, WP-3.2, WP-4.1) it contains:
+Today (WP-1.1, WP-3.2, WP-4.1, WP-5.2) it contains:
 
 - **Static assets:** `apps/web/dist`, with SPA fallback. Only `/api/*` runs the Worker first.
 - **`/api`:** the `@seply/server` app (`createApp`), mounted with a `connect` that opens one `pg` client per request over the `HYPERDRIVE` binding (none at module scope). Routes: `/api/health`, Better Auth under `/api/auth/*`, `/api/me`, `/api/expeditions`. See the server README.
@@ -20,6 +20,7 @@ Today (WP-1.1, WP-3.2, WP-4.1) it contains:
   - `agentPresence({ userId, label, ttlMs })` shows an agent (`agent:<userId>`) to collaborators until its TTL passes without a renewal; an alarm sends its `leave`.
   It never reads Postgres.
 - **Jobs** (`src/jobs.ts`, WP-3.2): `JobWorkflow`, one Cloudflare Workflow (binding `JOBS`) that runs every kind in `@seply/server`'s `JOB_KINDS` through `runJob`; each `ctx.step` is a `step.do` with exponential backoff, so a step's result is its checkpoint. `workflowsEngine` launches one instance per attempt (`<jobId>-<attempt>`), terminates on cancel, and wakes by pause + resume. **`wrangler dev` doesn't resume a running Workflow after a restart** (production does): with `JOBS_WAKE_ON_START=1` the Worker wakes the open jobs on its first request. Workflow names are unique per account, so CI names it `<worker>-jobs` (`scripts/ci.mjs`). The jobs get `services` (WP-3.5b): the env (for the AI setup), the Sources R2 bucket, and `@seply/views/inspect`'s `readView` as the curator's `ViewReader` (the only `@seply/views` import this Worker makes).
+- **Cron** (WP-5.2): `scheduled` purges Expeditions whose 30 days in Trash are over (`@seply/server`'s `purgeTrash`, Source files from `SOURCES` included), daily at 04:17 UTC (`triggers.crons` in `wrangler.jsonc`). Only production runs it: `scripts/ci.mjs hyperdrive-upsert` drops the trigger for previews (`seply-pr-*`), which would each take one of the account's cron triggers. Locally, `wrangler dev` runs it on `curl http://localhost:8787/cdn-cgi/local/scheduled`.
 - **`SOURCES`:** the R2 bucket for Source files and segments (spec §2.7), passed to the app as `blobs` (`r2BlobStore`). `wrangler.jsonc` names `seply-sources`; CI points previews at `seply-sources-preview` (`scripts/ci.mjs r2-bucket`, which also creates a missing bucket). `wrangler dev` simulates it locally.
 - **Env:** vars `DB_BRANCH`, `BETTER_AUTH_URL`, `AUTH_PROXY_URL`, `AUTH_TRUSTED_ORIGINS` (set by CI with `--var`), and secrets `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and optionally `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (web push) and `RESEND_API_KEY` (invite email, WP-5.1) (uploaded by CI with `--secrets-file`). `EMAIL_FROM` (the invite sender) is a var: CI passes the repo variable with `--var` when it is set; the server's default is `Seply Learn <invites@mail.seply.app>`. `JOBS_WAKE_ON_START` for local dev only. Locally, `.dev.vars` (copy `.dev.vars.example`; gitignored).
 - **AI env** (WP-3.3; the server README's "AI" section has the full list):
