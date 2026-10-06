@@ -4,6 +4,7 @@
 import { sql } from "drizzle-orm"
 import type { ProviderOptions } from "@seply/ai"
 import { Hono, type Context, type MiddlewareHandler } from "hono"
+import { AccessDenied } from "./access.ts"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
 import { createFlowRoutes } from "./create.ts"
@@ -27,7 +28,9 @@ import { liveRoutes } from "./live.ts"
 import { webPushRoutes } from "./push/index.ts"
 import { readerRoutes } from "./reader.ts"
 import { noopRelay, type Relay } from "./relay.ts"
+import { logMailer, resendMailer, type Mailer } from "./mailer.ts"
 import { searchRoutes } from "./search.ts"
+import { inviteRoutes, sharingRoutes } from "./sharing.ts"
 import { sourceRoutes } from "./sources/routes.ts"
 import { syncRoutes } from "./sync.ts"
 
@@ -45,6 +48,8 @@ export type AppVariables = {
   auth: () => Promise<Auth>
   /** The blob store (Source files and segments); throws when there is none. */
   blobs: () => BlobStore
+  /** The invite Mailer (mailer.ts), or null: invites use the link and inbox only. */
+  mailer: () => Mailer | null
   /** Set by `requireUser`. */
   user: SessionUser
 }
@@ -71,6 +76,11 @@ export type AppOptions<Env extends ServerEnv> = {
    * a restart). It opens its own connections.
    */
   onFirstRequest?: (env: Env) => Promise<void>
+  /**
+   * The invite Mailer. Default: from config (Resend with RESEND_API_KEY, a
+   * log-only one under test credentials, else none). Tests pass a memory one.
+   */
+  mailer?: (env: Env) => Mailer | null
 }
 
 class NoDatabase extends Error {}
@@ -119,6 +129,18 @@ function resources<Env extends ServerEnv>(
       store ??= opts.blobs?.(c.env as Env) ?? null
       if (!store) throw new NoBlobStore()
       return store
+    })
+    let mailer: Mailer | null | undefined
+    c.set("mailer", () => {
+      if (mailer !== undefined) return mailer
+      if (opts.mailer) return (mailer = opts.mailer(c.env as Env))
+      const mail = getConfig().mail
+      return (mailer =
+        mail?.kind === "resend"
+          ? resendMailer({ apiKey: mail.apiKey, from: mail.from })
+          : mail?.kind === "log"
+            ? logMailer()
+            : null)
     })
     c.set("auth", () => (auth ??= db().then((d) => createAuth(getConfig(), d))))
     try {
@@ -171,6 +193,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   })
 
   app.onError((err, c) => {
+    if (err instanceof AccessDenied)
+      return c.json({ error: err.message }, err.status)
     if (err instanceof NoDatabase)
       return c.json({ error: "no database configured" }, 503)
     if (err instanceof NoBlobStore)
@@ -221,6 +245,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/expeditions", createFlowRoutes(relay, opts.ai, opts.jobs))
   app.route("/expeditions", proposalRoutes(relay))
   app.route("/expeditions", askRoutes())
+  app.route("/expeditions", sharingRoutes(relay))
+  app.route("/invites", inviteRoutes())
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)

@@ -43,6 +43,13 @@
       "when": 1790870468867,
       "tag": "0005_proposal_review",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791299261578,
+      "tag": "0006_sharing",
+      "breakpoints": true
     }
   ]
 }

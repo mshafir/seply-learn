@@ -7,9 +7,10 @@
 // count (owners and editors, WP-4.3), which opens the Suggestions tab, and
 // History (owners and editors, WP-4.2), which opens the History side panel.
 // Ask (owners and editors, WP-4.4) opens Grow's Ask tab, where they ask the
-// AI about the Expedition; it spins while one of their asks runs. The
+// AI about the Expedition; it spins while one of their asks runs.
+// Share (Collaborators, WP-5.1) opens the share dialog (share-dialog.tsx). The
 // Expedition menu (export-dialog.tsx: Export, for anyone who can view, WP-5.3)
-// sits before the account menu. Share arrives with its work package.
+// sits before the account menu.
 import * as React from "react"
 import {
   CloudOffIcon,
@@ -17,6 +18,7 @@ import {
   LoaderCircleIcon,
   MessageCircleQuestionIcon,
   SparklesIcon,
+  UsersIcon,
 } from "lucide-react"
 import { Link } from "wouter"
 
@@ -42,6 +44,7 @@ export function ExpeditionHeader({
   suggestions,
   ask,
   menu,
+  share,
 }: {
   title: string
   canEdit: boolean
@@ -63,6 +66,8 @@ export function ExpeditionHeader({
   ask?: { open: boolean; asking: boolean; onToggle: () => void }
   /** The Expedition menu (export-dialog.tsx), when the server is reachable. */
   menu?: React.ReactNode
+  /** Share, the share dialog (Collaborators); absent for everyone else. */
+  share?: { onOpen: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -178,6 +183,17 @@ export function ExpeditionHeader({
         >
           <HistoryIcon />
           History
+        </Button>
+      )}
+      {share && (
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid="share-button"
+          onClick={share.onOpen}
+        >
+          <UsersIcon />
+          Share
         </Button>
       )}
       {signInHref && (

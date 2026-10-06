@@ -6,7 +6,7 @@
 // is a hibernating Durable Object (apps/worker); the Node rooms come with
 // WP-6.1. The wire protocol is @seply/domain's room.ts. Without a live relay
 // the app uses `noopRelay`.
-import type { BuildEvent, LoggedOp, ReaderBatch } from "@seply/domain"
+import type { BuildEvent, LoggedOp, ReaderBatch, Role } from "@seply/domain"
 
 /**
  * How someone joins (spec §2.4):
@@ -28,6 +28,13 @@ export type RoomJoin = {
   /** Their display name (empty when anonymous). */
   name: string
   access: RoomAccess
+  /**
+   * Their Collaborator role (null for readers of a link). The room never
+   * takes ops from anyone (they arrive through /push, which checks the role
+   * on every op); a viewer's presence carries no `editing`. A role change
+   * kicks the user's connections, so a reconnect picks up the new role.
+   */
+  role: Role | null
   /** The Expedition's head seq when they joined (the room never reads Postgres). */
   headSeq: number
 }

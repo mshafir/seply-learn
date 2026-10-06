@@ -19,7 +19,6 @@ import {
   type SkimSource,
 } from "@seply/ai"
 import {
-  can,
   isLive,
   keysAfter,
   makeOps,
@@ -38,12 +37,13 @@ import { z } from "zod"
 import { resolveAi } from "./ai.ts"
 import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
-import { appendOps, roleOf } from "./oplog.ts"
+import { expeditionAccess } from "./access.ts"
+import { appendOps } from "./oplog.ts"
 import { loadState } from "./projection.ts"
 import type { BuildJobInput } from "./jobs/build.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
-import { expeditionVisibility, readSegments } from "./sources/store.ts"
+import { readSegments } from "./sources/store.ts"
 
 /** A Source on the create screens. */
 export type DraftSource = {
@@ -203,15 +203,9 @@ async function access(
   userId: string,
   action: Action
 ): Promise<Access> {
-  const visibility = await expeditionVisibility(db, expeditionId)
-  if (!visibility) return { role: null, ok: false, found: false }
-  const role = await roleOf(db, expeditionId, userId)
-  const actor = { role, signedIn: true }
-  return {
-    role,
-    found: can(actor, "read", visibility),
-    ok: can(actor, action, visibility),
-  }
+  const a = await expeditionAccess(db, expeditionId, userId)
+  if (!a) return { role: null, ok: false, found: false }
+  return { role: a.role, found: true, ok: a.may(action) }
 }
 
 const liveViews = (state: DomainState) =>

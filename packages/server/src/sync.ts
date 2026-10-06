@@ -7,8 +7,7 @@
 //
 // A push is all or nothing: one transaction appends and applies every new op,
 // or nothing is written. Retrying a push returns the same results.
-import { can, parseOp, SCHEMA_V, schema, type Op } from "@seply/domain"
-import { eq } from "drizzle-orm"
+import { parseOp, SCHEMA_V, type Op } from "@seply/domain"
 import { Hono } from "hono"
 import { z } from "zod"
 import { requireUser, type AppEnv } from "./app.ts"
@@ -18,9 +17,10 @@ import {
   PULL_LIMIT,
   PushError,
   readOps,
-  roleOf,
 } from "./oplog.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
+import { expeditionAccess, sessionUserId } from "./access.ts"
+import { expeditionVisibility } from "./sources/store.ts"
 
 /** The most ops one push may carry. */
 export const PUSH_LIMIT = 1000
@@ -114,28 +114,16 @@ export function syncRoutes(relay: Relay) {
       return c.json({ error: "invalid query", issues: q.error.issues }, 400)
     const { expedition: expeditionId, since, limit } = q.data
     const db = await c.var.db()
-    const [exp] = await db
-      .select({
-        visibility: schema.expeditions.visibility,
-        deletedAt: schema.expeditions.deletedAt,
-        headSeq: schema.expeditions.headSeq,
-      })
-      .from(schema.expeditions)
-      .where(eq(schema.expeditions.id, expeditionId))
-    const notFound = () => c.json({ error: "Expedition not found" }, 404)
-    if (!exp || exp.deletedAt) return notFound()
-    let userId: string | null = null
-    if (exp.visibility === "private") {
-      const auth = await c.var.auth()
-      const session = await auth.api.getSession({ headers: c.req.raw.headers })
-      userId = session?.user.id ?? null
-    }
-    const role = await roleOf(db, expeditionId, userId)
-    if (!can({ role, signedIn: !!userId }, "read", exp.visibility))
-      return notFound()
+    // Viewing needs a session only where Visibility asks for one.
+    const visibility = await expeditionVisibility(db, expeditionId)
+    if (!visibility) return c.json({ error: "Expedition not found" }, 404)
+    const userId =
+      visibility === "private" ? await sessionUserId(c) : null
+    const a = await expeditionAccess(db, expeditionId, userId)
+    if (!a) return c.json({ error: "Expedition not found" }, 404)
     const ops = await readOps(db, expeditionId, since, limit)
     const last = ops.at(-1)?.serverSeq ?? since
-    const headSeq = Math.max(exp.headSeq, last)
+    const headSeq = Math.max(a.headSeq, last)
     return c.json({ headSeq, ops, more: last < headSeq })
   })
 

@@ -1,5 +1,6 @@
 // Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
 //   /sign-in            Google sign-in
+//   /invite/:token      an invite link: accept it (WP-5.1)
 //   /                   the Library
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
@@ -14,6 +15,7 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"
+import { InviteScreen } from "@/screens/invite.tsx"
 import { LibraryScreen } from "@/screens/library.tsx"
 import { SettingsScreen } from "@/screens/settings.tsx"
 import { SignInScreen } from "@/screens/sign-in.tsx"
@@ -54,6 +56,13 @@ export function App() {
     <Switch>
       <Route path="/showcase" component={Showcase} />
       <Route path="/sign-in" component={SignInScreen} />
+      <Route path="/invite/:token">
+        {(params) => (
+          <WaitForSession>
+            <InviteScreen token={params.token} />
+          </WaitForSession>
+        )}
+      </Route>
       <Route path="/e/:id/:viewId?">
         {(params) => (
           <WaitForSession>

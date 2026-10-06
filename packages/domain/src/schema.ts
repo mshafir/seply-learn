@@ -437,10 +437,48 @@ export const collaborators = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     role: text("role", { enum: ["owner", "editor", "viewer"] }).notNull(),
+    /** Who invited them (null for the owner who created it). */
+    invitedBy: text("invited_by"),
+    addedAt: ts("added_at").notNull().defaultNow(),
+    /**
+     * When they first opened it; null shows the Library's New badge under
+     * "Shared with you" (spec §3.9). The creating owner's is set at once.
+     */
+    seenAt: ts("seen_at"),
   },
   (t) => [
     primaryKey({ columns: [t.expeditionId, t.userId] }),
     index("collaborators_user_idx").on(t.userId),
+  ]
+)
+
+/**
+ * An invite to an Expedition as editor or viewer (spec §3.9), by email. The
+ * link carries a random token; only its SHA-256 is stored. It is accepted
+ * once: by whoever opens the link signed in, or by the account with that
+ * (verified) email when it signs in. Accepted invites are kept for the record.
+ */
+export const invites = pgTable(
+  "invites",
+  {
+    id: text("id").primaryKey(),
+    expeditionId: exp(),
+    /** Lower-cased. */
+    email: text("email").notNull(),
+    role: text("role", { enum: ["editor", "viewer"] }).notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    invitedBy: text("invited_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    acceptedBy: text("accepted_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    acceptedAt: ts("accepted_at"),
+  },
+  (t) => [
+    index("invites_expedition_idx").on(t.expeditionId),
+    index("invites_email_idx").on(t.email),
   ]
 )
 

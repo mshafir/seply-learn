@@ -1,6 +1,6 @@
 // The Library (spec §3.2, canvas 01): Continue reading, then Your
-// Expeditions, Shared with you and Drafts, filtered by a Tag. Cards show the
-// fixed thumbnail of the best View's View Type (never a preview of the
+// Expeditions, Shared with you (with a New badge until it is opened) and
+// Drafts, filtered by a Tag. Cards show the fixed thumbnail of the best View's View Type (never a preview of the
 // Expedition), the title and summary, the collaborators' avatars with a
 // short summary, the Concept and View counts and the date, and a pin to
 // "Keep available offline" (spec §2.9). Offline, the Library lists the
@@ -277,6 +277,11 @@ function ExpeditionCard({
         <Collaborators card={card} meId={meId} />
       </CardContent>
       <CardFooter className="flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
+        {card.isNew && (
+          <Badge data-testid="card-new" aria-label="New: shared with you">
+            New
+          </Badge>
+        )}
         <span data-testid="card-counts">{countsLabel(card.counts)}</span>
         {card.status !== "ready" && (
           <Badge variant="secondary">

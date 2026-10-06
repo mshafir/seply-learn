@@ -10,13 +10,11 @@
 // A job or Expedition the caller can't view is a 404; one they can view but
 // not run jobs on is a 403. Test-only kinds (the fake job) are refused unless
 // test credentials are on.
-import { can, schema, type Action } from "@seply/domain"
-import { eq } from "drizzle-orm"
+import type { Action } from "@seply/domain"
 import { Hono, type Context } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "../app.ts"
-import type { Db } from "../db.ts"
-import { roleOf } from "../oplog.ts"
+import { expeditionAccess as access } from "../access.ts"
 import { JobError } from "./runner.ts"
 import { getJob, listJobs } from "./store.ts"
 import type { JobRunner } from "./types.ts"
@@ -25,26 +23,6 @@ const StartBody = z.object({
   kind: z.string().min(1).max(64),
   input: z.unknown().optional(),
 })
-
-/** The caller's access to an Expedition, or null when it isn't there for them. */
-export async function access(db: Db, expeditionId: string, userId: string) {
-  const [exp] = await db
-    .select({
-      visibility: schema.expeditions.visibility,
-      deletedAt: schema.expeditions.deletedAt,
-      headSeq: schema.expeditions.headSeq,
-    })
-    .from(schema.expeditions)
-    .where(eq(schema.expeditions.id, expeditionId))
-  if (!exp || exp.deletedAt) return null
-  const role = await roleOf(db, expeditionId, userId)
-  const actor = { role, signedIn: true }
-  if (!can(actor, "read", exp.visibility)) return null
-  return {
-    headSeq: exp.headSeq,
-    may: (action: Action) => can(actor, action, exp.visibility),
-  }
-}
 
 export function jobRoutes(runner: JobRunner | undefined) {
   const r = new Hono<AppEnv>()

@@ -9,26 +9,19 @@ import {
   apply,
   ApplyError,
   actionForOp,
-  can,
   higherReadingState,
   mergedPairs,
   schema,
   type ChangeOrigin,
   type LoggedOp,
   type Op,
-  type Role,
 } from "@seply/domain"
 import { and, asc, eq, gt, inArray, sql } from "drizzle-orm"
 import type { Db } from "./db.ts"
+import { expeditionAccess } from "./access.ts"
 import { loadState, writeState } from "./projection.ts"
 
-const {
-  expeditions,
-  collaborators,
-  ops: opsTable,
-  changes,
-  readingStatus,
-} = schema
+const { expeditions, ops: opsTable, changes, readingStatus } = schema
 
 /** Changes a client may start through /push. Builds, AI and imports are server-side. */
 export const CLIENT_ORIGINS = ["human", "restore", "merge"] as const
@@ -59,24 +52,7 @@ export type AppendResult = {
   headSeq: number
 }
 
-/** The caller's role on an Expedition, or null. */
-export async function roleOf(
-  db: Db,
-  expeditionId: string,
-  userId: string | null
-) {
-  if (!userId) return null
-  const [row] = await db
-    .select({ role: collaborators.role })
-    .from(collaborators)
-    .where(
-      and(
-        eq(collaborators.expeditionId, expeditionId),
-        eq(collaborators.userId, userId)
-      )
-    )
-  return (row?.role ?? null) as Role | null
-}
+export { roleOf } from "./access.ts"
 
 /**
  * Appends a batch of validated ops (one Expedition, acting as `userId`) to the
@@ -97,24 +73,13 @@ export async function appendOps(
 
   // Lock the Expedition: pushes to one Expedition are serialized, so
   // server_seq is gap-free and the idempotency check below can't race.
-  const [exp] = await tx
-    .select({
-      visibility: expeditions.visibility,
-      deletedAt: expeditions.deletedAt,
-      headSeq: expeditions.headSeq,
-    })
-    .from(expeditions)
-    .where(eq(expeditions.id, expeditionId))
-    .for("update")
-  if (!exp || exp.deletedAt)
-    throw new PushError(404, { error: "Expedition not found" })
-
-  const role = await roleOf(tx, expeditionId, userId)
-  const actor = { role, signedIn: true }
-  if (!can(actor, "read", exp.visibility))
-    throw new PushError(404, { error: "Expedition not found" })
+  const access = await expeditionAccess(tx, expeditionId, userId, {
+    lock: true,
+  })
+  if (!access) throw new PushError(404, { error: "Expedition not found" })
+  const { role } = access
   for (const op of ops) {
-    if (!can(actor, actionForOp(op.kind), exp.visibility))
+    if (!access.may(actionForOp(op.kind)))
       throw new PushError(403, {
         error: "not allowed",
         opId: op.opId,
@@ -147,7 +112,7 @@ export async function appendOps(
         serverSeq: known.get(o.opId)!,
       })),
       logged: [],
-      headSeq: exp.headSeq,
+      headSeq: access.headSeq,
     }
 
   // Apply in batch order on top of the current state.
@@ -167,7 +132,7 @@ export async function appendOps(
     }
   }
 
-  let seq = exp.headSeq
+  let seq = access.headSeq
   const logged: LoggedOp[] = fresh.map((op) => ({ ...op, serverSeq: ++seq }))
   for (let i = 0; i < logged.length; i += 500) {
     await tx.insert(opsTable).values(

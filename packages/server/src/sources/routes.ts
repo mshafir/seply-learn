@@ -13,7 +13,7 @@
 //
 // Viewing needs no sign-in where Visibility allows, like /pull: anyone who
 // can view an Expedition can see its Sources (spec §1.8).
-import { can, MAX_SOURCE_BYTES, type Visibility } from "@seply/domain"
+import { MAX_SOURCE_BYTES, type Visibility } from "@seply/domain"
 import { Hono, type Context } from "hono"
 import { bodyLimit } from "hono/body-limit"
 import { z } from "zod"
@@ -21,7 +21,8 @@ import { z } from "zod"
 import { requireUser, type AppEnv } from "../app.ts"
 import type { BlobStore } from "../blobs.ts"
 import type { Db } from "../db.ts"
-import { PushError, roleOf } from "../oplog.ts"
+import { expeditionAccess, sessionUserId } from "../access.ts"
+import { PushError } from "../oplog.ts"
 import { publishCommitted, type Relay } from "../relay.ts"
 import {
   parseFile,
@@ -70,14 +71,8 @@ export async function canView(
     expeditionId
   )
   if (!visibility) return false
-  let userId: string | null = null
-  if (visibility === "private") {
-    const auth = await c.var.auth()
-    const session = await auth.api.getSession({ headers: c.req.raw.headers })
-    userId = session?.user.id ?? null
-  }
-  const role = await roleOf(db, expeditionId, userId)
-  return can({ role, signedIn: !!userId }, "read", visibility)
+  const userId = visibility === "private" ? await sessionUserId(c) : null
+  return !!(await expeditionAccess(db, expeditionId, userId))
 }
 
 export function sourceRoutes(relay: Relay) {

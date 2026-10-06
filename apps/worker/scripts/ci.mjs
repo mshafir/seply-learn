@@ -234,12 +234,15 @@ const AUTH_SECRETS = [
 // instance key, and the master key that bring-your-own-key mode encrypts
 // readers' keys under. Without them the Worker runs, and AI says it isn't set up.
 // And the web push VAPID keys (WP-3.2): web push is off without them.
+// And Resend's key (WP-5.1): invite emails are off without it (the link and
+// the inbox still work). EMAIL_FROM is a var, passed with --var.
 const OPTIONAL_SECRETS = [
   "AI_GATEWAY_API_KEY",
   "AI_KEYS_MASTER_KEY",
   "VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
+  "RESEND_API_KEY",
 ]
 
 function secretsFile(path) {

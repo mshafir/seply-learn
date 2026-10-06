@@ -28,6 +28,8 @@ export type CardCollaborator = {
 
 /** One Library card (the server's `LibraryCard`). */
 export type LibraryCard = ExpeditionSummary & {
+  /** Shared with me and not opened yet: the New badge. */
+  isNew: boolean
   tags: string[]
   /** Owner first, then editors, then viewers. */
   collaborators: CardCollaborator[]
@@ -824,4 +826,130 @@ export function parseSseEvents(events: readonly string[]): AskStreamPart[] {
     }
   }
   return out
+}
+
+// --- Sharing (WP-5.1; the server's sharing.ts) -------------------------------
+
+export type InviteRole = "editor" | "viewer"
+
+/** A Collaborator as the share dialog lists them. */
+export type SharingPerson = {
+  id: string
+  name: string
+  email: string
+  image: string | null
+  role: Role
+}
+
+export type PendingInvite = {
+  id: string
+  email: string
+  role: InviteRole
+  invitedBy: { id: string; name: string }
+  createdAt: string
+}
+
+export type Sharing = {
+  role: Role | null
+  visibility: "private" | "unlisted" | "public"
+  may: {
+    invite: boolean
+    changeRole: boolean
+    removeCollaborator: boolean
+    transferOwnership: boolean
+  }
+  collaborators: SharingPerson[]
+  invites: PendingInvite[]
+}
+
+export type InviteCreated = {
+  invite: PendingInvite
+  link: string
+  emailed: boolean
+  added: boolean
+}
+
+export type InviteInfo = {
+  expedition: { id: string; title: string }
+  role: InviteRole
+  invitedBy: string
+  email: string
+  status: "pending" | "accepted" | "yours"
+}
+
+const expPath = (id: string) => `/expeditions/${encodeURIComponent(id)}`
+
+/** Who has access to an Expedition, and what I may change. */
+export function getSharing(expeditionId: string): Promise<Sharing> {
+  return call<Sharing>(`${expPath(expeditionId)}/sharing`)
+}
+
+export function invite(
+  expeditionId: string,
+  email: string,
+  role: InviteRole
+): Promise<InviteCreated> {
+  return call<InviteCreated>(`${expPath(expeditionId)}/invites`, {
+    method: "POST",
+    body: JSON.stringify({ email, role }),
+  })
+}
+
+export async function revokeInvite(
+  expeditionId: string,
+  inviteId: string
+): Promise<void> {
+  await call(
+    `${expPath(expeditionId)}/invites/${encodeURIComponent(inviteId)}`,
+    { method: "DELETE" }
+  )
+}
+
+export async function changeRole(
+  expeditionId: string,
+  userId: string,
+  role: InviteRole
+): Promise<void> {
+  await call(
+    `${expPath(expeditionId)}/collaborators/${encodeURIComponent(userId)}`,
+    { method: "PATCH", body: JSON.stringify({ role }) }
+  )
+}
+
+/** Removes a Collaborator (the owner), or leaves (yourself). */
+export async function removeCollaborator(
+  expeditionId: string,
+  userId: string
+): Promise<void> {
+  await call(
+    `${expPath(expeditionId)}/collaborators/${encodeURIComponent(userId)}`,
+    { method: "DELETE" }
+  )
+}
+
+export async function transferOwnership(
+  expeditionId: string,
+  userId: string
+): Promise<void> {
+  await call(`${expPath(expeditionId)}/transfer`, {
+    method: "POST",
+    body: JSON.stringify({ userId }),
+  })
+}
+
+/** I opened it: clears its New badge in the Library. */
+export async function markSeen(expeditionId: string): Promise<void> {
+  await call(`${expPath(expeditionId)}/seen`, { method: "POST" })
+}
+
+export function getInvite(token: string): Promise<InviteInfo> {
+  return call<InviteInfo>(`/invites/${encodeURIComponent(token)}`)
+}
+
+export function acceptInvite(
+  token: string
+): Promise<{ expeditionId: string; role: Role }> {
+  return call(`/invites/${encodeURIComponent(token)}/accept`, {
+    method: "POST",
+  })
 }

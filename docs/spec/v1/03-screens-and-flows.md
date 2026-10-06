@@ -130,6 +130,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **History** (owners and editors) lists **Changes** with author, label and time ("Accepted 12 suggestions · Ana · 2h ago"). Each Change has **Undo**, **View as of here** (read-only) and **Restore to here**. Undo reports any edits it kept because they changed since. _(The canvas's Snapshot list and diff are replaced by this.)_
 - **Share dialog:**
   - **Invite** by email as editor or viewer. An **email** is sent when a mailer is configured, and a **copyable invite link** is always offered. The invitee finds it under "Shared with you" with a **New** badge. Editors can invite. Only the owner changes roles or removes people.
+    - *(WP-5.1)* An account with the invited email gets it at once; anyone else accepts through the link, which works once, for whichever signed-in account opens it first. Accepting never lowers a role. An editor cancels only the invites they sent. Anyone but the owner may **leave**. Someone removed or given another role is kicked from the live room and reopens with their new access.
   - **Visibility:** private / unlisted / public, **owner only**. A public or unlisted link shows the **latest state**, live.
   - A plain warning: **"Anyone who can view can also see the Sources."**
   - **Fork** (anyone signed in who can view): make your own copy.

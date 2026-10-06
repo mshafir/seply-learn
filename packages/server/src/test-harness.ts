@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url"
 import { createApp } from "./app.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { JobRunner } from "./jobs/types.ts"
+import type { Mailer } from "./mailer.ts"
 import type { ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
 import type { Relay } from "./relay.ts"
@@ -33,7 +34,13 @@ export function testApp(
     blobs,
     ai,
     jobs,
-  }: { blobs?: BlobStore; ai?: ProviderOptions; jobs?: JobRunner } = {}
+    mailer,
+  }: {
+    blobs?: BlobStore
+    ai?: ProviderOptions
+    jobs?: JobRunner
+    mailer?: Mailer | null
+  } = {}
 ) {
   const root = new Hono()
   root.route(
@@ -44,6 +51,7 @@ export function testApp(
       blobs: () => blobs ?? null,
       ai,
       jobs,
+      ...(mailer !== undefined && { mailer: () => mailer }),
     })
   )
   const request = (path: string, init: RequestInit = {}) =>

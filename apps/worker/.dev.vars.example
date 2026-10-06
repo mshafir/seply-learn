@@ -31,3 +31,10 @@ JOBS_WAKE_ON_START=1
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
 VAPID_SUBJECT=
+
+# --- Invite email (optional; packages/server README, "Sharing") ---
+# Resend's sending-only key. Never used while AUTH_TEST_CREDENTIALS=1: tests
+# and e2e only log that an email would go out.
+RESEND_API_KEY=
+# The sender. Default: Seply Learn <invites@mail.seply.app>
+EMAIL_FROM=
