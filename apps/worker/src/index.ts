@@ -4,6 +4,7 @@
 import {
   connectPg,
   createApp,
+  purgeTrash,
   r2BlobStore,
   type JobRunner,
   type Relay,
@@ -70,4 +71,28 @@ app.route(
 
 app.notFound((c) => c.json({ error: "not found" }, 404))
 
-export default app
+/**
+ * The daily cron (wrangler.jsonc `triggers`; WP-5.2): purges Expeditions
+ * whose 30 days in Trash are over, Source files included.
+ */
+export async function scheduled(
+  _controller: ScheduledController,
+  env: Bindings
+): Promise<void> {
+  if (!env.HYPERDRIVE) return
+  const conn = await connectPg(env.HYPERDRIVE.connectionString)
+  try {
+    const purged = await purgeTrash(
+      conn.db,
+      env.SOURCES ? r2BlobStore(env.SOURCES) : null
+    )
+    if (purged.length) console.log(`trash: purged ${purged.length}`)
+  } finally {
+    await conn.close()
+  }
+}
+
+export default {
+  fetch: app.fetch,
+  scheduled,
+} satisfies ExportedHandler<Bindings>

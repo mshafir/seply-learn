@@ -7,7 +7,13 @@
 // The callers: the owner, an editor, a viewer, a signed-in stranger (not a
 // Collaborator) and an anonymous reader. Private Expeditions are 404 to
 // whoever can't read them, so a stranger can't tell one exists.
-import { makeOps, schema, ulidSequence } from "@seply/domain"
+import {
+  makeOps,
+  schema,
+  ulidSequence,
+  type Visibility,
+} from "@seply/domain"
+import { eq } from "drizzle-orm"
 import { beforeAll, describe, expect, it } from "vitest"
 import { memoryBlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
@@ -40,8 +46,13 @@ type Ctx = {
 
 type Route = {
   name: string
-  /** [owner, editor, viewer, stranger, anonymous] */
+  /** On a private Expedition: [owner, editor, viewer, stranger, anonymous] */
   expect: [Cell, Cell, Cell, Cell, Cell]
+  /**
+   * On an unlisted or a public one (WP-5.2), for those who aren't
+   * Collaborators: [stranger, anonymous]. Collaborators are as above.
+   */
+  link: [Cell, Cell]
   prepare?: (ctx: Ctx, s: Setup) => Promise<void>
   request: (ctx: Ctx, as: TestUser | null) => [string, RequestInit?]
 }
@@ -56,54 +67,65 @@ const ROUTES: Route[] = [
   {
     name: "GET /pull",
     expect: [200, 200, 200, 404, 404],
+    link: [200, 200],
     request: (x) => [`/api/pull?expedition=${x.exp}&since=0`],
   },
   {
     name: "GET /expeditions/:id/live",
     expect: [200, 200, 200, 404, 404],
+    link: [200, 200],
     request: (x) => [`/api/expeditions/${x.exp}/live`],
   },
   {
     name: "GET /reader/expeditions/:id",
     expect: [200, 200, 200, 404, 401],
+    link: [200, 401],
     request: (x) => [`/api/reader/expeditions/${x.exp}`],
   },
   {
+    // The draft is for Collaborators only (the create flow), whatever the link.
     name: "GET /expeditions/:id/draft",
     expect: [200, 200, 200, 404, 401],
+    link: [404, 401],
     request: (x) => [`/api/expeditions/${x.exp}/draft`],
   },
   {
     name: "GET /sources/:id/:sourceId",
     expect: [200, 200, 200, 404, 404],
+    link: [200, 200],
     prepare: addSource,
     request: (x) => [`/api/sources/${x.exp}/${x.sourceId}`],
   },
   {
     name: "GET /sources/:id/:sourceId/file",
     expect: [200, 200, 200, 404, 404],
+    link: [200, 200],
     prepare: addSource,
     request: (x) => [`/api/sources/${x.exp}/${x.sourceId}/file`],
   },
   {
     name: "GET /expeditions/:id/jobs",
     expect: [200, 200, 200, 404, 401],
+    link: [200, 401],
     request: (x) => [`/api/expeditions/${x.exp}/jobs`],
   },
   {
     name: "GET /jobs/:id",
     expect: [200, 200, 200, 404, 401],
+    link: [200, 401],
     prepare: startJob,
     request: (x) => [`/api/jobs/${x.jobId}`],
   },
   {
     name: "GET /expeditions/:id/sharing",
     expect: [200, 200, 200, 404, 401],
+    link: [200, 401],
     request: (x) => [`/api/expeditions/${x.exp}/sharing`],
   },
   {
     name: "POST /expeditions/:id/seen",
     expect: [204, 204, 204, 404, 401],
+    link: [204, 401],
     request: (x) => [`/api/expeditions/${x.exp}/seen`, { method: "POST" }],
   },
 
@@ -111,6 +133,7 @@ const ROUTES: Route[] = [
   {
     name: "POST /push",
     expect: [200, 200, 403, 404, 401],
+    link: [403, 401],
     request: (x, as) => [
       "/api/push",
       json("POST", {
@@ -137,6 +160,7 @@ const ROUTES: Route[] = [
   {
     name: "PUT /expeditions/:id/plan",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [404, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/plan`,
       json("PUT", { title: "Compute", views: [] }),
@@ -145,6 +169,7 @@ const ROUTES: Route[] = [
   {
     name: "POST /sources/:id",
     expect: [201, 201, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/sources/${x.exp}`,
       json("POST", { type: "paste", text: "User: what is attention?" }),
@@ -153,6 +178,7 @@ const ROUTES: Route[] = [
   {
     name: "DELETE /sources/:id/:sourceId",
     expect: [204, 204, 403, 404, 401],
+    link: [403, 401],
     prepare: addSource,
     request: (x) => [
       `/api/sources/${x.exp}/${x.sourceId}`,
@@ -162,6 +188,7 @@ const ROUTES: Route[] = [
   {
     name: "GET /history",
     expect: [200, 200, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [`/api/history?expedition=${x.exp}`],
   },
 
@@ -169,11 +196,13 @@ const ROUTES: Route[] = [
   {
     name: "GET /expeditions/:id/proposals",
     expect: [200, 200, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [`/api/expeditions/${x.exp}/proposals`],
   },
   {
     name: "POST /expeditions/:id/proposals/review",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/proposals/review`,
       json("POST", { dismiss: ["nope"] }),
@@ -182,6 +211,7 @@ const ROUTES: Route[] = [
   {
     name: "POST /expeditions/:id/proposals/reopen",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/proposals/reopen`,
       json("POST", { itemIds: ["nope"] }),
@@ -190,21 +220,25 @@ const ROUTES: Route[] = [
   {
     name: "GET /expeditions/:id/asks",
     expect: [200, 200, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [`/api/expeditions/${x.exp}/asks`],
   },
   {
     name: "POST /expeditions/:id/skim",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [`/api/expeditions/${x.exp}/skim`, json("POST", {})],
   },
   {
     name: "POST /expeditions/:id/build",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [`/api/expeditions/${x.exp}/build`, json("POST", {})],
   },
   {
     name: "POST /expeditions/:id/jobs",
     expect: [201, 201, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/jobs`,
       json("POST", { kind: "fake", input: { views: 1 } }),
@@ -213,12 +247,14 @@ const ROUTES: Route[] = [
   {
     name: "POST /jobs/:id/cancel",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     prepare: startJob,
     request: (x) => [`/api/jobs/${x.jobId}/cancel`, { method: "POST" }],
   },
   {
     name: "POST /ai/estimate/article",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       "/api/ai/estimate/article",
       json("POST", { expeditionId: x.exp }),
@@ -227,6 +263,7 @@ const ROUTES: Route[] = [
   {
     name: "POST /ai/estimate/ask",
     expect: [ALLOWED, ALLOWED, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       "/api/ai/estimate/ask",
       json("POST", { expeditionId: x.exp }),
@@ -237,6 +274,7 @@ const ROUTES: Route[] = [
   {
     name: "POST /expeditions/:id/invites",
     expect: [201, 201, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/invites`,
       json("POST", { email: "newcomer@example.com", role: "viewer" }),
@@ -246,6 +284,7 @@ const ROUTES: Route[] = [
     // Editors invite, but revoke only their own invites (this is the owner's).
     name: "DELETE /expeditions/:id/invites/:inviteId",
     expect: [204, 403, 403, 404, 401],
+    link: [403, 401],
     prepare: invite,
     request: (x) => [
       `/api/expeditions/${x.exp}/invites/${x.inviteId}`,
@@ -255,6 +294,7 @@ const ROUTES: Route[] = [
   {
     name: "PATCH /expeditions/:id/collaborators/:userId",
     expect: [200, 403, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/collaborators/${x.users.extra.id}`,
       json("PATCH", { role: "editor" }),
@@ -263,6 +303,7 @@ const ROUTES: Route[] = [
   {
     name: "DELETE /expeditions/:id/collaborators/:userId",
     expect: [204, 403, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/collaborators/${x.users.extra.id}`,
       { method: "DELETE" },
@@ -271,10 +312,41 @@ const ROUTES: Route[] = [
   {
     name: "POST /expeditions/:id/transfer",
     expect: [200, 403, 403, 404, 401],
+    link: [403, 401],
     request: (x) => [
       `/api/expeditions/${x.exp}/transfer`,
       json("POST", { userId: x.users.editor.id }),
     ],
+  },
+  // --- Visibility, Fork and Trash (WP-5.2) ---
+  {
+    name: "PATCH /expeditions/:id/visibility",
+    expect: [200, 403, 403, 404, 401],
+    link: [403, 401],
+    request: (x) => [
+      `/api/expeditions/${x.exp}/visibility`,
+      json("PATCH", { visibility: "unlisted" }),
+    ],
+  },
+  {
+    name: "POST /expeditions/:id/fork",
+    expect: [201, 201, 201, 404, 401],
+    link: [201, 401],
+    request: (x) => [`/api/expeditions/${x.exp}/fork`, json("POST", {})],
+  },
+  {
+    name: "DELETE /expeditions/:id",
+    expect: [200, 403, 403, 404, 401],
+    link: [403, 401],
+    request: (x) => [`/api/expeditions/${x.exp}`, { method: "DELETE" }],
+  },
+  {
+    // In Trash, it is unreadable to everyone but its owner, who restores it.
+    name: "POST /expeditions/:id/restore",
+    expect: [200, 404, 404, 404, 401],
+    link: [404, 401],
+    prepare: trash,
+    request: (x) => [`/api/expeditions/${x.exp}/restore`, { method: "POST" }],
   },
 ]
 
@@ -303,6 +375,14 @@ async function invite(ctx: Ctx, s: Setup) {
   })
   expect(res.status).toBe(201)
   ctx.inviteId = ((await res.json()) as { invite: { id: string } }).invite.id
+}
+
+async function trash(ctx: Ctx, s: Setup) {
+  const res = await s.app.request(`/api/expeditions/${ctx.exp}`, {
+    method: "DELETE",
+    headers: s.users.owner.headers,
+  })
+  expect(res.status).toBe(200)
 }
 
 async function startJob(ctx: Ctx, s: Setup) {
@@ -349,8 +429,11 @@ beforeAll(async () => {
   s = { db, app, users, kicks }
 }, 60_000)
 
-/** A fresh private Expedition: olive owns it; eddie edits; vera and xavi view. */
-async function fresh(): Promise<Ctx> {
+/**
+ * A fresh Expedition (private by default): olive owns it; eddie edits; vera
+ * and xavi view.
+ */
+async function fresh(visibility: Visibility = "private"): Promise<Ctx> {
   const res = await s.app.request("/api/expeditions", {
     method: "POST",
     headers: s.users.owner.headers,
@@ -363,34 +446,55 @@ async function fresh(): Promise<Ctx> {
     { expeditionId: exp, userId: s.users.viewer.id, role: "viewer", seenAt },
     { expeditionId: exp, userId: s.users.extra.id, role: "viewer", seenAt },
   ])
+  if (visibility !== "private")
+    await s.db
+      .update(schema.expeditions)
+      .set({ visibility })
+      .where(eq(schema.expeditions.id, exp))
   return { exp, users: s.users }
+}
+
+async function check(
+  route: Route,
+  caller: Caller,
+  cell: Cell,
+  visibility: Visibility
+) {
+  const ctx = await fresh(visibility)
+  await route.prepare?.(ctx, s)
+  const as = caller === "anonymous" ? null : s.users[caller]
+  const [path, init = {}] = route.request(ctx, as)
+  const headers: Record<string, string> = as
+    ? { ...as.headers }
+    : { "content-type": "application/json" }
+  if (path.endsWith("/live")) headers.upgrade = "websocket"
+  const res = await s.app.request(path, { ...init, headers })
+  if (cell === ALLOWED)
+    expect([401, 403, 404], `${caller}: ${await res.text()}`).not.toContain(
+      res.status
+    )
+  else
+    expect(res.status, `${caller}: ${await res.clone().text()}`).toBe(cell)
 }
 
 describe("the permissions matrix against the API routes", () => {
   describe.each(ROUTES)("$name", (route) => {
     it.each(CALLERS.map((c, i) => [c, route.expect[i]!] as const))(
       "%s → %s",
-      async (caller, cell) => {
-        const ctx = await fresh()
-        await route.prepare?.(ctx, s)
-        const as = caller === "anonymous" ? null : s.users[caller]
-        const [path, init = {}] = route.request(ctx, as)
-        const headers: Record<string, string> = as
-          ? { ...as.headers }
-          : { "content-type": "application/json" }
-        if (path.endsWith("/live")) headers.upgrade = "websocket"
-        const res = await s.app.request(path, { ...init, headers })
-        if (cell === ALLOWED)
-          expect(
-            [401, 403, 404],
-            `${caller}: ${await res.text()}`
-          ).not.toContain(res.status)
-        else
-          expect(res.status, `${caller}: ${await res.clone().text()}`).toBe(
-            cell
-          )
-      }
+      (caller, cell) => check(route, caller, cell, "private")
     )
+  })
+
+  // Unlisted and public links (WP-5.2): anyone may read, signed in or not;
+  // only Collaborators do more. Search is the only place they differ.
+  describe.each(["unlisted", "public"] as const)("on a %s link", (vis) => {
+    describe.each(ROUTES)("$name", (route) => {
+      it.each([
+        ["stranger", route.link[0]],
+        ["anonymous", route.link[1]],
+        ["viewer", route.expect[2]],
+      ] as const)("%s → %s", (caller, cell) => check(route, caller, cell, vis))
+    })
   })
 
   it("covers every Expedition route the app serves", () => {
@@ -402,6 +506,7 @@ describe("the permissions matrix against the API routes", () => {
       "GET /health",
       "POST /expeditions",
       "GET /expeditions",
+      "GET /expeditions/trash", // mine, as owner
       "POST /import",
       "GET /search",
       "POST /reader",
