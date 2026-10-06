@@ -93,8 +93,13 @@ export function createAuth(
       ...(config.proxyURL
         ? [oAuthProxy({ productionURL: config.proxyURL })]
         : []),
-      // usePlural adds the "s": the table is `jwks`.
-      jwt({ schema: { jwks: { modelName: "jwk" } } }),
+      // Signs MCP access tokens only. usePlural adds the "s": the table is
+      // `jwks`. No JWT on every session read (the app uses cookies), so the
+      // app's sign-in never depends on the signing keys.
+      jwt({
+        schema: { jwks: { modelName: "jwk" } },
+        disableSettingJwtHeader: true,
+      }),
       mcp({
         resource: mcpResource(config),
         // The app's pages (apps/web): sign in, then the consent screen,

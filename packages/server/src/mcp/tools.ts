@@ -119,7 +119,7 @@ function blobSourceReader(
 ): SourceReader {
   return {
     async read(sourceId, ids) {
-      let got: Awaited<ReturnType<typeof readSegments>> = null
+      let got: Awaited<ReturnType<typeof readSegments>>
       try {
         got = await readSegments(ctx.db, ctx.blobs(), expeditionId, sourceId)
       } catch {
@@ -316,7 +316,7 @@ export const HANDLERS: Handlers = {
 
   async get_source_segments(ctx, { expedition, source, segments, offset }) {
     await readable(ctx, expedition)
-    let got: Awaited<ReturnType<typeof readSegments>> = null
+    let got: Awaited<ReturnType<typeof readSegments>>
     try {
       got = await readSegments(ctx.db, ctx.blobs(), expedition, source)
     } catch {

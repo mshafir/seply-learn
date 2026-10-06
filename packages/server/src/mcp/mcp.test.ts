@@ -141,7 +141,7 @@ async function connect(bearer: string, modern = false): Promise<Client> {
   const transport = new StreamableHTTPClientTransport(
     new URL(`${TEST_ORIGIN}/mcp`),
     {
-      fetch: (url, init) => s.app.request(String(url), init as RequestInit),
+      fetch: async (url, init) => s.app.request(String(url), init),
       requestInit: { headers: { authorization: `Bearer ${bearer}` } },
     }
   )

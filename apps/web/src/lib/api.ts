@@ -132,17 +132,132 @@ export function importExpedition(fileText: string): Promise<ImportResult> {
   return call("/import", { method: "POST", body: fileText })
 }
 
-/** Starts Google sign-in (Better Auth): the browser leaves for Google. */
-export async function signInWithGoogle(callbackPath = "/"): Promise<void> {
+/**
+ * Starts Google sign-in (Better Auth): the browser leaves for Google. With
+ * `oauthQuery` (an MCP client's sign-in: the signed query Better Auth sent to
+ * /sign-in), the authorization continues after sign-in, to /consent.
+ */
+export async function signInWithGoogle(
+  callbackPath = "/",
+  oauthQuery?: string
+): Promise<void> {
   const { url } = await call<{ url?: string }>("/auth/sign-in/social", {
     method: "POST",
     body: JSON.stringify({
       provider: "google",
       callbackURL: new URL(callbackPath, window.location.origin).href,
+      ...(oauthQuery && { oauth_query: oauthQuery }),
     }),
   })
   if (!url) throw new ApiError(500, "Sign-in didn't return a redirect.")
   window.location.assign(url)
+}
+
+// --- Connected agents (WP-5.4): API tokens and MCP OAuth grants ---------------
+
+export type AgentScope =
+  "expeditions:read" | "expeditions:create" | "proposals:write"
+
+/** A personal API token (never its key, except once when it's made). */
+export type ApiToken = {
+  id: string
+  name: string
+  start: string | null
+  scopes: AgentScope[]
+  /** Restricted to these Expeditions; null: every Expedition I can see. */
+  expeditions: string[] | null
+  createdAt: string
+  lastUsedAt: string | null
+  expiresAt: string | null
+}
+
+/** An MCP client I let in with OAuth, e.g. Claude Code. */
+export type AgentGrant = {
+  clientId: string
+  name: string
+  uri: string | null
+  icon: string | null
+  scopes: AgentScope[]
+  expeditions: string[] | null
+  createdAt: string | null
+}
+
+export type AgentsOverview = {
+  tokens: ApiToken[]
+  grants: AgentGrant[]
+  scopes: { id: AgentScope; label: string }[]
+}
+
+export function getAgents(): Promise<AgentsOverview> {
+  return call("/agents")
+}
+
+export function createApiToken(body: {
+  name: string
+  scopes: AgentScope[]
+  expeditions: string[] | null
+}): Promise<{ token: ApiToken; key: string }> {
+  return call("/agents/tokens", { method: "POST", body: JSON.stringify(body) })
+}
+
+export async function deleteApiToken(id: string): Promise<void> {
+  await call(`/agents/tokens/${encodeURIComponent(id)}`, { method: "DELETE" })
+}
+
+export async function revokeAgentGrant(clientId: string): Promise<void> {
+  await call(`/agents/grants/${encodeURIComponent(clientId)}`, {
+    method: "DELETE",
+  })
+}
+
+/** An OAuth client as the consent screen shows it (Better Auth's public view). */
+export type OAuthClientInfo = {
+  client_id: string
+  client_name?: string
+  client_uri?: string
+  logo_uri?: string
+}
+
+export function getOAuthClient(clientId: string): Promise<OAuthClientInfo> {
+  return call(
+    `/auth/oauth2/public-client?client_id=${encodeURIComponent(clientId)}`
+  )
+}
+
+/**
+ * Answers the consent screen: the Expeditions the client may use go to our
+ * server first, then Better Auth issues the code (or the refusal) and says
+ * where to send the browser.
+ */
+export async function answerConsent(args: {
+  accept: boolean
+  clientId: string
+  scopes: string[]
+  expeditions: string[] | null
+  oauthQuery: string
+}): Promise<string> {
+  if (args.accept)
+    await call("/agents/consent", {
+      method: "POST",
+      body: JSON.stringify({
+        clientId: args.clientId,
+        expeditions: args.expeditions,
+      }),
+    })
+  const res = await call<{ url?: string; redirect_uri?: string }>(
+    "/auth/oauth2/consent",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        accept: args.accept,
+        ...(args.accept && { scope: args.scopes.join(" ") }),
+        oauth_query: args.oauthQuery,
+      }),
+    }
+  )
+  const url = res.url ?? res.redirect_uri
+  if (!url) throw new ApiError(500, "The sign-in didn't say where to go next.")
+  return url
 }
 
 export async function signOut(): Promise<void> {

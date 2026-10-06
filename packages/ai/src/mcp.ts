@@ -15,6 +15,7 @@ import {
   Speaker,
   emptyState,
   isLive,
+  ulid,
   type DomainState,
   type OpBody,
   type Prov,
@@ -379,14 +380,25 @@ export async function stageFirstBuild(o: {
     ])
   )
 
+  // Every Concept's id is minted up front, so any Concept, Relationship,
+  // View or overview link can name any other, in any order.
+  const mint = o.newId ?? (() => ulid(Date.now()))
+  let minted: string | undefined
   const c = createCuratorTools({
     state: emptyState(o.expeditionId),
     views: o.views,
     sources: memorySourceReader(segments),
-    newId: o.newId,
+    newId: () => minted ?? mint(),
   })
   const errors: string[] = []
   const ids = new Map(Object.entries(o.sourceIds))
+  const conceptIds = new Map<string, string>()
+  for (const { ref } of input.concepts) {
+    if (ids.has(ref) || conceptIds.has(ref))
+      errors.push(`concept ${ref}: temp id used twice`)
+    else conceptIds.set(ref, mint())
+  }
+  for (const [ref, id] of conceptIds) ids.set(ref, id)
 
   const staged = c.stage.stage(o.preamble)
   if (!staged.ok) return { ok: false, errors: [staged.error] }
@@ -433,11 +445,10 @@ export async function stageFirstBuild(o: {
       a
     )
 
+  const created = new Set<string>()
   for (const { ref, ...value } of input.concepts) {
-    if (ids.has(ref)) {
-      errors.push(`concept ${ref}: temp id used twice`)
-      continue
-    }
+    if (created.has(ref) || !conceptIds.has(ref)) continue
+    created.add(ref)
     const unknown = new Set<string>()
     const resolved = withIds(value, ids, unknown) as typeof value
     const bad = [
@@ -448,8 +459,9 @@ export async function stageFirstBuild(o: {
       errors.push(
         `concept ${ref}: prov cites no such segment: ${bad.join(", ")}`
       )
-    const out = await run(`concept ${ref}`, CURATOR_OF(c).concept_create, value)
-    if (out?.id) ids.set(ref, out.id)
+    minted = conceptIds.get(ref)
+    await run(`concept ${ref}`, CURATOR_OF(c).concept_create, value)
+    minted = undefined
   }
 
   for (const r of input.relationships ?? []) {
@@ -509,7 +521,7 @@ export async function stageFirstBuild(o: {
       relationships: live(state.relationships),
       views: viewIds.length,
     },
-    ids: Object.fromEntries([...ids].filter(([k]) => !(k in o.sourceIds))),
+    ids: Object.fromEntries(conceptIds),
     viewIds,
   }
 }

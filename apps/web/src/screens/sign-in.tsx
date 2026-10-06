@@ -16,6 +16,7 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 
 import { signInWithGoogle } from "@/lib/api.ts"
+import { authorizeUrl, signedOAuthQuery } from "@/lib/oauth.ts"
 import { useSession } from "@/lib/session.ts"
 
 export function SignInScreen() {
@@ -25,12 +26,29 @@ export function SignInScreen() {
   const [params] = useSearchParams()
   const raw = params.get("next") ?? "/"
   const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/"
+  // An MCP client's sign-in (WP-5.4): Better Auth sent the authorization
+  // request here as a signed query. Signing in continues to /consent; a
+  // reader who is signed in already goes straight back to it.
+  const oauthQuery = signedOAuthQuery(window.location.search)
+  const signedIn = session.status === "signed-in"
 
-  if (session.status === "signed-in") return <Redirect to={next} replace />
+  React.useEffect(() => {
+    if (signedIn && oauthQuery)
+      window.location.replace(authorizeUrl(oauthQuery))
+  }, [signedIn, oauthQuery])
+
+  if (signedIn)
+    return oauthQuery ? (
+      <main className="flex min-h-svh items-center justify-center">
+        <Spinner className="size-6 text-muted-foreground" />
+      </main>
+    ) : (
+      <Redirect to={next} replace />
+    )
 
   const start = () => {
     setStarting(true)
-    signInWithGoogle(next).catch(() => {
+    signInWithGoogle(next, oauthQuery ?? undefined).catch(() => {
       setStarting(false)
       toast.add({
         title: "Couldn't start sign-in",
@@ -49,7 +67,9 @@ export function SignInScreen() {
             Sign in
           </CardTitle>
           <CardDescription>
-            Build Expeditions from your AI chats, and read them your way.
+            {oauthQuery
+              ? "Sign in to connect an agent to your Expeditions."
+              : "Build Expeditions from your AI chats, and read them your way."}
           </CardDescription>
         </CardHeader>
         <CardContent>

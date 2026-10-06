@@ -109,6 +109,20 @@ Every stage takes an `onStep` callback with the working copy (live counters, pre
 
 **Measured** (`apps/server-node/scripts/real-grow.ts`, the instance key through the AI Gateway; not part of `pnpm test`): "What would I need to understand QLoRA?" on the compute sample (201 Concepts, 425 Relationships, no Source text) on Opus 5.5: 4 calls in 47 s, **$0.35 billed** (the meter agreed; `estimateAsk` says $0.35, with more output and less cache writing than it measured), 12 items streamed in two batches (4 new Concepts, each with a summary and an overview, and 8 Relationships, 3 of them linking Concepts that were already there), all applying when accepted. The Proposal and a summary are in `fixtures/grow/` for owner review. A first run before the lean index and the link check cost $0.43 and left two overview fixes as extra items; both were changed for that.
 
+### MCP tools (spec §6, WP-5.4)
+
+`mcp.ts`: the MCP tools' definitions, shared with the curator's tools so MCP and in-app AI can't drift. Nothing here touches a database or a transport (the server serves them; phase 2 can serve them on loopback).
+
+| Export | What it is |
+|---|---|
+| `MCP_TOOLS` | Every §6.2 tool: `title`, `description`, `scope`, `readOnly` and its Zod `input`. `propose_changes` and `create_expedition` take the curator tools' own input schemas, and their descriptions carry the curator tools' descriptions. |
+| `MCP_SCOPES`, `McpScope`, `MCP_SCOPE_LABELS` | `expeditions:read`, `expeditions:create`, `proposals:write`, and their words for the consent screen and Settings. |
+| `MCP_INSTRUCTIONS` | The server's instructions: the `seply-learn` skill's SKILL.md without its front matter (`SKILL_TEXT` in `playbook/generated.ts`). |
+| `ProposeItem`, `ProposeChangesInput`, `stageProposal({ state, items, views?, sources?, newId? })` | Each item is one curator tool call (`concept_create`, `concept_update`, `relationship_add`, `relationship_remove`, `view_build`) with its input as that tool takes it; `ref: "new:…"` names what an item creates, and later items use it (as an id, a record key or an overview link `#c/new:…`). Items run one at a time over the Expedition with the earlier ones applied; a refused item is skipped with its reason. A View is taken only when `view.inspect` passes, and goes in ready. Returns per-item results, one Proposal item per taken item, and the temp ids' real ids. |
+| `CreateExpeditionInput`, `stageFirstBuild({ expeditionId, input, sourceIds, preamble, views, newId? })` | `create_expedition`: Sources as segments with the agent's own ids, Attributes, Concepts (each with a temp id; ids are minted up front, so any can name any other), Relationships and at least one View, through the curator tools and the curator's commit (every View must pass). Prov must cite segments that exist. All or nothing: every error found is returned. |
+
+**The `seply-learn` skill** (spec §6.3) lives in `plugins/seply-learn/` at the repo root (a Claude Code plugin; `.claude-plugin/marketplace.json` lists it). Its `SKILL.md` is written by hand; `pnpm --filter @seply/ai playbook` copies the playbook files it bundles (`_contract`, `extract`, `build-view`, `grow`) and every proven and experimental View Type into its `references/`, and puts SKILL.md's text in `generated.ts`. `playbook.test.ts` fails while either is stale.
+
 ### The skim and the playbook (spec §5.2 step 2; WP-3.4)
 
 | Export | What it is |

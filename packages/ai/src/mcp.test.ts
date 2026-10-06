@@ -69,7 +69,9 @@ describe("the MCP tool catalog", () => {
   })
 
   it("takes propose_changes items exactly as the curator tools take them", () => {
-    const schema = z.toJSONSchema(ProposeChangesInput, { io: "input" }) as {
+    const schema = z.toJSONSchema(ProposeChangesInput, {
+      io: "input",
+    }) as unknown as {
       properties: { items: { items: { oneOf?: unknown[]; anyOf?: unknown[] } } }
     }
     const variants =
@@ -356,6 +358,45 @@ describe("stageFirstBuild", () => {
     expect(out.errors.join("\n")).toContain("src1#t9")
     expect(out.errors.join("\n")).toContain("temp id used twice")
     expect(out.errors.join("\n")).toContain("new:ghost")
+  })
+
+  it("lets a Concept name one created after it (ids are minted up front)", async () => {
+    const out = await stageFirstBuild({
+      expeditionId: "e1",
+      input: input({
+        concepts: [
+          {
+            ref: "new:printers",
+            title: "Printers",
+            kind: "builtin:topic",
+            tags: ["topic"],
+            summary: "The options.",
+            overview: "We chose the [Orbit P2](#c/new:orbit).",
+          },
+          {
+            ref: "new:orbit",
+            title: "Orbit P2",
+            kind: "builtin:thing",
+            summary: "Enclosed.",
+          },
+        ],
+        relationships: [
+          { from: "new:orbit", type: "builtin:part-of", to: "new:printers" },
+        ],
+      }),
+      sourceIds: { "new:chat": "src1" },
+      preamble,
+      views: stubViewReader(),
+      newId: ids(),
+    })
+    if (!out.ok) throw new Error(out.errors.join("; "))
+    expect(out.ids).toEqual({ "new:printers": "n0", "new:orbit": "n1" })
+    const hub = out.bodies.find(
+      (b) => b.kind === "concept.create" && b.target === "n0"
+    )
+    expect(hub).toMatchObject({
+      value: { overview: "We chose the [Orbit P2](#c/n1)." },
+    })
   })
 
   it("refuses a View with problems", async () => {

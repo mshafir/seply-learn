@@ -2,8 +2,9 @@
 // mode, a key per provider (shown by its last 4 characters, with Test and
 // Delete), which key builds use, and the model per stage under Advanced; in
 // either mode, the per-ask spending cap. A key goes to the server once, when
-// saved, and never comes back. Theme stays in the account menu; Connected
-// agents and Notifications come with their work packages.
+// saved, and never comes back. Theme stays in the account menu. WP-5.4 brings
+// Connected agents (connected-agents.tsx): MCP OAuth grants and API tokens.
+// Notifications come with their work package.
 import * as React from "react"
 import { ArrowLeftIcon, ChevronDownIcon, KeyRoundIcon } from "lucide-react"
 import { Link } from "wouter"
@@ -45,6 +46,7 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
+import { ConnectedAgentsSection } from "@/screens/connected-agents.tsx"
 import {
   deleteAiKey,
   getAi,
@@ -416,6 +418,7 @@ export function SettingsScreen() {
           <h1 className="text-2xl font-semibold">Settings</h1>
         </div>
         <AiSection />
+        <ConnectedAgentsSection />
       </main>
     </div>
   )
