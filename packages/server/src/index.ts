@@ -88,7 +88,23 @@ export {
   type PendingInvite,
   type Sharing,
   type SharingPerson,
+  VisibilityBody,
 } from "./sharing.ts"
+export {
+  forkExpedition,
+  ForkBody,
+  ForkError,
+  forkLabel,
+  type ForkResult,
+} from "./fork.ts"
+export {
+  listTrash,
+  purgeTrash,
+  restoreExpedition,
+  trashExpedition,
+  TRASH_DAYS,
+  type TrashedCard,
+} from "./trash.ts"
 export {
   readConfig,
   isLocalURL,

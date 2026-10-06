@@ -25,6 +25,7 @@ import {
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
 import { exportRoutes } from "./export.ts"
+import { forkRoutes } from "./fork.ts"
 import { historyRoutes } from "./history.ts"
 import { importRoutes } from "./import.ts"
 import { proposalRoutes } from "./proposals.ts"
@@ -41,6 +42,7 @@ import { searchRoutes } from "./search.ts"
 import { inviteRoutes, sharingRoutes } from "./sharing.ts"
 import { sourceRoutes } from "./sources/routes.ts"
 import { syncRoutes } from "./sync.ts"
+import { trashRoutes } from "./trash.ts"
 
 export type SessionUser = { id: string; email: string; name: string }
 
@@ -289,6 +291,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/expeditions", proposalRoutes(relay))
   app.route("/expeditions", askRoutes())
   app.route("/expeditions", sharingRoutes(relay))
+  app.route("/expeditions", forkRoutes(relay))
+  app.route("/expeditions", trashRoutes(relay))
   app.route("/invites", inviteRoutes())
   app.use("/agents", signedIn)
   app.use("/agents/*", signedIn)

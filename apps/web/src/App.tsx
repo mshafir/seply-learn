@@ -68,7 +68,12 @@ export function App() {
       <Route path="/e/:id/:viewId?">
         {(params) => (
           <WaitForSession>
-            <ExpeditionScreen expeditionId={params.id} viewId={params.viewId} />
+            {/* A new Expedition (a Fork just made) starts a fresh screen. */}
+            <ExpeditionScreen
+              key={params.id}
+              expeditionId={params.id}
+              viewId={params.viewId}
+            />
           </WaitForSession>
         )}
       </Route>

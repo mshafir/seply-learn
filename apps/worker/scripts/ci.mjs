@@ -114,6 +114,9 @@ async function hyperdriveUpsert(name) {
   binding.id = id
   // Workflow names are unique per account: each Worker gets its own.
   for (const wf of config.workflows ?? []) wf.name = workflowName(name, wf)
+  // Only production runs the cron (the Trash purge); previews would each
+  // take one of the account's cron triggers.
+  if (name.startsWith("seply-pr-")) delete config.triggers
   writeFileSync(join(root, "wrangler.ci.json"), JSON.stringify(config, null, 2))
   console.log("wrote wrangler.ci.json")
 }

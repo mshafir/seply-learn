@@ -8,9 +8,9 @@
 // History (owners and editors, WP-4.2), which opens the History side panel.
 // Ask (owners and editors, WP-4.4) opens Grow's Ask tab, where they ask the
 // AI about the Expedition; it spins while one of their asks runs.
-// Share (Collaborators, WP-5.1) opens the share dialog (share-dialog.tsx). The
-// Expedition menu (export-dialog.tsx: Export, for anyone who can view, WP-5.3)
-// sits before the account menu.
+// Share (anyone signed in: WP-5.1, WP-5.2) opens the share dialog
+// (share-dialog.tsx). The Expedition menu (export-dialog.tsx: Export, for
+// anyone who can view, WP-5.3) sits before the account menu.
 import * as React from "react"
 import {
   CloudOffIcon,
@@ -66,7 +66,7 @@ export function ExpeditionHeader({
   ask?: { open: boolean; asking: boolean; onToggle: () => void }
   /** The Expedition menu (export-dialog.tsx), when the server is reachable. */
   menu?: React.ReactNode
-  /** Share, the share dialog (Collaborators); absent for everyone else. */
+  /** Share, the share dialog (anyone signed in and online); absent otherwise. */
   share?: { onOpen: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)

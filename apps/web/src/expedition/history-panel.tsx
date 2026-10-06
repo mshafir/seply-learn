@@ -10,9 +10,12 @@
 //   after that Change, read-only, with a banner to go back (or restore).
 // - **Restore to here**: appends the ops that bring everything back to that
 //   point, as a new Change. Nothing is lost: it can be undone too.
+// - **Fork from here** (WP-5.2): a copy of my own, as it was right after
+//   that Change, with a fresh history.
 //
-// The newest Change has only Undo: viewing or restoring it is the present.
-import { EyeIcon, HistoryIcon, Undo2Icon } from "lucide-react"
+// The newest Change has only Undo and Fork: viewing or restoring it is the
+// present.
+import { EyeIcon, GitForkIcon, HistoryIcon, Undo2Icon } from "lucide-react"
 
 import {
   Avatar,
@@ -49,6 +52,7 @@ export type HistoryPanelProps = {
   onUndo: (change: ChangeSummary) => void
   onViewAsOf: (change: ChangeSummary) => void
   onRestore: (change: ChangeSummary) => void
+  onFork: (change: ChangeSummary) => void
 }
 
 export function HistoryPanel({
@@ -61,6 +65,7 @@ export function HistoryPanel({
   onUndo,
   onViewAsOf,
   onRestore,
+  onFork,
 }: HistoryPanelProps & { onClose: () => void; inline: boolean }) {
   const Description = inline ? "p" : SheetDescription
   const { changes, loading, error, more, loadOlder } = history
@@ -106,6 +111,7 @@ export function HistoryPanel({
                 onUndo={() => onUndo(change)}
                 onViewAsOf={() => onViewAsOf(change)}
                 onRestore={() => onRestore(change)}
+                onFork={() => onFork(change)}
               />
             ))}
             {more && (
@@ -131,6 +137,7 @@ function ChangeItem({
   onUndo,
   onViewAsOf,
   onRestore,
+  onFork,
 }: {
   change: ChangeSummary
   me: string | null
@@ -140,6 +147,7 @@ function ChangeItem({
   onUndo: () => void
   onViewAsOf: () => void
   onRestore: () => void
+  onFork: () => void
 }) {
   return (
     <li
@@ -203,6 +211,10 @@ function ChangeItem({
               </Button>
             </>
           )}
+          <Button variant="ghost" size="xs" disabled={busy} onClick={onFork}>
+            <GitForkIcon />
+            Fork from here
+          </Button>
         </div>
       </div>
     </li>
