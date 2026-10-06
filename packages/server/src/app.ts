@@ -2,9 +2,16 @@
 // (the Worker now, the Node server later). Runtimes supply env and a
 // per-request `connect`; nothing here holds state across requests.
 import { sql } from "drizzle-orm"
-import type { ProviderOptions } from "@seply/ai"
-import { Hono, type Context, type MiddlewareHandler } from "hono"
+import type { ClientMetadataResourceFetch } from "@better-auth/oauth-provider"
+import type { ProviderOptions, ViewReader } from "@seply/ai"
+import {
+  Hono,
+  type Context,
+  type ErrorHandler,
+  type MiddlewareHandler,
+} from "hono"
 import { AccessDenied } from "./access.ts"
+import { agentRoutes } from "./agents.ts"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
 import { createFlowRoutes } from "./create.ts"
@@ -26,6 +33,7 @@ import { askRoutes } from "./asks.ts"
 import { jobRoutes } from "./jobs/routes.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import { liveRoutes } from "./live.ts"
+import { mcpRoutes } from "./mcp/routes.ts"
 import { webPushRoutes } from "./push/index.ts"
 import { readerRoutes } from "./reader.ts"
 import { noopRelay, type Relay } from "./relay.ts"
@@ -83,6 +91,18 @@ export type AppOptions<Env extends ServerEnv> = {
    * log-only one under test credentials, else none). Tests pass a memory one.
    */
   mailer?: (env: Env) => Mailer | null
+  /**
+   * Renders Views (`@seply/views/inspect`'s `readView`) for MCP: `get_view`
+   * in the View's own shape, and the checks `create_expedition` and proposed
+   * Views must pass. Without it, `get_view` lists and agents can't create
+   * Expeditions or propose Views.
+   */
+  views?: ViewReader
+  /**
+   * The Client ID Metadata Document fetch for MCP OAuth (see `AuthOptions`).
+   * Without it, MCP clients can't register, and agents use API tokens.
+   */
+  cimdFetch?: ClientMetadataResourceFetch
 }
 
 class NoDatabase extends Error {}
@@ -144,7 +164,13 @@ function resources<Env extends ServerEnv>(
             ? logMailer()
             : null)
     })
-    c.set("auth", () => (auth ??= db().then((d) => createAuth(getConfig(), d))))
+    c.set(
+      "auth",
+      () =>
+        (auth ??= db().then((d) =>
+          createAuth(getConfig(), d, { cimdFetch: opts.cimdFetch })
+        ))
+    )
     try {
       await next()
     } finally {
@@ -178,6 +204,36 @@ export function requireUser(): MiddlewareHandler<AppEnv> {
   }
 }
 
+const onError: ErrorHandler<AppEnv> = (err, c) => {
+  if (err instanceof AccessDenied)
+    return c.json({ error: err.message }, err.status)
+  if (err instanceof NoDatabase)
+    return c.json({ error: "no database configured" }, 503)
+  if (err instanceof NoBlobStore)
+    return c.json({ error: "no file storage configured" }, 503)
+  if (err instanceof ConfigError) {
+    console.error("config:", err.message)
+    return c.json({ error: "server not configured" }, 503)
+  }
+  console.error(err)
+  return c.json({ error: "internal error" }, 500)
+}
+
+/**
+ * The routes that live at the origin's root, not under /api (spec §6.1):
+ * `/mcp` and the OAuth discovery documents under `/.well-known/`. Each
+ * runtime mounts them at `/`, next to `createApp` at `/api`.
+ */
+export function createRootRoutes<Env extends ServerEnv>(opts: AppOptions<Env>) {
+  const app = new Hono<AppEnv>()
+  const res = resources(opts)
+  app.use("/mcp", res)
+  app.use("/.well-known/*", res)
+  app.onError(onError)
+  app.route("/", mcpRoutes(opts.relay ?? noopRelay, { views: opts.views }))
+  return app
+}
+
 export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   const app = new Hono<AppEnv>()
   const relay = opts.relay ?? noopRelay
@@ -194,20 +250,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
     await next()
   })
 
-  app.onError((err, c) => {
-    if (err instanceof AccessDenied)
-      return c.json({ error: err.message }, err.status)
-    if (err instanceof NoDatabase)
-      return c.json({ error: "no database configured" }, 503)
-    if (err instanceof NoBlobStore)
-      return c.json({ error: "no file storage configured" }, 503)
-    if (err instanceof ConfigError) {
-      console.error("config:", err.message)
-      return c.json({ error: "server not configured" }, 503)
-    }
-    console.error(err)
-    return c.json({ error: "internal error" }, 500)
-  })
+  app.onError(onError)
 
   app.get("/health", async (c) => {
     const branch = c.env?.DB_BRANCH
@@ -251,6 +294,9 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.route("/expeditions", forkRoutes(relay))
   app.route("/expeditions", trashRoutes(relay))
   app.route("/invites", inviteRoutes())
+  app.use("/agents", signedIn)
+  app.use("/agents/*", signedIn)
+  app.route("/agents", agentRoutes())
   app.use("/import", signedIn)
   app.route("/import", importRoutes(relay))
   app.use("/reader", signedIn)

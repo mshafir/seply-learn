@@ -1,0 +1,10 @@
+{
+  "name": "seply-learn",
+  "version": "0.1.0",
+  "description": "Read, create and curate Seply Learn Expeditions from Claude Code: the seply-learn skill and the hosted MCP server.",
+  "author": { "name": "Seply" },
+  "homepage": "https://learn.seply.app",
+  "repository": "https://github.com/mshafir/seply-learn",
+  "license": "MIT",
+  "keywords": ["seply", "learning", "knowledge", "mcp"]
+}

@@ -64,7 +64,7 @@ export default defineConfig({
         globIgnores: ["**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2"],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/mcp$/, /^\/\.well-known\//],
         cleanupOutdatedCaches: true,
         // Web push: show a job's notification, open its Expedition on click.
         importScripts: ["push-sw.js"],
@@ -75,7 +75,14 @@ export default defineConfig({
   // root, so swapping the brand means swapping that one folder.
   publicDir: path.resolve(__dirname, "../../packages/ui/brand"),
   // In dev, /api goes to the Worker (`wrangler dev` on 8787); see docs/ops/deploy.md.
-  server: { proxy: { "/api": "http://localhost:8787" } },
+  // So do MCP and its OAuth discovery documents (WP-5.4).
+  server: {
+    proxy: {
+      "/api": "http://localhost:8787",
+      "/mcp": "http://localhost:8787",
+      "/.well-known/oauth-": "http://localhost:8787",
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

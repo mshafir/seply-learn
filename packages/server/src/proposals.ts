@@ -47,7 +47,7 @@ import {
   type ProposalItemView,
   type ProposalView,
 } from "@seply/domain"
-import { and, asc, eq, inArray } from "drizzle-orm"
+import { and, asc, desc, eq, inArray, isNull } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "./app.ts"
@@ -555,6 +555,116 @@ export async function reopenProposals(
       rows.map((r) => r.proposalId)
     )
     return rows.map((r) => r.id)
+  })
+}
+
+/** One of an author's Proposals, with its items counted by status (MCP `list_my_proposals`). */
+export type AuthoredProposal = {
+  id: string
+  expeditionId: string
+  expeditionTitle: string
+  origin: "ai" | "mcp"
+  rationale: string
+  status: "pending" | "partly" | "accepted" | "rejected" | "withdrawn"
+  createdAt: string
+  items: { pending: number; accepted: number; dismissed: number }
+}
+
+/**
+ * An author's Proposals of one origin, newest first, in Expeditions they can
+ * still see (`visible`). No access check beyond that: callers filter.
+ */
+export async function listAuthoredProposals(
+  db: Db,
+  args: { author: string; origin: "ai" | "mcp"; expeditionIds?: string[]; limit?: number }
+): Promise<AuthoredProposal[]> {
+  if (args.expeditionIds && !args.expeditionIds.length) return []
+  const rows = await db
+    .select({
+      id: proposals.id,
+      expeditionId: proposals.expeditionId,
+      expeditionTitle: expeditions.title,
+      origin: proposals.origin,
+      rationale: proposals.rationale,
+      status: proposals.status,
+      createdAt: proposals.createdAt,
+    })
+    .from(proposals)
+    .innerJoin(expeditions, eq(expeditions.id, proposals.expeditionId))
+    .where(
+      and(
+        eq(proposals.author, args.author),
+        eq(proposals.origin, args.origin),
+        isNull(expeditions.deletedAt),
+        ...(args.expeditionIds
+          ? [inArray(proposals.expeditionId, args.expeditionIds)]
+          : [])
+      )
+    )
+    .orderBy(desc(proposals.createdAt), desc(proposals.id))
+    .limit(args.limit ?? 50)
+  if (!rows.length) return []
+  const items = await db
+    .select({
+      expeditionId: proposalItems.expeditionId,
+      proposalId: proposalItems.proposalId,
+      status: proposalItems.status,
+    })
+    .from(proposalItems)
+    .where(
+      and(
+        inArray(proposalItems.expeditionId, [...new Set(rows.map((r) => r.expeditionId))]),
+        inArray(proposalItems.proposalId, rows.map((r) => r.id))
+      )
+    )
+  return rows.map((r) => {
+    const counts = { pending: 0, accepted: 0, dismissed: 0 }
+    for (const i of items)
+      if (i.expeditionId === r.expeditionId && i.proposalId === r.id)
+        counts[i.status === "stale" ? "pending" : i.status]++
+    return { ...r, createdAt: iso(r.createdAt)!, items: counts }
+  })
+}
+
+/**
+ * Withdraws an author's Proposal: its pending items are dismissed (by the
+ * author) and it reads "withdrawn". Accepted items stay. Returns how many
+ * items it took back, or null when there is no such Proposal of theirs.
+ */
+export async function withdrawProposal(
+  db: Db,
+  args: { expeditionId: string; proposalId: string; author: string; now?: () => Date }
+): Promise<number | null> {
+  const at = (args.now ?? (() => new Date()))().toISOString()
+  return db.transaction(async (tx) => {
+    const [p] = await tx
+      .select({ id: proposals.id })
+      .from(proposals)
+      .where(
+        and(
+          eq(proposals.expeditionId, args.expeditionId),
+          eq(proposals.id, args.proposalId),
+          eq(proposals.author, args.author)
+        )
+      )
+      .for("update")
+    if (!p) return null
+    const taken = await tx
+      .update(proposalItems)
+      .set({ status: "dismissed", reviewedBy: args.author, reviewedAt: at })
+      .where(
+        and(
+          eq(proposalItems.expeditionId, args.expeditionId),
+          eq(proposalItems.proposalId, args.proposalId),
+          inArray(proposalItems.status, ["pending", "stale"])
+        )
+      )
+      .returning({ id: proposalItems.id })
+    await tx
+      .update(proposals)
+      .set({ status: "withdrawn" })
+      .where(and(eq(proposals.expeditionId, args.expeditionId), eq(proposals.id, args.proposalId)))
+    return taken.length
   })
 }
 

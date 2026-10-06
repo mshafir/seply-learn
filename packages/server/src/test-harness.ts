@@ -1,14 +1,15 @@
 // Test helpers: the app over an in-memory PGlite database with the committed
 // migrations applied, and a tiny cookie jar. Not exported from the package.
 import { PGlite } from "@electric-sql/pglite"
-import type { ProviderOptions } from "@seply/ai"
+import type { ClientMetadataResourceFetch } from "@better-auth/oauth-provider"
+import type { ProviderOptions, ViewReader } from "@seply/ai"
 import { pg_trgm } from "@electric-sql/pglite/contrib/pg_trgm"
 import { schema } from "@seply/domain"
 import { drizzle } from "drizzle-orm/pglite"
 import { migrate } from "drizzle-orm/pglite/migrator"
 import { Hono } from "hono"
 import { fileURLToPath } from "node:url"
-import { createApp } from "./app.ts"
+import { createApp, createRootRoutes, type AppOptions } from "./app.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import type { Mailer } from "./mailer.ts"
@@ -35,25 +36,31 @@ export function testApp(
     ai,
     jobs,
     mailer,
+    views,
+    cimdFetch,
   }: {
     blobs?: BlobStore
     ai?: ProviderOptions
     jobs?: JobRunner
     mailer?: Mailer | null
+    views?: ViewReader
+    cimdFetch?: ClientMetadataResourceFetch
   } = {}
 ) {
   const root = new Hono()
-  root.route(
-    "/api",
-    createApp({
-      connect: async () => (db ? { db, close: async () => {} } : null),
-      relay,
-      blobs: () => blobs ?? null,
-      ai,
-      jobs,
-      ...(mailer !== undefined && { mailer: () => mailer }),
-    })
-  )
+  const opts: AppOptions<ServerEnv> = {
+    connect: async () => (db ? { db, close: async () => {} } : null),
+    relay,
+    blobs: () => blobs ?? null,
+    ai,
+    jobs,
+    views,
+    cimdFetch,
+    ...(mailer !== undefined && { mailer: () => mailer }),
+  }
+  root.route("/api", createApp(opts))
+  // /mcp and /.well-known/*, at the origin's root as the Worker mounts them.
+  root.route("/", createRootRoutes(opts))
   const request = (path: string, init: RequestInit = {}) =>
     root.request(path, init, env)
   return { request, routes: root.routes }

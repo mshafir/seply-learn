@@ -1,6 +1,7 @@
 // Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
 //   /sign-in            Google sign-in
 //   /invite/:token      an invite link: accept it (WP-5.1)
+//   /consent            an MCP client asks to connect: scopes and Expeditions (WP-5.4)
 //   /                   the Library
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
@@ -12,6 +13,7 @@ import { Redirect, Route, Switch } from "wouter"
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Spinner } from "@seply/ui/components/spinner"
 
+import { ConsentScreen } from "@/screens/consent.tsx"
 import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"
@@ -85,6 +87,11 @@ export function App() {
             />
           </RequireUser>
         )}
+      </Route>
+      <Route path="/consent">
+        <RequireUser>
+          <ConsentScreen />
+        </RequireUser>
       </Route>
       <Route path="/settings">
         <RequireUser>

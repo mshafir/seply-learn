@@ -177,6 +177,28 @@ export {
   type SkimSource,
 } from "./skim.ts"
 export { startingSettings, UNSET_ATTRIBUTE } from "./plan.ts"
+// MCP (spec §6): the tools' definitions, shared with the curator's tools
+export {
+  CreateExpeditionInput,
+  MCP_INSTRUCTIONS,
+  MCP_SCOPE_LABELS,
+  MCP_SCOPES,
+  MCP_TOOLS,
+  McpScope,
+  PROPOSE_TOOLS,
+  ProposeChangesInput,
+  ProposeItem,
+  stageFirstBuild,
+  stageProposal,
+  TempId,
+  type FirstBuild,
+  type McpToolDef,
+  type McpToolName,
+  type ProposeItemResult,
+  type ProposeTool,
+  type SourceInput,
+  type StagedProposal,
+} from "./mcp.ts"
 // The writers (spec §5.2 step 4)
 export {
   ArticleOutput,
