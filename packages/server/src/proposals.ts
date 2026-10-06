@@ -32,7 +32,6 @@
 // Reviews and reopens poke the room themselves (`Relay.poke`): open
 // Suggestions tabs elsewhere fetch the list again.
 import {
-  can,
   isStale,
   makeOps,
   orderItems,
@@ -53,7 +52,8 @@ import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
-import { appendOps, PushError, roleOf } from "./oplog.ts"
+import { expeditionAccess } from "./access.ts"
+import { appendOps, PushError } from "./oplog.ts"
 import { loadState } from "./projection.ts"
 import { publishCommitted, publishPoke, type Relay } from "./relay.ts"
 
@@ -83,21 +83,9 @@ async function mayReview(
   userId: string,
   lock = false
 ) {
-  const q = db
-    .select({
-      visibility: expeditions.visibility,
-      deletedAt: expeditions.deletedAt,
-    })
-    .from(expeditions)
-    .where(eq(expeditions.id, expeditionId))
-  const [exp] = lock ? await q.for("update") : await q
-  if (!exp || exp.deletedAt)
-    throw new ProposalError(404, { error: "Expedition not found" })
-  const role = await roleOf(db, expeditionId, userId)
-  const actor = { role, signedIn: true }
-  if (!can(actor, "read", exp.visibility))
-    throw new ProposalError(404, { error: "Expedition not found" })
-  if (!can(actor, "reviewProposals", exp.visibility))
+  const a = await expeditionAccess(db, expeditionId, userId, { lock })
+  if (!a) throw new ProposalError(404, { error: "Expedition not found" })
+  if (!a.may("reviewProposals"))
     throw new ProposalError(403, {
       error: "only owners and editors review suggestions",
     })

@@ -1,5 +1,6 @@
 // Server configuration, read from env vars (Worker vars and secrets, or
 // process.env on Node). See README.md for the list.
+import { DEFAULT_EMAIL_FROM } from "./mailer.ts"
 
 /** The env vars the app reads. Every runtime passes these through. */
 export type ServerEnv = {
@@ -51,7 +52,20 @@ export type ServerEnv = {
   VAPID_PUBLIC_KEY?: string
   VAPID_PRIVATE_KEY?: string
   VAPID_SUBJECT?: string
+
+  // --- Email (invites only; mailer.ts) ---
+  /** Resend's API key (a sending-only key). Invite emails are off without it. */
+  RESEND_API_KEY?: string
+  /** The sender, e.g. `Seply Learn <invites@mail.seply.app>` (the default). A var, not a secret. */
+  EMAIL_FROM?: string
 }
+
+/**
+ * How invite emails go out: through Resend, only logged (tests and local
+ * e2e, whatever keys are set), or not at all (the link and the inbox only).
+ */
+export type MailConfig =
+  { kind: "resend"; apiKey: string; from: string } | { kind: "log" } | null
 
 export type ServerConfig = {
   baseURL: string
@@ -65,6 +79,7 @@ export type ServerConfig = {
   trustedOrigins: string[]
   testCredentials: boolean
   dbBranch?: string
+  mail: MailConfig
 }
 
 export class ConfigError extends Error {}
@@ -113,13 +128,27 @@ export function readConfig(env: ServerEnv): ServerConfig {
   // The proxy target must trust us, and we must trust it.
   if (proxy && !trustedOrigins.includes(proxy)) trustedOrigins.push(proxy)
 
+  const testCredentials =
+    env.AUTH_TEST_CREDENTIALS === "1" && isLocalURL(baseURL)
+  // Tests never send real email, even with a Resend key in .dev.vars.
+  const mail: MailConfig = testCredentials
+    ? { kind: "log" }
+    : env.RESEND_API_KEY
+      ? {
+          kind: "resend",
+          apiKey: env.RESEND_API_KEY,
+          from: env.EMAIL_FROM?.trim() || DEFAULT_EMAIL_FROM,
+        }
+      : null
+
   return {
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
     google,
     proxyURL: proxy,
     trustedOrigins,
-    testCredentials: env.AUTH_TEST_CREDENTIALS === "1" && isLocalURL(baseURL),
+    testCredentials,
     dbBranch: env.DB_BRANCH,
+    mail,
   }
 }

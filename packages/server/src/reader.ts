@@ -12,7 +12,6 @@
 // Marks for an Expedition the reader can't view (or that is gone) are
 // skipped, not refused, so a queue never gets stuck on one.
 import {
-  can,
   parsePersonalSettings,
   ReaderBatch,
   schema,
@@ -28,7 +27,7 @@ import { z } from "zod"
 import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
 import type { ExpeditionSummary } from "./expeditions.ts"
-import { roleOf } from "./oplog.ts"
+import { expeditionAccess } from "./access.ts"
 import type { Relay } from "./relay.ts"
 
 const { readingStatus, personalViewSettings, readerPosition, expeditions } =
@@ -77,8 +76,7 @@ async function readable(db: Db, userId: string, ids: string[]) {
   const ok = new Set<string>()
   for (const e of rows) {
     if (e.deletedAt) continue
-    const role = await roleOf(db, e.id, userId)
-    if (can({ role, signedIn: true }, "read", e.visibility)) ok.add(e.id)
+    if (await expeditionAccess(db, e.id, userId)) ok.add(e.id)
   }
   return ok
 }
@@ -305,8 +303,7 @@ export async function recentPositions(
   const out: ContinueReadingItem[] = []
   for (const r of rows) {
     if (out.length >= limit) break
-    const role = await roleOf(db, r.expeditionId, userId)
-    if (!can({ role, signedIn: true }, "read", r.visibility)) continue
+    if (!(await expeditionAccess(db, r.expeditionId, userId))) continue
     out.push({
       expedition: {
         id: r.expeditionId,
