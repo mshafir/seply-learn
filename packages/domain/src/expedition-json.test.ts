@@ -316,6 +316,26 @@ describe("id re-minting", () => {
     const aIds = new Set(a.ids.concepts.values())
     for (const id of b.ids.concepts.values()) expect(aIds.has(id)).toBe(false)
   })
+
+  it("records the Source files that came with the file, under the new id", () => {
+    const seen: [string, string][] = []
+    const { state, ids } = importExpeditionJson(tiny(), {
+      ...options(),
+      sourceFiles: (newId, oldId) => {
+        seen.push([newId, oldId])
+        return { blobKey: `k/${newId}/raw`, segmentsKey: `k/${newId}/seg` }
+      },
+    })
+    const id = ids.sources.get("src")!
+    expect(seen).toEqual([[id, "src"]])
+    expect(state.sources[id]).toMatchObject({
+      blobKey: `k/${id}/raw`,
+      segmentsKey: `k/${id}/seg`,
+    })
+    // Without them, a Source is metadata only.
+    const bare = importExpeditionJson(tiny(), options())
+    expect(Object.values(bare.state.sources)[0]).not.toHaveProperty("blobKey")
+  })
 })
 
 describe("validation", () => {

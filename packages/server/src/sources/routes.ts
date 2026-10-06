@@ -49,7 +49,7 @@ export const PasteBody = z.object({
 /** Multipart framing on top of the 25 MB file. */
 const FORM_OVERHEAD = 64 * 1024
 
-const DOWNLOAD_EXT: Record<string, string> = {
+export const DOWNLOAD_EXT: Record<string, string> = {
   "application/pdf": "pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
     "docx",
@@ -61,7 +61,7 @@ const DOWNLOAD_EXT: Record<string, string> = {
 }
 
 /** Can the caller (signed in or not) view this Expedition? */
-async function canView(
+export async function canView(
   c: Context<AppEnv>,
   db: Db,
   expeditionId: string
