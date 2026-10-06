@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "seply-learn": {
+      "type": "http",
+      "url": "https://learn.seply.app/mcp"
+    }
+  }
+}

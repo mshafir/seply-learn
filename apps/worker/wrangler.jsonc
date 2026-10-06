@@ -13,8 +13,8 @@
     "binding": "ASSETS",
     // Unknown paths get index.html so client-side routes work.
     "not_found_handling": "single-page-application",
-    // The API runs before the SPA fallback.
-    "run_worker_first": ["/api/*"],
+    // The API, MCP (WP-5.4) and OAuth discovery run before the SPA fallback.
+    "run_worker_first": ["/api/*", "/mcp", "/.well-known/*"],
   },
   "hyperdrive": [
     {

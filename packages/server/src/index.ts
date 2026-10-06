@@ -1,6 +1,7 @@
 // @seply/server: see README.md for this package's contract.
 export {
   createApp,
+  createRootRoutes,
   requireUser,
   type AppEnv,
   type AppOptions,
@@ -30,7 +31,31 @@ export {
   type AddedSource,
 } from "./sources/store.ts"
 export { PasteBody } from "./sources/routes.ts"
-export { createAuth, AUTH_BASE_PATH, type Auth } from "./auth.ts"
+export {
+  createAuth,
+  API_TOKEN_PREFIX,
+  AUTH_BASE_PATH,
+  MCP_PATH,
+  authIssuer,
+  mcpResource,
+  type Auth,
+  type AuthOptions,
+} from "./auth.ts"
+export {
+  agentRoutes,
+  listAgents,
+  type AgentGrant,
+  type AgentsOverview,
+  type ApiToken,
+} from "./agents.ts"
+export { mcpRoutes } from "./mcp/routes.ts"
+export {
+  AGENT_TTL_MS,
+  mcpServer,
+  runTool,
+  type ToolContext,
+} from "./mcp/tools.ts"
+export { resolveAgent, type Agent } from "./mcp/agent.ts"
 export {
   AccessDenied,
   authorize,

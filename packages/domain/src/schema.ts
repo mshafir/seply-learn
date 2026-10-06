@@ -81,20 +81,270 @@ export const verifications = pgTable("verifications", {
   updatedAt: authTs("updated_at").notNull().defaultNow(),
 })
 
-/** API tokens (and MCP agents): inherit the user's role, optionally restricted to chosen Expeditions. */
-export const apiKeys = pgTable("api_keys", {
+/**
+ * Personal API tokens (spec §2.6, WP-5.4): Better Auth's API key plugin
+ * (`@better-auth/api-key`) owns the rows. `referenceId` is the user; only the
+ * key's hash is stored. `permissions` holds the token's scopes as
+ * `{"mcp": ["expeditions:read", …]}` and `metadata` its restriction to chosen
+ * Expeditions (`{"expeditions": [ids]}`, absent: every Expedition the user
+ * can see). A token inherits its user's role and writes only Proposals (or a
+ * first build).
+ */
+export const apiKeys = pgTable(
+  "api_keys",
+  {
+    id: text("id").primaryKey(),
+    configId: text("config_id").notNull().default("default"),
+    name: text("name"),
+    start: text("start"),
+    referenceId: text("reference_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    prefix: text("prefix"),
+    key: text("key").notNull(),
+    refillInterval: integer("refill_interval"),
+    refillAmount: integer("refill_amount"),
+    lastRefillAt: authTs("last_refill_at"),
+    enabled: boolean("enabled").default(true),
+    rateLimitEnabled: boolean("rate_limit_enabled").default(true),
+    rateLimitTimeWindow: integer("rate_limit_time_window"),
+    rateLimitMax: integer("rate_limit_max"),
+    requestCount: integer("request_count").default(0),
+    remaining: integer("remaining"),
+    lastRequest: authTs("last_request"),
+    expiresAt: authTs("expires_at"),
+    createdAt: authTs("created_at").notNull(),
+    updatedAt: authTs("updated_at").notNull(),
+    permissions: text("permissions"),
+    metadata: text("metadata"),
+  },
+  (t) => [
+    index("api_keys_reference_id_idx").on(t.referenceId),
+    uniqueIndex("api_keys_key_idx").on(t.key),
+  ]
+)
+
+// --- MCP OAuth (Better Auth's `@better-auth/mcp`, WP-5.4) ----------------------
+// The OAuth 2.1 authorization server's tables (`@better-auth/oauth-provider`,
+// which `mcp()` builds on) and the JWT plugin's signing keys. Better Auth owns
+// the rows; the shapes follow its schema for 1.7.
+
+/** The JWT plugin's signing keys (access tokens are JWTs; `/jwks` serves the public halves). */
+export const jwks = pgTable("jwks", {
   id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  name: text("name"),
-  start: text("start"),
-  keyHash: text("key_hash").notNull().unique(),
-  expeditionIds: text("expedition_ids").array(),
-  createdAt: authTs("created_at").notNull().defaultNow(),
-  lastUsedAt: authTs("last_used_at"),
+  publicKey: text("public_key").notNull(),
+  privateKey: text("private_key").notNull(),
+  createdAt: authTs("created_at").notNull(),
   expiresAt: authTs("expires_at"),
+  alg: text("alg"),
+  crv: text("crv"),
 })
+
+/** OAuth clients: MCP clients known by their Client ID Metadata Document URL (CIMD). */
+export const oauthClients = pgTable(
+  "oauth_clients",
+  {
+    id: text("id").primaryKey(),
+    clientId: text("client_id").notNull().unique(),
+    clientSecret: text("client_secret"),
+    clientDiscoveryId: text("client_discovery_id"),
+    disabled: boolean("disabled").default(false),
+    skipConsent: boolean("skip_consent"),
+    enableEndSession: boolean("enable_end_session"),
+    subjectType: text("subject_type"),
+    scopes: text("scopes").array(),
+    clientCredentialsScopes: text("client_credentials_scopes")
+      .array()
+      .default([]),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    createdAt: authTs("created_at"),
+    updatedAt: authTs("updated_at"),
+    name: text("name"),
+    uri: text("uri"),
+    icon: text("icon"),
+    contacts: text("contacts").array(),
+    tos: text("tos"),
+    policy: text("policy"),
+    softwareId: text("software_id"),
+    softwareVersion: text("software_version"),
+    softwareStatement: text("software_statement"),
+    redirectUris: text("redirect_uris").array().notNull(),
+    postLogoutRedirectUris: text("post_logout_redirect_uris").array(),
+    backchannelLogoutUri: text("backchannel_logout_uri"),
+    backchannelLogoutSessionRequired: boolean(
+      "backchannel_logout_session_required"
+    ),
+    tokenEndpointAuthMethod: text("token_endpoint_auth_method"),
+    applicationType: text("application_type"),
+    jwks: text("jwks"),
+    jwksUri: text("jwks_uri"),
+    grantTypes: text("grant_types").array(),
+    responseTypes: text("response_types").array(),
+    requirePKCE: boolean("require_pkce"),
+    dpopBoundAccessTokens: boolean("dpop_bound_access_tokens").default(false),
+    referenceId: text("reference_id"),
+    metadata: jsonb("metadata"),
+  },
+  (t) => [index("oauth_clients_user_id_idx").on(t.userId)]
+)
+
+/** Protected resources (the `/mcp` endpoint). */
+export const oauthResources = pgTable("oauth_resources", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull().unique(),
+  name: text("name").notNull(),
+  accessTokenTtl: integer("access_token_ttl"),
+  refreshTokenTtl: integer("refresh_token_ttl"),
+  signingAlgorithm: text("signing_algorithm"),
+  signingKeyId: text("signing_key_id"),
+  allowedScopes: text("allowed_scopes").array(),
+  customClaims: jsonb("custom_claims"),
+  dpopBoundAccessTokensRequired: boolean(
+    "dpop_bound_access_tokens_required"
+  ).default(false),
+  disabled: boolean("disabled").default(false),
+  createdAt: authTs("created_at"),
+  updatedAt: authTs("updated_at"),
+  policyVersion: integer("policy_version").default(1),
+  metadata: jsonb("metadata"),
+})
+
+export const oauthClientResources = pgTable(
+  "oauth_client_resources",
+  {
+    id: text("id").primaryKey(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    resourceId: text("resource_id")
+      .notNull()
+      .references(() => oauthResources.identifier, { onDelete: "cascade" }),
+    metadata: jsonb("metadata"),
+    createdAt: authTs("created_at"),
+  },
+  (t) => [
+    uniqueIndex("oauth_client_resources_client_resource_uidx").on(
+      t.clientId,
+      t.resourceId
+    ),
+    index("oauth_client_resources_resource_id_idx").on(t.resourceId),
+  ]
+)
+
+export const oauthRefreshTokens = pgTable(
+  "oauth_refresh_tokens",
+  {
+    id: text("id").primaryKey(),
+    token: text("token").notNull().unique(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    sessionId: text("session_id").references(() => sessions.id, {
+      onDelete: "set null",
+    }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    referenceId: text("reference_id"),
+    authorizationCodeId: text("authorization_code_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
+    expiresAt: authTs("expires_at"),
+    createdAt: authTs("created_at"),
+    revoked: authTs("revoked"),
+    rotatedAt: authTs("rotated_at"),
+    rotationReplayResponse: text("rotation_replay_response"),
+    rotationReplayExpiresAt: authTs("rotation_replay_expires_at"),
+    authTime: authTs("auth_time"),
+    confirmation: jsonb("confirmation"),
+    scopes: text("scopes").array().notNull(),
+  },
+  (t) => [
+    index("oauth_refresh_tokens_client_id_idx").on(t.clientId),
+    index("oauth_refresh_tokens_user_id_idx").on(t.userId),
+    index("oauth_refresh_tokens_authorization_code_id_idx").on(
+      t.authorizationCodeId
+    ),
+  ]
+)
+
+export const oauthAccessTokens = pgTable(
+  "oauth_access_tokens",
+  {
+    id: text("id").primaryKey(),
+    token: text("token").unique(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    sessionId: text("session_id").references(() => sessions.id, {
+      onDelete: "set null",
+    }),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    referenceId: text("reference_id"),
+    authorizationCodeId: text("authorization_code_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
+    refreshId: text("refresh_id").references(() => oauthRefreshTokens.id, {
+      onDelete: "cascade",
+    }),
+    expiresAt: authTs("expires_at"),
+    createdAt: authTs("created_at"),
+    revoked: authTs("revoked"),
+    confirmation: jsonb("confirmation"),
+    scopes: text("scopes").array().notNull(),
+  },
+  (t) => [
+    index("oauth_access_tokens_client_id_idx").on(t.clientId),
+    index("oauth_access_tokens_user_id_idx").on(t.userId),
+    index("oauth_access_tokens_refresh_id_idx").on(t.refreshId),
+  ]
+)
+
+/** What a user agreed to give an OAuth client (the consent screen). */
+export const oauthConsents = pgTable(
+  "oauth_consents",
+  {
+    id: text("id").primaryKey(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
+    referenceId: text("reference_id"),
+    resources: text("resources").array(),
+    requestedUserInfoClaims: text("requested_user_info_claims").array(),
+    scopes: text("scopes").array().notNull(),
+    createdAt: authTs("created_at"),
+    updatedAt: authTs("updated_at"),
+  },
+  (t) => [
+    index("oauth_consents_client_id_idx").on(t.clientId),
+    index("oauth_consents_user_id_idx").on(t.userId),
+  ]
+)
+
+/** Replay protection for client assertions. */
+export const oauthClientAssertions = pgTable("oauth_client_assertions", {
+  id: text("id").primaryKey(),
+  expiresAt: authTs("expires_at").notNull(),
+})
+
+/**
+ * An OAuth grant's restriction to chosen Expeditions (spec §6.1: chosen at
+ * consent). One row per user and client; no row, or null ids, means every
+ * Expedition the user can see. Ours, not Better Auth's.
+ */
+export const agentGrants = pgTable(
+  "agent_grants",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    expeditionIds: text("expedition_ids").array(),
+    updatedAt: authTs("updated_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.clientId] })]
+)
 
 /** BYOK mode only. */
 export const aiKeys = pgTable(

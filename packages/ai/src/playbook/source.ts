@@ -74,6 +74,8 @@ export function generatedModule(args: {
   viewTypes: Record<string, string>
   /** Every playbook file (name → markdown), for the curator (WP-3.5b). */
   playbook?: Record<string, string>
+  /** The `seply-learn` skill's SKILL.md (WP-5.4): the MCP server's instructions. */
+  skill?: string
 }): string {
   const catalog = buildCatalog(args.viewTypes)
   const files = Object.fromEntries(
@@ -104,5 +106,38 @@ export function generatedModule(args: {
     "/** Each View Type's definition (docs/view-types/<id>.md), by id. */",
     `export const VIEW_TYPE_DOCS: Record<string, string> = ${JSON.stringify(docs, null, 2)}`,
     "",
+    "/** The `seply-learn` skill (plugins/seply-learn), without its front matter: the MCP server's instructions. */",
+    `export const SKILL_TEXT = ${JSON.stringify(skillText(args.skill ?? ""))}`,
+    "",
   ].join("\n")
+}
+
+/** A SKILL.md without its front matter. */
+export function skillText(md: string): string {
+  return md
+    .replace(/\r\n/g, "\n")
+    .replace(/^---\n[\s\S]*?\n---\n?/, "")
+    .trim()
+}
+
+/** The playbook files the `seply-learn` skill bundles (spec §6.3): the shapes, extracting, Views and proposing. */
+export const SKILL_PLAYBOOK = ["_contract.md", "extract.md", "build-view.md", "grow.md"]
+
+/**
+ * The skill's `references/` (path → markdown): copies of the playbook files it
+ * bundles and of every proven and experimental View Type definition, so the
+ * plugin carries the same guidance as the curator.
+ */
+export function skillReferences(args: {
+  viewTypes: Record<string, string>
+  playbook?: Record<string, string>
+}): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const name of SKILL_PLAYBOOK) {
+    const md = args.playbook?.[name]
+    if (md === undefined) throw new Error(`no playbook file ${name}`)
+    out[`playbook/${name}`] = md
+  }
+  for (const e of buildCatalog(args.viewTypes)) out[`view-types/${e.id}.md`] = args.viewTypes[`${e.id}.md`]!
+  return out
 }

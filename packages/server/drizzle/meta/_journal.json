@@ -50,6 +50,13 @@
       "when": 1791299261578,
       "tag": "0006_sharing",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791302438509,
+      "tag": "0007_mcp",
+      "breakpoints": true
     }
   ]
 }

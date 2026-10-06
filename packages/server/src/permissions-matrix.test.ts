@@ -544,3 +544,121 @@ describe("sharing side effects", () => {
     expect(patch.status).toBe(403)
   })
 })
+
+// --- MCP (WP-5.4) -------------------------------------------------------------
+// The same matrix for agents: each caller's own API token (all scopes) on a
+// private Expedition. "ok" answers; "refused" is a tool error the agent reads
+// (an Expedition it can't read is "not found", never a hint it exists); an
+// anonymous caller has no token and gets 401 before any tool runs.
+type McpCell = "ok" | "refused"
+const MCP_ROUTES: {
+  tool: string
+  /** [owner, editor, viewer, stranger] */
+  expect: [McpCell, McpCell, McpCell, McpCell]
+  prepare?: (ctx: Ctx, s: Setup) => Promise<void>
+  args: (ctx: Ctx) => Record<string, unknown>
+}[] = [
+  {
+    tool: "get_expedition",
+    expect: ["ok", "ok", "ok", "refused"],
+    args: (x) => ({ expedition: x.exp }),
+  },
+  {
+    tool: "list_sources",
+    expect: ["ok", "ok", "ok", "refused"],
+    args: (x) => ({ expedition: x.exp }),
+  },
+  {
+    tool: "get_source_segments",
+    expect: ["ok", "ok", "ok", "refused"],
+    prepare: addSource,
+    args: (x) => ({ expedition: x.exp, source: x.sourceId }),
+  },
+  {
+    tool: "list_my_proposals",
+    expect: ["ok", "ok", "ok", "refused"],
+    args: (x) => ({ expedition: x.exp }),
+  },
+  {
+    tool: "propose_changes",
+    expect: ["ok", "ok", "refused", "refused"],
+    args: (x) => ({
+      expedition: x.exp,
+      rationale: "r",
+      items: [
+        {
+          tool: "concept_create",
+          input: {
+            title: "T",
+            kind: "builtin:idea",
+            summary: "s",
+            overview: "o",
+          },
+        },
+      ],
+    }),
+  },
+]
+
+describe("the permissions matrix against the MCP tools", () => {
+  const keys = new Map<string, string>()
+  async function key(as: TestUser): Promise<string> {
+    if (!keys.has(as.id)) {
+      const res = await s.app.request("/api/agents/tokens", {
+        method: "POST",
+        headers: as.headers,
+        body: JSON.stringify({
+          name: "matrix",
+          scopes: ["expeditions:read", "expeditions:create", "proposals:write"],
+        }),
+      })
+      keys.set(as.id, ((await res.json()) as { key: string }).key)
+    }
+    return keys.get(as.id)!
+  }
+  /** One tools/call over plain streamable HTTP (2025 JSON-RPC, stateless). */
+  async function callTool(bearer: string | null, name: string, args: unknown) {
+    const res = await s.app.request("http://localhost:8787/mcp", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+        "mcp-protocol-version": "2025-06-18",
+        ...(bearer && { authorization: `Bearer ${bearer}` }),
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name, arguments: args },
+      }),
+    })
+    if (res.status !== 200) return res.status
+    const text = await res.text()
+    const json = text.startsWith("{") ? text : /^data: (.*)$/m.exec(text)![1]!
+    const body = JSON.parse(json) as {
+      result?: { isError?: boolean }
+      error?: unknown
+    }
+    if (body.error) throw new Error(JSON.stringify(body.error))
+    return body.result!.isError ? "refused" : "ok"
+  }
+
+  describe.each(MCP_ROUTES)("$tool", (route) => {
+    it.each(
+      (["owner", "editor", "viewer", "stranger"] as const).map(
+        (c, i) => [c, route.expect[i]!] as const
+      )
+    )("%s's agent → %s", async (caller, cell) => {
+      const ctx = await fresh()
+      await route.prepare?.(ctx, s)
+      expect(
+        await callTool(await key(s.users[caller]), route.tool, route.args(ctx))
+      ).toBe(cell)
+    })
+    it("anonymous → 401", async () => {
+      const ctx = await fresh()
+      expect(await callTool(null, route.tool, route.args(ctx))).toBe(401)
+    })
+  })
+})

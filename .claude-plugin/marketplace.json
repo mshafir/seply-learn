@@ -1,0 +1,15 @@
+{
+  "name": "seply",
+  "owner": { "name": "Seply" },
+  "metadata": {
+    "description": "Claude Code plugins for Seply."
+  },
+  "plugins": [
+    {
+      "name": "seply-learn",
+      "source": "./plugins/seply-learn",
+      "description": "Read, create and curate Seply Learn Expeditions: the seply-learn skill and the hosted MCP server.",
+      "category": "productivity"
+    }
+  ]
+}

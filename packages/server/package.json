@@ -16,12 +16,18 @@
     "db:check": "drizzle-kit check"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.7.7",
+    "@better-auth/cimd": "^1.7.7",
+    "@better-auth/mcp": "^1.7.7",
+    "@better-auth/oauth-provider": "^1.7.7",
+    "@modelcontextprotocol/server": "^2.3.1",
     "@seply/ai": "workspace:*",
     "@seply/domain": "workspace:*",
-    "better-auth": "^1.7.6",
+    "better-auth": "^1.7.7",
     "drizzle-orm": "^0.45.3",
     "fflate": "^0.8.3",
     "hono": "^4.13.10",
+    "jose": "^6.2.12",
     "node-html-parser": "^9.0.4",
     "pg": "^8.23.0",
     "unpdf": "^1.8.1",
@@ -30,6 +36,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^10",
+    "@modelcontextprotocol/client": "^2.3.1",
     "@seply/config": "workspace:*",
     "@types/node": "^24",
     "@types/pg": "^8.23.1",
