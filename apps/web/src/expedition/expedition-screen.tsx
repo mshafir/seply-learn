@@ -170,6 +170,7 @@ import { ShareDialog } from "@/expedition/share-dialog.tsx"
 import {
   ApiError,
   estimateArticle,
+  forkExpedition,
   listExpeditions,
   markSeen,
   reopenProposals,
@@ -245,7 +246,6 @@ export function ExpeditionScreen({
           canEdit={
             state.status === "ready" && (role === "owner" || role === "editor")
           }
-          role={role}
           health={health}
           signInHref={signInHref}
           offlineSince={state.status === "cached" ? state.savedAt : null}
@@ -375,7 +375,6 @@ function ExpeditionFrame({
   viewId,
   userId,
   canEdit,
-  role,
   health,
   signInHref,
   offlineSince,
@@ -387,8 +386,6 @@ function ExpeditionFrame({
   viewId?: string
   userId: string
   canEdit: boolean
-  /** My Collaborator role, or null (a reader of a link, or not known yet). */
-  role: Role | null
   health: SyncHealth
   signInHref: string | null
   /** Reading this device's saved copy, taken then (ms); null when live. */
@@ -458,9 +455,10 @@ function ExpeditionFrame({
     }
   )
   const [query, setQuery] = React.useState("")
-  // The share dialog (WP-5.1): Collaborators, signed in and online.
+  // The share dialog (WP-5.1): anyone signed in and online. Collaborators
+  // manage access there; readers of a link see it and can Fork (WP-5.2).
   const [shareOpen, setShareOpen] = React.useState(false)
-  const canShare = role !== null && signInHref === null && offlineSince === null
+  const canShare = signInHref === null && offlineSince === null
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
   const reader = useReader()
@@ -796,6 +794,31 @@ function ExpeditionFrame({
       .finally(() => setHistoryBusy(false))
   }
 
+  // Fork (WP-5.2): my own copy, of now or as of a Change; it opens at once.
+  const fork = async (change?: ChangeSummary) => {
+    setHistoryBusy(true)
+    try {
+      const out = await forkExpedition(expeditionId, change?.id)
+      toast.add({
+        title: "Forked: this copy is yours",
+        description: change
+          ? `As it was after “${change.label}”, with a history of its own.`
+          : "With its Sources and a history of its own.",
+        type: "success",
+      })
+      setShareOpen(false)
+      navigate(`/e/${out.expedition.id}`)
+    } catch (err) {
+      toast.add({
+        title: "Couldn't fork it",
+        description: err instanceof Error ? err.message : String(err),
+        type: "error",
+      })
+    } finally {
+      setHistoryBusy(false)
+    }
+  }
+
   // Suggestions: each review action is one request (and at most one Change).
   const [reviewBusy, setReviewBusy] = React.useState(false)
   const liveState = client.engine.state
@@ -913,6 +936,7 @@ function ExpeditionFrame({
             onUndo: undoChange,
             onViewAsOf: viewAsOf,
             onRestore: restoreChange,
+            onFork: (change) => void fork(change),
           }
         : panel?.type === "view" && view
           ? {
@@ -1368,6 +1392,23 @@ function ExpeditionFrame({
           meId={userId}
           onAccessChanged={onAccessChanged}
           onLeft={() => navigate("/", { replace: true })}
+          onForked={(out) => {
+            setShareOpen(false)
+            toast.add({
+              title: "Forked: this copy is yours",
+              description: "With its Sources and a history of its own.",
+              type: "success",
+            })
+            navigate(`/e/${out.expedition.id}`)
+          }}
+          onTrashed={() => {
+            toast.add({
+              title: "Moved to Trash",
+              description:
+                "Restore it from Trash in the Library within 30 days.",
+            })
+            navigate("/", { replace: true })
+          }}
         />
       )}
     </>

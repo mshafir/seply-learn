@@ -42,6 +42,9 @@
   // Source files and their segments (spec §2.7). CI points previews at
   // seply-sources-preview (scripts/ci.mjs r2-bucket); wrangler dev simulates it locally.
   "r2_buckets": [{ "binding": "SOURCES", "bucket_name": "seply-sources" }],
+  // Daily: purge Expeditions whose 30 days in Trash are over (WP-5.2).
+  // Previews drop it (scripts/ci.mjs hyperdrive-upsert).
+  "triggers": { "crons": ["17 4 * * *"] },
   "vars": {
     // The Neon branch this deploy reads from; CI overrides it with --var.
     "DB_BRANCH": "local",

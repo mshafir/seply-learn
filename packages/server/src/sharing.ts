@@ -11,13 +11,16 @@
 //   DELETE /expeditions/:id/collaborators/:userId  → 204              (removeCollaborator: owner; anyone may leave)
 //   POST   /expeditions/:id/transfer { userId }    → 200              (transferOwnership: owner, to an editor)
 //   POST   /expeditions/:id/seen                   → 204              (clears the New badge)
+//   PATCH  /expeditions/:id/visibility             → { visibility }   (changeVisibility: owner; WP-5.2)
+//          { visibility: "private" | "unlisted" | "public" }
 //   GET    /invites/:token                         → the invite       (anyone holding the link)
 //   POST   /invites/:token/accept                  → { expeditionId, role } (signed in)
 //
 // Someone who loses access or changes role is kicked from the live room
 // (Relay.kick), so their open tab reopens the Expedition and finds its new
-// access at once: gone, or read-only.
-import { schema, ulid, type Role } from "@seply/domain"
+// access at once: gone, or read-only. Making an Expedition private kicks
+// every reader of its link the same way.
+import { schema, ulid, type Role, type Visibility } from "@seply/domain"
 import { and, eq, isNull, sql } from "drizzle-orm"
 import { Hono, type Context } from "hono"
 import { z } from "zod"
@@ -38,6 +41,9 @@ export const InviteBody = z.object({
 })
 const RoleBody = z.object({ role: InviteRole })
 const TransferBody = z.object({ userId: z.string().min(1).max(128) })
+export const VisibilityBody = z.object({
+  visibility: z.enum(["private", "unlisted", "public"]),
+})
 
 /** A Collaborator as the share dialog lists them. */
 export type SharingPerson = {
@@ -67,6 +73,12 @@ export type Sharing = {
     changeRole: boolean
     removeCollaborator: boolean
     transferOwnership: boolean
+    /** Private, unlisted or public (WP-5.2): the owner. */
+    changeVisibility: boolean
+    /** Make your own copy (WP-5.2): anyone signed in who can view. */
+    fork: boolean
+    /** Delete to Trash (WP-5.2): the owner. */
+    trashExpedition: boolean
   }
   collaborators: SharingPerson[]
   /** Not accepted yet; listed for those who may invite. */
@@ -271,6 +283,9 @@ export async function readSharing(
       changeRole: a.may("changeRole"),
       removeCollaborator: a.may("removeCollaborator"),
       transferOwnership: a.may("transferOwnership"),
+      changeVisibility: a.may("changeVisibility"),
+      fork: a.may("fork"),
+      trashExpedition: a.may("trashExpedition"),
     },
     collaborators: people
       .map((p) => ({ ...p, email: a.role ? p.email : "" }))
@@ -565,6 +580,40 @@ export function sharingRoutes(relay: Relay) {
     if (done === "not-editor")
       return c.json({ error: "ownership goes to an existing editor" }, 409)
     return c.json({ ownerId: target })
+  })
+
+  r.patch("/:id/visibility", async (c) => {
+    const db = await c.var.db()
+    const expeditionId = c.req.param("id")
+    const before = await authorize(
+      db,
+      expeditionId,
+      c.var.user.id,
+      "changeVisibility",
+      { refusal: "only the owner changes Visibility" }
+    )
+    const body = await bodyOf(c, VisibilityBody)
+    if (!body.ok)
+      return c.json({ error: "invalid body", issues: body.issues }, 400)
+    const visibility: Visibility = body.data.visibility
+    if (visibility !== before.visibility) {
+      await db
+        .update(expeditions)
+        .set({ visibility })
+        .where(eq(expeditions.id, expeditionId))
+      // Readers of the link lose access: close their live connections.
+      if (visibility === "private")
+        try {
+          await relay.kick?.(
+            expeditionId,
+            null,
+            "The owner made this Expedition private"
+          )
+        } catch (err) {
+          console.error("relay: kick failed", err)
+        }
+    }
+    return c.json({ visibility })
   })
 
   r.post("/:id/seen", async (c) => {

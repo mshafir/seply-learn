@@ -857,6 +857,9 @@ export type Sharing = {
     changeRole: boolean
     removeCollaborator: boolean
     transferOwnership: boolean
+    changeVisibility: boolean
+    fork: boolean
+    trashExpedition: boolean
   }
   collaborators: SharingPerson[]
   invites: PendingInvite[]
@@ -940,6 +943,59 @@ export async function transferOwnership(
 /** I opened it: clears its New badge in the Library. */
 export async function markSeen(expeditionId: string): Promise<void> {
   await call(`${expPath(expeditionId)}/seen`, { method: "POST" })
+}
+
+// --- Visibility, Fork and Trash (WP-5.2; the server's sharing.ts, fork.ts, trash.ts)
+
+export type Visibility = Sharing["visibility"]
+
+/** Private, unlisted or public (the owner). */
+export async function setVisibility(
+  expeditionId: string,
+  visibility: Visibility
+): Promise<void> {
+  await call(`${expPath(expeditionId)}/visibility`, {
+    method: "PATCH",
+    body: JSON.stringify({ visibility }),
+  })
+}
+
+export type ForkResult = {
+  expedition: ExpeditionSummary
+  forkedFrom: { exp: string; seq: number }
+}
+
+/** My own copy: of the current state, or as of a Change (`asOf`, its id). */
+export function forkExpedition(
+  expeditionId: string,
+  asOf?: string
+): Promise<ForkResult> {
+  return call<ForkResult>(`${expPath(expeditionId)}/fork`, {
+    method: "POST",
+    body: JSON.stringify(asOf ? { asOf } : {}),
+  })
+}
+
+/** An Expedition of mine in Trash, with when it will be purged. */
+export type TrashedCard = LibraryCard & {
+  deletedAt: string
+  purgeAfter: string
+}
+
+/** Deletes to Trash (the owner); purged after 30 days. */
+export async function trashExpedition(expeditionId: string): Promise<void> {
+  await call(expPath(expeditionId), { method: "DELETE" })
+}
+
+export async function listTrash(): Promise<TrashedCard[]> {
+  return (await call<{ expeditions: TrashedCard[] }>("/expeditions/trash"))
+    .expeditions
+}
+
+export function restoreExpedition(
+  expeditionId: string
+): Promise<ExpeditionSummary> {
+  return call(`${expPath(expeditionId)}/restore`, { method: "POST" })
 }
 
 export function getInvite(token: string): Promise<InviteInfo> {
