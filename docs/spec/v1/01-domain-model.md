@@ -168,10 +168,10 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
 ## 1.9 Export and import
 
 - **Export** is available to anyone who can view, in two formats:
-  1. **Canonical JSON:** the current state, with `schemaVersion`, built-ins inlined, View settings including overrides, and provenance. Source files are included optionally (default on for owners and editors).
+  1. **Canonical JSON:** the current state, with `schemaVersion`, built-ins inlined, View settings including overrides, and provenance. Source files are included optionally (default on for owners and editors); with them the export is a zip of the JSON (`expedition.json`) and each Source's files (`sources/<Source id>/`: the original file and its segments), and the JSON itself is unchanged.
   2. **A Markdown folder:** one note per Concept, with frontmatter, the overview and article as the body, and typed `[[wikilinks]]`, plus an index note per View.
 
   No history, Proposals, per-reader state or collaborators are exported.
-- **Import:** our own JSON only, as a **new private Expedition via a first build** ("Imported from file"). It is validated, upgraded from older versions, and gets fresh ids.
+- **Import:** our own JSON only (alone, or in the zip with Source files), as a **new private Expedition via a first build** ("Imported from file"). It is validated, upgraded from older versions, and gets fresh ids.
   - A file without `schemaVersion` is version 0: the prototype sample-graph format, upgraded like any older version.
   - Fresh ids go to the Expedition, Concepts, article sections, Views and Sources, with references remapped. Custom Kind, Relationship Type and Attribute ids are Expedition-scoped vocabulary that View settings name, so they are kept.

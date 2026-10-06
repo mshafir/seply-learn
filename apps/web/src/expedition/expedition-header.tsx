@@ -7,8 +7,9 @@
 // count (owners and editors, WP-4.3), which opens the Suggestions tab, and
 // History (owners and editors, WP-4.2), which opens the History side panel.
 // Ask (owners and editors, WP-4.4) opens Grow's Ask tab, where they ask the
-// AI about the Expedition; it spins while one of their asks runs.
-// Share arrives with its work package.
+// AI about the Expedition; it spins while one of their asks runs. The
+// Expedition menu (export-dialog.tsx: Export, for anyone who can view, WP-5.3)
+// sits before the account menu. Share arrives with its work package.
 import * as React from "react"
 import {
   CloudOffIcon,
@@ -40,6 +41,7 @@ export function ExpeditionHeader({
   history,
   suggestions,
   ask,
+  menu,
 }: {
   title: string
   canEdit: boolean
@@ -59,6 +61,8 @@ export function ExpeditionHeader({
   suggestions?: { count: number; open: boolean; onToggle: () => void }
   /** Ask, Grow's Ask tab (owners and editors); absent for everyone else. */
   ask?: { open: boolean; asking: boolean; onToggle: () => void }
+  /** The Expedition menu (export-dialog.tsx), when the server is reachable. */
+  menu?: React.ReactNode
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -184,6 +188,7 @@ export function ExpeditionHeader({
           Sign in
         </Link>
       )}
+      {menu}
       <AccountMenu />
     </header>
   )

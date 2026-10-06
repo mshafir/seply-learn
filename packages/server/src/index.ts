@@ -56,9 +56,19 @@ export {
 export {
   importExpedition,
   IMPORT_MAX_BYTES,
+  IMPORT_MAX_UNZIPPED_BYTES,
+  readImportBody,
   type ImportCounts,
+  type ImportedSourceFile,
   type ImportResponse,
 } from "./import.ts"
+export {
+  attachment,
+  exportExpedition,
+  ExportQuery,
+  type ExportFile,
+  type ExportFormat,
+} from "./export.ts"
 export {
   acceptLabel,
   addProposalItems,

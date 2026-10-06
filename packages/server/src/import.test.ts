@@ -23,6 +23,7 @@ type Doc = {
   concepts: { id: string }[]
   relationships: unknown[]
   views: { id: string }[]
+  sources?: unknown[]
 }
 const fixture = (name: string) =>
   JSON.parse(
@@ -80,7 +81,11 @@ describe("POST /import", () => {
         relationships: doc.relationships.length,
         views: doc.views.length,
       }
-      expect(out.counts).toEqual(expected)
+      expect(out.counts).toEqual({
+        ...expected,
+        sources: doc.sources?.length ?? 0,
+        sourceFiles: 0,
+      })
       expect(out.expedition).toMatchObject({
         visibility: "private",
         status: "ready",
