@@ -93,11 +93,22 @@ describe("invites", () => {
       changeRole: true,
       removeCollaborator: true,
       transferOwnership: true,
+      changeVisibility: true,
+      fork: true,
+      trashExpedition: true,
     })
-    // Bob (a viewer) sees who is on it, but no invites, and may do nothing.
+    // Bob (a viewer) sees who is on it, but no invites, and may only Fork.
     const bobs = await s.sharing(bob)
     expect(bobs.role).toBe("viewer")
-    expect(bobs.may.invite).toBe(false)
+    expect(bobs.may).toEqual({
+      invite: false,
+      changeRole: false,
+      removeCollaborator: false,
+      transferOwnership: false,
+      changeVisibility: false,
+      fork: true,
+      trashExpedition: false,
+    })
 
     // Inviting a Collaborator again is a conflict.
     expect((await s.invite(s.ada, "bob@example.com", "editor")).status).toBe(
