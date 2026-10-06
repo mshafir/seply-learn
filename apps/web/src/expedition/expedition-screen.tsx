@@ -116,6 +116,7 @@ import { CanvasSlot } from "@/expedition/canvas-slot.tsx"
 import { ConceptSearch } from "@/expedition/concept-search.tsx"
 import { resumeFrom, samePlace, type Place } from "@/expedition/continue.ts"
 import { ExpeditionHeader } from "@/expedition/expedition-header.tsx"
+import { ExpeditionMenu } from "@/expedition/export-dialog.tsx"
 import {
   changeMeta,
   keptMessage,
@@ -1108,6 +1109,16 @@ function ExpeditionFrame({
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        menu={
+          // Export reads the server's copy: not from the saved one offline.
+          offlineSince === null ? (
+            <ExpeditionMenu
+              expeditionId={expeditionId}
+              title={expedition?.title ?? ""}
+              canEdit={canEdit}
+            />
+          ) : undefined
+        }
         share={canShare ? { onOpen: () => setShareOpen(true) } : undefined}
         suggestions={
           canReview

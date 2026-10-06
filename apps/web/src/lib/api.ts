@@ -42,7 +42,14 @@ export type LibraryCard = ExpeditionSummary & {
 
 export type ImportResult = {
   expedition: ExpeditionSummary
-  counts: { concepts: number; relationships: number; views: number }
+  counts: {
+    concepts: number
+    relationships: number
+    views: number
+    sources: number
+    /** Sources whose files came with the import. */
+    sourceFiles: number
+  }
 }
 
 /** A non-2xx answer. `status` 0 means the request never reached the server. */
@@ -127,9 +134,75 @@ export async function continueReading(
   ).items
 }
 
-/** Our JSON, as read from the file (the server validates it). */
-export function importExpedition(fileText: string): Promise<ImportResult> {
-  return call("/import", { method: "POST", body: fileText })
+/**
+ * Imports an Expedition file: our JSON, or a zip export with Source files.
+ * The server tells them apart by their bytes.
+ */
+export function importExpedition(file: Blob): Promise<ImportResult> {
+  return call("/import", {
+    method: "POST",
+    body: file,
+    headers: { "content-type": file.type || "application/octet-stream" },
+  })
+}
+
+export type ExportFormat = "json" | "markdown"
+
+/** An export, ready to save. */
+export type ExportDownload = {
+  blob: Blob
+  filename: string
+  /** How many Sources' files it carries. */
+  sourceFiles: number
+}
+
+/** The file name a `content-disposition` header gives, if any. */
+export function dispositionFilename(header: string | null): string | null {
+  if (!header) return null
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header)
+  if (utf8)
+    try {
+      return decodeURIComponent(utf8[1]!)
+    } catch {
+      // Fall back to the plain name.
+    }
+  return /filename="([^"]*)"/i.exec(header)?.[1] ?? null
+}
+
+/**
+ * Exports an Expedition (spec §1.9): our JSON, with the Sources' files when
+ * `sources` (a zip then, if any are stored), or a Markdown folder as a zip.
+ */
+export async function exportExpedition(
+  expeditionId: string,
+  format: ExportFormat,
+  sources = false
+): Promise<ExportDownload> {
+  const query = new URLSearchParams({ format, sources: sources ? "1" : "0" })
+  let res: Response
+  try {
+    res = await fetch(
+      `/api/export/${encodeURIComponent(expeditionId)}?${query}`,
+      { credentials: "include" }
+    )
+  } catch {
+    throw new ApiError(0, "Can't reach the server.")
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new ApiError(
+      res.status,
+      body.message ?? body.error ?? `HTTP ${res.status}`,
+      body
+    )
+  }
+  return {
+    blob: await res.blob(),
+    filename:
+      dispositionFilename(res.headers.get("content-disposition")) ??
+      (format === "json" ? "expedition.json" : "expedition.zip"),
+    sourceFiles: Number(res.headers.get("x-source-files") ?? 0),
+  }
 }
 
 /** Starts Google sign-in (Better Auth): the browser leaves for Google. */

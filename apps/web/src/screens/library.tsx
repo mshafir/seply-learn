@@ -4,9 +4,10 @@
 // Expedition), the title and summary, the collaborators' avatars with a
 // short summary, the Concept and View counts and the date, and a pin to
 // "Keep available offline" (spec §2.9). Offline, the Library lists the
-// Expeditions saved on this device. Global search, New and Import sit in the
-// header. **Trash** (WP-5.2), for owners: what I moved there, with when it
-// will be deleted for good (30 days on) and Restore.
+// Expeditions saved on this device. Global search, New and Import (our JSON,
+// or a zip export with Source files; spec §1.9) sit in the header. **Trash**
+// (WP-5.2), for owners: what I moved there, with when it will be deleted for
+// good (30 days on) and Restore.
 import * as React from "react"
 import {
   BookOpenIcon,
@@ -74,6 +75,7 @@ import {
   type LibraryCard,
   type TrashedCard,
 } from "@/lib/api.ts"
+import { importedLabel } from "@/lib/export.ts"
 import { formatAsOf, setKeptOffline, useOfflineEntries } from "@/lib/offline.ts"
 import { useUser } from "@/lib/session.ts"
 import {
@@ -554,10 +556,10 @@ export function LibraryScreen() {
   const onImport = async (file: File) => {
     setBusy("import")
     try {
-      const { expedition, counts } = await importExpedition(await file.text())
+      const { expedition, counts } = await importExpedition(file)
       toast.add({
         title: `Imported ${expedition.title || "the Expedition"}`,
-        description: `${counts.concepts} Concepts, ${counts.relationships} Relationships, ${counts.views} Views.`,
+        description: importedLabel(counts),
         type: "success",
       })
       navigate(`/e/${expedition.id}`)
@@ -633,7 +635,7 @@ export function LibraryScreen() {
         <input
           ref={fileInput}
           type="file"
-          accept="application/json,.json"
+          accept="application/json,.json,application/zip,.zip"
           className="hidden"
           aria-label="Import an Expedition file"
           data-testid="import-file"

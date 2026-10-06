@@ -23,14 +23,13 @@ import {
   stateToExpeditionJson,
   ulid,
   type LoggedOp,
-  type OpBody,
 } from "@seply/domain"
 import { and, eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import { authorize, AccessDenied } from "./access.ts"
 import type { AppEnv } from "./app.ts"
-import { sourceBlobKeys, type BlobStore } from "./blobs.ts"
+import { sourceBlobKeys, type BlobStore, type StoredBlob } from "./blobs.ts"
 import type { Db } from "./db.ts"
 import { createExpedition, type ExpeditionSummary } from "./expeditions.ts"
 import { readOps } from "./oplog.ts"
@@ -126,52 +125,58 @@ export async function forkExpedition(
   const mint = () => ulid(now())
   const id = mint()
   const doc = stateToExpeditionJson(state, { exportedAt: at })
-  const { bodies, ids } = expeditionJsonToOpBodies(doc, {
+
+  // The Sources' files come with the Fork, under its own prefix: read the
+  // ones that exist first (a Source imported without its file has none).
+  const files = new Map<string, { raw?: StoredBlob; segments?: StoredBlob }>()
+  if (blobs)
+    for (const src of Object.values(state.sources)) {
+      const raw = src.blobKey ? await blobs.get(src.blobKey) : null
+      const segments = src.segmentsKey ? await blobs.get(src.segmentsKey) : null
+      if (raw || segments)
+        files.set(src.id, {
+          ...(raw && { raw }),
+          ...(segments && { segments }),
+        })
+    }
+  const copies: { key: string; blob: StoredBlob; type: string }[] = []
+  const { bodies } = expeditionJsonToOpBodies(doc, {
     expeditionId: id,
     actor: args.userId,
     newId: mint,
     at,
+    sourceFiles: (newId, oldId) => {
+      const f = files.get(oldId)
+      if (!f) return undefined
+      const keys = sourceBlobKeys(id, newId)
+      if (f.raw)
+        copies.push({
+          key: keys.raw,
+          blob: f.raw,
+          type: f.raw.contentType ?? "application/octet-stream",
+        })
+      if (f.segments)
+        copies.push({
+          key: keys.segments,
+          blob: f.segments,
+          type: f.segments.contentType ?? "application/json",
+        })
+      return {
+        ...(f.raw && { blobKey: keys.raw }),
+        ...(f.segments && { segmentsKey: keys.segments }),
+      }
+    },
   })
 
-  // The Sources' files come with the Fork, under its own prefix. A Source
-  // with no file (imported from JSON) stays without one.
   const copied: string[] = []
-  const withFiles: OpBody[] = []
   try {
-    for (const body of bodies) {
-      if (body.kind !== "source.add") {
-        withFiles.push(body)
-        continue
-      }
-      const oldId = [...ids.sources].find(([, n]) => n === body.target)?.[0]
-      const original = oldId ? state.sources[oldId] : undefined
-      const keys = sourceBlobKeys(id, body.target)
-      const value = { ...body.value }
-      if (blobs && original?.blobKey) {
-        const raw = await blobs.get(original.blobKey)
-        if (raw) {
-          await blobs.put(keys.raw, raw.body, {
-            contentType: raw.contentType ?? "application/octet-stream",
-          })
-          copied.push(keys.raw)
-          value.blobKey = keys.raw
-        }
-      }
-      if (blobs && original?.segmentsKey) {
-        const segs = await blobs.get(original.segmentsKey)
-        if (segs) {
-          await blobs.put(keys.segments, segs.body, {
-            contentType: segs.contentType ?? "application/json",
-          })
-          copied.push(keys.segments)
-          value.segmentsKey = keys.segments
-        }
-      }
-      withFiles.push({ ...body, value })
+    for (const c of copies) {
+      await blobs!.put(c.key, c.blob.body, { contentType: c.type })
+      copied.push(c.key)
     }
 
     const changeId = mint()
-    const ops = makeOps(withFiles, {
+    const ops = makeOps(bodies, {
       expeditionId: id,
       actor: args.userId,
       changeId,

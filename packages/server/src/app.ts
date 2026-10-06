@@ -17,6 +17,7 @@ import {
 } from "./config.ts"
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
+import { exportRoutes } from "./export.ts"
 import { forkRoutes } from "./fork.ts"
 import { historyRoutes } from "./history.ts"
 import { importRoutes } from "./import.ts"
@@ -258,6 +259,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/search", signedIn)
   app.route("/search", searchRoutes())
   app.route("/sources", sourceRoutes(relay))
+  // Like Sources, export needs no sign-in where Visibility allows (export.ts).
+  app.route("/export", exportRoutes())
   app.use("/ai", signedIn)
   app.use("/ai/*", signedIn)
   app.route("/ai", aiRoutes(opts.ai))

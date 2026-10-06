@@ -99,6 +99,12 @@ const ROUTES: Route[] = [
     request: (x) => [`/api/sources/${x.exp}/${x.sourceId}/file`],
   },
   {
+    name: "GET /export/:id",
+    expect: [200, 200, 200, 404, 404],
+    link: [200, 200],
+    request: (x) => [`/api/export/${x.exp}?format=markdown`],
+  },
+  {
     name: "GET /expeditions/:id/jobs",
     expect: [200, 200, 200, 404, 401],
     link: [200, 401],
@@ -517,7 +523,7 @@ describe("the permissions matrix against the API routes", () => {
       .map((n) => n.replace(/:expeditionId/g, ":id"))
       .filter(
         (n) =>
-          /\/(expeditions|sources|jobs|pull|push|history|ai\/estimate\/(article|ask)|reader\/expeditions)/.test(
+          /\/(expeditions|sources|export|jobs|pull|push|history|ai\/estimate\/(article|ask)|reader\/expeditions)/.test(
             n
           ) && !exempt.has(n)
       )
