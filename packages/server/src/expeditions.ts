@@ -18,6 +18,7 @@ import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
 import { appendOps, type ChangeInfo } from "./oplog.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
+import { claimInvites } from "./sharing.ts"
 
 const {
   expeditions,
@@ -58,6 +59,8 @@ export type CardCollaborator = {
  * its creation), ISO 8601.
  */
 export type LibraryCard = ExpeditionSummary & {
+  /** Shared with me and not opened yet: the New badge (spec §3.9). */
+  isNew: boolean
   tags: string[]
   collaborators: CardCollaborator[]
   counts: { concepts: number; views: number }
@@ -83,9 +86,12 @@ export async function createExpedition(
 ): Promise<{ summary: ExpeditionSummary; logged: LoggedOp[] }> {
   const { id, userId } = args
   await tx.insert(expeditions).values({ id, ownerId: userId })
-  await tx
-    .insert(collaborators)
-    .values({ expeditionId: id, userId, role: "owner" })
+  await tx.insert(collaborators).values({
+    expeditionId: id,
+    userId,
+    role: "owner",
+    seenAt: new Date().toISOString(),
+  })
   const { logged } = await appendOps(tx, {
     expeditionId: id,
     userId,
@@ -145,11 +151,17 @@ export function expeditionRoutes(relay: Relay) {
   })
 
   // List mine: every Expedition I collaborate on (as owner, editor or viewer),
-  // newest first (ids are ULIDs), excluding those in Trash.
+  // newest first (ids are ULIDs), excluding those in Trash. Invites to my
+  // (verified) email are claimed first: the "Shared with you" inbox.
   r.get("/", async (c) => {
     const db = await c.var.db()
+    await claimInvites(db, c.var.user.id, c.var.config().testCredentials)
     const rows = await db
-      .select({ ...summaryColumns, role: collaborators.role })
+      .select({
+        ...summaryColumns,
+        role: collaborators.role,
+        seenAt: collaborators.seenAt,
+      })
       .from(collaborators)
       .innerJoin(expeditions, eq(expeditions.id, collaborators.expeditionId))
       .where(
@@ -171,7 +183,7 @@ const ROLE_ORDER: Record<Role, number> = { owner: 0, editor: 1, viewer: 2 }
 /** Adds what a Library card shows to each summary (five queries in all). */
 export async function libraryCards(
   db: Db,
-  rows: ExpeditionSummary[]
+  rows: (ExpeditionSummary & { seenAt?: string | null })[]
 ): Promise<LibraryCard[]> {
   if (!rows.length) return []
   const ids = rows.map((r) => r.id)
@@ -234,7 +246,7 @@ export async function libraryCards(
   const changedAt = new Map(lastChanges.map((r) => [r.id, Number(r.ms)]))
   const bestOf = new Map(best.map((r) => [r.id, r.bestViewId]))
 
-  return rows.map((row) => {
+  return rows.map(({ seenAt, ...row }) => {
     const vs = (viewsOf.get(row.id) ?? []).sort((a, b) =>
       a.orderKey < b.orderKey ? -1 : a.orderKey > b.orderKey ? 1 : 0
     )
@@ -243,6 +255,7 @@ export async function libraryCards(
     const at = changedAt.get(row.id)
     return {
       ...row,
+      isNew: row.role !== "owner" && seenAt === null,
       tags: (tagsOf.get(row.id) ?? []).map((t) => t.tag).sort(),
       collaborators: (peopleOf.get(row.id) ?? [])
         .map(({ id, name, image, role }) => ({ id, name, image, role }))

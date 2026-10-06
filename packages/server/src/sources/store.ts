@@ -2,13 +2,11 @@
 // store under the Expedition's prefix, and the Source itself is logged as a
 // `source.add` op (its own Change) through the op log.
 import {
-  can,
   makeOps,
   SegmentsDoc,
   schema,
   ulid,
   type LoggedOp,
-  type Role,
   type Source,
   type Visibility,
 } from "@seply/domain"
@@ -16,7 +14,8 @@ import { and, eq } from "drizzle-orm"
 
 import { sourceBlobKeys, sourcePrefix, type BlobStore } from "../blobs.ts"
 import type { Db } from "../db.ts"
-import { appendOps, PushError, roleOf } from "../oplog.ts"
+import { expeditionAccess } from "../access.ts"
+import { appendOps, PushError } from "../oplog.ts"
 import type { ParsedSource } from "./parse.ts"
 
 export type AddedSource = {
@@ -64,17 +63,12 @@ export async function addSource(
   const { expeditionId, userId, parsed } = args
   const now = args.now ?? Date.now
 
-  const visibility = await expeditionVisibility(db, expeditionId)
-  const role: Role | null = visibility
-    ? await roleOf(db, expeditionId, userId)
-    : null
-  const actor = { role, signedIn: true }
-  if (!visibility || !can(actor, "read", visibility))
-    throw new PushError(404, { error: "Expedition not found" })
-  if (!can(actor, "manageSources", visibility))
+  const access = await expeditionAccess(db, expeditionId, userId)
+  if (!access) throw new PushError(404, { error: "Expedition not found" })
+  if (!access.may("manageSources"))
     throw new PushError(403, {
       error: "not allowed",
-      message: `${role ?? "a reader"} may not add Sources`,
+      message: `${access.role ?? "a reader"} may not add Sources`,
     })
 
   const id = ulid(now())
@@ -143,15 +137,12 @@ export async function removeSource(
   args: { expeditionId: string; sourceId: string; userId: string }
 ): Promise<LoggedOp[]> {
   const { expeditionId, sourceId, userId } = args
-  const visibility = await expeditionVisibility(db, expeditionId)
-  const role = visibility ? await roleOf(db, expeditionId, userId) : null
-  const actor = { role, signedIn: true }
-  if (!visibility || !can(actor, "read", visibility))
-    throw new PushError(404, { error: "Expedition not found" })
-  if (!can(actor, "manageSources", visibility))
+  const access = await expeditionAccess(db, expeditionId, userId)
+  if (!access) throw new PushError(404, { error: "Expedition not found" })
+  if (!access.may("manageSources"))
     throw new PushError(403, {
       error: "not allowed",
-      message: `${role ?? "a reader"} may not remove Sources`,
+      message: `${access.role ?? "a reader"} may not remove Sources`,
     })
   const source = await sourceRow(db, expeditionId, sourceId)
   if (!source) throw new PushError(404, { error: "Source not found" })

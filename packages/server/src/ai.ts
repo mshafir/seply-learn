@@ -43,7 +43,7 @@ import type { AppEnv } from "./app.ts"
 import { ConfigError, type ServerEnv } from "./config.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
-import { access } from "./jobs/routes.ts"
+import { expeditionAccess as access } from "./access.ts"
 import { loadState } from "./projection.ts"
 import { readSegments } from "./sources/store.ts"
 

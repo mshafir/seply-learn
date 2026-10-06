@@ -69,12 +69,14 @@ const room = () => new ExpeditionRoom(ctx as never, {} as never)
 const join = (
   userId: string | null,
   access: RoomJoin["access"],
-  headSeq = 3
+  headSeq = 3,
+  role: RoomJoin["role"] = access === "collaborator" ? "editor" : null
 ): RoomJoin => ({
   expeditionId: "exp",
   userId,
   name: userId ? userId.toUpperCase() : "",
   access,
+  role,
   headSeq,
 })
 
@@ -219,6 +221,47 @@ describe("the Expedition room", () => {
     expect(eve.closed?.code).toBe(KICK_CODE)
     expect(anon.closed?.code).toBe(KICK_CODE)
     expect(ada.closed).toBeNull()
+  })
+
+  it("takes no ops from any client; a viewer never shows as editing", async () => {
+    const ada = await connect(join("ada", "collaborator", 3, "owner"))
+    const vi = await connect(join("vi", "collaborator", 3, "viewer"))
+    const ed = await connect(join("ed", "collaborator", 3, "editor"))
+    // Ops only come from the Worker after /push commits; a client's are junk.
+    await say(vi, { t: "ops", from: 3, to: 4, ops: [op(4)] })
+    await say(ed, { t: "ops", from: 3, to: 4, ops: [op(4)] })
+    await say(vi, { t: "poke", headSeq: 99 })
+    expect(ada.of("ops")).toEqual([])
+    expect(ada.of("poke")).toEqual([])
+    await say(vi, { ...here("v1"), editing: "c1" })
+    await say(ed, { ...here("v1"), editing: "c1" })
+    const shown = ada.of("presence")
+    expect(shown.find((p) => p.userId === "vi")!.editing).toBeUndefined()
+    expect(shown.find((p) => p.userId === "ed")!.editing).toBe("c1")
+    // And a latecomer hears the same.
+    const late = await connect(join("bo", "collaborator"))
+    const seen = late.of("hello")[0]!.presence
+    expect(seen.find((p) => p.userId === "vi")!.editing).toBeUndefined()
+  })
+
+  it("kicks a downgraded editor at once, mid-edit, across hibernation", async () => {
+    const ada = await connect(join("ada", "collaborator", 3, "owner"))
+    const ed = await connect(join("ed", "collaborator", 3, "editor"))
+    await say(ed, { ...here("v1"), editing: "c1" })
+    expect(ada.of("presence")[0]!.editing).toBe("c1")
+    // A fresh instance (as after hibernation) still finds his socket by tag.
+    await room().kick("ed", "The owner made you a viewer")
+    expect(ed.of("kick")).toEqual([
+      { t: "kick", reason: "The owner made you a viewer" },
+    ])
+    expect(ed.closed?.code).toBe(KICK_CODE)
+    expect(ada.of("leave")).toEqual([
+      { t: "leave", id: ed.of("hello")[0]!.you },
+    ])
+    // Rejoining (the screen reopens, reading his new access) he's a viewer.
+    const again = await connect(join("ed", "collaborator", 3, "viewer"))
+    await say(again, { ...here("v1"), editing: "c1" })
+    expect(ada.of("presence").at(-1)!.editing).toBeUndefined()
   })
 
   it("shows an agent until its TTL runs out", async () => {

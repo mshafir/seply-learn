@@ -165,10 +165,12 @@ import {
   type SessionAsk,
 } from "@/expedition/asks.ts"
 import type { GrowTab } from "@/expedition/grow-panel.tsx"
+import { ShareDialog } from "@/expedition/share-dialog.tsx"
 import {
   ApiError,
   estimateArticle,
   listExpeditions,
+  markSeen,
   reopenProposals,
   reviewProposals,
   startJob,
@@ -212,8 +214,19 @@ export function ExpeditionScreen({
   const user = session.status === "signed-in" ? session.user : null
   const actor = user?.id ?? ANONYMOUS_ACTOR
   const { state, health, retry } = useSyncClient(expeditionId, actor)
-  const role = useRole(expeditionId, !!user)
+  // Bumped when access may have changed (kicked from the room, ownership
+  // handed on): the role is read again, and is null (read-only) meanwhile.
+  const [accessVersion, bumpAccess] = React.useReducer((n: number) => n + 1, 0)
+  const role = useRole(expeditionId, !!user, accessVersion)
   const signInHref = user ? null : signInHrefFor(expeditionId)
+  // Opening a shared Expedition clears its New badge in the Library.
+  React.useEffect(() => {
+    if (user) markSeen(expeditionId).catch(() => {})
+  }, [expeditionId, user])
+  const reopen = React.useCallback(() => {
+    bumpAccess()
+    retry()
+  }, [retry])
 
   return (
     <div
@@ -231,10 +244,12 @@ export function ExpeditionScreen({
           canEdit={
             state.status === "ready" && (role === "owner" || role === "editor")
           }
+          role={role}
           health={health}
           signInHref={signInHref}
           offlineSince={state.status === "cached" ? state.savedAt : null}
           onRetry={retry}
+          onAccessChanged={reopen}
         />
       ) : (
         <>
@@ -306,24 +321,35 @@ function NotFound({ signInHref }: { signInHref: string | null }) {
   )
 }
 
-/** My role on this Expedition (from the Library list), or null. */
-function useRole(expeditionId: string, signedIn: boolean): Role | null {
-  const [role, setRole] = React.useState<Role | null>(null)
+/**
+ * My role on this Expedition (from the Library list), or null. Read again
+ * whenever `version` changes, and null (read-only) until it is.
+ */
+function useRole(
+  expeditionId: string,
+  signedIn: boolean,
+  version: number
+): Role | null {
+  const key = `${expeditionId}:${version}`
+  const [read, setRead] = React.useState<{ key: string; role: Role | null }>()
   React.useEffect(() => {
     if (!signedIn) return
     let cancelled = false
     listExpeditions().then(
       (list) => {
         if (!cancelled)
-          setRole(list.find((e) => e.id === expeditionId)?.role ?? null)
+          setRead({
+            key,
+            role: list.find((e) => e.id === expeditionId)?.role ?? null,
+          })
       },
       () => {}
     )
     return () => {
       cancelled = true
     }
-  }, [expeditionId, signedIn])
-  return signedIn ? role : null
+  }, [expeditionId, signedIn, key])
+  return signedIn && read?.key === key ? read.role : null
 }
 
 /** What the side panel shows: a Concept (with its back stack), the View, History or Suggestions. */
@@ -348,21 +374,27 @@ function ExpeditionFrame({
   viewId,
   userId,
   canEdit,
+  role,
   health,
   signInHref,
   offlineSince,
   onRetry,
+  onAccessChanged,
 }: {
   expeditionId: string
   client: SyncClient
   viewId?: string
   userId: string
   canEdit: boolean
+  /** My Collaborator role, or null (a reader of a link, or not known yet). */
+  role: Role | null
   health: SyncHealth
   signInHref: string | null
   /** Reading this device's saved copy, taken then (ms); null when live. */
   offlineSince: number | null
   onRetry: () => void
+  /** My access may have changed: reopen, reading my role again. */
+  onAccessChanged: () => void
 }) {
   const [, navigate] = useLocation()
   // "View as of here" shows a replay instead of the live client, read-only.
@@ -425,6 +457,9 @@ function ExpeditionFrame({
     }
   )
   const [query, setQuery] = React.useState("")
+  // The share dialog (WP-5.1): Collaborators, signed in and online.
+  const [shareOpen, setShareOpen] = React.useState(false)
+  const canShare = role !== null && signInHref === null && offlineSince === null
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
   const reader = useReader()
@@ -442,7 +477,7 @@ function ExpeditionFrame({
     enabled: offlineSince === null,
     onKicked: (reason) => {
       toast.add({ title: "Disconnected", description: reason })
-      onRetry()
+      onAccessChanged()
     },
   })
   // Proposals changed elsewhere (another tab reviewed, an ask wrote): the
@@ -1049,6 +1084,7 @@ function ExpeditionFrame({
         onRename={rename}
         health={health}
         signInHref={signInHref}
+        share={canShare ? { onOpen: () => setShareOpen(true) } : undefined}
         suggestions={
           canReview
             ? {
@@ -1312,6 +1348,17 @@ function ExpeditionFrame({
         target={sourceTarget}
         onClose={() => setSourceTarget(null)}
       />
+      {canShare && (
+        <ShareDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          expeditionId={expeditionId}
+          title={expedition?.title ?? ""}
+          meId={userId}
+          onAccessChanged={onAccessChanged}
+          onLeft={() => navigate("/", { replace: true })}
+        />
+      )}
     </>
   )
 }

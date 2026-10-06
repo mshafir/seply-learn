@@ -24,6 +24,7 @@ const card = (
   visibility: "private",
   status,
   role,
+  isNew: false,
   tags,
   collaborators: [],
   counts: { concepts: 0, views: 0 },

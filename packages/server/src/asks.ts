@@ -17,7 +17,6 @@
 //
 // Starting, stopping (cancel) and Continue are the job routes.
 import {
-  can,
   schema,
   TERMINAL_JOB_STATUSES,
   type JobStatus,
@@ -29,12 +28,12 @@ import { Hono, type Context } from "hono"
 import { streamSSE } from "hono/streaming"
 import type { AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
-import { roleOf } from "./oplog.ts"
+import { expeditionAccess } from "./access.ts"
 import { readProposal } from "./proposals.ts"
 import { getJob } from "./jobs/store.ts"
 import type { Job } from "./jobs/types.ts"
 
-const { expeditions, jobs, proposals, proposalItems, users } = schema
+const { jobs, proposals, proposalItems, users } = schema
 
 /** Job kinds that are asks: what they write is one Proposal. */
 export const ASK_KINDS = ["grow", "article"] as const
@@ -132,14 +131,9 @@ export function askRoutes() {
 
   /** The caller may review this Expedition's Proposals: null, or the refusal. */
   const refused = async (c: Context<AppEnv>, db: Db, expeditionId: string) => {
-    const [exp] = await db
-      .select({ visibility: expeditions.visibility, deletedAt: expeditions.deletedAt })
-      .from(expeditions)
-      .where(eq(expeditions.id, expeditionId))
-    if (!exp || exp.deletedAt) return c.json({ error: "Expedition not found" }, 404)
-    const actor = { role: await roleOf(db, expeditionId, c.var.user.id), signedIn: true }
-    if (!can(actor, "read", exp.visibility)) return c.json({ error: "Expedition not found" }, 404)
-    if (!can(actor, "reviewProposals", exp.visibility))
+    const a = await expeditionAccess(db, expeditionId, c.var.user.id)
+    if (!a) return c.json({ error: "Expedition not found" }, 404)
+    if (!a.may("reviewProposals"))
       return c.json({ error: "only owners and editors see asks" }, 403)
     return null
   }

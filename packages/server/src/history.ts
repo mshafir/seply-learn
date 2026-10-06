@@ -7,15 +7,15 @@
 // Undo, "view as of" and "Restore to here" run in the client's op engine
 // (@seply/sync), over the log it already pulled: they append ordinary ops
 // through /push as a new Change, so the server needs nothing more.
-import { can, schema, type ChangeOrigin } from "@seply/domain"
+import { schema, type ChangeOrigin } from "@seply/domain"
 import { and, desc, eq, lt } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import { requireUser, type AppEnv } from "./app.ts"
 import type { Db } from "./db.ts"
-import { roleOf } from "./oplog.ts"
+import { expeditionAccess } from "./access.ts"
 
-const { changes, expeditions, users } = schema
+const { changes, users } = schema
 
 /** The most Changes one page carries. */
 export const HISTORY_LIMIT = 200
@@ -68,19 +68,9 @@ export async function readHistory(
 ): Promise<HistoryPage | 403 | 404> {
   const { expeditionId, userId } = args
   const limit = args.limit ?? HISTORY_LIMIT
-  const [exp] = await db
-    .select({
-      visibility: expeditions.visibility,
-      deletedAt: expeditions.deletedAt,
-      headSeq: expeditions.headSeq,
-    })
-    .from(expeditions)
-    .where(eq(expeditions.id, expeditionId))
-  if (!exp || exp.deletedAt) return 404
-  const role = await roleOf(db, expeditionId, userId)
-  const actor = { role, signedIn: true }
-  if (!can(actor, "read", exp.visibility)) return 404
-  if (!can(actor, "viewHistory", exp.visibility)) return 403
+  const a = await expeditionAccess(db, expeditionId, userId)
+  if (!a) return 404
+  if (!a.may("viewHistory")) return 403
   const rows = await db
     .select({
       id: changes.id,
@@ -106,7 +96,7 @@ export async function readHistory(
     .orderBy(desc(changes.firstSeq))
     .limit(limit + 1)
   return {
-    headSeq: exp.headSeq,
+    headSeq: a.headSeq,
     changes: rows.slice(0, limit).map((r) => ({
       id: r.id,
       // A deleted account keeps its Changes; it shows as "Someone".

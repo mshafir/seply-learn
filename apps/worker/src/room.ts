@@ -12,7 +12,15 @@
 // Who hears what (relay.ts `RoomAccess`): collaborators send and hear
 // presence; signed-in readers of a link hear `ops`, `poke` and `build`;
 // anonymous readers hear `ops` and `poke` only. It never touches Postgres:
-// the Worker checks access and passes the join and head seq in.
+// the Worker checks access and passes the join (with the Collaborator role)
+// and head seq in.
+//
+// Roles (WP-5.1): the room takes no ops from anyone, whatever their role;
+// ops arrive through /push, which checks the role on every op, and reach the
+// room from the Worker after they commit. A viewer's presence never claims
+// to be `editing`. When someone is removed or their role changes, the
+// Worker kicks their sockets (`kick`), and their tab reconnects only by
+// opening the Expedition again, which reads their new access.
 import {
   buildKey,
   IDLE_PRESENCE,
@@ -23,6 +31,7 @@ import {
   type Participant,
   type PresenceState,
   type RoomMessage,
+  type Role,
   type RoomOps,
 } from "@seply/domain"
 import type { AgentPresence, RoomAccess, RoomJoin } from "@seply/server"
@@ -50,6 +59,8 @@ export type Attachment = {
   userId: string | null
   name: string
   access: RoomAccess
+  /** The Collaborator role at join (null for readers of a link). */
+  role: Role | null
   /** Null until the client sends presence, and again once it leaves. */
   presence: PresenceState | null
 }
@@ -80,6 +91,7 @@ export class ExpeditionRoom extends DurableObject {
       userId: join.userId,
       name: join.name,
       access: join.access,
+      role: join.role ?? null,
       presence: null,
     }
     ws.serializeAttachment(me)
@@ -190,11 +202,13 @@ export class ExpeditionRoom extends DurableObject {
       this.depart(ws)
       return
     }
+    // Viewers can't edit, so they never show as editing.
+    const editing = me.role === "viewer" ? undefined : msg.editing
     const presence: PresenceState = {
       view: msg.view,
       cursor: msg.cursor,
       selection: msg.selection,
-      ...(msg.editing !== undefined && { editing: msg.editing }),
+      ...(editing !== undefined && { editing }),
     }
     ws.serializeAttachment({ ...me, presence } satisfies Attachment)
     this.broadcast(

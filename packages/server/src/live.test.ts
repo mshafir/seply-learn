@@ -40,6 +40,7 @@ describe("the live route", () => {
         userId: s.ada.id,
         name: "ada",
         access: "collaborator",
+        role: "owner",
         headSeq: 1,
       },
     ])
@@ -69,7 +70,11 @@ describe("the live route", () => {
       .insert(schema.collaborators)
       .values({ expeditionId: s.exp, userId: bob.id, role: "viewer" })
     expect(await (await s.live(bob.headers)).text()).toBe("upgraded")
-    expect(s.joins[0]).toMatchObject({ userId: bob.id, access: "collaborator" })
+    expect(s.joins[0]).toMatchObject({
+      userId: bob.id,
+      access: "collaborator",
+      role: "viewer",
+    })
   })
 
   it("lets readers of an unlisted link in: signed in read-only, signed out anonymous", async () => {
@@ -87,6 +92,7 @@ describe("the live route", () => {
         userId: eve.id,
         name: "eve",
         access: "reader",
+        role: null,
         headSeq: 1,
       },
       {
@@ -94,6 +100,7 @@ describe("the live route", () => {
         userId: null,
         name: "",
         access: "anonymous",
+        role: null,
         headSeq: 1,
       },
     ])
