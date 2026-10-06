@@ -411,7 +411,7 @@ export function sharingRoutes(relay: Relay) {
             link,
           })
         )
-        emailed = true
+        emailed = mailer.delivers !== false
       } catch (err) {
         // The link still works; the dialog says the email didn't go.
         console.error("mail: invite failed", err)

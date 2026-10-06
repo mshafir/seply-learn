@@ -123,6 +123,8 @@ jobs:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT: ${{ vars.VAPID_SUBJECT }}
+          # Optional: invite emails are off without it (WP-5.1).
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # Google sign-in goes through production (AUTH_PROXY_URL): Google only
@@ -134,15 +136,21 @@ jobs:
           URL: ${{ steps.urls.outputs.url }}
           PRODUCTION_URL: ${{ steps.urls.outputs.production_url }}
           PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
+          # The invite sender; empty: the server's default.
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
         run: |
           trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
+          # The sender only when the repo variable is set (else the server's default).
+          mail=()
+          if [ -n "$EMAIL_FROM" ]; then mail=(--var "EMAIL_FROM:$EMAIL_FROM"); fi
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --name "$WORKER_PREVIEW" \
             --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
             --var "DB_BRANCH:$NEON_BRANCH_PREVIEW" \
             --var "BETTER_AUTH_URL:$URL" \
             --var "AUTH_PROXY_URL:$PRODUCTION_URL" \
-            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" | tee deploy.log
+            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
+            "${mail[@]}" | tee deploy.log
           deployed=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
           if [ "$deployed" != "$URL" ]; then
             echo "::error::Deployed to '$deployed', expected $URL. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
@@ -329,6 +337,8 @@ jobs:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           VAPID_SUBJECT: ${{ vars.VAPID_SUBJECT }}
+          # Optional: invite emails are off without it (WP-5.1).
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # AUTH_PROXY_URL is production itself: the OAuth proxy plugin only unwraps
@@ -340,14 +350,20 @@ jobs:
           BRANCH: ${{ steps.neon.outputs.name }}
           URL: ${{ steps.urls.outputs.url }}
           PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
+          # The invite sender; empty: the server's default.
+          EMAIL_FROM: ${{ vars.EMAIL_FROM }}
         run: |
           trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
+          # The sender only when the repo variable is set (else the server's default).
+          mail=()
+          if [ -n "$EMAIL_FROM" ]; then mail=(--var "EMAIL_FROM:$EMAIL_FROM"); fi
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
             --var "DB_BRANCH:$BRANCH" \
             --var "BETTER_AUTH_URL:$URL" \
             --var "AUTH_PROXY_URL:$URL" \
-            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" | tee deploy.log
+            --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
+            "${mail[@]}" | tee deploy.log
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Check /api/health

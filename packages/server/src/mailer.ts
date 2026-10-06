@@ -18,6 +18,8 @@ export type Email = {
 
 export interface Mailer {
   send(email: Email): Promise<void>
+  /** False for one that only logs: the share dialog doesn't say "we emailed". */
+  readonly delivers?: boolean
 }
 
 /** The default sender (the hosted instance's; EMAIL_FROM overrides it). */
@@ -60,6 +62,7 @@ export function resendMailer(opts: {
 /** Logs that an email would go out; sends nothing. */
 export function logMailer(): Mailer {
   return {
+    delivers: false,
     async send(email) {
       console.log(`mail (not sent): to ${email.to}: ${email.subject}`)
     },

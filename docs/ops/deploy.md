@@ -61,9 +61,10 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
 - [ ] **Web push (VAPID keys):** needed from WP-3.2 for build notifications; without them web push is off (`GET /api/web-push/key` answers 404) and everything else works. Generate a P-256 key pair once, without printing the private half, e.g. `npx web-push generate-vapid-keys --json`, then store `publicKey` as the secret **`VAPID_PUBLIC_KEY`** and `privateKey` as **`VAPID_PRIVATE_KEY`** (both base64url). Optionally set the repo **variable** `VAPID_SUBJECT` (`mailto:` or `https:` contact for push services; default `mailto:admin@localhost`). Keep the pair stable: a new pair invalidates every browser's subscription.
 - [X] **`CLOUDFLARE_API_TOKEN` and Workflows:** from WP-3.2 the Worker binds a Durable Object (the Expedition room) and a Workflow (jobs). Both deploy with the Worker under the token's existing Workers permissions (checked on PR #86's preview); nothing to add.
 
-- [X] **Email (Resend):** needed from WP-5.2. The domain `mail.seply.app` is verified in Resend; its DKIM, SPF (MX and TXT on `send.mail`) and `_dmarc.seply.app` records live in the Cloudflare zone `seply.app`.
+- [X] **Email (Resend):** invite emails, from WP-5.1. Optional: without the key, invites still work through the copyable link and the Library's "Shared with you" inbox. The domain `mail.seply.app` is verified in Resend; its DKIM, SPF (MX and TXT on `send.mail`) and `_dmarc.seply.app` records live in the Cloudflare zone `seply.app`.
   - **`RESEND_API_KEY`:** a _Sending access_ key restricted to `mail.seply.app`.
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Seply Learn <invites@mail.seply.app>`.
+  - From WP-5.1 the deploy uploads `RESEND_API_KEY` to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists) and passes `EMAIL_FROM` with `--var` (when the variable is set; the server's default is the same address). Previews send real invite emails too, with links to the preview. Local e2e and unit tests never send: with `AUTH_TEST_CREDENTIALS=1` the server only logs that an email would go out, whatever `.dev.vars` holds.
 
 When the Cloudflare and Neon secrets and the variable exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
