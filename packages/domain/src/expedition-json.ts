@@ -46,6 +46,18 @@ export const EXPEDITION_JSON_VERSION = 1
 
 export const IMPORT_CHANGE_LABEL = "Imported from file"
 
+/**
+ * An export with Source files is a zip: our JSON at `json`, and each Source's
+ * files under `sources/<Source id>/`: the original file (any name) and its
+ * segments at `segments.json`. The JSON itself is unchanged.
+ */
+export const EXPEDITION_BUNDLE_PATHS = {
+  json: "expedition.json",
+  /** Each Source's folder is `sources/<Source id>/`. */
+  sources: "sources/",
+  segments: "segments.json",
+} as const
+
 // --- the v1 format -----------------------------------------------------------
 
 const Tag = z.string().trim().min(1)
@@ -78,7 +90,10 @@ export const JsonAttribute = z
     (a) => a.type !== "enum" || (a.enumValues && a.enumValues.length > 0),
     { message: "an enum Attribute needs enumValues" }
   )
-/** Source metadata. Source files travel separately (not in v1 files yet). */
+/**
+ * Source metadata. Source files travel beside the file, never in it: an
+ * export with them is a zip (see `EXPEDITION_BUNDLE_PATHS`).
+ */
 export const JsonSource = z.strictObject({
   id: Id,
   kind: SourceKind,
@@ -249,11 +264,11 @@ function checkReferences(doc: ExpeditionJson, ctx: z.RefinementCtx) {
         issue(["views", i, "settings", ...e.path.map(String)], e.message)
     const refs = VIEW_TYPES[v.viewType].refs
     for (const p of refs.kinds)
-      for (const id of readRefs(v.settings, p))
+      for (const id of readSettingsRefs(v.settings, p))
         if (!kindKnown(id))
           issue(["views", i, "settings", p], `unknown Kind ${id}`)
     for (const p of refs.relTypes)
-      for (const id of readRefs(v.settings, p))
+      for (const id of readSettingsRefs(v.settings, p))
         if (!relTypeKnown(id))
           issue(["views", i, "settings", p], `unknown Relationship Type ${id}`)
   })
@@ -266,7 +281,7 @@ const isRecord = (x: unknown): x is Settings =>
   !!x && typeof x === "object" && !Array.isArray(x)
 
 /** The ids at a refs path (`a.b`, `columns[].concept`). */
-function readRefs(obj: unknown, path: string): string[] {
+export function readSettingsRefs(obj: unknown, path: string): string[] {
   const out: string[] = []
   const walk = (cur: unknown, segs: string[]) => {
     if (!segs.length) {
@@ -376,9 +391,9 @@ export function stateToExpeditionJson(
   for (const v of views) {
     const refs = VIEW_TYPES[v.viewType].refs
     for (const p of refs.kinds)
-      for (const id of readRefs(v.settings, p)) usedKinds.add(id)
+      for (const id of readSettingsRefs(v.settings, p)) usedKinds.add(id)
     for (const p of refs.relTypes)
-      for (const id of readRefs(v.settings, p)) usedRelTypes.add(id)
+      for (const id of readSettingsRefs(v.settings, p)) usedRelTypes.add(id)
   }
   const kinds: ExpeditionJson["kinds"] = []
   for (const k of BUILTIN_KIND_BY_ID.values()) {
@@ -587,6 +602,14 @@ export type ImportOptions = {
   newId: () => string
   /** ISO time the import happened. */
   at: string
+  /**
+   * The stored files of an imported Source (its blob keys), when the file
+   * came with them; `oldId` is the Source's id in the file. Default: none.
+   */
+  sourceFiles?: (
+    newId: string,
+    oldId: string
+  ) => { blobKey?: string; segmentsKey?: string } | undefined
 }
 
 /** Old id → new id, per entity. Kinds, Relationship Types and Attributes keep theirs. */
@@ -622,7 +645,10 @@ export function remapConceptLinks(
  */
 export function expeditionJsonToOpBodies(
   doc: ExpeditionJson,
-  opts: Pick<ImportOptions, "expeditionId" | "actor" | "newId" | "at">
+  opts: Pick<
+    ImportOptions,
+    "expeditionId" | "actor" | "newId" | "at" | "sourceFiles"
+  >
 ): { bodies: OpBody[]; ids: ImportIdMap } {
   const exp = opts.expeditionId
   const mint = (list: readonly { id: string }[]) =>
@@ -645,19 +671,26 @@ export function expeditionJsonToOpBodies(
   for (const tag of doc.tags)
     ops.push({ kind: "expedition.tag.add", target: exp, value: tag })
 
-  for (const s of doc.sources)
+  for (const s of doc.sources) {
+    const id = ids.sources.get(s.id)!
+    const files = opts.sourceFiles?.(id, s.id)
     ops.push({
       kind: "source.add",
-      target: ids.sources.get(s.id)!,
+      target: id,
       value: {
         kind: s.kind,
         title: s.title,
+        ...(files?.blobKey !== undefined ? { blobKey: files.blobKey } : {}),
+        ...(files?.segmentsKey !== undefined
+          ? { segmentsKey: files.segmentsKey }
+          : {}),
         ...(s.mime !== undefined ? { mime: s.mime } : {}),
         ...(s.size !== undefined ? { size: s.size } : {}),
         addedBy: opts.actor,
         addedAt: s.addedAt ?? opts.at,
       },
     })
+  }
 
   // Vocabulary: built-ins by reference; custom (and unknown built-ins) defined.
   const taken = new Set([
