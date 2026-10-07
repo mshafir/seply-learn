@@ -18,6 +18,10 @@ export const cell = (s: string | null | undefined) =>
     .replace(/\s*\n\s*/g, " ")
     .trim()
 
+/** At most `max` characters, cut at a word with an ellipsis. */
+export const clip = (s: string, max: number) =>
+  s.length <= max ? s : `${s.slice(0, max).replace(/\s+\S*$/, "")}…`
+
 const live = <T extends { deletedAt: string | null }>(r: Record<string, T>) =>
   Object.values(r).filter(isLive)
 
@@ -218,8 +222,8 @@ function renderNeighbours(
             : `${o!.title} ${relLabel(s, r.type)} ${from.title}`
         lines.push(
           hop === 1
-            ? `- ${phrase} · ${conceptRef(o!)}${o!.summary ? `: ${cell(o!.summary)}` : ""}${r.note ? ` (note: ${cell(r.note)})` : ""}`
-            : `- ${phrase} · \`${o!.id}\``
+            ? `- ${phrase} (\`${o!.id}\`)${o!.summary ? `: ${cell(o!.summary)}` : ""}${r.note ? ` (note: ${cell(r.note)})` : ""}`
+            : `- ${phrase} (\`${o!.id}\`)`
         )
         if (lines.length >= 60) break
       }

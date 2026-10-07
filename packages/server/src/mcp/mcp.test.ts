@@ -26,13 +26,19 @@ import {
   type TestUser,
 } from "../test-harness.ts"
 
-/** A ViewReader stand-in: the View's label and every live Concept title. */
+/**
+ * A ViewReader stand-in: the real reader's first line ("<label> (<View
+ * Type>): <question>"), then every live Concept title.
+ */
 const views: ViewReader = {
   async read(state, viewId) {
+    const v = state.views[viewId]!
     const titles = Object.values(state.concepts)
       .filter(isLive)
       .map((c) => `- ${c.title}`)
-    return { text: [`${state.views[viewId]!.label}:`, ...titles].join("\n") }
+    return {
+      text: [`${v.label} (${v.viewType}): ${v.question}`, ...titles].join("\n"),
+    }
   },
 }
 
@@ -359,6 +365,7 @@ describe("an agent with an API token", () => {
     const client = await connect((await token(s.ada)).key)
     const listed = await call(client, "list_expeditions")
     expect(listed.text).toContain("## Mine")
+    expect(listed.text).toContain("| Expedition | id | About |")
     expect(listed.text).toContain("## Shared with me")
     expect(listed.text).toContain(shared)
 
@@ -413,6 +420,8 @@ describe("an agent with an API token", () => {
     })
     expect(view.text).toContain("Multi-head attention")
     expect(view.text).toContain(`\`${mha.id}\``)
+    // The heading names the View once; its reading doesn't repeat it.
+    expect(view.text.split("(outline)").length).toBe(1)
     const concept = await call(client, "get_concept", {
       expedition: exp,
       concept: mha.id,
@@ -422,6 +431,10 @@ describe("an agent with an API token", () => {
     expect(concept.text).toContain("## Overview")
     expect(concept.text).toContain(
       `Attention is needed to understand Multi-head attention`
+    )
+    // Each neighbour is named once, then its id.
+    expect(concept.text).toMatch(
+      /- Attention is needed to understand Multi-head attention \(`[^`]+`\): /
     )
     const srcs = await call(client, "list_sources", { expedition: exp })
     expect(srcs.text).toContain("2 segments (chat)")
