@@ -47,6 +47,7 @@ import { readSegments } from "../sources/store.ts"
 import { agentCaller, type Agent } from "./agent.ts"
 import {
   cell,
+  clip,
   conceptLegend,
   renderConcept,
   renderExpedition,
@@ -173,11 +174,11 @@ export const HANDLERS: Handlers = {
         : "No Expeditions yet. Create one with create_expedition."
     cards.sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role])
     const table = (list: typeof cards) => [
-      "| Expedition | id | Your role | Visibility | Concepts | Views | Changed |",
-      "|---|---|---|---|---|---|---|",
+      "| Expedition | id | About | Your role | Visibility | Concepts | Views | Changed |",
+      "|---|---|---|---|---|---|---|---|",
       ...list.map(
         (c) =>
-          `| ${cell(c.title || "Untitled")}${c.summary ? `: ${cell(c.summary).slice(0, 140)}` : ""} | \`${c.id}\` | ${c.role} | ${c.visibility} | ${c.counts.concepts} | ${c.counts.views} | ${c.updatedAt.slice(0, 10)} |`
+          `| ${cell(c.title || "Untitled")} | \`${c.id}\` | ${clip(cell(c.summary ?? ""), 100)} | ${c.role} | ${c.visibility} | ${c.counts.concepts} | ${c.counts.views} | ${c.updatedAt.slice(0, 10)} |`
       ),
     ]
     const mine = cards.filter((c) => c.role === "owner")
@@ -218,6 +219,11 @@ export const HANDLERS: Handlers = {
     } catch {
       return renderViewPlain(state, view)!
     }
+    // The reading opens with "<label> (<View Type>): <question>", which the
+    // heading and Answers line below already say.
+    const head = `${v!.label} (${v!.viewType})`
+    if (reading.startsWith(head))
+      reading = reading.slice(reading.indexOf("\n") + 1 || reading.length)
     const legend = conceptLegend(state, reading)
     return [
       `# ${v!.label} (\`${view}\`, ${v!.viewType})`,
