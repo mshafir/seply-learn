@@ -87,8 +87,11 @@ export function createAuth(
           },
         }
       : {},
-    // Tests only: see ServerEnv.AUTH_TEST_CREDENTIALS and readConfig.
-    emailAndPassword: { enabled: config.testCredentials },
+    // Self-host (AUTH_EMAIL_PASSWORD) and tests (AUTH_TEST_CREDENTIALS).
+    emailAndPassword: {
+      enabled: config.emailPassword || config.testCredentials,
+      disableSignUp: !config.emailSignUp,
+    },
     plugins: [
       ...(config.proxyURL
         ? [oAuthProxy({ productionURL: config.proxyURL })]

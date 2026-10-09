@@ -213,6 +213,13 @@ async function runAsk(
       earlier: earlier.length,
       abortSignal: stop.signal,
       onItems: async (items) => {
+        // Stopped meanwhile: nothing more is suggested (a Workflow's
+        // terminate cuts the step off; an in-process run must check).
+        if (!(await stillMine())) {
+          stopped = true
+          stop.abort()
+          return
+        }
         await ctx.withDb((db) =>
           // The base is the Expedition as the agent saw it.
           addProposalItems(db, { expeditionId, proposalId: jobId, items, state })

@@ -205,6 +205,52 @@ export async function exportExpedition(
   }
 }
 
+/** How this server offers sign-in (`GET /api/sign-in-options`). */
+export type SignInOptions = {
+  google: boolean
+  /** Email + password (self-hosted instances). */
+  emailPassword: boolean
+  /** Whether new accounts can be made with email + password. */
+  signUp: boolean
+}
+
+/** Google only, as hosted, when the server doesn't say (an older server). */
+export const DEFAULT_SIGN_IN_OPTIONS: SignInOptions = {
+  google: true,
+  emailPassword: false,
+  signUp: false,
+}
+
+export async function getSignInOptions(): Promise<SignInOptions> {
+  try {
+    return await call<SignInOptions>("/sign-in-options")
+  } catch {
+    return DEFAULT_SIGN_IN_OPTIONS
+  }
+}
+
+/**
+ * Signs in (or, with `name`, signs up) with email and password (Better Auth).
+ * Sets the session cookie; the caller reloads into the app.
+ */
+export async function signInWithEmail(args: {
+  email: string
+  password: string
+  name?: string
+  oauthQuery?: string
+}): Promise<void> {
+  const signUp = args.name !== undefined
+  await call(signUp ? "/auth/sign-up/email" : "/auth/sign-in/email", {
+    method: "POST",
+    body: JSON.stringify({
+      email: args.email,
+      password: args.password,
+      ...(signUp && { name: args.name }),
+      ...(args.oauthQuery && { oauth_query: args.oauthQuery }),
+    }),
+  })
+}
+
 /**
  * Starts Google sign-in (Better Auth): the browser leaves for Google. With
  * `oauthQuery` (an MCP client's sign-in: the signed query Better Auth sent to

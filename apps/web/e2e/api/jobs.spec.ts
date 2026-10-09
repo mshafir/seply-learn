@@ -19,7 +19,9 @@ import pg from "pg"
 // and a Worker restart, and its progress events reach the browser. This spec
 // runs its own `wrangler dev` (the Worker, its Expedition room Durable Object
 // and its jobs Workflow, persisted to a temp dir) so it can kill and restart
-// it mid-job, plus a fake web push service to catch the notification.
+// it mid-job, plus a fake web push service to catch the notification. With
+// E2E_SERVER=node it runs the Node entry instead (WP-6.1: pg-boss jobs, blobs
+// in the temp dir), killed and restarted the same way.
 // Needs E2E_DATABASE_URL (a migrated Postgres); see playwright.config.ts.
 test.skip(
   !process.env.E2E_DATABASE_URL && !process.env.CI,
@@ -34,6 +36,20 @@ const WORKER_DIR = join(
   "../../../worker"
 )
 const WRANGLER = join(WORKER_DIR, "node_modules/.bin/wrangler")
+const NODE_DIR = join(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../server-node"
+)
+const NODE = process.env.E2E_SERVER === "node"
+/**
+ * On Node, a database of its own: instances on one database share their
+ * pg-boss queue, so the suite's other server would run the job instead.
+ */
+const DATABASE_URL = (() => {
+  const url = new URL(process.env.E2E_DATABASE_URL ?? "postgres://localhost/x")
+  if (NODE) url.pathname = `${url.pathname}_jobs`
+  return url.href
+})()
 
 type Msg = {
   t: string
@@ -91,18 +107,42 @@ async function startWorker() {
     persistTo,
     ...Object.entries(vars).flatMap(([k, v]) => ["--var", `${k}:${v}`]),
   ]
-  const child = spawn(WRANGLER, args, {
-    cwd: WORKER_DIR,
-    // Its own process group, so a kill takes workerd with it.
-    detached: true,
-    stdio: ["ignore", "pipe", "pipe"],
-    env: {
-      ...process.env,
-      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE:
-        process.env.E2E_DATABASE_URL,
-      WRANGLER_SEND_METRICS: "false",
-    },
-  })
+  const child = NODE
+    ? spawn(
+        process.execPath,
+        [
+          "--experimental-transform-types",
+          "--disable-warning=ExperimentalWarning",
+          "src/main.ts",
+        ],
+        {
+          cwd: NODE_DIR,
+          detached: true,
+          stdio: ["ignore", "pipe", "pipe"],
+          env: {
+            ...process.env,
+            ...vars,
+            DATABASE_URL,
+            PORT: String(PORT),
+            HOST: "127.0.0.1",
+            BLOB_DIR: persistTo,
+            // A killed instance's job is picked up again after this long.
+            JOBS_HEARTBEAT_SECONDS: "10",
+          },
+        }
+      )
+    : spawn(WRANGLER, args, {
+        cwd: WORKER_DIR,
+        // Its own process group, so a kill takes workerd with it.
+        detached: true,
+        stdio: ["ignore", "pipe", "pipe"],
+        env: {
+          ...process.env,
+          CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE:
+            process.env.E2E_DATABASE_URL,
+          WRANGLER_SEND_METRICS: "false",
+        },
+      })
   child.stdout!.on("data", (d) => (workerLog += d))
   child.stderr!.on("data", (d) => (workerLog += d))
   worker = child
@@ -141,6 +181,12 @@ const pushed: Buffer[] = []
 test.beforeAll(async () => {
   test.setTimeout(120_000)
   persistTo = mkdtempSync(join(tmpdir(), "seply-e2e-jobs-"))
+  if (NODE) {
+    // A fresh database (the server migrates it on start).
+    const name = new URL(DATABASE_URL).pathname.slice(1)
+    await admin(`drop database if exists "${name}" with (force)`)
+    await admin(`create database "${name}"`)
+  }
   pushServer = createServer((req, res) => {
     const chunks: Buffer[] = []
     req.on("data", (c) => chunks.push(c))
@@ -157,7 +203,22 @@ test.afterAll(async () => {
   await killWorker()
   await new Promise((r) => pushServer?.close(r))
   if (persistTo) rmSync(persistTo, { recursive: true, force: true })
+  if (NODE)
+    await admin(
+      `drop database if exists "${new URL(DATABASE_URL).pathname.slice(1)}" with (force)`
+    )
 })
+
+/** Runs one statement on the suite's database (to create and drop ours). */
+async function admin(statement: string) {
+  const c = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL })
+  await c.connect()
+  try {
+    await c.query(statement)
+  } finally {
+    await c.end()
+  }
+}
 
 // eslint-disable-next-line no-empty-pattern
 test.afterEach(async ({}, testInfo) => {
@@ -230,7 +291,7 @@ async function waitFor(
 }
 
 async function db<T>(fn: (c: pg.Client) => Promise<T>): Promise<T> {
-  const c = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL })
+  const c = new pg.Client({ connectionString: DATABASE_URL })
   await c.connect()
   try {
     return await fn(c)
@@ -331,8 +392,13 @@ test("a fake job survives a forced step failure and a Worker restart, and the br
       m.status === "complete",
     120_000
   )
-  // wrangler dev doesn't resume Workflows by itself; the restarted Worker woke it.
-  expect(workerLog).toMatch(/jobs: woke \d+ running job/)
+  // wrangler dev doesn't resume Workflows by itself; the restarted Worker
+  // woke it. On Node, pg-boss handed the attempt to the restarted instance.
+  expect(workerLog).toMatch(
+    NODE
+      ? /jobs: resuming \S+-1 after \d+ recorded steps/
+      : /jobs: woke \d+ running job/
+  )
   const msgs = await received(page)
   const views = await db((c) =>
     c.query(

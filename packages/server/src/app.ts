@@ -105,6 +105,15 @@ export type AppOptions<Env extends ServerEnv> = {
   cimdFetch?: ClientMetadataResourceFetch
 }
 
+/** SMTP needs sockets: the runtime passes `mailer` (the Node entry does). */
+let warnedSmtp = false
+function smtpUnavailable(): null {
+  if (!warnedSmtp)
+    console.warn("mail: SMTP is configured but this runtime can't send it")
+  warnedSmtp = true
+  return null
+}
+
 class NoDatabase extends Error {}
 class NoBlobStore extends Error {}
 
@@ -162,7 +171,9 @@ function resources<Env extends ServerEnv>(
           ? resendMailer({ apiKey: mail.apiKey, from: mail.from })
           : mail?.kind === "log"
             ? logMailer()
-            : null)
+            : mail?.kind === "smtp"
+              ? smtpUnavailable()
+              : null)
     })
     c.set(
       "auth",
@@ -272,6 +283,18 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
       console.error("health: database check failed", err)
       return c.json({ ok: false, db: "error", branch }, 503)
     }
+  })
+
+  // How the sign-in screen offers sign-in (WP-6.1). Google shows whenever
+  // email + password isn't on, as hosted. Test credentials have no UI.
+  app.get("/sign-in-options", (c) => {
+    const config = c.var.config()
+    const emailPassword = config.emailPassword
+    return c.json({
+      google: !!config.google || !emailPassword,
+      emailPassword,
+      signUp: emailPassword && config.emailSignUp,
+    })
   })
 
   // Better Auth's routes: sign-in, callbacks (and the OAuth proxy's), session, sign-out.
