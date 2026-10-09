@@ -19,7 +19,8 @@
 // - `matches` (search inside the Expedition) dims every other Concept.
 // - `suggested` (the Suggestions preview, WP-4.3) draws pending items dashed;
 //   `collections` are then the preview's.
-// - The Map View's tiles come from the build's env (lib/basemap.ts).
+// - The Map View's tiles come from the server's map config, else the build's
+//   env (lib/basemap.ts).
 import type { EngineCollections } from "@seply/sync"
 import {
   canvasViewTypes,
@@ -28,7 +29,7 @@ import {
   type SuggestedInteraction,
   type ViewStatusChip,
 } from "@seply/views"
-import { basemap } from "@/lib/basemap"
+import { useBasemap } from "@/lib/basemap"
 
 /** The height the View button covers (top-4 + the button + a gap: pt-19). */
 const VIEW_BUTTON_AREA = 76
@@ -65,6 +66,7 @@ export function CanvasSlot({
   onMarkKnown,
   suggested,
 }: CanvasSlotProps) {
+  const basemap = useBasemap()
   const underButton = (canvasViewTypes as readonly string[]).includes(viewType)
   return (
     <div

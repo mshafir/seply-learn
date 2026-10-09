@@ -1,0 +1,24 @@
+# The image builds from the workspace (Dockerfile). Keep the context small:
+# no installs, build output, local state, or anything private.
+**/node_modules
+**/dist
+**/.turbo
+**/.wrangler
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+.git
+.github
+.claude
+.metrics
+prototypes
+plugins
+data
+/basemap-*.pmtiles
+*.log
+
+# The web build bundles the View Type definitions; the rest of docs isn't needed.
+docs/*
+!docs/view-types

@@ -229,6 +229,17 @@ export async function getSignInOptions(): Promise<SignInOptions> {
   }
 }
 
+/** The Map View's basemap as the server sets it at runtime (`GET /api/map-config`). */
+export type MapConfig = { tiles: string | null; assets: string | null }
+
+export async function getMapConfig(): Promise<MapConfig> {
+  try {
+    return await call<MapConfig>("/map-config")
+  } catch {
+    return { tiles: null, assets: null }
+  }
+}
+
 /**
  * Signs in (or, with `name`, signs up) with email and password (Better Auth).
  * Sets the session cookie; the caller reloads into the app.

@@ -14,6 +14,7 @@ A collaborative, LLM-assisted tool for building, curating and exploring **Expedi
 | [`docs/view-types/`](docs/view-types/README.md) | View Type definitions, written as instructions for curators and agents |
 | [`docs/wayfinder/mindmaps-v1/`](docs/wayfinder/mindmaps-v1/map.md) | The planning map and every decision ticket behind the spec |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
+| [`docs/self-host.md`](docs/self-host.md) | Self-hosting with Docker Compose: quick start, AI keys, sign-in, email, S3/MinIO, map tiles, backups, upgrades |
 | [`prototypes/sample-graphs/`](prototypes/sample-graphs/) | A static viewer prototype for the View Types |
 | [`prototypes/seeding/`](prototypes/seeding/README.md) | The curator-agent playbook prototype, with its checks and layout metrics |
 
@@ -21,7 +22,7 @@ A collaborative, LLM-assisted tool for building, curating and exploring **Expedi
 
 A TypeScript monorepo (pnpm + Turborepo):
 - **Frontend:** React 19 + Vite; React Flow; shadcn with Base UI; Tailwind v4, with dark mode.
-- **Backend:** Hono on Cloudflare Workers (Durable Objects, Workflows, R2, Hyperdrive → Postgres on Neon). Self-hostable as one Node container plus Postgres.
+- **Backend:** Hono on Cloudflare Workers (Durable Objects, Workflows, R2, Hyperdrive → Postgres on Neon). Self-hostable as one Node container plus Postgres ([guide](docs/self-host.md)).
 - **Auth:** Better Auth.
 - **AI:** AI SDK 7 for the in-app curator agent. A remote MCP server lets outside agents read and propose.
 

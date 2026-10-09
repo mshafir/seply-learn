@@ -36,6 +36,8 @@ export type NodeConfig = {
   host: string
   /** The built SPA (apps/web/dist); null serves the API only. */
   webDist: string | null
+  /** A PMTiles archive on a volume, served at MAP_TILES_PATH (MAP_TILES_FILE). */
+  mapTilesFile: string | null
   migrateOnStart: boolean
   blobs: BlobConfig
   /** Jobs one instance runs at once. */
@@ -56,6 +58,9 @@ export type NodeConfig = {
 export const DEFAULT_WEB_DIST = fileURLToPath(
   new URL("../../web/dist", import.meta.url)
 )
+
+/** Where MAP_TILES_FILE is served (with Range requests, as PMTiles reads it). */
+export const MAP_TILES_PATH = "/tiles/basemap.pmtiles"
 
 /** Defaults the Node entry applies to the app's own vars. */
 const NODE_DEFAULTS: Partial<ServerEnv> = {
@@ -110,6 +115,13 @@ export function readNodeConfig(raw: Env = process.env): NodeConfig {
 
   const blobs = readBlobs(get, bool, problems)
 
+  const tilesRaw = get("MAP_TILES_FILE")
+  const mapTilesFile = tilesRaw ? resolve(tilesRaw) : null
+  if (mapTilesFile && !existsSync(mapTilesFile))
+    problems.push(
+      `MAP_TILES_FILE does not exist (${mapTilesFile}): download an extract first (docs/self-host.md), or unset it to use the fallback map`
+    )
+
   const trashRaw = get("TRASH_PURGE_CRON")
   const trashPurgeCron = trashRaw === "off" ? null : (trashRaw ?? "17 4 * * *")
   if (trashPurgeCron && trashPurgeCron.split(/\s+/).length !== 5)
@@ -120,6 +132,9 @@ export function readNodeConfig(raw: Env = process.env): NodeConfig {
   const env: ServerEnv = { ...NODE_DEFAULTS }
   for (const [k, v] of Object.entries(raw))
     if (v !== undefined) (env as Env)[k] = v
+  // The Map View reads the archive from this origin unless MAP_TILES_URL says otherwise.
+  if (mapTilesFile && !env.MAP_TILES_URL?.trim())
+    env.MAP_TILES_URL = MAP_TILES_PATH
 
   if (!env.BETTER_AUTH_URL?.trim())
     problems.push(
@@ -167,6 +182,7 @@ export function readNodeConfig(raw: Env = process.env): NodeConfig {
     port: int("PORT", 3000, 0, 65535),
     host: get("HOST") ?? "0.0.0.0",
     webDist,
+    mapTilesFile,
     migrateOnStart: bool("MIGRATE_ON_START", true),
     blobs,
     jobConcurrency: int("JOBS_CONCURRENCY", 4, 1, 50),

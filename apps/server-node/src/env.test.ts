@@ -183,4 +183,23 @@ describe("readNodeConfig", () => {
       readNodeConfig({ ...valid, TRASH_PURGE_CRON: "off" }).trashPurgeCron
     ).toBeNull()
   })
+
+  it("serves MAP_TILES_FILE on this origin unless MAP_TILES_URL says otherwise", () => {
+    const tiles = join(dist, "basemap.pmtiles")
+    writeFileSync(tiles, "PMTiles")
+    const c = readNodeConfig({ ...valid, MAP_TILES_FILE: tiles })
+    expect(c.mapTilesFile).toBe(tiles)
+    expect(c.server.map).toEqual({ tiles: "/tiles/basemap.pmtiles" })
+    expect(
+      readNodeConfig({
+        ...valid,
+        MAP_TILES_FILE: tiles,
+        MAP_TILES_URL: "https://tiles.example.com/w.pmtiles",
+      }).server.map.tiles
+    ).toBe("https://tiles.example.com/w.pmtiles")
+    expect(readNodeConfig(valid).mapTilesFile).toBeNull()
+    expect(
+      problems({ ...valid, MAP_TILES_FILE: join(dist, "missing.pmtiles") })
+    ).toContain("MAP_TILES_FILE does not exist")
+  })
 })

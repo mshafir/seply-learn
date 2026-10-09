@@ -50,6 +50,30 @@ describe("/api/health", () => {
   })
 })
 
+describe("/api/map-config", () => {
+  it("is empty unless the runtime sets the basemap", async () => {
+    const app = testApp(localEnv, null)
+    const res = await app.request(`${LOCAL}/api/map-config`)
+    expect(await res.json()).toEqual({ tiles: null, assets: null })
+  })
+
+  it("passes MAP_TILES_URL and MAP_ASSETS_URL through", async () => {
+    const app = testApp(
+      {
+        ...localEnv,
+        MAP_TILES_URL: " /tiles/basemap.pmtiles ",
+        MAP_ASSETS_URL: "https://tiles.example.com/assets",
+      },
+      null
+    )
+    const res = await app.request(`${LOCAL}/api/map-config`)
+    expect(await res.json()).toEqual({
+      tiles: "/tiles/basemap.pmtiles",
+      assets: "https://tiles.example.com/assets",
+    })
+  })
+})
+
 describe("Expeditions", () => {
   it("need a session", async () => {
     const app = testApp(localEnv, await testDb())

@@ -297,6 +297,14 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
     })
   })
 
+  // Where the Map View's basemap comes from, when the runtime sets it
+  // (self-host: MAP_TILES_URL or the Node entry's MAP_TILES_FILE). The web
+  // build's own VITE_MAP_* values apply to whatever this leaves out.
+  app.get("/map-config", (c) => {
+    const { tiles, assets } = c.var.config().map
+    return c.json({ tiles: tiles ?? null, assets: assets ?? null })
+  })
+
   // Better Auth's routes: sign-in, callbacks (and the OAuth proxy's), session, sign-out.
   app.on(["GET", "POST"], "/auth/*", async (c) => {
     const auth = await c.var.auth()

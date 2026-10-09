@@ -1,0 +1,97 @@
+# Seply Learn, self-hosted (docs/self-host.md): the app and Postgres, with
+# an optional MinIO for Source files (the `s3` profile).
+#
+#   cp .env.example .env     # then set BETTER_AUTH_SECRET, POSTGRES_PASSWORD, a key
+#   docker compose up -d     # builds the image from this checkout, or uses SEPLY_IMAGE
+#   open http://localhost:3000
+#
+# Every setting is in .env; .env.example lists them all.
+name: seply-learn
+
+services:
+  app:
+    image: ${SEPLY_IMAGE:-seply-learn:local}
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      minio-bucket:
+        condition: service_completed_successfully
+        required: false # only with the s3 profile
+    env_file:
+      - path: ${SEPLY_ENV_FILE:-.env}
+        required: false
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-seply}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-seply}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env (openssl rand -base64 32)}
+    ports:
+      - "${SEPLY_PORT:-3000}:3000"
+    volumes:
+      # Source files (BLOB_DIR=/data/blobs) unless S3_BUCKET is set.
+      - data:/data
+      # A PMTiles extract for the Map View: put basemap.pmtiles here and set
+      # MAP_TILES_FILE=/data/tiles/basemap.pmtiles (docs/self-host.md).
+      - ${SEPLY_TILES_DIR:-./tiles}:/data/tiles:ro
+    stop_grace_period: 30s # SHUTDOWN_GRACE_SECONDS (25) and a margin
+
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-seply}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-seply}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # --- Optional: Source files in S3-compatible storage (COMPOSE_PROFILES=s3) ---
+  # MinIO no longer publishes images, so this is pgsty's community build of it.
+  minio:
+    image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-08-04T00-00-00Z}
+    profiles: [s3]
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-}
+    volumes:
+      - minio:/data
+    # The console (9001) and the S3 API stay on the compose network; publish
+    # them here if you need them from the host.
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9000/minio/health/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Creates S3_BUCKET once (a no-op after that), then exits. The s3 profile
+  # needs S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY (MinIO's root user, 8+
+  # characters) in .env: they're unset otherwise, so the profile is off.
+  minio-bucket:
+    image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-08-04T00-00-00Z}
+    profiles: [s3]
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-seply}
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        mc alias set local http://minio:9000 "$$S3_ACCESS_KEY_ID" "$$S3_SECRET_ACCESS_KEY" >/dev/null &&
+        mc mb --ignore-existing "local/$$S3_BUCKET"
+    restart: "no"
+
+volumes:
+  data:
+  pgdata:
+  minio:

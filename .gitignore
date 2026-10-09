@@ -8,6 +8,7 @@ dist/
 .DS_Store
 .env
 .env.*
+!.env.example
 
 # Private: the statins chat and everything derived from it holds personal health data.
 # Never commit, fixture, or publish it.
@@ -42,3 +43,5 @@ dist-ssr/
 
 # Basemap extracts (scripts/basemap-tiles.mjs); the harness test extract is committed.
 /basemap-*.pmtiles
+# The Docker compose tiles folder (docs/self-host.md).
+/tiles/

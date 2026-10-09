@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node --experimental-transform-types --disable-warning=ExperimentalWarning src/main.ts",
     "migrate": "node --experimental-transform-types --disable-warning=ExperimentalWarning src/main.ts migrate",
+    "bundle": "node --experimental-transform-types --disable-warning=ExperimentalWarning scripts/bundle.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "test": "vitest run --passWithNoTests"
@@ -36,6 +37,7 @@
     "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/ws": "^8.18.2",
+    "esbuild": "^0.28.2",
     "eslint": "^10",
     "globals": "^17",
     "typescript": "~6",

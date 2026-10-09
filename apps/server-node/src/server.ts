@@ -27,12 +27,12 @@ import { PgBoss } from "pg-boss"
 import { WebSocketServer } from "ws"
 import { blobStoreFor } from "./blobs.ts"
 import { connectPool, createPool } from "./db.ts"
-import type { NodeConfig } from "./env.ts"
+import { MAP_TILES_PATH, type NodeConfig } from "./env.ts"
 import { createPgBossEngine } from "./jobs.ts"
 import { createNodeRooms, type NodeRooms } from "./live.ts"
 import { mailerFor } from "./mailer.ts"
 import { runMigrations } from "./migrate.ts"
-import { serveSpa } from "./static.ts"
+import { serveRangeFile, serveSpa } from "./static.ts"
 
 export const TRASH_QUEUE = "seply-trash-purge"
 
@@ -185,6 +185,10 @@ export async function startServer(config: NodeConfig): Promise<RunningServer> {
   const app = new Hono<{ Bindings: ServerEnv }>()
   app.route("/api", createApp<ServerEnv>(options))
   app.route("/", createRootRoutes<ServerEnv>(options))
+  if (config.mapTilesFile) {
+    const tiles = serveRangeFile(config.mapTilesFile)
+    app.on(["GET", "HEAD"], MAP_TILES_PATH, tiles)
+  }
   if (config.webDist) {
     const spa = serveSpa(config.webDist)
     app.use("*", async (c, next) => {

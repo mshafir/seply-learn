@@ -77,12 +77,12 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-light",
-      testIgnore: /(api|app)\//,
+      testIgnore: /(api|app|compose)\//,
       use: { ...devices["Desktop Chrome"], colorScheme: "light" },
     },
     {
       name: "chromium-dark",
-      testIgnore: /(api|app)\//,
+      testIgnore: /(api|app|compose)\//,
       use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
     },
     {

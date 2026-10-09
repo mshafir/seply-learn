@@ -40,7 +40,9 @@ jobs:
     # The API tests (apps/web/e2e/api) run the Worker (`wrangler dev`) against this.
     services:
       postgres:
-        image: postgres:17
+        # The official image through Google's mirror: Docker Hub rate-limits
+        # unauthenticated pulls per runner IP.
+        image: mirror.gcr.io/library/postgres:17
         env:
           POSTGRES_USER: seply
           POSTGRES_PASSWORD: seply
@@ -110,7 +112,9 @@ jobs:
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:17
+        # The official image through Google's mirror: Docker Hub rate-limits
+        # unauthenticated pulls per runner IP.
+        image: mirror.gcr.io/library/postgres:17
         env:
           POSTGRES_USER: seply
           POSTGRES_PASSWORD: seply
