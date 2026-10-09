@@ -60,6 +60,19 @@ jobs:
       - name: Install Chromium and its system dependencies
         run: pnpm --filter web exec playwright install --with-deps chromium
 
+      # Docker Hub rate-limits unauthenticated pulls per runner IP; pull its
+      # images through Google's mirror first (Docker falls back to Docker Hub).
+      - name: Pull Docker Hub images through mirror.gcr.io
+        run: |
+          conf=/etc/docker/daemon.json
+          { sudo cat "$conf" 2>/dev/null || echo '{}'; } \
+            | jq '. + {"registry-mirrors": ["https://mirror.gcr.io"]}' \
+            | sudo tee "$conf.new" >/dev/null
+          sudo mv "$conf.new" "$conf"
+          cat "$conf"
+          sudo systemctl restart docker
+          docker info --format '{{.RegistryConfig.Mirrors}}'
+
       - name: docker compose up, then the smoke test (MinIO and tiles too)
         run: scripts/compose-smoke.sh --s3 --tiles
 
