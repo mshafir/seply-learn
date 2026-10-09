@@ -53,6 +53,7 @@ reader_position  user_id, expedition_id, view_id, focus_concept_id, step, panel_
 trash            expedition_id, deleted_by, purge_after                (30 days)
 jobs             id, exp, kind, input{}, started_by, status (queued|running|paused|complete|failed|cancelled),
                  step, progress, error, attempt, cap_raises, created_at, updated_at   (plain rows, not logged; §2.5)
+job_steps        job_id, attempt, name, result{}, created_at          (Node only: an attempt's recorded steps, §2.5)
 push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; web push, §2.5)
 ```
 

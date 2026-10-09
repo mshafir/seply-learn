@@ -16,8 +16,9 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^10",
-    "@types/node": "^24",
+    "@opentelemetry/api": "^1.9.1",
     "@seply/config": "workspace:*",
+    "@types/node": "^24",
     "eslint": "^10",
     "globals": "^17",
     "typescript": "~6",

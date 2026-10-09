@@ -822,6 +822,27 @@ export const jobs = pgTable(
   (t) => [index("jobs_expedition_idx").on(t.expeditionId, t.status)]
 )
 
+/**
+ * A job attempt's recorded step results on Node (spec §2.5; the pg-boss
+ * engine in apps/server-node). Workflows keep their own on Cloudflare. Once a
+ * step has a row, a replay of that attempt returns its result instead of
+ * running it again; a retry is a new attempt and starts from the top.
+ */
+export const jobSteps = pgTable(
+  "job_steps",
+  {
+    jobId: text("job_id")
+      .notNull()
+      .references(() => jobs.id, { onDelete: "cascade" }),
+    attempt: integer("attempt").notNull(),
+    name: text("name").notNull(),
+    /** The step's JSON result (null is a result too). */
+    result: jsonb("result").$type<unknown>(),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.jobId, t.attempt, t.name] })]
+)
+
 /** A browser's web push subscription (per user; asked on "Leave it building"). */
 export const pushSubscriptions = pgTable(
   "push_subscriptions",

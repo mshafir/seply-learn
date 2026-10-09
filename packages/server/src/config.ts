@@ -24,6 +24,16 @@ export type ServerEnv = {
    * Worker, whatever its vars say.
    */
   AUTH_TEST_CREDENTIALS?: string
+  /**
+   * "1" turns on email + password sign-in (self-host: the Node entry's
+   * default; WP-6.1). Hosted, Google is the only way in.
+   */
+  AUTH_EMAIL_PASSWORD?: string
+  /**
+   * "0" closes email sign-up: existing accounts still sign in, and invites
+   * reach people who already have one. Default: open.
+   */
+  AUTH_EMAIL_SIGNUP?: string
   /** The Neon branch this deploy reads from (reported by /api/health). */
   DB_BRANCH?: string
 
@@ -58,14 +68,40 @@ export type ServerEnv = {
   RESEND_API_KEY?: string
   /** The sender, e.g. `Seply Learn <invites@mail.seply.app>` (the default). A var, not a secret. */
   EMAIL_FROM?: string
+  /**
+   * Self-host SMTP (WP-6.1; the Node entry sends through it). With
+   * SMTP_HOST set, EMAIL_FROM is required. SMTP_PORT defaults to 587 (465
+   * when SMTP_SECURE is "1": TLS from the start; otherwise STARTTLS when the
+   * server offers it). SMTP_USER and SMTP_PASS are optional.
+   */
+  SMTP_HOST?: string
+  SMTP_PORT?: string
+  SMTP_SECURE?: string
+  SMTP_USER?: string
+  SMTP_PASS?: string
+}
+
+/** An SMTP server (self-host). */
+export type SmtpConfig = {
+  host: string
+  port: number
+  /** TLS from the start (port 465); otherwise STARTTLS when offered. */
+  secure: boolean
+  user?: string
+  pass?: string
 }
 
 /**
- * How invite emails go out: through Resend, only logged (tests and local
- * e2e, whatever keys are set), or not at all (the link and the inbox only).
+ * How invite emails go out: through Resend, through SMTP (self-host; the
+ * runtime supplies the Mailer, since SMTP needs sockets), only logged (tests
+ * and local e2e, whatever keys are set), or not at all (the link and the
+ * inbox only).
  */
 export type MailConfig =
-  { kind: "resend"; apiKey: string; from: string } | { kind: "log" } | null
+  | { kind: "resend"; apiKey: string; from: string }
+  | { kind: "smtp"; smtp: SmtpConfig; from: string }
+  | { kind: "log" }
+  | null
 
 export type ServerConfig = {
   baseURL: string
@@ -78,6 +114,10 @@ export type ServerConfig = {
   proxyURL?: string
   trustedOrigins: string[]
   testCredentials: boolean
+  /** Email + password sign-in (AUTH_EMAIL_PASSWORD); test credentials also turn it on, without UI. */
+  emailPassword: boolean
+  /** Whether email + password sign-up is open (AUTH_EMAIL_SIGNUP). */
+  emailSignUp: boolean
   dbBranch?: string
   mail: MailConfig
 }
@@ -130,6 +170,9 @@ export function readConfig(env: ServerEnv): ServerConfig {
 
   const testCredentials =
     env.AUTH_TEST_CREDENTIALS === "1" && isLocalURL(baseURL)
+  const emailPassword = flag(env.AUTH_EMAIL_PASSWORD)
+  const emailSignUp = env.AUTH_EMAIL_SIGNUP?.trim() !== "0"
+  const smtp = readSmtp(env)
   // Tests never send real email, even with a Resend key in .dev.vars.
   const mail: MailConfig = testCredentials
     ? { kind: "log" }
@@ -139,7 +182,9 @@ export function readConfig(env: ServerEnv): ServerConfig {
           apiKey: env.RESEND_API_KEY,
           from: env.EMAIL_FROM?.trim() || DEFAULT_EMAIL_FROM,
         }
-      : null
+      : smtp
+        ? { kind: "smtp", smtp, from: env.EMAIL_FROM!.trim() }
+        : null
 
   return {
     baseURL,
@@ -148,7 +193,31 @@ export function readConfig(env: ServerEnv): ServerConfig {
     proxyURL: proxy,
     trustedOrigins,
     testCredentials,
+    emailPassword,
+    emailSignUp,
     dbBranch: env.DB_BRANCH,
     mail,
   }
+}
+
+const flag = (v: string | undefined) =>
+  v?.trim() === "1" || v?.trim() === "true"
+
+/** SMTP_* (self-host), validated; undefined without SMTP_HOST. */
+function readSmtp(env: ServerEnv): SmtpConfig | undefined {
+  const host = env.SMTP_HOST?.trim()
+  if (!host) return undefined
+  if (!env.EMAIL_FROM?.trim())
+    throw new ConfigError(
+      "EMAIL_FROM is not set (SMTP_HOST needs a sender, e.g. Seply Learn <learn@example.com>)"
+    )
+  const secure = flag(env.SMTP_SECURE)
+  const rawPort = env.SMTP_PORT?.trim()
+  const port = rawPort ? Number(rawPort) : secure ? 465 : 587
+  if (!Number.isInteger(port) || port < 1 || port > 65535)
+    throw new ConfigError(`SMTP_PORT is not a port number: ${rawPort}`)
+  const user = env.SMTP_USER?.trim() || undefined
+  if (env.SMTP_PASS && !user)
+    throw new ConfigError("SMTP_PASS is set without SMTP_USER")
+  return { host, port, secure, user, pass: env.SMTP_PASS || undefined }
 }

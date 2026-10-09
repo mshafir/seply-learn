@@ -66,6 +66,7 @@ Relay {
 
 - **Cloudflare:** a hand-written **hibernating Durable Object** (`ctx.acceptWebSocket`). Presence lives in socket attachments (≤16 KB), and it never touches Postgres. Outgoing messages are free.
 - **Node:** in-process rooms (`@hono/node-server` + `ws`). **Postgres LISTEN/NOTIFY** handles multi-instance fan-out: `exp_ops` fires on commit, and `exp_live` carries presence and build events, with payloads under 8 KB and a dedicated direct connection.
+  - *As built (WP-6.1):* both runtimes run one room implementation, `@seply/server`'s `Room`, over a host of sockets (tags and an attachment each) and key-value storage with one alarm: the Durable Object's hibernatable sockets and storage on Cloudflare, `ws` sockets and memory on Node. Each Node instance applies its own events at once and NOTIFYs the rest; `exp_ops` carries `ops` and `poke` after a commit, `exp_live` carries builds, kicks, agents' presence and collaborators' presence and leave. `ops` too large for one NOTIFY reach the other instances as a `poke`, and a build event drops its `previewNodes`. Collaborators connected to another instance show as timed participants: each instance re-announces its own every 15 s and they leave after 45 s without news (a stopped instance sends their `leave` at once). A room Node opens reads the Expedition's open jobs from `jobs`, so `hello` lists running builds after a restart. After the listener reconnects, every open room is poked at its head.
 - **Protocol** (JSON `{t, …}`; the schemas are `@seply/domain`'s `room.ts`):
   - `hello {headSeq, presence[], builds[], you?}`: `presence` is everyone else here, as participants `{id, userId, name, agent?, view, cursor, selection[], editing?}` (one per connection, so a reader with two tabs is two); `you` is this connection's participant id, given only to those who may send presence
   - `ops {from, to, ops[]}`, or `poke {headSeq}` for large batches (over 64 KB of JSON) and gaps. `from` is the head the ops follow (exclusive): a client at `from` or later applies them, one further behind pulls
@@ -80,20 +81,20 @@ Relay {
 
 - **The interface:** `JobRunner` (start, step, retry, cancel, progress → Relay).
   - **Cloudflare:** **Workflows**, with persisted, retried steps. One step runs the curator agent until its next View commit, so each committed View is a checkpoint and a restart resumes from the last one.
-  - **Node:** **pg-boss** in Postgres, with an in-process worker.
+  - **Node:** **pg-boss** in Postgres, with an in-process worker. *As built (WP-6.1):* one pg-boss job per attempt, with Workflows' step semantics: each step's JSON result is recorded in `job_steps` (job, attempt, name), retried with backoff, and a replay of the attempt returns recorded results. pg-boss heartbeats each running attempt, so when an instance dies another one (or the same, restarted) picks the attempt up and replays it from its last recorded step. Cancel marks the row `cancelled`; the attempt stops at its next step boundary, and stops waiting for a step in flight within a second, wherever it runs. A daily pg-boss schedule (one instance runs it) purges Trash.
 - The step functions (the curator agent loop, the skim, writers) live in `packages/ai` and are shared by both.
 - Build progress and preview nodes go to the room as `build` events. The View's status and failure reason are logged fields.
 - **Checkpoints and commits:** a job commits through a pair of steps (make the ops, then append them as one Change with origin `build`); op ids are fixed in the first, so a retried or replayed commit is never logged twice. A job's row (`jobs`) holds its status, step, progress, failure reason and attempt; Retry starts the next attempt from the first step, and the job resumes from its logged state (Views already ready are kept).
 - **The spending cap:** a step that throws `SpendingCapReached` (spec §5.5) is not retried: the attempt ends `paused`. **Continue** (`POST /jobs/:id/continue`) starts the next attempt with the job's `cap_raises` one higher (the job's meter calls `raise()` that many times); **Stop** is Cancel. Views left queued by a cancelled or stopped job stay queued in the log, and the app shows them as "Not built", with Retry and Remove (§3.5).
 - **Local dev:** `wrangler dev` does not resume a running Workflow after a restart (production does), so with `JOBS_WAKE_ON_START=1` the Worker wakes open jobs on its first request.
 - **Notifications:** live status on Library cards, an activity indicator in the header, and **web push** if the reader allowed it (asked on the first "Leave it building"). Build notifications don't use email in v1.
-- **Email (invites only):** a `Mailer` interface. Hosted: a transactional provider (Resend assumed; Cloudflare's email service if it fits better). Self-host: optional SMTP via env vars. Without one, invites use the link and in-app inbox only ([Invites and email](../../wayfinder/mindmaps-v1/tickets/26-invites-and-email.md)).
+- **Email (invites only):** a `Mailer` interface. Hosted: a transactional provider (Resend assumed; Cloudflare's email service if it fits better). Self-host: optional SMTP via env vars. *As built (WP-6.1):* `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` and `EMAIL_FROM`; without them the Node entry only logs that an invite would go out. Without one, invites use the link and in-app inbox only ([Invites and email](../../wayfinder/mindmaps-v1/tickets/26-invites-and-email.md)).
 
 ## 2.6 Auth, keys and tokens
 
 - **Better Auth ≥ 1.7** with the Drizzle adapter, built per request.
   - **Hosted:** Google login by default.
-  - **Self-host:** email + password by default, Google optional.
+  - **Self-host:** email + password by default, Google optional. *As built (WP-6.1):* `AUTH_EMAIL_PASSWORD=1` (the Node entry's default) turns it on, `AUTH_EMAIL_SIGNUP=0` closes sign-up, and `GET /api/sign-in-options` tells the sign-in screen which to show. Accounts made this way have unverified emails, so pending email invites aren't claimed automatically; the invite link still works.
 - **MCP OAuth:** Better Auth is the OAuth 2.1 authorization server (`@better-auth/mcp` + CIMD; dynamic client registration opt-in only). Personal API tokens (`@better-auth/api-key`) are the fallback on the same Bearer header. Scopes are coarse (`expeditions:read`, `expeditions:create`, `proposals:write`), and the Collaborator role is checked on every call.
 - **AI key mode** is an instance setting in env config (`AI_KEY_MODE`: `instance`, the default, or `byok`):
   - **instance key:** the operator's keys serve everyone; usage caps are phase 2.
@@ -134,5 +135,5 @@ Relay {
 - **Hosted:** GitHub Actions runs typecheck and tests, applies Drizzle migrations to Neon, then deploys with Wrangler.
   - Each pull request gets a **preview Worker and its own Neon branch**, so parallel agents never share a database.
   - Cloudflare resources: the Worker (with static assets), a Durable Object class (the room), Workflows, R2 buckets (Sources, tiles), Hyperdrive, and secrets (master key, OAuth, instance AI keys).
-- **Self-host:** release tags publish the Node image. `docker compose` runs the app and Postgres, with an optional S3 bucket. Configuration is env vars only.
+- **Self-host:** release tags publish the Node image. `docker compose` runs the app and Postgres, with an optional S3 bucket. Configuration is env vars only. *As built (WP-6.1):* `apps/server-node` validates its env at startup and stops with every problem listed, applies migrations on start (or `migrate`), and shuts down gracefully on SIGTERM. Its README lists every variable.
 - **Desktop:** none in v1. Electron (local-first, SQLite, offline op queue) is phase 2.

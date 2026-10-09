@@ -26,7 +26,8 @@ const TITLE = "AI compute & model internals"
 async function importThroughButton(page: Page, file: string) {
   await page.goto("/")
   const chooser = page.waitForEvent("filechooser")
-  await page.getByRole("button", { name: "Import" }).click()
+  // The header's (a new reader's empty Library shows the same actions again).
+  await page.getByRole("banner").getByRole("button", { name: "Import" }).click()
   await (await chooser).setFiles(file)
   await expect(page).toHaveURL(/\/e\/[^/]+$/)
   return page.getByRole("dialog", { name: /^Imported/ })

@@ -110,6 +110,7 @@ export {
   isLocalURL,
   ConfigError,
   type MailConfig,
+  type SmtpConfig,
   type ServerConfig,
   type ServerEnv,
 } from "./config.ts"
@@ -166,6 +167,16 @@ export {
   type RoomAccess,
   type RoomJoin,
 } from "./relay.ts"
+export {
+  KICK_CODE,
+  MAX_FRAME,
+  Room,
+  ROOM_STALE_MS,
+  type Attachment,
+  type RoomHost,
+  type RoomSockets,
+  type RoomStorage,
+} from "./room.ts"
 export {
   instanceId,
   jobRegistry,
