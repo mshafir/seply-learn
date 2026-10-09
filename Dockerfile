@@ -8,21 +8,27 @@
 # server into one ES module (apps/server-node/scripts/bundle.ts), so the
 # image is Node, that file, the migrations and the SPA: no node_modules.
 
+# The base for both stages (hadolint's DL3006 can't see the tag through the ARG).
 ARG NODE_IMAGE=node:24-alpine
 
-FROM ${NODE_IMAGE} AS build
+# The bundle and the SPA are plain JS, CSS and HTML, so this stage runs on the
+# builder's platform even for another target (no emulated install for arm64).
+# hadolint ignore=DL3006
+FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS build
 ENV CI=1 PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN corepack enable && corepack prepare pnpm@10.33.4 --activate
 WORKDIR /app
-# Dependencies first, cached until the lockfile changes.
+# Dependencies first, cached until the lockfile changes. pnpm is the version
+# package.json's packageManager names.
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+RUN corepack enable && corepack install
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm fetch
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --frozen-lockfile --offline
 RUN pnpm --filter web build && pnpm --filter @seply/server-node bundle
 
+# hadolint ignore=DL3006
 FROM ${NODE_IMAGE}
 ENV NODE_ENV=production \
     PORT=3000 \

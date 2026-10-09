@@ -22,6 +22,8 @@ The web build reads these (Vite env, so they're fixed at build time: `apps/web/s
 
 The Deploy workflow passes the repo **variable** `MAP_TILES_URL` as `VITE_MAP_TILES_URL`.
 
+The server can also set them at runtime (WP-6.2): `MAP_TILES_URL` and `MAP_ASSETS_URL` on the Worker or the Node entry are served by `GET /api/map-config`, and the web app prefers them over the build's values (`useBasemap` in `basemap.ts`; it asks once, as the app loads). The self-host image relies on this; the hosted Worker can use either.
+
 ## Making the extract
 
 `scripts/basemap-tiles.mjs` extracts a region and zoom range from the newest public daily build (`https://build.protomaps.com/<YYYYMMDD>.pmtiles`) with the [`pmtiles` CLI](https://github.com/protomaps/go-pmtiles), measures the file, appends the size to the table below, and uploads it to R2.
@@ -55,7 +57,7 @@ node scripts/basemap-tiles.mjs all --maxzoom=10
 3. **CORS**, so the app's origins can make range requests: allow `GET` and `HEAD` from the production and preview origins, allow the `Range` and `If-Match` request headers, and expose `ETag`, `Content-Length` and `Content-Range`.
 4. **Set the repo variable** `MAP_TILES_URL` to the public URL of `basemap.pmtiles`, and redeploy.
 
-Self-hosting (M6) serves the same file from the volume or S3, with the same variable.
+Self-hosting serves an extract from the volume (`MAP_TILES_FILE`, served by the Node entry at `/tiles/basemap.pmtiles` with Range requests) or from any public URL that allows Range requests and CORS (`MAP_TILES_URL`): see [docs/self-host.md](../self-host.md#map-tiles).
 
 ## Measured extracts
 

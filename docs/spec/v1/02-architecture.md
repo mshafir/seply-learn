@@ -110,7 +110,7 @@ Relay {
   - a local volume or any S3-compatible bucket when self-hosted.
 
   Files are capped at 25 MB each.
-- **Map tiles:** our own **Protomaps PMTiles** copy (R2 when hosted, volume/S3 when self-hosted), with OpenFreeMap as a configurable fallback. The build picks the max zoom and **measures the extract size**; the figures quoted during planning were unverified. A coarse world layer is bundled.
+- **Map tiles:** our own **Protomaps PMTiles** copy (R2 when hosted, volume/S3 when self-hosted), with OpenFreeMap as a configurable fallback. The build picks the max zoom and **measures the extract size**; the figures quoted during planning were unverified. A coarse world layer is bundled. *As built (WP-6.2):* the tiles URL is read at runtime too: `GET /api/map-config` answers `MAP_TILES_URL` and `MAP_ASSETS_URL`, which the web app prefers over its build's `VITE_MAP_*`, so the published image needs no rebuild. The Node entry serves `MAP_TILES_FILE` (an extract on the volume) at `/tiles/basemap.pmtiles` with Range requests; an extract in S3 is reached through its own public URL (`MAP_TILES_URL`).
 
 ## 2.8 Search
 
@@ -135,5 +135,5 @@ Relay {
 - **Hosted:** GitHub Actions runs typecheck and tests, applies Drizzle migrations to Neon, then deploys with Wrangler.
   - Each pull request gets a **preview Worker and its own Neon branch**, so parallel agents never share a database.
   - Cloudflare resources: the Worker (with static assets), a Durable Object class (the room), Workflows, R2 buckets (Sources, tiles), Hyperdrive, and secrets (master key, OAuth, instance AI keys).
-- **Self-host:** release tags publish the Node image. `docker compose` runs the app and Postgres, with an optional S3 bucket. Configuration is env vars only. *As built (WP-6.1):* `apps/server-node` validates its env at startup and stops with every problem listed, applies migrations on start (or `migrate`), and shuts down gracefully on SIGTERM. Its README lists every variable.
+- **Self-host:** release tags publish the Node image. `docker compose` runs the app and Postgres, with an optional S3 bucket. Configuration is env vars only. *As built (WP-6.1):* `apps/server-node` validates its env at startup and stops with every problem listed, applies migrations on start (or `migrate`), and shuts down gracefully on SIGTERM. Its README lists every variable. *As built (WP-6.2):* the root `Dockerfile` bundles the Node entry with esbuild into one module and ships it with the migrations and the SPA on `node:24-alpine` (no `node_modules`; about 70 MB compressed), running as a non-root user with a health check. `docker-compose.yml` runs it with Postgres 17, and the `s3` profile adds MinIO (a community build: MinIO no longer publishes images) with a one-shot bucket container. The Image workflow runs a compose smoke test on pull requests and publishes `ghcr.io/mshafir/seply-learn` (amd64 and arm64) on `v*` tags. Guide: [docs/self-host.md](../../self-host.md).
 - **Desktop:** none in v1. Electron (local-first, SQLite, offline op queue) is phase 2.

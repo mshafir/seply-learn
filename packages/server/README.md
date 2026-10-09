@@ -40,6 +40,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
 **Routes** (under `/api`):
 
 - `GET /sign-in-options`: `{ google, emailPassword, signUp }` (see "Email + password sign-in" below).
+- `GET /map-config`: `{ tiles, assets }`, the Map View's basemap when the runtime sets it (`MAP_TILES_URL`, `MAP_ASSETS_URL`; each `null` otherwise). The web app prefers these over its build's `VITE_MAP_*`, so a prebuilt self-host image can point at its own PMTiles extract (WP-6.2, [docs/ops/basemap-tiles.md](../../docs/ops/basemap-tiles.md)).
 - `GET /health`: `{ ok, db, branch }`. `db` is `select current_database()`, `"unconfigured"` with no database, `"error"` (503) when it fails.
 - `/auth/*`: Better Auth (sign-in, callbacks including `/auth/callback/google/oauth-proxy`, session, sign-out).
 - `GET /me`: `{ user: { id, email, name } }`, or 401.
@@ -90,7 +91,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
   - `POST /ai/estimate/ask` `{ expeditionId }` (WP-4.4): what one Grow ask would cost on that Expedition (its Sources and Concept set, `@seply/ai`'s `estimateAsk`): `{ usd, model, sourceChars, askCapUsd, keySource: "reader" | "instance" }`. Owners and editors; 404/409 as below.
   - `POST /ai/estimate/article` `{ expeditionId }`: what "Write the article" would cost at each length on that Expedition's Sources: `{ lengths: { short | standard | long: { words, usd, model } }, sourceChars, askCapUsd }`. Owners and editors (`useAi`); 404 when the caller can't see it; 409 as above. The `article` job takes `{ conceptId, length?, capUsd? }`.
 
-**Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `AUTH_EMAIL_PASSWORD` (`1`: email + password sign-in; the Node entry's default, WP-6.1), `AUTH_EMAIL_SIGNUP` (`0` closes email sign-up), `DB_BRANCH`, and for web push `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) and `VAPID_SUBJECT`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
+**Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `AUTH_EMAIL_PASSWORD` (`1`: email + password sign-in; the Node entry's default, WP-6.1), `AUTH_EMAIL_SIGNUP` (`0` closes email sign-up), `DB_BRANCH`, `MAP_TILES_URL` and `MAP_ASSETS_URL` (the basemap, served by `GET /map-config`), and for web push `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) and `VAPID_SUBJECT`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
 
 **Permissions and sharing** (WP-5.1; spec §1.8, §3.9; `access.ts`, `sharing.ts`, `mailer.ts`):
 
