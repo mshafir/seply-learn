@@ -5,7 +5,7 @@
 //   package; the step functions they call (curator, skim, writers) live in
 //   @seply/ai.
 // - A **JobEngine** is the runtime's durable executor: Cloudflare Workflows
-//   in apps/worker, pg-boss on Node later, and `createInlineEngine` (in
+//   in apps/worker, pg-boss in apps/server-node, and `createInlineEngine` (in
 //   process) for tests.
 // - A **JobRunner** is what the API calls: start, cancel, retry, wake.
 //   `createJobRunner` builds one from an engine; it keeps the `jobs` rows.

@@ -3,8 +3,9 @@
 // progress; `GET /api/expeditions/:id/live` hands the WebSocket upgrade to
 // `handleUpgrade`; sharing calls `kick` when someone loses access, and the
 // MCP handler calls `agentPresence` on each tool call. On Cloudflare the room
-// is a hibernating Durable Object (apps/worker); the Node rooms come with
-// WP-6.1. The wire protocol is @seply/domain's room.ts. Without a live relay
+// is a hibernating Durable Object (apps/worker); on Node, in-process rooms
+// with LISTEN/NOTIFY between instances (apps/server-node). Both run room.ts's
+// `Room`. The wire protocol is @seply/domain's room.ts. Without a live relay
 // the app uses `noopRelay`.
 import type { BuildEvent, LoggedOp, ReaderBatch, Role } from "@seply/domain"
 

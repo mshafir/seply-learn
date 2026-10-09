@@ -7,7 +7,8 @@
 // - `memoryMailer`: unit tests, which read what was "sent".
 // - none: invites still work through the copyable link and the Library's
 //   "Shared with you" inbox.
-// Self-host SMTP (WP-6.1) is another implementation of the same interface.
+// - SMTP (self-host, WP-6.1): `readConfig` reads SMTP_*; apps/server-node
+//   implements it (nodemailer needs sockets) and passes it as `mailer`.
 
 export type Email = {
   to: string
