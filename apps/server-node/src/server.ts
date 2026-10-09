@@ -225,6 +225,11 @@ export async function startServer(config: NodeConfig): Promise<RunningServer> {
     head: Buffer
   ) => {
     socket.on("error", () => {})
+    // Only the live route takes upgrades.
+    if (!incoming.url?.startsWith("/api/")) {
+      socket.end("HTTP/1.1 404 Not Found\r\nconnection: close\r\n\r\n")
+      return
+    }
     const headers = new Headers()
     for (const [k, v] of Object.entries(incoming.headers))
       if (v !== undefined) headers.set(k, Array.isArray(v) ? v.join(", ") : v)
