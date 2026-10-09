@@ -175,6 +175,14 @@ describe.skipIf(!TEST_DATABASE_URL)("pg-boss JobRunner", () => {
       )
     ).rows.map((r) => r.name)
 
+  const bossJob = async (id: string, attempt: number) =>
+    (
+      await pool.query<{ state: string; retry_count: number }>(
+        "select state, retry_count from pgboss.job where id = $1",
+        [bossJobId(instanceId({ jobId: id, attempt }))]
+      )
+    ).rows[0]
+
   const changes = async () =>
     (
       await pool.query<{ label: string }>(
@@ -229,6 +237,13 @@ describe.skipIf(!TEST_DATABASE_URL)("pg-boss JobRunner", () => {
     const j = await start({ views: 2, failView: { n: 2 } })
     await until(ended(j.id))
     expect((await job(j.id)).status).toBe("failed")
+    // A failed attempt is over: pg-boss never runs it again (a replay would
+    // re-send its events after a Retry).
+    await until(async () => (await bossJob(j.id, 1))?.state === "completed")
+    expect(await bossJob(j.id, 1)).toEqual({
+      state: "completed",
+      retry_count: 0,
+    })
     const res = await call("POST", `/jobs/${j.id}/retry`)
     expect(((await res.json()) as { job: Job }).job).toMatchObject({
       status: "queued",

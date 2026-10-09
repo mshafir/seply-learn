@@ -139,11 +139,29 @@ export function createPgBossEngine(opts: {
       await runJob(p, await durableSteps(p), deps, registry)
     } catch (err) {
       if (err instanceof Halted) return
+      // `runJob` rethrows a job's failure once it has recorded it (so a
+      // Workflow instance errors): the attempt is over, and running it again
+      // would only replay it. Only an attempt left open is retried.
+      if (!(await stillOpen(p))) return
       if (job.retryCount < RESTARTS) throw err // pg-boss starts it again
       // Out of restarts: the job ends failed rather than running forever.
       console.error(`jobs: ${instanceId(p)} gave up`, err)
       await giveUp(p)
     }
+  }
+
+  /** Whether this attempt's row is still queued or running (it didn't finish). */
+  const stillOpen = async (p: JobPayload) => {
+    const { rows } = await pool.query<{ status: string; attempt: number }>(
+      "select status, attempt from jobs where id = $1",
+      [p.jobId]
+    )
+    const row = rows[0]
+    return (
+      !!row &&
+      row.attempt === p.attempt &&
+      (row.status === "queued" || row.status === "running")
+    )
   }
 
   const giveUp = async (p: JobPayload) => {
