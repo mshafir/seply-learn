@@ -68,3 +68,50 @@ export function serveSpa(dist: string): MiddlewareHandler {
     return new Response(body, { headers })
   }
 }
+
+/**
+ * One file with Range requests (a PMTiles archive: MapLibre's pmtiles
+ * protocol reads its header, directories and tiles as byte ranges). A
+ * satisfiable `bytes=a-b`, `a-` or `-n` gets 206 with that slice; an
+ * unsatisfiable one 416; anything else (no Range, several ranges) the
+ * whole file.
+ */
+export function serveRangeFile(path: string): MiddlewareHandler {
+  return async (c) => {
+    const s = await stat(path).catch(() => null)
+    if (!s?.isFile()) return c.json({ error: "not found" }, 404)
+    const size = s.size
+    const headers: Record<string, string> = {
+      "content-type": TYPES[extname(path)] ?? "application/octet-stream",
+      "accept-ranges": "bytes",
+      etag: `"${size.toString(16)}-${Math.floor(s.mtimeMs).toString(16)}"`,
+      "cache-control": "public, max-age=3600",
+    }
+    let start = 0
+    let end = size - 1
+    let status = 200
+    const range = /^bytes=(\d*)-(\d*)$/.exec(c.req.header("range") ?? "")
+    if (range && (range[1] || range[2])) {
+      if (range[1]) {
+        start = Number(range[1])
+        if (range[2]) end = Math.min(Number(range[2]), size - 1)
+      } else start = Math.max(0, size - Number(range[2]))
+      if (start >= size || start > end)
+        return new Response(null, {
+          status: 416,
+          headers: { ...headers, "content-range": `bytes */${size}` },
+        })
+      status = 206
+      headers["content-range"] = `bytes ${start}-${end}/${size}`
+    }
+    headers["content-length"] = String(end - start + 1)
+    if (c.req.method === "HEAD") return new Response(null, { status, headers })
+    const body =
+      end < start
+        ? null
+        : (Readable.toWeb(
+            createReadStream(path, { start, end })
+          ) as ReadableStream)
+    return new Response(body, { status, headers })
+  }
+}

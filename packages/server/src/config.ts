@@ -79,6 +79,16 @@ export type ServerEnv = {
   SMTP_SECURE?: string
   SMTP_USER?: string
   SMTP_PASS?: string
+
+  // --- The Map View's basemap (docs/ops/basemap-tiles.md) ---
+  /**
+   * Our PMTiles archive: a URL, or a path on this origin (the Node entry's
+   * MAP_TILES_FILE is served at /tiles/basemap.pmtiles). Read at runtime and
+   * served by GET /api/map-config, over the web build's VITE_MAP_TILES_URL.
+   */
+  MAP_TILES_URL?: string
+  /** A copy of Protomaps' fonts and sprites (basemaps-assets), likewise. */
+  MAP_ASSETS_URL?: string
 }
 
 /** An SMTP server (self-host). */
@@ -120,6 +130,8 @@ export type ServerConfig = {
   emailSignUp: boolean
   dbBranch?: string
   mail: MailConfig
+  /** The Map View's basemap, when set at runtime (MAP_TILES_URL, MAP_ASSETS_URL). */
+  map: { tiles?: string; assets?: string }
 }
 
 export class ConfigError extends Error {}
@@ -197,6 +209,10 @@ export function readConfig(env: ServerEnv): ServerConfig {
     emailSignUp,
     dbBranch: env.DB_BRANCH,
     mail,
+    map: {
+      tiles: env.MAP_TILES_URL?.trim() || undefined,
+      assets: env.MAP_ASSETS_URL?.trim() || undefined,
+    },
   }
 }
 
