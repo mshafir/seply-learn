@@ -37,7 +37,7 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | Lane | Owns | Notes |
 |---|---|---|
 | **A: Data & sync** | `packages/domain`, `packages/sync` | **Serial critical path in M0–M1**: schema, ops, apply, push/pull. Other lanes build against its contracts. |
-| **B: Server & infra** | `packages/server`, `apps/worker`, `apps/server-node`, CI, deploys | |
+| **B: Server & infra** | `packages/server`, `apps/worker`, `apps/server-node`, `apps/desktop`, CI, deploys | |
 | **C: Views** | `packages/views` | Renderers, layouts, layout metrics |
 | **D: App & UI** | `packages/ui`, `apps/web` | Screens, design system |
 | **E: AI** | `packages/ai` | Starts in M3. It replaces lane C's slot once M2's Views land. |
@@ -53,8 +53,9 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | **M4** | Grow and collaborate | Live presence and cursors; History with undo, view as of, restore; editing in place and Merge; per-View overrides; Proposals and the Suggestions tab; Grow asks and Concept actions |
 | **M5** | Share | Roles and invites (email, link, inbox); Visibility and live public links; Fork; Trash; export and import; the MCP server, OAuth and the `seply-learn` skill |
 | **M6** | Self-host | A Node image with docker compose: in-process rooms + LISTEN/NOTIFY, pg-boss, volume/S3 blobs, optional SMTP, email+password auth; PMTiles instructions |
+| **M7** | Desktop shell | Unsigned installers for macOS, Windows and Linux that open `learn.seply.app` or a chosen self-hosted server; Google sign-in through the browser; `seply://` links; files opened into an Expedition; native build notifications |
 
-Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
+Local-first desktop (bundled client, SQLite) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
 
 ## Owner checklist before M0 (a task only the owner can do)
 

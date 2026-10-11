@@ -355,3 +355,70 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - spec: 02-architecture.md#210-deployment
 - **Build:** a multi-stage image, `docker-compose.yml` (app + Postgres, optional MinIO), and a self-host guide (keys mode, SMTP, PMTiles download and extract).
 - **Done when:** `docker compose up` on a clean machine reaches sign-in, imports a fixture, and builds one Expedition with an instance key.
+
+## M7: Desktop shell
+
+### WP-7.1: Desktop shell and server picker
+- lane: B
+- milestone: M7
+- depends: WP-6.2
+- spec: 09-desktop.md#91-shape
+- **Build:**
+  - `apps/desktop`: Electron main process, sandboxed renderer, the navigation and permission rules of §9.5, and an empty versioned preload bridge gated on the chosen origin.
+  - `GET /api/instance` in `packages/server`.
+  - The server picker (§9.2), the "Can't reach" page, the app menu and the stored setting.
+  - `pnpm --filter desktop dev` against the local Node entry; `check:deps` knows the new app.
+- **Done when:** the app opens `learn.seply.app` by default and a local Node entry when chosen, email + password sign-in works in the window, an outside link opens in the system browser, and unit tests cover origin reduction, the `https` rule, instance validation and bridge gating.
+
+### WP-7.2: Browser sign-in for desktop
+- lane: B
+- milestone: M7
+- depends: WP-7.1
+- spec: 09-desktop.md#93-sign-in
+- **Build:**
+  - The `seply://` scheme and single-instance handling in the shell; `signInWithBrowser()` on the bridge.
+  - `<server>/desktop/sign-in` in `apps/web` and the one-time token in `packages/server` (confirm Better Auth's `one-time-token` first; assumption 2).
+  - The sign-in screen's Google button uses the bridge when it is there.
+- **Done when:** Google sign-in on desktop goes through the system browser and lands signed in on the Library; a used, expired or wrong-server token is refused, with server tests for each. Label `needs-owner` (auth).
+
+### WP-7.3: Deep links and files
+- lane: D
+- milestone: M7
+- depends: WP-7.2
+- spec: 09-desktop.md#94-native-integration
+- **Build:**
+  - `seply://<host>/<path>` navigation, with the switch-server prompt for another host.
+  - **Open in app** in the Share dialog and on the public page.
+  - "Open with" registration for the Source types, `onOpenFiles` on the bridge, and the **Add to which Expedition?** dialog in `apps/web` (prebuilt components) feeding the existing upload.
+- **Done when:** a `seply://` Expedition link and an invite link open in the app, a PDF opened with the app becomes a Source of the chosen Expedition, and an oversized or unsupported file gets the web flow's own error.
+
+### WP-7.4: Native notifications and tray
+- lane: B
+- milestone: M7
+- depends: WP-7.1
+- spec: 09-desktop.md#94-native-integration
+- **Build:**
+  - `GET /api/notifications?since=` from the `jobs` table (assumption 1), sharing the payload builder with web push.
+  - `notify` and `requestNotificationPermission` on the bridge; the desktop poll in `apps/web`; "Leave it building" asks through the bridge on desktop.
+  - The tray, close-to-tray and Quit.
+- **Done when:** a build finished while the window is closed to the tray raises one OS notification, clicking it opens the Expedition, and the web's push behaviour is unchanged in a browser.
+
+### WP-7.5: Packaging, release workflow and docs
+- lane: B
+- milestone: M7
+- depends: WP-7.3, WP-7.4
+- spec: 09-desktop.md#96-packaging-updates-and-tests
+- **Build:**
+  - electron-builder targets, with icons from `packages/ui/brand`.
+  - The `desktop-v*` release workflow on a three-OS matrix, publishing unsigned packages to a GitHub Release.
+  - The Playwright Electron run in CI on Linux.
+  - `apps/desktop/README.md`, and "Using the desktop app with your server" in the self-host guide, with the unsigned-install steps.
+- **Done when:** a tag produces installable packages for all three platforms, the Electron e2e run passes in CI, and the owner has installed one on each OS they can reach.
+
+### WP-7.6: Signing and automatic updates
+- lane: B
+- milestone: M7
+- depends: WP-7.5, owner checklist (Apple Developer ID, Windows certificate)
+- spec: 09-desktop.md#96-packaging-updates-and-tests
+- **Build:** macOS signing and notarisation, Windows signing, electron-updater from GitHub Releases, and verified `https` links for `learn.seply.app`.
+- **Done when:** a signed build installs with no OS warning and updates itself to the next release.
