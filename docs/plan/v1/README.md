@@ -37,7 +37,7 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | Lane | Owns | Notes |
 |---|---|---|
 | **A: Data & sync** | `packages/domain`, `packages/sync` | **Serial critical path in M0–M1**: schema, ops, apply, push/pull. Other lanes build against its contracts. |
-| **B: Server & infra** | `packages/server`, `apps/worker`, `apps/server-node`, CI, deploys | |
+| **B: Server & infra** | `packages/server`, `apps/worker`, `apps/server-node`, `apps/desktop`, CI, deploys | |
 | **C: Views** | `packages/views` | Renderers, layouts, layout metrics |
 | **D: App & UI** | `packages/ui`, `apps/web` | Screens, design system |
 | **E: AI** | `packages/ai` | Starts in M3. It replaces lane C's slot once M2's Views land. |
@@ -54,8 +54,9 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | **M5** | Share | Roles and invites (email, link, inbox); Visibility and live public links; Fork; Trash; export and import; the MCP server, OAuth and the `seply-learn` skill |
 | **M6** | Self-host | A Node image with docker compose: in-process rooms + LISTEN/NOTIFY, pg-boss, volume/S3 blobs, optional SMTP, email+password auth; PMTiles instructions |
 | **M7** | Landing site | `seply.app` live: the landing and self-host pages, real screenshots, the explainer video, a live embed, three public showcases; hosted access approval in the app |
+| **M8** | Desktop shell | Unsigned installers for macOS, Windows and Linux that open `learn.seply.app` or a chosen self-hosted server; Google sign-in through the browser; `seply://` links; files opened into an Expedition; native build notifications |
 
-Desktop (Electron, local-first) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
+Local-first desktop (bundled client, SQLite) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
 
 ## Owner checklist before M0 (a task only the owner can do)
 
@@ -81,4 +82,5 @@ M4: 4.1 (B) ‖ 4.2 (A) ‖ 4.5 (D) → 4.3 (A) → 4.4 (E)
 M5: 5.1 (B) → 5.2 (B/D) ‖ 5.3 (A) ‖ 5.4 (B/E)
 M6: 6.1 (B) → 6.2 (B)
 M7: 7.1 (B) → 7.2 (D);  7.3 (B/D) ‖ 7.4 (C) ‖ 7.5 (D);  7.1 + 7.5 + public showcases → 7.6 (D)
+M8: 5.5 (D) ‖ 8.1 (B) → 8.2 (B) → 8.3 (D);  8.4 (B) after 8.1;  8.3 + 8.4 → 8.5 (B) → 8.6 (B)
 ```

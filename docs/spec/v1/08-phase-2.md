@@ -4,7 +4,7 @@ Out of v1, but v1's design must not block any of it. Each item notes what v1 alr
 
 | Item | What it is | What v1 already does to allow it |
 |---|---|---|
-| **Desktop, local-first** | Electron app that edits offline on SQLite and syncs to any server | Pure `apply()`; op log with client ULIDs and push/pull; the Drizzle schema is portable; the op engine is shared |
+| **Desktop, local-first** | Electron app that edits offline on SQLite and syncs to any server | Pure `apply()`; op log with client ULIDs and push/pull; the Drizzle schema is portable; the op engine is shared; the desktop shell ([§10](10-desktop.md)) already provides the window, bridge, packaging and releases |
 | **Real-time text co-editing** | Character-level co-editing of overviews and article sections | Sections are separate rows; phase 2 adds a CRDT state column (Yjs likely, following the editor choice) and a `text.update` op, relayed through the same room |
 | **Agent mode (harnesses)** | Run builds or Grow with the reader's own Claude Code / Codex / Pi subscription (AI SDK `HarnessAgent`) on desktop and self-host | A tool-based curator agent behind one seam; the tools are shared with MCP |
 | **Semantic search** | pgvector embeddings next to full-text | Search queries are isolated in `packages/server` |

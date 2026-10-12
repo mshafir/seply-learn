@@ -338,6 +338,19 @@ Each package is sized to about one agent session. The format is parsed by `make_
   - The skill as a Claude Code plugin with a marketplace entry, mirrored in the server instructions.
 - **Done when:** Claude Code connects, lists Expeditions, runs `create_expedition` from a chat, and has its `propose_changes` show up in Suggestions.
 
+### WP-5.5: Connect an agent
+- lane: D
+- milestone: M5
+- depends: WP-5.4
+- spec: 06-mcp.md#64-connecting-an-agent
+- **Build:**
+  - `GET /api/instance` in `packages/server` (with `hosted`), if WP-8.1 hasn't added it.
+  - `/connect` in `apps/web`: the four steps, the five agent tabs, hosted and self-hosted commands, the connected-agent check, and the first prompts for the Library and for `?e=<id>`.
+  - The plugin's server address made configurable, defaulting to `https://learn.seply.app` (the plugin option `userConfig.server_url`).
+  - Every command checked against the agent's current release; the plugin README and the self-host guide gain the same steps.
+  - The entry points: Create: Sources, the Suggestions tab and its empty state, Ask, the empty Library, and Settings → Connected agents (which loses its own command).
+- **Done when:** following the Claude Code tab on a preview connects Claude Code and its first prompt creates an Expedition; the step ticks itself when the agent connects; the plugin installed with no setting connects to `learn.seply.app`, and with the address set connects to a local Node entry; a self-hosted server's page shows the plugin steps with its own address filled in; e2e covers the page and one entry point in light and dark.
+
 ## M6: Self-host
 
 ### WP-6.1: Node entry
@@ -408,3 +421,70 @@ Spec: [9. Landing site](../../spec/v1/09-landing-site.md). The three showcase Ex
 - **Build:** `apps/site/scripts/capture.ts` (Playwright) taking the shot list from the design doc against the public showcases on `learn.seply.app`, light and dark, 1440 × 900 at 2×, encoded to AVIF and WebP; signed-in shots use the demo account from CI secrets (`DEMO_EMAIL`, `DEMO_PASSWORD`) and reset its demo Expedition first. A CI job runs it on demand and weekly, caching the output, and the site build reads it through the media manifest from 7.2.
 - **Done when:** every placeholder on the site preview shows a real screenshot in both themes, and a rerun with nothing changed reuses the cache.
 
+## M8: Desktop shell
+
+### WP-8.1: Desktop shell and server picker
+- lane: B
+- milestone: M8
+- depends: WP-6.2
+- spec: 10-desktop.md#101-shape
+- **Build:**
+  - `apps/desktop`: Electron main process, sandboxed renderer, the navigation and permission rules of §10.5, and an empty versioned preload bridge gated on the chosen origin.
+  - `GET /api/instance` in `packages/server`.
+  - The server picker (§10.2), the "Can't reach" page, the app menu and the stored setting.
+  - `pnpm --filter desktop dev` against the local Node entry; `check:deps` knows the new app.
+- **Done when:** the app opens `learn.seply.app` by default and a local Node entry when chosen, email + password sign-in works in the window, an outside link opens in the system browser, and unit tests cover origin reduction, the `https` rule, instance validation and bridge gating.
+
+### WP-8.2: Browser sign-in for desktop
+- lane: B
+- milestone: M8
+- depends: WP-8.1
+- spec: 10-desktop.md#103-sign-in
+- **Build:**
+  - The `seply://` scheme and single-instance handling in the shell; `signInWithBrowser()` on the bridge.
+  - `<server>/desktop/sign-in` in `apps/web` and the one-time token in `packages/server` (confirm Better Auth's `one-time-token` first; assumption 2).
+  - The sign-in screen's Google button uses the bridge when it is there.
+- **Done when:** Google sign-in on desktop goes through the system browser and lands signed in on the Library; a used, expired or wrong-server token is refused, with server tests for each. Label `needs-owner` (auth).
+
+### WP-8.3: Deep links and files
+- lane: D
+- milestone: M8
+- depends: WP-8.2, WP-5.5
+- spec: 10-desktop.md#104-native-integration
+- **Build:**
+  - **Connect an agent…** in the app menu, and the once-after-first-sign-in landing on `/connect` when the bridge is there.
+  - `seply://<host>/<path>` navigation, with the switch-server prompt for another host.
+  - **Open in app** in the Share dialog and on the public page.
+  - "Open with" registration for the Source types, `onOpenFiles` on the bridge, and the **Add to which Expedition?** dialog in `apps/web` (prebuilt components) feeding the existing upload.
+- **Done when:** a `seply://` Expedition link and an invite link open in the app, a PDF opened with the app becomes a Source of the chosen Expedition, and an oversized or unsupported file gets the web flow's own error.
+
+### WP-8.4: Native notifications and tray
+- lane: B
+- milestone: M8
+- depends: WP-8.1
+- spec: 10-desktop.md#104-native-integration
+- **Build:**
+  - `GET /api/notifications?since=` from the `jobs` table (assumption 1), sharing the payload builder with web push.
+  - `notify` and `requestNotificationPermission` on the bridge; the desktop poll in `apps/web`; "Leave it building" asks through the bridge on desktop.
+  - The tray, close-to-tray and Quit.
+- **Done when:** a build finished while the window is closed to the tray raises one OS notification, clicking it opens the Expedition, and the web's push behaviour is unchanged in a browser.
+
+### WP-8.5: Packaging, release workflow and docs
+- lane: B
+- milestone: M8
+- depends: WP-8.3, WP-8.4
+- spec: 10-desktop.md#106-packaging-updates-and-tests
+- **Build:**
+  - electron-builder targets, with icons from `packages/ui/brand`.
+  - The `desktop-v*` release workflow on a three-OS matrix, publishing unsigned packages to a GitHub Release.
+  - The Playwright Electron run in CI on Linux.
+  - `apps/desktop/README.md`, and "Using the desktop app with your server" in the self-host guide, with the unsigned-install steps.
+- **Done when:** a tag produces installable packages for all three platforms, the Electron e2e run passes in CI, and the owner has installed one on each OS they can reach.
+
+### WP-8.6: Signing and automatic updates
+- lane: B
+- milestone: M8
+- depends: WP-8.5, owner checklist (Apple Developer ID, Windows certificate)
+- spec: 10-desktop.md#106-packaging-updates-and-tests
+- **Build:** macOS signing and notarisation, Windows signing, electron-updater from GitHub Releases, and verified `https` links for `learn.seply.app`.
+- **Done when:** a signed build installs with no OS warning and updates itself to the next release.
