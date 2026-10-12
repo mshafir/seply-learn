@@ -49,8 +49,8 @@ Read from the environment at `astro build` (`src/lib/env.ts`):
 | Slot | Files under `public/media/` | Filled by |
 |---|---|---|
 | Screenshots (`IMAGE_SLOTS`) | `shots/<file>-light.webp` (required), `-light.avif`, `-dark.webp`, `-dark.avif` (optional; dark falls back to light) | WP-7.6 |
-| Explainer | `video/explainer.mp4` and/or `.webm`, `explainer.vtt` (captions), `explainer-poster.webp` | WP-7.4 |
-| Hero loop | `video/hero-loop.mp4` and/or `.webm`, `hero-loop-poster.webp`; replaces the sketch, plays unless the reader prefers reduced motion, with a Pause button | WP-7.4 |
+| Explainer | `video/explainer.mp4` and/or `.webm`, `explainer.vtt` (captions), `explainer-poster.webp` | WP-7.4: the site jobs in `preview.yml` copy the cached render in (`.github/actions/explainer-video`); locally, `pnpm --filter video render` and copy `apps/video/out/` |
+| Hero loop | `video/hero-loop.mp4` and/or `.webm`, `hero-loop-poster.webp`; replaces the sketch, plays unless the reader prefers reduced motion, with a Pause button | WP-7.4, as above |
 | Live embed | `SITE_EMBED_URL` at build time (`https://learn.seply.app/e/<id>/embed?view=<id>`); a lazy iframe, else the Read together screenshot | WP-7.5 |
 
 `MEDIA_DIR` overrides where the build looks (the tests use it).

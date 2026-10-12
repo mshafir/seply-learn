@@ -14,6 +14,8 @@ const allowed = {
   "@seply/server": ["@seply/domain", "@seply/ai"],
   web: ["@seply/ui", "@seply/views", "@seply/sync", "@seply/domain"],
   "@seply/site": ["@seply/ui"],
+  // The explainer video (WP-7.4) draws the real Views over committed fixtures.
+  video: ["@seply/ui", "@seply/views", "@seply/domain"],
   "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
   "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
 };
