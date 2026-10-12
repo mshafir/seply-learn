@@ -167,6 +167,8 @@ import {
 } from "@/expedition/asks.ts"
 import type { GrowTab } from "@/expedition/grow-panel.tsx"
 import { ShareDialog } from "@/expedition/share-dialog.tsx"
+import { ExpeditionDetailsDialog } from "@/expedition/details-dialog.tsx"
+import type { ExpeditionDetails } from "@/expedition/editing.ts"
 import {
   ApiError,
   estimateArticle,
@@ -460,6 +462,7 @@ function ExpeditionFrame({
   // The share dialog (WP-5.1): anyone signed in and online. Collaborators
   // manage access there; readers of a link see it and can Fork (WP-5.2).
   const [shareOpen, setShareOpen] = React.useState(false)
+  const [detailsOpen, setDetailsOpen] = React.useState(false)
   const canShare = signInHref === null && offlineSince === null
   // Hosted access approval: Fork from History explains instead of failing.
   const approval = useApprovalGate()
@@ -1107,6 +1110,24 @@ function ExpeditionFrame({
       draft.title = title
     })
   }
+  const saveDetails = (changes: Partial<ExpeditionDetails>) => {
+    if (!expedition) return
+    try {
+      const tx = client.collections.expeditions.update(
+        expedition.id,
+        (draft) => {
+          if (changes.title !== undefined) draft.title = changes.title
+          if (changes.summary !== undefined) draft.summary = changes.summary
+          if (changes.tags !== undefined) draft.tags = changes.tags
+        }
+      ) as { isPersisted?: { promise: Promise<unknown> } } | void
+      tx?.isPersisted?.promise.catch((e: unknown) =>
+        refused("Couldn't save the details", e)
+      )
+    } catch (e) {
+      refused("Couldn't save the details", e)
+    }
+  }
 
   return (
     <>
@@ -1114,6 +1135,11 @@ function ExpeditionFrame({
         title={expedition?.title ?? ""}
         canEdit={editable}
         onRename={rename}
+        details={
+          editable && expedition
+            ? { onOpen: () => setDetailsOpen(true) }
+            : undefined
+        }
         health={health}
         signInHref={signInHref}
         menu={
@@ -1123,6 +1149,9 @@ function ExpeditionFrame({
               expeditionId={expeditionId}
               title={expedition?.title ?? ""}
               canEdit={canEdit}
+              onEditDetails={
+                editable && expedition ? () => setDetailsOpen(true) : undefined
+              }
             />
           ) : undefined
         }
@@ -1391,6 +1420,18 @@ function ExpeditionFrame({
         onClose={() => setSourceTarget(null)}
       />
       <WaitingListDialog {...approval.dialog} />
+      {editable && expedition && (
+        <ExpeditionDetailsDialog
+          open={detailsOpen}
+          onOpenChange={setDetailsOpen}
+          details={{
+            title: expedition.title,
+            summary: expedition.summary ?? "",
+            tags: expedition.tags,
+          }}
+          onSave={saveDetails}
+        />
+      )}
       {canShare && (
         <ShareDialog
           open={shareOpen}

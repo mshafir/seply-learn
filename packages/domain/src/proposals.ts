@@ -12,11 +12,14 @@
 //   Relationships go stale only through the second.
 // - **Dependencies** (`withDependencies`): accepting an item that needs a
 //   Concept another pending item creates (a Relationship to a new Concept, a
-//   new Concept's article) includes that item.
+//   new Concept's article) includes that item. The same goes for an
+//   Attribute another pending item defines (a Concept's value for it, a View
+//   whose settings name it).
 // - **Preview** (`previewProposals`): the state with every pending item that
 //   applies, and what to draw dashed.
 import { applyBody, getPath } from "./apply.ts"
 import {
+  ATTR_PREFIX,
   EXISTS,
   TAG_PREFIX,
   deepEqual,
@@ -152,6 +155,22 @@ export type ItemRefs = {
   needs: Set<string>
   /** Article sections the item needs (and doesn't create). */
   needsSections: Set<string>
+  /** Attribute ids the item defines (`attribute.define`). */
+  definesAttributes: Set<string>
+  /**
+   * Attributes the item may need (and doesn't define): a Concept's values,
+   * and every string in a View's settings (only those that name an
+   * Attribute a pending item defines count, so other strings never match).
+   */
+  needsAttributes: Set<string>
+}
+
+/** Every string inside a value (View settings name Attributes by id). */
+function stringsIn(value: unknown, out: Set<string>) {
+  if (typeof value === "string") out.add(value)
+  else if (Array.isArray(value)) for (const v of value) stringsIn(v, out)
+  else if (value && typeof value === "object")
+    for (const v of Object.values(value)) stringsIn(v, out)
 }
 
 export function itemRefs(item: Pick<ProposalItemLike, "ops">): ItemRefs {
@@ -159,12 +178,30 @@ export function itemRefs(item: Pick<ProposalItemLike, "ops">): ItemRefs {
   const createsSections = new Set<string>()
   const needs = new Set<string>()
   const needsSections = new Set<string>()
+  const definesAttributes = new Set<string>()
+  const needsAttributes = new Set<string>()
   for (const op of item.ops) {
     switch (op.kind) {
       case "concept.create":
         creates.add(op.target)
+        for (const a of Object.keys(op.value.attributes ?? {}))
+          needsAttributes.add(a)
         break
       case "concept.set":
+        needs.add(op.target)
+        if (op.path.startsWith(ATTR_PREFIX))
+          needsAttributes.add(op.path.slice(ATTR_PREFIX.length))
+        break
+      case "attribute.define":
+        definesAttributes.add(op.target)
+        break
+      case "view.create":
+        stringsIn(op.value.settings, needsAttributes)
+        break
+      case "view.set":
+        if (op.path === "settings" || op.path.startsWith("settings."))
+          stringsIn(op.value, needsAttributes)
+        break
       case "concept.tag.add":
       case "concept.tag.remove":
       case "concept.delete":
@@ -192,21 +229,45 @@ export function itemRefs(item: Pick<ProposalItemLike, "ops">): ItemRefs {
   }
   for (const id of creates) needs.delete(id)
   for (const id of createsSections) needsSections.delete(id)
-  return { creates, createsSections, needs, needsSections }
+  for (const id of definesAttributes) needsAttributes.delete(id)
+  return {
+    creates,
+    createsSections,
+    needs,
+    needsSections,
+    definesAttributes,
+    needsAttributes,
+  }
 }
 
-/** Which pending item creates each Concept and section. */
+/** Which pending item creates each Concept and section, and defines each Attribute. */
 function providers(pool: readonly ProposalItemLike[]) {
   const concepts = new Map<string, string>()
   const sections = new Map<string, string>()
+  const attributes = new Map<string, string>()
   for (const item of pool) {
     const r = itemRefs(item)
     for (const id of r.creates) if (!concepts.has(id)) concepts.set(id, item.id)
     for (const id of r.createsSections)
       if (!sections.has(id)) sections.set(id, item.id)
+    for (const id of r.definesAttributes)
+      if (!attributes.has(id)) attributes.set(id, item.id)
   }
-  return { concepts, sections }
+  return { concepts, sections, attributes }
 }
+
+/**
+ * The Attributes of `r` that aren't in the Expedition and that `from`
+ * defines: the ones the item really waits for.
+ */
+const pendingAttributes = (
+  state: DomainState,
+  r: ItemRefs,
+  from: { attributes: ReadonlyMap<string, string> }
+) =>
+  [...r.needsAttributes].filter(
+    (a) => !isLive(state.attributes[a]) && from.attributes.has(a)
+  )
 
 // --- stale ------------------------------------------------------------------
 
@@ -299,6 +360,7 @@ export function withDependencies(
       ...[...r.needsSections]
         .filter((s) => !isLive(state.sections[s]))
         .map((s) => from.sections.get(s)),
+      ...pendingAttributes(state, r, from).map((a) => from.attributes.get(a)),
     ]
     for (const d of deps) if (d && !want.has(d)) queue.push(d)
   }
@@ -325,6 +387,8 @@ export function orderItems<T extends ProposalItemLike>(
       for (const s of r.needsSections)
         if (!isLive(state.sections[s]) && from.sections.has(s))
           d.add(from.sections.get(s)!)
+      for (const a of pendingAttributes(state, r, from))
+        d.add(from.attributes.get(a)!)
       d.delete(i.id)
       return [i.id, d]
     })
@@ -381,8 +445,9 @@ export type ProposalEntry = {
   /** A package's Relationships to Concepts in the map. Each can be left out. */
   relationships: string[]
   /**
-   * Suggested Concepts this entry needs that aren't in the map yet (another
-   * pending package creates them). While any are, it can't be accepted alone.
+   * Suggested Concepts (and Attributes) this entry needs that aren't in the
+   * map yet (another pending item creates them). While any are, it can't be
+   * accepted alone.
    */
   waitsFor: string[]
 }
@@ -431,6 +496,7 @@ export function proposalEntries(
       continue
     }
     const waits = [...r.needs].filter(newConcept)
+    const attrs = pendingAttributes(state, r, from)
     const creates = [...r.creates].filter((c) => !isLive(state.concepts[c]))
     if (creates.length) {
       const e: ProposalEntry = {
@@ -439,7 +505,7 @@ export function proposalEntries(
         concepts: creates,
         items: [item.id],
         relationships: [],
-        waitsFor: waits,
+        waitsFor: [...waits, ...attrs],
       }
       entries.push(e)
       entryOf.set(item.id, e)
@@ -447,7 +513,7 @@ export function proposalEntries(
     }
     const among = [...r.needs].filter((c) => suggested.has(c))
     const home =
-      among.length === 1 && waits.length === 1
+      among.length === 1 && waits.length === 1 && !attrs.length
         ? entryOf.get(from.concepts.get(waits[0]!)!)
         : undefined
     if (home && home.kind === "package") {
@@ -462,7 +528,7 @@ export function proposalEntries(
       concepts: [],
       items: [item.id],
       relationships: [],
-      waitsFor: waits,
+      waitsFor: [...waits, ...attrs],
     }
     entries.push(e)
     entryOf.set(item.id, e)
@@ -501,6 +567,9 @@ export function waiting(
           !isLive(state.sections[s]) &&
           all.sections.has(s) &&
           !mine.sections.has(s)
+      ),
+      ...pendingAttributes(state, r, all).filter(
+        (a) => !mine.attributes.has(a)
       ),
     ]
     if (w.length) out.set(item.id, w)
@@ -570,7 +639,8 @@ export function withDependents(
             !isLive(state.sections[s]) &&
             gone.sections.has(s) &&
             !left.sections.has(s)
-        )
+        ) ||
+        pendingAttributes(state, r, gone).some((a) => !left.attributes.has(a))
       )
     })
     if (!more.length) break

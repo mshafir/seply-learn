@@ -4,7 +4,8 @@
 // nested under it; a Relationship between suggested Concepts on its own,
 // waiting until they're in; anything else on its own. Each in plain words
 // ("New Concept · KV cache", "KV cache is part of Attention", "Article for
-// MLA · 3 sections"), whether it is stale ("changed since suggested", with
+// MLA · 3 sections", "Summary and Tags of the Expedition", "New Attribute ·
+// Priority"), whether it is stale ("changed since suggested", with
 // both versions), and what accepting a selection does.
 // Reader-facing copy says "suggestions"; the code says Proposal.
 import {
@@ -15,6 +16,7 @@ import {
   proposalEntries,
   staleness,
   type DomainState,
+  type OpBody,
   type ProposalItemView,
   type ProposalView,
   type StaleField,
@@ -172,11 +174,12 @@ export function planAccept(
 
 // --- describing items --------------------------------------------------------
 
-export type ItemKind = "concept" | "relationship" | "article" | "edit"
+export type ItemKind =
+  "concept" | "relationship" | "article" | "attribute" | "edit"
 
 export type ItemDescription = {
   kind: ItemKind
-  /** "New Concept", "New Relationship", "Article", "Edit". */
+  /** "New Concept", "New Relationship", "Article", "New Attribute", "Attribute", "Edit". */
   label: string
   /** "KV cache", "KV cache is part of Attention", "for MLA · 3 sections". */
   title: string
@@ -206,6 +209,7 @@ const FIELD_NAMES: Record<string, string> = {
   lat: "location",
   lon: "location",
   weightPin: "weight",
+  def: "definition",
 }
 
 /** A field's name in copy: "summary", "price", "tag #japan". */
@@ -221,12 +225,70 @@ export function fieldName(state: DomainState, field: string): string {
 
 const words = (md: string) => md.split(/\s+/).filter(Boolean).length
 
+/** An Attribute's type in copy: "enum: hard < nice", "money, USD". */
+function attributeDetail(v: {
+  type: string
+  unit?: string
+  enumValues?: string[]
+}): string {
+  const type = v.type === "bool" ? "yes/no" : v.type
+  if (v.enumValues?.length) return `${type}: ${v.enumValues.join(" < ")}`
+  return v.unit ? `${type}, ${v.unit}` : type
+}
+
+/** The concept a section op is about: its own for a create, else the section's. */
+function sectionConcept(state: DomainState, op: OpBody): string | undefined {
+  if (op.kind === "section.create") return op.value.conceptId
+  if (op.kind.startsWith("section."))
+    return state.sections[op.target]?.conceptId
+  return undefined
+}
+
 /** One item in plain words. `state` should have the item applied (the preview), so new Concepts have titles. */
 export function describeItem(
   state: DomainState,
-  item: Pick<ProposalItemView, "ops">
+  item: Pick<ProposalItemView, "ops"> & { base?: ProposalItemView["base"] }
 ): ItemDescription {
   const ops = item.ops
+  if (ops.length && ops.every((op) => op.kind.startsWith("expedition."))) {
+    const fields: string[] = []
+    const added: string[] = []
+    const removed: string[] = []
+    let summary: string | undefined
+    for (const op of ops) {
+      if (op.kind === "expedition.set") {
+        fields.push(op.path === "title" ? "title" : op.path)
+        if (op.path === "summary") summary = String(op.value ?? "")
+      } else if (op.kind === "expedition.tag.add") added.push(`#${op.value}`)
+      else if (op.kind === "expedition.tag.remove") removed.push(`#${op.value}`)
+    }
+    if (added.length || removed.length) fields.push("Tags")
+    const tagLine = [
+      added.length ? `add ${added.join(" ")}` : "",
+      removed.length ? `remove ${removed.join(" ")}` : "",
+    ]
+      .filter(Boolean)
+      .join(", ")
+    return {
+      kind: "edit",
+      label: "Edit",
+      title: `${listWords([...new Set(fields)])} of the Expedition`,
+      detail:
+        summary !== undefined
+          ? [summary || "(no summary)", tagLine].filter(Boolean).join(" · ")
+          : tagLine || undefined,
+    }
+  }
+  const defined = ops.find((op) => op.kind === "attribute.define")
+  if (defined && defined.kind === "attribute.define" && ops.length === 1) {
+    const existed = Object.keys(item.base ?? {}).length > 0
+    return {
+      kind: "attribute",
+      label: existed ? "Attribute" : "New Attribute",
+      title: defined.value.label,
+      detail: attributeDetail(defined.value),
+    }
+  }
   const created = ops.find((op) => op.kind === "concept.create")
   if (created && created.kind === "concept.create")
     return {
@@ -236,7 +298,16 @@ export function describeItem(
       detail: created.value.summary,
     }
   const sections = ops.filter((op) => op.kind === "section.create")
-  if (sections.length && sections.length === ops.length) {
+  const deleted = ops.filter((op) => op.kind === "section.delete")
+  if (deleted.length && deleted.length === ops.length) {
+    const conceptId = sectionConcept(state, deleted[0]!) ?? ""
+    return {
+      kind: "article",
+      label: "Article",
+      title: `Remove the article of ${titleOf(state, conceptId)}`,
+    }
+  }
+  if (sections.length && sections.length + deleted.length === ops.length) {
     const conceptId =
       sections[0]!.kind === "section.create" ? sections[0]!.value.conceptId : ""
     const n = sections.reduce(
@@ -248,7 +319,7 @@ export function describeItem(
       kind: "article",
       label: "Article",
       title: `for ${titleOf(state, conceptId)}`,
-      detail: `${sections.length === 1 ? "1 section" : `${sections.length} sections`} · about ${n.toLocaleString()} words`,
+      detail: `${deleted.length ? "replaces it · " : ""}${sections.length === 1 ? "1 section" : `${sections.length} sections`} · about ${n.toLocaleString()} words`,
     }
   }
   const rel = ops.find((op) => op.kind === "relationship.add")
@@ -262,17 +333,28 @@ export function describeItem(
     }
   }
   const sets = ops.filter((op) => op.kind === "concept.set")
-  if (sets.length && sets.length === ops.length) {
-    const target = sets[0]!.target
+  // An existing Concept's edits: fields, Tags and its article together.
+  const conceptOf = (op: OpBody) =>
+    op.kind === "concept.set" ||
+    op.kind === "concept.tag.add" ||
+    op.kind === "concept.tag.remove"
+      ? op.target
+      : sectionConcept(state, op)
+  const target = ops.length ? conceptOf(ops[0]!) : undefined
+  if (target && ops.every((op) => conceptOf(op) === target)) {
     const fields = [
       ...new Set(
-        sets.map((op) =>
-          op.kind === "concept.set" ? fieldName(state, op.path) : ""
+        ops.map((op) =>
+          op.kind === "concept.set"
+            ? fieldName(state, op.path)
+            : op.kind.startsWith("concept.tag.")
+              ? "Tags"
+              : "article"
         )
       ),
     ]
-    const last = sets.at(-1)!
-    const value = last.kind === "concept.set" ? last.value : undefined
+    const last = sets.at(-1)
+    const value = last?.kind === "concept.set" ? last.value : undefined
     return {
       kind: "edit",
       label: "Edit",
@@ -293,12 +375,18 @@ function listWords(xs: string[]) {
 }
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Why a Relationship between suggested Concepts can't be accepted yet: "Accept NF4 and QLoRA first". `state` should be the preview, so new Concepts have titles. */
+/** Why an entry can't be accepted yet: "Accept NF4 and QLoRA first". It may wait for suggested Concepts or Attributes. `state` should be the preview, so they have names. */
 export function waitsForPhrase(
   state: DomainState,
   conceptIds: readonly string[]
 ): string {
-  const names = conceptIds.map((id) => titleOf(state, id))
+  const names = conceptIds.map(
+    (id) =>
+      state.concepts[id]?.title ??
+      (state.attributes[id]
+        ? `the ${state.attributes[id].label} Attribute`
+        : titleOf(state, id))
+  )
   const list =
     names.length <= 1
       ? (names[0] ?? "")
@@ -331,7 +419,13 @@ export function itemsPhrase(
   state: DomainState,
   items: readonly Pick<ProposalItemView, "ops">[]
 ): string {
-  const counts = { concept: 0, relationship: 0, article: 0, edit: 0 }
+  const counts = {
+    concept: 0,
+    relationship: 0,
+    article: 0,
+    attribute: 0,
+    edit: 0,
+  }
   for (const i of items) counts[describeItem(state, i).kind]++
   const parts = [
     counts.concept &&
@@ -340,6 +434,8 @@ export function itemsPhrase(
       `${counts.relationship} ${counts.relationship === 1 ? "Relationship" : "Relationships"}`,
     counts.article &&
       `${counts.article} ${counts.article === 1 ? "article" : "articles"}`,
+    counts.attribute &&
+      `${counts.attribute} ${counts.attribute === 1 ? "Attribute" : "Attributes"}`,
     counts.edit && `${counts.edit} ${counts.edit === 1 ? "edit" : "edits"}`,
   ].filter(Boolean) as string[]
   if (parts.length <= 1) return parts[0] ?? "nothing"

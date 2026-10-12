@@ -1,11 +1,13 @@
 // Grow (spec §5.5): the curator agent scoped to one ask. The same tools as a
-// build, minus everything that builds Views or reshapes the vocabulary, and
-// nothing is ever committed: after each model step, what the agent staged is
-// cut into reviewable items (a new Concept with its summary and overview in
-// one `concept.create`; each Relationship on its own; each existing Concept's
-// changes together) and handed to `onItems`, which writes them to the ask's
-// one Proposal. So items stream while the agent works, and Stop (or the
-// per-ask cap) keeps what already came out.
+// build, minus everything that builds Views or reshapes Kinds and
+// Relationship Types, and nothing is ever committed: after each model step,
+// what the agent staged is cut into reviewable items (a new Concept with its
+// summary and overview in one `concept.create`; each Relationship on its own;
+// each existing Concept's changes, its article included, together; the
+// Expedition's title, summary and Tags together; each Attribute on its own)
+// and handed to `onItems`, which writes them to the ask's one Proposal. So
+// items stream while the agent works, and Stop (or the per-ask cap) keeps
+// what already came out.
 import { isLive, type DomainState, type OpBody } from "@seply/domain"
 import { z } from "zod"
 import { liveConcepts, liveRelationships } from "../checks/common.ts"
@@ -62,11 +64,28 @@ export type GrowItem = { ops: OpBody[] }
 /**
  * Cuts one step's staged op bodies into items: a `concept.create` takes the
  * edits of the same new Concept that follow it; each Relationship is its own
- * item; an existing Concept's edits in the step are one item.
+ * item; an existing Concept's edits in the step (its article's sections
+ * too) are one item; the Expedition's edits are one item; anything else
+ * (an Attribute) is its own. `state` (with the bodies applied) tells which
+ * Concept a section belongs to.
  */
-export function itemsFrom(bodies: readonly OpBody[]): GrowItem[] {
+export function itemsFrom(
+  bodies: readonly OpBody[],
+  state?: DomainState
+): GrowItem[] {
   const items: GrowItem[] = []
   const byConcept = new Map<string, GrowItem>()
+  let expedition: GrowItem | undefined
+  const sectionOwner = new Map<string, string>()
+  const join = (conceptId: string, b: OpBody) => {
+    let item = byConcept.get(conceptId)
+    if (!item) {
+      item = { ops: [] }
+      byConcept.set(conceptId, item)
+      items.push(item)
+    }
+    item.ops.push(b)
+  }
   for (const b of bodies) {
     if (b.kind === "concept.create") {
       const item = { ops: [b] }
@@ -76,14 +95,26 @@ export function itemsFrom(bodies: readonly OpBody[]): GrowItem[] {
       b.kind === "concept.set" ||
       b.kind === "concept.tag.add" ||
       b.kind === "concept.tag.remove"
+    )
+      join(b.target, b)
+    else if (b.kind === "section.create") {
+      sectionOwner.set(b.target, b.value.conceptId)
+      join(b.value.conceptId, b)
+    } else if (
+      b.kind === "section.set" ||
+      b.kind === "section.move" ||
+      b.kind === "section.delete"
     ) {
-      let item = byConcept.get(b.target)
-      if (!item) {
-        item = { ops: [] }
-        byConcept.set(b.target, item)
-        items.push(item)
+      const owner =
+        sectionOwner.get(b.target) ?? state?.sections[b.target]?.conceptId
+      if (owner) join(owner, b)
+      else items.push({ ops: [b] })
+    } else if (b.kind.startsWith("expedition.")) {
+      if (!expedition) {
+        expedition = { ops: [] }
+        items.push(expedition)
       }
-      item.ops.push(b)
+      expedition.ops.push(b)
     } else items.push({ ops: [b] })
   }
   return items
@@ -160,7 +191,8 @@ export async function grow(o: GrowOptions): Promise<GrowResult> {
     description: base.concept_update.description,
     inputSchema: base.concept_update.inputSchema as never,
     execute: async (input: unknown) => {
-      const bad = badLinks(c.stage.state, (input as { overview?: unknown })?.overview)
+      const v = input as { overview?: unknown; article?: unknown }
+      const bad = badLinks(c.stage.state, v?.overview) ?? badLinks(c.stage.state, v?.article, "article")
       if (bad) return { ok: false, error: bad }
       return base.concept_update.execute(input as never)
     },
@@ -170,6 +202,9 @@ export async function grow(o: GrowOptions): Promise<GrowResult> {
     concept_create: conceptCreate,
     concept_update: conceptUpdate,
     relationship_add: base.relationship_add,
+    attribute_create: base.attribute_create,
+    attribute_update: base.attribute_update,
+    expedition_update: base.expedition_update,
     search_existing: base.search_existing,
     ...(o.sources.length && { source_read: base.source_read }),
     ...(o.views && view && { view_inspect: viewInspect(base.view_inspect, view.id) }),
@@ -179,7 +214,7 @@ export async function grow(o: GrowOptions): Promise<GrowResult> {
   const flush = async () => {
     const bodies = c.stage.take()
     if (!bodies.length) return
-    const items = itemsFrom(bodies)
+    const items = itemsFrom(bodies, c.stage.state)
     count += items.length
     await o.onItems(items, c.stage.state)
   }
@@ -220,12 +255,16 @@ const nonEmpty = (v: unknown) => typeof v === "string" && v.trim().length > 0
  * don't exist yet), or null. Each suggestion streams as it is made and can't
  * be fixed afterwards, so a broken link is refused rather than unlinked.
  */
-export function badLinks(state: DomainState, overview: unknown): string | null {
+export function badLinks(
+  state: DomainState,
+  overview: unknown,
+  what: "overview" | "article" = "overview"
+): string | null {
   if (typeof overview !== "string") return null
   const ids = [...overview.matchAll(/\]\(#c\/([^)\s]*)\)/g)].map((m) => m[1]!)
   const unknown = [...new Set(ids)].filter((id) => !isLive(state.concepts[id]))
   if (!unknown.length) return null
-  return `The overview links to Concepts that don't exist: ${unknown.map((id) => `#c/${id || "(empty)"}`).join(", ")}. Link only ids from the Concept set or Concepts you have already created (their ids came back from concept_create). To link two new Concepts, create the first, then write the second's overview with the id you got back.`
+  return `The ${what} links to Concepts that don't exist: ${unknown.map((id) => `#c/${id || "(empty)"}`).join(", ")}. Link only ids from the Concept set or Concepts you have already created (their ids came back from concept_create). To link two new Concepts, create the first, then write the second's ${what} with the id you got back.`
 }
 
 /** view_inspect, on the reader's View only. */

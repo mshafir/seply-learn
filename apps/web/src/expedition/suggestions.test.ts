@@ -225,6 +225,123 @@ describe("Suggestions", () => {
     })
   })
 
+  it("describes the Expedition's edits, Attributes and articles (issue #139)", () => {
+    const s = applyOps(base(), [
+      { kind: "expedition.tag.add", target: "e1", value: "synthetic" },
+      {
+        kind: "section.create",
+        target: "old",
+        value: { conceptId: "mla", orderKey: "i", heading: "", md: "Old" },
+      },
+    ])
+    const exp: OpBody[] = [
+      {
+        kind: "expedition.set",
+        target: "e1",
+        path: "summary",
+        value: "Attention, briefly.",
+      },
+      { kind: "expedition.tag.add", target: "e1", value: "ml" },
+      { kind: "expedition.tag.remove", target: "e1", value: "synthetic" },
+    ]
+    expect(describeItem(applyOps(s, exp), { ops: exp })).toEqual({
+      kind: "edit",
+      label: "Edit",
+      title: "Summary and Tags of the Expedition",
+      detail: "Attention, briefly. · add #ml, remove #synthetic",
+    })
+
+    const create: OpBody = {
+      kind: "attribute.define",
+      target: "priority",
+      value: { label: "Priority", type: "enum", enumValues: ["hard", "nice"] },
+    }
+    expect(
+      describeItem(applyOps(s, [create]), {
+        ops: [create],
+        base: proposalBase(s, [create]),
+      })
+    ).toEqual({
+      kind: "attribute",
+      label: "New Attribute",
+      title: "Priority",
+      detail: "enum: hard < nice",
+    })
+    const withIt = applyOps(s, [create])
+    const update: OpBody = {
+      ...create,
+      value: {
+        label: "Priority",
+        type: "enum",
+        enumValues: ["hard", "nice", "dropped"],
+      },
+    } as OpBody
+    expect(
+      describeItem(applyOps(withIt, [update]), {
+        ops: [update],
+        base: proposalBase(withIt, [update]),
+      })
+    ).toMatchObject({
+      label: "Attribute",
+      detail: "enum: hard < nice < dropped",
+    })
+
+    const replace: OpBody[] = [
+      { kind: "section.delete", target: "old" },
+      {
+        kind: "section.create",
+        target: "new",
+        value: {
+          conceptId: "mla",
+          orderKey: "i",
+          heading: "",
+          md: "Brand new words",
+        },
+      },
+    ]
+    expect(describeItem(applyOps(s, replace), { ops: replace })).toEqual({
+      kind: "article",
+      label: "Article",
+      title: "for MLA",
+      detail: "replaces it · 1 section · about 3 words",
+    })
+    const remove: OpBody[] = [{ kind: "section.delete", target: "old" }]
+    expect(describeItem(applyOps(s, remove), { ops: remove })).toMatchObject({
+      kind: "article",
+      title: "Remove the article of MLA",
+    })
+    const mixed = [set("mla", "summary", "Latent attention"), ...replace]
+    expect(describeItem(applyOps(s, mixed), { ops: mixed })).toMatchObject({
+      kind: "edit",
+      title: "Summary and article of MLA",
+    })
+  })
+
+  it("waits for a suggested Attribute, by its name", () => {
+    const s = base()
+    const p = proposal(s, "p1", [
+      [
+        "a",
+        [
+          {
+            kind: "attribute.define",
+            target: "priority",
+            value: { label: "Priority", type: "enum", enumValues: ["hard"] },
+          },
+        ],
+      ],
+      ["v", [set("mla", "attributes.priority", "hard")]],
+    ])
+    const entry = groupPending(s, [p])[0]!.entries.find((e) => e.id === "v")!
+    expect(entry.waitsFor).toEqual(["priority"])
+    const preview = applyOps(s, p.items[0]!.ops)
+    expect(waitsForPhrase(preview, entry.waitsFor)).toBe(
+      "Accept the Priority Attribute first"
+    )
+    expect(planAccept(s, [p], ["v"]).skipped).toEqual(["v"])
+    expect(planAccept(s, [p], ["a", "v"]).ids).toEqual(["a", "v"])
+  })
+
   it("says who suggested it, and what, for the MCP toast", () => {
     const s = base()
     const p = proposal(

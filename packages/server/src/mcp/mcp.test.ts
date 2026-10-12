@@ -613,6 +613,134 @@ describe("an agent with an API token", () => {
   })
 })
 
+describe("agent edits (issue #139)", () => {
+  it("suggests the Expedition's summary and Tags, an article and an Attribute; accepted, they read back", async () => {
+    const client = await connect((await token(s.ada)).key)
+    const made = await call(client, "create_expedition", BUILD)
+    const exp = /\(`([0-9A-Z]{26})`\)/.exec(made.text)![1]!
+    const before = (await loadState(s.db, exp))!
+    const attn = Object.values(before.concepts).find(
+      (c) => c.title === "Attention"
+    )!
+    const items = [
+      {
+        tool: "expedition_update",
+        input: {
+          summary: "Attention in transformers, from one chat.",
+          addTags: ["#transformers"],
+          removeTags: ["ml"],
+        },
+      },
+      {
+        tool: "attribute_create",
+        input: {
+          id: "priority",
+          label: "Priority",
+          type: "enum",
+          enumValues: ["hard", "nice"],
+        },
+      },
+      {
+        tool: "attribute_update",
+        input: { id: "priority", enumValues: ["hard", "nice", "dropped"] },
+      },
+      {
+        tool: "concept_update",
+        input: {
+          id: attn.id,
+          attributes: { priority: "hard" },
+          article:
+            "Each token weighs every other.\n\n## Scores\n\nDot products, softmaxed.",
+        },
+      },
+      { tool: "expedition_update", input: { removeTags: ["nope"] } },
+    ]
+
+    // A viewer reads but can't suggest.
+    const cy = await connect((await token(s.cy)).key)
+    await s.db.insert(schema.collaborators).values({
+      expeditionId: exp,
+      userId: s.cy.id,
+      role: "viewer",
+      seenAt: new Date().toISOString(),
+    })
+    expect(
+      await call(cy, "propose_changes", {
+        expedition: exp,
+        rationale: "Tidy.",
+        items: items.slice(0, 1),
+      })
+    ).toMatchObject({
+      isError: true,
+      text: expect.stringContaining("Only owners and editors"),
+    })
+    await cy.close()
+
+    // An Attribute's type never changes: the call is refused as it stands.
+    expect(
+      await call(client, "propose_changes", {
+        expedition: exp,
+        rationale: "Retype.",
+        items: [{ tool: "attribute_update", input: { id: "x", type: "text" } }],
+      })
+    ).toMatchObject({
+      isError: true,
+      text: expect.stringContaining(
+        "an Attribute's type is fixed at creation and can't be changed"
+      ),
+    })
+
+    const r = await call(client, "propose_changes", {
+      expedition: exp,
+      rationale: "Tidy the Expedition.",
+      items,
+    })
+    expect(r.isError, r.text).toBe(false)
+    expect(r.text).toMatch(/4 suggestions wait in Suggestions \(1 refused\)/)
+    expect(r.text).toContain(
+      "5. expedition_update: refused: the Expedition has no Tag #nope"
+    )
+    // Nothing changes until it is accepted.
+    const still = await call(client, "get_expedition", { expedition: exp })
+    expect(still.text).toContain("What attention is and why it matters.")
+    expect(still.text).not.toContain("priority")
+
+    const [p] = await suggestions(exp)
+    const accept = await s.app.request(
+      `/api/expeditions/${exp}/proposals/review`,
+      {
+        method: "POST",
+        headers: s.ada.headers,
+        body: JSON.stringify({ accept: p!.items.map((i) => i.id) }),
+      }
+    )
+    expect(accept.status, await accept.clone().text()).toBe(200)
+    expect(await accept.json()).toMatchObject({
+      label: "Accepted 4 suggestions",
+    })
+
+    const after = (await loadState(s.db, exp))!
+    expect(after.expedition).toMatchObject({
+      summary: "Attention in transformers, from one chat.",
+      tags: ["transformers"],
+    })
+    const got = await call(client, "get_expedition", { expedition: exp })
+    expect(got.text).toContain(
+      "`priority`: Priority (enum: hard < nice < dropped)"
+    )
+    const concept = await call(client, "get_concept", {
+      expedition: exp,
+      concept: attn.id,
+      depth: "article",
+    })
+    expect(concept.text).toContain("Priority: hard")
+    expect(concept.text).toContain("Each token weighs every other.")
+    expect(concept.text).toContain("### Scores")
+    expect(concept.text).toContain("Dot products, softmaxed.")
+    await client.close()
+  })
+})
+
 describe("scopes, restriction and roles", () => {
   const proposal = (exp: string) => ({
     expedition: exp,

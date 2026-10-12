@@ -119,6 +119,9 @@ export const PROPOSE_TOOLS = [
   "concept_update",
   "relationship_add",
   "relationship_remove",
+  "attribute_create",
+  "attribute_update",
+  "expedition_update",
   "view_build",
 ] as const
 export type ProposeTool = (typeof PROPOSE_TOOLS)[number]
@@ -141,6 +144,18 @@ export const ProposeItem = z.discriminatedUnion("tool", [
   z.strictObject({
     tool: z.literal("relationship_remove"),
     input: input(CURATOR.relationship_remove),
+  }),
+  z.strictObject({
+    tool: z.literal("attribute_create"),
+    input: input(CURATOR.attribute_create),
+  }),
+  z.strictObject({
+    tool: z.literal("attribute_update"),
+    input: input(CURATOR.attribute_update),
+  }),
+  z.strictObject({
+    tool: z.literal("expedition_update"),
+    input: input(CURATOR.expedition_update),
   }),
   z.strictObject({
     tool: z.literal("view_build"),
@@ -655,12 +670,15 @@ export const MCP_TOOLS = {
     title: "Propose changes",
     description: [
       "Suggest changes to an Expedition as ONE Proposal: it waits in the reader's Suggestions until they accept or dismiss it, item by item. You never change an Expedition directly.",
-      'Each item is one curator tool call: concept_create (give it a temp id `ref` like "new:qlora" that later items use), concept_update, relationship_add, relationship_remove, view_build. A refused item is skipped and the reply says why; the rest are proposed. Keep a batch small and coherent, with a rationale.',
+      'Each item is one curator tool call: concept_create (give it a temp id `ref` like "new:qlora" that later items use), concept_update (its article too), relationship_add, relationship_remove, attribute_create, attribute_update, expedition_update (the Expedition\'s title, summary and Tags), view_build. Items run in order, each over the Expedition with the earlier ones applied: a View or a Concept value can use an Attribute an earlier item creates. A refused item is skipped and the reply says why; the rest are proposed. Keep a batch small and coherent, with a rationale.',
       "New Concepts need a summary (one line) and an overview (one paragraph). Link each new Concept to the Concepts already there.",
       `concept_create: ${CURATOR.concept_create.description}`,
       `concept_update: ${CURATOR.concept_update.description}`,
       `relationship_add: ${CURATOR.relationship_add.description}`,
       `relationship_remove: ${CURATOR.relationship_remove.description}`,
+      `attribute_create: ${CURATOR.attribute_create.description}`,
+      `attribute_update: ${CURATOR.attribute_update.description}`,
+      `expedition_update: ${CURATOR.expedition_update.description}`,
       `view_build: ${CURATOR.view_build.description}`,
     ].join("\n\n"),
     scope: "proposals:write",

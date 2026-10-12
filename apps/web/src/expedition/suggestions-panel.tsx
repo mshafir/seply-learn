@@ -30,6 +30,7 @@ import {
   CheckIcon,
   FileTextIcon,
   PencilLineIcon,
+  SlidersHorizontalIcon,
   SparklesIcon,
   SquareDashedIcon,
   TriangleAlertIcon,
@@ -111,6 +112,7 @@ const KIND_ICON: Record<ItemKind, typeof SparklesIcon> = {
   concept: SquareDashedIcon,
   relationship: ArrowRightLeftIcon,
   article: FileTextIcon,
+  attribute: SlidersHorizontalIcon,
   edit: PencilLineIcon,
 }
 

@@ -110,9 +110,17 @@ describe("grow", () => {
       onItems: async (items) => void batches.push(items),
     })
 
-    // Scoped: concept and relationship tools, no Views, no vocabulary, no commit.
+    // Scoped: concept, relationship, Attribute and Expedition tools; no Views, no Kinds or Relationship Types, no commit.
     expect(model.turns[0]!.tools.sort()).toEqual(
-      ["concept_create", "concept_update", "relationship_add", "search_existing"].sort()
+      [
+        "attribute_create",
+        "attribute_update",
+        "concept_create",
+        "concept_update",
+        "expedition_update",
+        "relationship_add",
+        "search_existing",
+      ].sort()
     )
     expect(model.turns[0]!.system).toContain("# Grow: answer one ask with suggestions")
     expect(model.turns[0]!.user).toContain("“What would I need to understand QLoRA?”")

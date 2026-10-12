@@ -19,6 +19,7 @@ import {
   keysAfter,
   Prov,
   relKey,
+  splitArticle,
   ulid,
   VIEW_TYPE_IDS,
   VIEW_TYPES,
@@ -85,6 +86,9 @@ export const TOOL_NAMES = {
   relationship_add: "relationship.add",
   relationship_remove: "relationship.remove",
   attribute_define: "attribute.define",
+  attribute_create: "attribute.create",
+  attribute_update: "attribute.update",
+  expedition_update: "expedition.update",
   view_build: "view.build",
   view_inspect: "view.inspect",
   view_commit: "view.commit",
@@ -93,6 +97,15 @@ export const TOOL_NAMES = {
 } as const
 
 const MAX_SEGMENTS = 40
+
+/**
+ * The longest article a tool takes, in characters (about 7,000 words): far
+ * past the longest "Write the article" length, so it only stops runaway
+ * output. The app's article editor has no limit of its own.
+ */
+export const ARTICLE_MAX_CHARS = 50_000
+/** The most sections an article written through a tool splits into. */
+export const ARTICLE_MAX_SECTIONS = 40
 
 export function createCuratorTools(opts: CuratorToolsOptions) {
   const stage = new StagingArea(opts.state, { nextOpId: opts.nextOpId })
@@ -181,9 +194,18 @@ export function createCuratorTools(opts: CuratorToolsOptions) {
 
     concept_update: tool({
       description:
-        "Change a Concept's fields. Send only what changes; null unsets an optional field (an Attribute value too). addTags/removeTags edit its Tags. Never pin weightPin on a guess about one reader.",
+        "Change a Concept's fields. Send only what changes; null unsets an optional field (an Attribute value too). addTags/removeTags edit its Tags. `article` replaces the Concept's whole article with markdown: `## ` headings start its sections, the text before the first is the introduction, and [title](#c/<id>) links other Concepts; null removes the article. Never pin weightPin on a guess about one reader.",
       inputSchema: ConceptUpdateInput,
-      execute: async ({ id, attributes, addTags, removeTags, ...fields }) => {
+      execute: async ({
+        id,
+        attributes,
+        addTags,
+        removeTags,
+        article,
+        ...fields
+      }) => {
+        if (!isLive(stage.state.concepts[id]))
+          return { ok: false, error: `Concept ${id} not found` }
         const bodies: OpBody[] = []
         for (const [path, value] of Object.entries(fields))
           if (value !== undefined)
@@ -199,8 +221,16 @@ export function createCuratorTools(opts: CuratorToolsOptions) {
           bodies.push({ kind: "concept.tag.add", target: id, value: t })
         for (const t of removeTags ?? [])
           bodies.push({ kind: "concept.tag.remove", target: id, value: t })
-        if (!isLive(stage.state.concepts[id]))
-          return { ok: false, error: `Concept ${id} not found` }
+        if (article !== undefined) {
+          const a = articleOps(stage.state, id, article, newId)
+          if (!a.ok) return a
+          bodies.push(...a.bodies)
+        }
+        if (!bodies.length)
+          return {
+            ok: false,
+            error: "nothing to change: send at least one field",
+          }
         return write(bodies, { id })
       },
     }),
@@ -256,6 +286,139 @@ export function createCuratorTools(opts: CuratorToolsOptions) {
         }),
       execute: async ({ id, ...value }) =>
         write([{ kind: "attribute.define", target: id, value }], { id }),
+    }),
+
+    attribute_create: tool({
+      description:
+        "Create an Attribute: a typed field Concepts fill in (text, number, money, bool, or enum with its values listed low → high), e.g. `priority`, an enum of hard / nice / dropped, for criteria. Its id is how Concepts (attributes: {<id>: value}) and View settings name it, in this batch too. The type is fixed once created. Put numbers in Attributes, not prose.",
+      inputSchema: AttributeCreateInput,
+      execute: async ({ id, ...value }) => {
+        const prev = stage.state.attributes[id]
+        if (isLive(prev))
+          return {
+            ok: false,
+            error: `Attribute ${id} already exists (${prev.type}); change it with attribute_update`,
+          }
+        if (prev && prev.type !== value.type)
+          return {
+            ok: false,
+            error: `Attribute ${id} was a ${prev.type} Attribute and was removed; pick another id`,
+          }
+        return write([{ kind: "attribute.define", target: id, value }], { id })
+      },
+    }),
+
+    attribute_update: tool({
+      description:
+        "Change an Attribute's label, unit or enum values (send only what changes; unit null removes it). Its type never changes. Removing an enum value is refused while a Concept still has it: change those Concepts first.",
+      inputSchema: AttributeUpdateInput,
+      execute: async ({ id, label, unit, enumValues }) => {
+        const prev = stage.state.attributes[id]
+        if (!prev || !isLive(prev))
+          return {
+            ok: false,
+            error: `Attribute ${id} not found; create it with attribute_create`,
+          }
+        if (enumValues !== undefined && prev.type !== "enum")
+          return {
+            ok: false,
+            error: `Attribute ${id} is ${prev.type}; only enum Attributes have values`,
+          }
+        if (enumValues) {
+          const keep = new Set(enumValues)
+          const using = Object.values(stage.state.concepts).filter((c) => {
+            const v = c.attributes[id]
+            return isLive(c) && typeof v === "string" && !keep.has(v)
+          })
+          if (using.length)
+            return {
+              ok: false,
+              error: `${using.length === 1 ? "1 Concept has" : `${using.length} Concepts have`} a value this drops (${[...new Set(using.map((c) => c.attributes[id] as string))].join(", ")}): ${using
+                .slice(0, 5)
+                .map((c) => `${c.title} (${c.id})`)
+                .join(
+                  ", "
+                )}${using.length > 5 ? ", …" : ""}. Change their values first.`,
+            }
+        }
+        const { id: _id, deletedAt: _d, unit: oldUnit, ...rest } = prev
+        void _id
+        void _d
+        const nextUnit = unit === undefined ? oldUnit : unit
+        const value = {
+          ...rest,
+          ...(label !== undefined && { label }),
+          ...(nextUnit != null && { unit: nextUnit }),
+          ...(enumValues !== undefined && { enumValues }),
+        }
+        const same =
+          value.label === prev.label &&
+          (nextUnit ?? undefined) === (prev.unit ?? undefined) &&
+          JSON.stringify(value.enumValues ?? null) ===
+            JSON.stringify(prev.enumValues ?? null)
+        if (same)
+          return { ok: false, error: `nothing to change on Attribute ${id}` }
+        return write([{ kind: "attribute.define", target: id, value }], { id })
+      },
+    }),
+
+    expedition_update: tool({
+      description:
+        'Change the Expedition itself: its title, its summary (one or two sentences on what it covers; null or "" clears it) and its Tags (addTags/removeTags, without the #). Send only what changes.',
+      inputSchema: ExpeditionUpdateInput,
+      execute: async ({ title, summary, ...tags }) => {
+        const exp = stage.state.expedition
+        const addTags = tags.addTags?.map(bareTag).filter(Boolean)
+        const removeTags = tags.removeTags?.map(bareTag).filter(Boolean)
+        const bodies: OpBody[] = []
+        if (title !== undefined && title !== exp.title)
+          bodies.push({
+            kind: "expedition.set",
+            target: exp.id,
+            path: "title",
+            value: title,
+          })
+        if (summary !== undefined && (summary ?? "") !== (exp.summary ?? ""))
+          bodies.push({
+            kind: "expedition.set",
+            target: exp.id,
+            path: "summary",
+            value: summary ?? "",
+          })
+        const has = new Set(exp.tags)
+        const removing = new Set(removeTags ?? [])
+        const missing = [...removing].filter((t) => !has.has(t))
+        if (missing.length)
+          return {
+            ok: false,
+            error: `the Expedition has no Tag ${missing.map((t) => `#${t}`).join(", ")}; its Tags: ${exp.tags.length ? exp.tags.map((t) => `#${t}`).join(" ") : "none"}`,
+          }
+        const both = (addTags ?? []).filter((t) => removing.has(t))
+        if (both.length)
+          return {
+            ok: false,
+            error: `#${both[0]} is both added and removed`,
+          }
+        for (const t of new Set(addTags ?? []))
+          if (!has.has(t))
+            bodies.push({
+              kind: "expedition.tag.add",
+              target: exp.id,
+              value: t,
+            })
+        for (const t of removing)
+          bodies.push({
+            kind: "expedition.tag.remove",
+            target: exp.id,
+            value: t,
+          })
+        if (!bodies.length)
+          return {
+            ok: false,
+            error: "nothing to change: the Expedition already reads like that",
+          }
+        return write(bodies, { id: exp.id })
+      },
     }),
 
     view_build: tool({
@@ -429,6 +592,98 @@ function tool<S extends z.ZodType, O>(t: {
   }
 }
 
+/**
+ * The ops that make `md` a Concept's whole article (null: no article): its
+ * live sections are deleted and the markdown, split at `## ` headings, is
+ * created as new ones (background knowledge: `prov: []`). The same article
+ * again is refused as nothing to change.
+ */
+export function articleOps(
+  state: DomainState,
+  conceptId: string,
+  md: string | null,
+  newId: () => string
+): { ok: true; bodies: OpBody[] } | { ok: false; error: string } {
+  const live = Object.values(state.sections)
+    .filter((s) => isLive(s) && s.conceptId === conceptId)
+    .sort((a, b) => (a.orderKey < b.orderKey ? -1 : 1))
+  const next = md === null ? [] : splitArticle(md)
+  if (md !== null && !next.length)
+    return {
+      ok: false,
+      error: "article: empty; send null to remove the article",
+    }
+  if (next.length > ARTICLE_MAX_SECTIONS)
+    return {
+      ok: false,
+      error: `article: ${next.length} sections; at most ${ARTICLE_MAX_SECTIONS}`,
+    }
+  const same =
+    live.length === next.length &&
+    live.every((s, i) => s.heading === next[i]!.heading && s.md === next[i]!.md)
+  if (same)
+    return {
+      ok: false,
+      error:
+        md === null
+          ? "article: the Concept has no article"
+          : "article: unchanged",
+    }
+  const keys = keysAfter(null, next.length)
+  return {
+    ok: true,
+    bodies: [
+      ...live.map((s): OpBody => ({ kind: "section.delete", target: s.id })),
+      ...next.map((s, i): OpBody => ({
+        kind: "section.create",
+        target: newId(),
+        value: {
+          conceptId,
+          orderKey: keys[i]!,
+          heading: s.heading,
+          md: s.md,
+          prov: [],
+        },
+      })),
+    ],
+  }
+}
+
+const Tag = z.string().trim().min(1).max(60)
+/** A Tag as stored: no leading #. */
+const bareTag = (t: string) => t.replace(/^#+/, "").trim()
+
+const AttributeCreateInput = z
+  .strictObject({ id: Id, ...AttributeDefineValue.shape })
+  .refine((v) => v.type !== "enum" || (v.enumValues?.length ?? 0) > 0, {
+    message: "an enum Attribute needs enumValues",
+  })
+  .refine((v) => v.type === "enum" || v.enumValues === undefined, {
+    message: "only enum Attributes have enumValues",
+  })
+
+const AttributeUpdateInput = z.strictObject(
+  {
+    id: Id,
+    label: z.string().min(1).optional(),
+    unit: z.string().nullable().optional(),
+    enumValues: z.array(z.string().min(1)).min(1).optional(),
+  },
+  {
+    error: (iss) =>
+      iss.code === "unrecognized_keys" && iss.keys.includes("type")
+        ? "an Attribute's type is fixed at creation and can't be changed"
+        : undefined,
+  }
+)
+
+const ExpeditionUpdateInput = z.strictObject({
+  title: z.string().trim().min(1).max(200).optional(),
+  summary: z.string().trim().max(1000).nullable().optional(),
+  addTags: z.array(Tag).max(20).optional(),
+  removeTags: z.array(Tag).max(20).optional(),
+})
+
 // concept.update: every settable Concept field (the domain's CONCEPT_FIELDS),
 // optional; null unsets the optional ones. Attributes by id.
 const unset = <S extends z.ZodType>(s: S) => s.nullable().optional()
@@ -451,6 +706,7 @@ const ConceptUpdateInput = z.strictObject({
   attributes: z.record(Id, AttributeValue.nullable()).optional(),
   addTags: z.array(z.string().trim().min(1)).optional(),
   removeTags: z.array(z.string().trim().min(1)).optional(),
+  article: unset(z.string().max(ARTICLE_MAX_CHARS)),
 })
 
 // view.build: one variant per View Type, each with that type's settings schema.

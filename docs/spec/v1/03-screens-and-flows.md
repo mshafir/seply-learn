@@ -81,6 +81,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **View-specific status floats on the canvas** as a chip, e.g. "Path to MLA · 7 of 11 read", with a clear button.
 - **The header** holds:
   - the title
+    - *As built (issue #139):* for owners and editors, a pencil beside it opens **Expedition details**: the title, the summary and the Tags (prebuilt Dialog, Field, Input, Textarea and the Tag picker Concepts use; a Tag goes with its ×, a new one is typed). The Expedition menu has the same, "Title, summary and Tags…". Saving writes only what changed, as one edit.
   - **presence** avatars
   - Share
   - the Suggestions count
@@ -118,6 +119,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   - **A new Concept is one entry**, a package: its summary (and article, if suggested), with its Relationships to Concepts already in the Expedition nested under it, each with a checkbox (ticked). **Accept** takes the Concept and the ticked Relationships as one Change; unticked ones are dismissed with it. **Dismiss** dismisses the Concept and everything that depends on it; the toast says how many and its Undo brings them all back.
   - **A Relationship between suggested Concepts** is its own entry, **faded, with Accept off**, until those Concepts are accepted. Hovering or focusing it says why: "Accept NF4 and QLoRA first". It can still be dismissed. Once they're accepted it reads and works like any other entry.
   - Other items (a Relationship between Concepts already in the Expedition, an edit) are entries of their own, with **Accept / Dismiss**.
+    - *As built (issue #139):* an edit of the Expedition reads "Summary and Tags of the Expedition", with the new summary and "add #ml, remove #synthetic"; an Attribute reads "New Attribute · Priority" (or "Attribute" for a change) with its type and values; an article that replaces another says so. An entry that needs a suggested Attribute waits for it like a Relationship waits for its Concepts.
   - **Accept all** per ask (and for everything, with more than one ask) asks first, in the tab's terms: "2 new Concepts, with 2 Relationships to Concepts already here", "then 1 Relationship between new Concepts", "1 other suggestion". It is one Change.
   - The canvas draws every pending item dashed, faded entries included, so the reader sees where they would go.
   - Stale items show "changed since suggested" with both versions.

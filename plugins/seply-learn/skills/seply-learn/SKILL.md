@@ -1,6 +1,6 @@
 ---
 name: seply-learn
-description: Read, create and curate Seply Learn Expeditions through the seply-learn MCP server. Use when the user wants to turn a chat, document or research into an Expedition, look something up in their Expeditions, or suggest Concepts, Relationships and Views to one (e.g. "save what we learned to Seply", "add this to my Expedition on transformers").
+description: Read, create and curate Seply Learn Expeditions through the seply-learn MCP server. Use when the user wants to turn a chat, document or research into an Expedition, look something up in their Expeditions, or suggest Concepts, Relationships, articles, Attributes, Views or a new summary and Tags to one (e.g. "save what we learned to Seply", "add this to my Expedition on transformers").
 ---
 
 # Seply Learn
@@ -43,6 +43,7 @@ Every write is validated by the same code as the in-app curator's tools. A refus
    - one small, coherent batch per call (usually 2–12 items), with a `rationale` the user reads: what you learned and why it belongs here;
    - every new Concept complete in its `concept_create` item (title, kind, summary, overview, tags like its neighbours', prov) and linked in: its one `part-of` parent, and the Relationship that makes it worth adding;
    - edits to existing Concepts are rare; never rewrite an overview a person wrote, never pin Weight;
+   - items are curator tool calls: `concept_create`, `concept_update` (its `article` too: markdown with `## ` sections, `null` removes it), `relationship_add`, `relationship_remove`, `attribute_create`, `attribute_update` (never its type), `expedition_update` (the Expedition's title, summary and Tags) and `view_build`. They run in order, so a later item can use an Attribute an earlier one creates (a `priority` enum of hard / nice / dropped, then a Comparison table that relies on it);
    - every item must be worth accepting on its own.
 3. Never assume a Proposal was accepted. `list_my_proposals` shows what happened; withdraw one you no longer stand behind.
 

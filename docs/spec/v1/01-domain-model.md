@@ -106,6 +106,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
   - **A Concept package** per suggested new Concept: the item that creates it, the items that only add to it (its article, edits of it), and the Relationships that connect it to Concepts already in the Expedition. They are reviewed together.
   - **A Relationship between suggested Concepts** (two or more of its Concepts were suggested) is its own entry. It **can't be accepted until every Concept it needs is in the Expedition**, or is accepted in the same review action.
   - Anything else (a Relationship between Concepts already in the Expedition, an edit of one) is its own entry.
+  - *As built (issue #139):* items can also edit the Expedition (its title, summary and Tags, in one item: `expedition.set` and `expedition.tag.add/remove` ops), a Concept's whole article (its sections deleted and the new ones created, in the item with that Concept's other edits), and Attributes (one `attribute.define` per item, to create one or change its label, unit or enum values; never its type). An item that needs an Attribute another pending item defines (a Concept's value for it, a View whose settings name it) depends on that item the way a Relationship depends on a suggested Concept: accepting it brings the Attribute's item along (or waits, "Accept the Priority Attribute first"), and dismissing the Attribute dismisses it.
 - **Review:** accept or dismiss per entry, or accept all.
   - Accepting a package accepts its Concept and its Relationships together. Any of its Relationships can be left out first; those are dismissed in the same action.
   - An item that needs a suggested Concept which isn't in the Expedition is refused unless the item that creates it is accepted with it. The server enforces this, for the app, the API and MCP alike.
@@ -117,6 +118,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
 - **What creates a Proposal:**
   - Grow asks (in-app AI).
   - MCP `propose_changes`.
+  - *As built (issue #139):* an agent's changes to the Expedition itself (title, summary, Tags), to a Concept's article and to Attributes are Proposals like any other; an accepted one is an ordinary Change by the reviewer.
   - A Source added to an existing Expedition: what it adds becomes one Proposal.
   - Changes a later-requested View would make to existing Concepts.
 
