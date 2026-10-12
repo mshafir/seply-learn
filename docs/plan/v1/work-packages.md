@@ -344,7 +344,7 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - depends: WP-5.4
 - spec: 06-mcp.md#64-connecting-an-agent
 - **Build:**
-  - `GET /api/instance` in `packages/server` (with `hosted`), if WP-7.1 hasn't added it.
+  - `GET /api/instance` in `packages/server` (with `hosted`), if WP-8.1 hasn't added it.
   - `/connect` in `apps/web`: the four steps, the five agent tabs, hosted and self-hosted commands, the connected-agent check, and the first prompts for the Library and for `?e=<id>`.
   - The plugin's server address made configurable, defaulting to `https://learn.seply.app` (the plugin option `userConfig.server_url`).
   - Every command checked against the agent's current release; the plugin README and the self-host guide gain the same steps.
@@ -369,36 +369,88 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - **Build:** a multi-stage image, `docker-compose.yml` (app + Postgres, optional MinIO), and a self-host guide (keys mode, SMTP, PMTiles download and extract).
 - **Done when:** `docker compose up` on a clean machine reaches sign-in, imports a fixture, and builds one Expedition with an instance key.
 
-## M7: Desktop shell
+## M7: Landing site
 
-### WP-7.1: Desktop shell and server picker
+Spec: [9. Landing site](../../spec/v1/09-landing-site.md). The three showcase Expeditions are tidied from Claude Code through the `seply-learn` MCP server in the owner's session, not by a builder; the owner then sets them public.
+
+### WP-7.1: Site scaffold and deploy
 - lane: B
 - milestone: M7
+- depends: none
+- spec: 09-landing-site.md#91-address-and-stack
+- **Build:** `apps/site` (Astro, static output) composing `packages/ui` tokens, fonts, glyph and wordmark, with light and dark from the system; a `seply-site` Worker serving the static assets on the `seply.app` apex (`learn/` internal route served at `/`); a 404; `sitemap.xml`, canonical URLs, build-time Open Graph card, `noindex` on previews, the Cloudflare Web Analytics beacon behind a `CF_ANALYTICS_TOKEN` variable (production only). CI: build and check it in `pnpm check`; deploy on main; a preview Worker per PR that touches `apps/site`, `apps/video` or `packages/ui`. `pnpm check:deps` knows the new app. Update `docs/ops/deploy.md` (custom domain, analytics token).
+- **Done when:** a PR preview serves a placeholder page with the wordmark in light and dark, main deploys to `seply.app` (or, before the domain is attached, the Worker URL), and Lighthouse on the placeholder scores 100 for accessibility and best practices.
+
+### WP-7.2: Landing and Self-host pages
+- lane: D
+- milestone: M7
+- depends: WP-7.1
+- spec: 09-landing-site.md#92-pages
+- **Build:** the landing page as in the mockup (sections, copy, the E-bike hero sketch with its question, the five-tab Views gallery, the suggestions panel, the plugin and Docker snippets, the phone menu below the breakpoint) and `/self-host` rendered from `docs/self-host.md` with a table of contents and copy buttons. Media slots (hero loop, video, gallery and example screenshots, live embed) read from a manifest with labelled placeholders until 7.4 to 7.6 fill them. Links into the app point at `learn.seply.app`.
+- **Done when:** both pages match the mockup at 1440 px and 390 px in light and dark, have no horizontal scroll at 320 px, pass axe with no violations, and ship under 60 KB of JavaScript.
+
+### WP-7.3: Hosted access approval
+- lane: B
+- milestone: M7
+- depends: none
+- spec: 02-architecture.md#26-auth-keys-and-tokens
+- **Build:** `ACCESS_APPROVAL` and `ADMIN_EMAILS` config; `users.approved_at` and `access_requests` (migration approves existing accounts); one server guard on creating Expeditions (new, import, Fork, MCP `create_expedition`) and on starting instance-key AI work, refusing with `approval_required`; request, approve and decline endpoints with Mailer emails; the waiting-list banner, the create/import/Fork dialog and Admin › Access requests in `apps/web` (spec 3.12). Self-host behaviour unchanged with the flag off. Add the guarded routes to the permissions matrix.
+- **Done when:** with the flag on, an unapproved account can read shared Expeditions and send a request but is refused (and told why) on every gated route, including MCP; approving lets it create; existing accounts are approved; with the flag off nothing changes; e2e covers the banner, request and admin approve.
+
+### WP-7.4: Explainer video
+- lane: C
+- milestone: M7
+- depends: none
+- spec: 09-landing-site.md#93-media
+- **Build:** `apps/video`, a Remotion project that renders the storyboard in the design doc: seven scenes, about 60 s, 1920 × 1080 at 30 fps, captions burned in plus WebVTT. Product visuals are the real `packages/views` renderers fed committed fixtures (the compute sample; the Swiss rail fixture for the Map scene once it lands), animated, in the app's tokens and fonts; amber only for suggestions. Outputs MP4 (H.264), WebM (VP9), a 12 s hero loop, a poster frame. A `render` script and a CI job that renders only when `apps/video`, `packages/views` or the fixtures change, caching by hash, and hands the files to the site build. Note Remotion's licence terms in the app README.
+- **Done when:** CI produces the video under 6 MB with captions that match the storyboard, renders reproducibly from a clean checkout, and the site preview plays it.
+
+### WP-7.5: Live embed
+- lane: D
+- milestone: M7
+- depends: none
+- spec: 09-landing-site.md#93-media
+- **Build:** `learn.seply.app/e/:id/embed?view=<id>`: one public View, read-only, without the app header, rail or panels; Concepts open a small read-only card; an "Open in Seply Learn" link. `Content-Security-Policy: frame-ancestors https://seply.app` (plus preview origins) on that route only; private and unlisted Expeditions return 404 there. The site's Read together section embeds it lazily, with the screenshot as the fallback.
+- **Done when:** the embed renders a public showcase View on the site preview, refuses a private one, cannot be framed by another origin, and e2e covers it.
+
+### WP-7.6: Screenshot pipeline
+- lane: D
+- milestone: M7
+- depends: WP-7.1, WP-7.5
+- spec: 09-landing-site.md#93-media
+- **Build:** `apps/site/scripts/capture.ts` (Playwright) taking the shot list from the design doc against the public showcases on `learn.seply.app`, light and dark, 1440 × 900 at 2×, encoded to AVIF and WebP; signed-in shots use the demo account from CI secrets (`DEMO_EMAIL`, `DEMO_PASSWORD`) and reset its demo Expedition first. A CI job runs it on demand and weekly, caching the output, and the site build reads it through the media manifest from 7.2.
+- **Done when:** every placeholder on the site preview shows a real screenshot in both themes, and a rerun with nothing changed reuses the cache.
+
+## M8: Desktop shell
+
+### WP-8.1: Desktop shell and server picker
+- lane: B
+- milestone: M8
 - depends: WP-6.2
-- spec: 09-desktop.md#91-shape
+- spec: 10-desktop.md#101-shape
 - **Build:**
-  - `apps/desktop`: Electron main process, sandboxed renderer, the navigation and permission rules of §9.5, and an empty versioned preload bridge gated on the chosen origin.
+  - `apps/desktop`: Electron main process, sandboxed renderer, the navigation and permission rules of §10.5, and an empty versioned preload bridge gated on the chosen origin.
   - `GET /api/instance` in `packages/server`.
-  - The server picker (§9.2), the "Can't reach" page, the app menu and the stored setting.
+  - The server picker (§10.2), the "Can't reach" page, the app menu and the stored setting.
   - `pnpm --filter desktop dev` against the local Node entry; `check:deps` knows the new app.
 - **Done when:** the app opens `learn.seply.app` by default and a local Node entry when chosen, email + password sign-in works in the window, an outside link opens in the system browser, and unit tests cover origin reduction, the `https` rule, instance validation and bridge gating.
 
-### WP-7.2: Browser sign-in for desktop
+### WP-8.2: Browser sign-in for desktop
 - lane: B
-- milestone: M7
-- depends: WP-7.1
-- spec: 09-desktop.md#93-sign-in
+- milestone: M8
+- depends: WP-8.1
+- spec: 10-desktop.md#103-sign-in
 - **Build:**
   - The `seply://` scheme and single-instance handling in the shell; `signInWithBrowser()` on the bridge.
   - `<server>/desktop/sign-in` in `apps/web` and the one-time token in `packages/server` (confirm Better Auth's `one-time-token` first; assumption 2).
   - The sign-in screen's Google button uses the bridge when it is there.
 - **Done when:** Google sign-in on desktop goes through the system browser and lands signed in on the Library; a used, expired or wrong-server token is refused, with server tests for each. Label `needs-owner` (auth).
 
-### WP-7.3: Deep links and files
+### WP-8.3: Deep links and files
 - lane: D
-- milestone: M7
-- depends: WP-7.2, WP-5.5
-- spec: 09-desktop.md#94-native-integration
+- milestone: M8
+- depends: WP-8.2, WP-5.5
+- spec: 10-desktop.md#104-native-integration
 - **Build:**
   - **Connect an agent…** in the app menu, and the once-after-first-sign-in landing on `/connect` when the bridge is there.
   - `seply://<host>/<path>` navigation, with the switch-server prompt for another host.
@@ -406,22 +458,22 @@ Each package is sized to about one agent session. The format is parsed by `make_
   - "Open with" registration for the Source types, `onOpenFiles` on the bridge, and the **Add to which Expedition?** dialog in `apps/web` (prebuilt components) feeding the existing upload.
 - **Done when:** a `seply://` Expedition link and an invite link open in the app, a PDF opened with the app becomes a Source of the chosen Expedition, and an oversized or unsupported file gets the web flow's own error.
 
-### WP-7.4: Native notifications and tray
+### WP-8.4: Native notifications and tray
 - lane: B
-- milestone: M7
-- depends: WP-7.1
-- spec: 09-desktop.md#94-native-integration
+- milestone: M8
+- depends: WP-8.1
+- spec: 10-desktop.md#104-native-integration
 - **Build:**
   - `GET /api/notifications?since=` from the `jobs` table (assumption 1), sharing the payload builder with web push.
   - `notify` and `requestNotificationPermission` on the bridge; the desktop poll in `apps/web`; "Leave it building" asks through the bridge on desktop.
   - The tray, close-to-tray and Quit.
 - **Done when:** a build finished while the window is closed to the tray raises one OS notification, clicking it opens the Expedition, and the web's push behaviour is unchanged in a browser.
 
-### WP-7.5: Packaging, release workflow and docs
+### WP-8.5: Packaging, release workflow and docs
 - lane: B
-- milestone: M7
-- depends: WP-7.3, WP-7.4
-- spec: 09-desktop.md#96-packaging-updates-and-tests
+- milestone: M8
+- depends: WP-8.3, WP-8.4
+- spec: 10-desktop.md#106-packaging-updates-and-tests
 - **Build:**
   - electron-builder targets, with icons from `packages/ui/brand`.
   - The `desktop-v*` release workflow on a three-OS matrix, publishing unsigned packages to a GitHub Release.
@@ -429,10 +481,10 @@ Each package is sized to about one agent session. The format is parsed by `make_
   - `apps/desktop/README.md`, and "Using the desktop app with your server" in the self-host guide, with the unsigned-install steps.
 - **Done when:** a tag produces installable packages for all three platforms, the Electron e2e run passes in CI, and the owner has installed one on each OS they can reach.
 
-### WP-7.6: Signing and automatic updates
+### WP-8.6: Signing and automatic updates
 - lane: B
-- milestone: M7
-- depends: WP-7.5, owner checklist (Apple Developer ID, Windows certificate)
-- spec: 09-desktop.md#96-packaging-updates-and-tests
+- milestone: M8
+- depends: WP-8.5, owner checklist (Apple Developer ID, Windows certificate)
+- spec: 10-desktop.md#106-packaging-updates-and-tests
 - **Build:** macOS signing and notarisation, Windows signing, electron-updater from GitHub Releases, and verified `https` links for `learn.seply.app`.
 - **Done when:** a signed build installs with no OS warning and updates itself to the next release.

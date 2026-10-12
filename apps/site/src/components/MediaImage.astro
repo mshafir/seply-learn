@@ -1,0 +1,56 @@
+---
+// One screenshot slot from the media manifest (src/media.ts): the light and
+// dark screenshots as AVIF and WebP when they're there, else a labelled
+// placeholder in the same box.
+import { cn } from "@seply/ui/lib/utils"
+
+import { image, type ImageSlotId } from "../media"
+
+interface Props {
+  slot: ImageSlotId
+  /** The box: aspect ratio, border, radius, background. */
+  class?: string
+  /** Placeholder label size. */
+  labelClass?: string
+  /** Extra placeholder lines above the slot's own label. */
+  extraLabels?: string[]
+  /** Above the fold: load eagerly. */
+  eager?: boolean
+}
+
+const { slot, class: className, labelClass = "text-[11px]", extraLabels = [], eager = false } = Astro.props
+const img = image(slot)
+const dark = img.dark ?? img.light
+---
+
+{
+  img.light ? (
+    <picture class={cn("block overflow-hidden", className)}>
+      {dark?.avif && <source srcset={dark.avif} type="image/avif" media="(prefers-color-scheme: dark)" />}
+      {dark && <source srcset={dark.webp} type="image/webp" media="(prefers-color-scheme: dark)" />}
+      {img.light.avif && <source srcset={img.light.avif} type="image/avif" />}
+      <img
+        src={img.light.webp}
+        alt={img.alt}
+        width="2880"
+        height="1800"
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        class="size-full object-cover object-top"
+      />
+    </picture>
+  ) : (
+    <div
+      class={cn(
+        "flex flex-col items-center justify-center gap-1.5 p-4 text-center font-mono tracking-[0.04em] text-muted-foreground",
+        labelClass,
+        className
+      )}
+      data-media-placeholder={slot}
+    >
+      {[...extraLabels, img.label].map((l) => (
+        <span>{l}</span>
+      ))}
+    </div>
+  )
+}

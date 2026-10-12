@@ -24,7 +24,7 @@ for block in re.split(r"^### ", text, flags=re.M)[1:]:
         continue
     field = lambda k: (re.search(rf"^- {k}: (.+)$", body, re.M) or [None, ""])[1].strip()
     wps.append({"id": m[1], "title": f"{m[1]}: {m[2]}", "lane": field("lane"), "milestone": field("milestone"),
-                "depends": [d.strip() for d in field("depends").split(",") if d.strip()], "spec": field("spec"),
+                "depends": [d.strip() for d in field("depends").split(",") if d.strip() and d.strip() != "none"], "spec": field("spec"),
                 "body": body.strip()})
 
 def gh(*args):

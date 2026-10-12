@@ -286,7 +286,7 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
     }
   })
 
-  // What this server is (spec §9.2, §6.4): the desktop app checks it before
+  // What this server is (spec §10.2, §6.4): the desktop app checks it before
   // it saves a server, and the setup page picks hosted or self-hosted steps.
   app.get("/instance", (c) =>
     c.json({

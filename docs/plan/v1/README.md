@@ -53,7 +53,8 @@ How the [v1 spec](../../spec/v1/README.md) gets built. It was decided in [Implem
 | **M4** | Grow and collaborate | Live presence and cursors; History with undo, view as of, restore; editing in place and Merge; per-View overrides; Proposals and the Suggestions tab; Grow asks and Concept actions |
 | **M5** | Share | Roles and invites (email, link, inbox); Visibility and live public links; Fork; Trash; export and import; the MCP server, OAuth and the `seply-learn` skill |
 | **M6** | Self-host | A Node image with docker compose: in-process rooms + LISTEN/NOTIFY, pg-boss, volume/S3 blobs, optional SMTP, email+password auth; PMTiles instructions |
-| **M7** | Desktop shell | Unsigned installers for macOS, Windows and Linux that open `learn.seply.app` or a chosen self-hosted server; Google sign-in through the browser; `seply://` links; files opened into an Expedition; native build notifications |
+| **M7** | Landing site | `seply.app` live: the landing and self-host pages, real screenshots, the explainer video, a live embed, three public showcases; hosted access approval in the app |
+| **M8** | Desktop shell | Unsigned installers for macOS, Windows and Linux that open `learn.seply.app` or a chosen self-hosted server; Google sign-in through the browser; `seply://` links; files opened into an Expedition; native build notifications |
 
 Local-first desktop (bundled client, SQLite) is phase 2. See [Phase 2 sketch](../../spec/v1/08-phase-2.md).
 
@@ -80,4 +81,6 @@ M3: 3.1 (B) ‖ 3.2 (B) ‖ 3.3 (E) → 3.4 (E) → 3.5a (E) → 3.5b (E) → 3.
 M4: 4.1 (B) ‖ 4.2 (A) ‖ 4.5 (D) → 4.3 (A) → 4.4 (E)
 M5: 5.1 (B) → 5.2 (B/D) ‖ 5.3 (A) ‖ 5.4 (B/E)
 M6: 6.1 (B) → 6.2 (B)
+M7: 7.1 (B) → 7.2 (D);  7.3 (B/D) ‖ 7.4 (C) ‖ 7.5 (D);  7.1 + 7.5 + public showcases → 7.6 (D)
+M8: 5.5 (D) ‖ 8.1 (B) → 8.2 (B) → 8.3 (D);  8.4 (B) after 8.1;  8.3 + 8.4 → 8.5 (B) → 8.6 (B)
 ```

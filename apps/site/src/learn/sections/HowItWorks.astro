@@ -1,0 +1,25 @@
+---
+import MediaImage from "../../components/MediaImage.astro"
+import { container, eyebrow, h2, h3 } from "../../lib/styles"
+import { STEPS } from "../content"
+---
+
+<section id="how" class="scroll-mt-20 border-t border-border bg-card">
+  <div class:list={[container, "flex flex-col gap-10 py-20"]}>
+    <div class="flex max-w-[40em] flex-col gap-3">
+      <span class={eyebrow}>How it works</span>
+      <h2 class={h2}>Seply Learn turns a question into something you can study and come back to.</h2>
+    </div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] gap-8">
+      {
+        STEPS.map((step) => (
+          <div class="flex flex-col gap-3.5">
+            <MediaImage slot={step.shot} class="aspect-[16/10] rounded-[10px] border border-border bg-background" />
+            <h3 class={h3}>{step.title}</h3>
+            <p class="m-0 text-muted-foreground">{step.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

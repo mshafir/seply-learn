@@ -49,7 +49,7 @@ All output is compact markdown with ids, not raw JSON dumps.
 
 ## 6.4 Connecting an agent
 
-One page, **`/connect`**, takes a signed-in reader from nothing to their agent's first result. It replaces the single command in Settings → Connected agents. It is part of the web client, so the web and the [desktop app](09-desktop.md) show the same page.
+One page, **`/connect`**, takes a signed-in reader from nothing to their agent's first result. It replaces the single command in Settings → Connected agents. It is part of the web client, so the web and the [desktop app](10-desktop.md) show the same page.
 
 - **Four steps** on one page, all visible at once:
   1. **Choose your agent:** tabs for Claude Code, Claude apps, Codex, Cursor and Other. The choice is remembered on the device.
