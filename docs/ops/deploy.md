@@ -68,6 +68,11 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Seply Learn <invites@mail.seply.app>`.
   - From WP-5.1 the deploy uploads `RESEND_API_KEY` to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists) and passes `EMAIL_FROM` with `--var` (when the variable is set; the server's default is the same address). Previews send real invite emails too, with links to the preview. Local e2e and unit tests never send: with `AUTH_TEST_CREDENTIALS=1` the server only logs that an email would go out, whatever `.dev.vars` holds.
 
+- [ ] **Hosted access approval** (WP-7.3, spec §2.6): only approved accounts create Expeditions or start work on the instance AI key.
+  - **`ACCESS_APPROVAL`** (a repo **variable**): `1`. The production deploy passes it with `--var` when it is set; previews leave it off.
+  - **`ADMIN_EMAILS`** (a repo **secret**, so the addresses stay out of the public Actions logs): the admins, comma-separated. `ci.mjs secrets-file` uploads it with the other optional secrets.
+  - Every account that existed when migration `0009_access_approval` ran is approved. Admins find the requests under Settings › Access requests, and each request emails them through Resend.
+
 When the Cloudflare and Neon secrets and the variable exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
 ## How a preview works

@@ -8,13 +8,15 @@
 //   POST /jobs/:id/continue      → { job }  paused at the cap     (useAi)
 //
 // A job or Expedition the caller can't view is a 404; one they can view but
-// not run jobs on is a 403. Test-only kinds (the fake job) are refused unless
+// not run jobs on is a 403. With hosted access approval on, starting, Retry
+// and Continue also need an approved account (approval.ts; Cancel doesn't). Test-only kinds (the fake job) are refused unless
 // test credentials are on.
 import type { Action } from "@seply/domain"
 import { Hono, type Context } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "../app.ts"
 import { expeditionAccess as access } from "../access.ts"
+import { requireApprovalFor } from "../approval.ts"
 import { JobError } from "./runner.ts"
 import { getJob, listJobs } from "./store.ts"
 import type { JobRunner } from "./types.ts"
@@ -51,6 +53,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     const a = await access(db, expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
+    await requireApprovalFor(c, "ai")
     try {
       const job = await runner.start(db, {
         expeditionId,
@@ -103,6 +106,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     if (!runner) return noRunner(c)
     const { db, job, res } = await jobFor(c, "useAi")
     if (res) return res
+    await requireApprovalFor(c, "ai")
     try {
       return c.json({ job: await runner.retry(db, job!.id) })
     } catch (err) {
@@ -114,6 +118,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     if (!runner) return noRunner(c)
     const { db, job, res } = await jobFor(c, "useAi")
     if (res) return res
+    await requireApprovalFor(c, "ai")
     try {
       return c.json({ job: await runner.continue(db, job!.id) })
     } catch (err) {

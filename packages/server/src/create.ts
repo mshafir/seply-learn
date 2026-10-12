@@ -36,6 +36,7 @@ import { Hono, type Context } from "hono"
 import { z } from "zod"
 import { resolveAi } from "./ai.ts"
 import type { AppEnv } from "./app.ts"
+import { requireApprovalFor } from "./approval.ts"
 import type { Db } from "./db.ts"
 import { expeditionAccess } from "./access.ts"
 import { appendOps } from "./oplog.ts"
@@ -301,6 +302,7 @@ export function createFlowRoutes(relay: Relay, ai?: ProviderOptions, jobs?: JobR
     const a = await access(db, id, userId, "useAi")
     if (!a.found) return c.json({ error: "Expedition not found" }, 404)
     if (!a.ok) return c.json({ error: "not allowed", message: "Viewers can't run the AI" }, 403)
+    await requireApprovalFor(c, "ai")
     const state = await loadState(db, id)
     if (!state) return c.json({ error: "Expedition not found" }, 404)
     const sources = await skimSources(c, db, state)
@@ -459,6 +461,7 @@ export function createFlowRoutes(relay: Relay, ai?: ProviderOptions, jobs?: JobR
     const a = await access(db, id, userId, "useAi")
     if (!a.found) return c.json({ error: "Expedition not found" }, 404)
     if (!a.ok) return c.json({ error: "not allowed", message: "Viewers can't build" }, 403)
+    await requireApprovalFor(c, "ai")
     const state = await loadState(db, id)
     if (!state) return c.json({ error: "Expedition not found" }, 404)
     if (state.expedition.status !== "draft")

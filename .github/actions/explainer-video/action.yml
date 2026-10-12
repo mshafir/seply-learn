@@ -1,0 +1,49 @@
+name: Explainer video
+description: >-
+  The explainer video's files (apps/video, WP-7.4), rendered only when their
+  inputs change: restores the render cached under a hash of apps/video,
+  packages/views, packages/ui and the fixtures, renders and caches it on a
+  miss, and optionally copies the files into a folder (the site's media).
+  Needs ./.github/actions/setup first.
+inputs:
+  to:
+    description: A folder to copy the files into (e.g. apps/site/public/media/video); empty for none.
+    required: false
+    default: ""
+outputs:
+  hit:
+    description: "'true' when the render came from the cache."
+    value: ${{ steps.cache.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    - name: Restore a render of these inputs
+      id: cache
+      uses: actions/cache/restore@v6
+      with:
+        path: apps/video/out
+        key: explainer-video-${{ hashFiles('apps/video/**', 'packages/views/**', 'packages/ui/**', 'packages/domain/fixtures/**', '!**/node_modules/**', '!apps/video/out/**') }}
+
+    # Remotion downloads its own headless Chrome; MapLibre gets WebGL from SwiftShader.
+    - name: Render (inputs changed)
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: pnpm --filter video render
+
+    # Another job may have rendered the same inputs meanwhile; saving then only warns.
+    - name: Save the render
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: apps/video/out
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+
+    - name: Copy the files
+      if: inputs.to != ''
+      shell: bash
+      env:
+        TO: ${{ inputs.to }}
+      run: |
+        mkdir -p "$TO"
+        cp apps/video/out/*.mp4 apps/video/out/*.webm apps/video/out/*.vtt apps/video/out/*.webp "$TO"/
+        ls -la "$TO"

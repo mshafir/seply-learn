@@ -25,6 +25,13 @@ import {
   type TestUser,
 } from "./test-harness.ts"
 
+/** Hosted access approval on (WP-7.3); the instance AI key (the default mode). */
+const HOSTED_ENV = {
+  ...TEST_ENV,
+  ACCESS_APPROVAL: "1",
+  ADMIN_EMAILS: "admin@example.com",
+}
+
 const ALLOWED = "allowed" as const
 type Cell = number | typeof ALLOWED
 type Caller = "owner" | "editor" | "viewer" | "stranger" | "anonymous"
@@ -356,6 +363,8 @@ type Setup = {
   app: ReturnType<typeof testApp>
   users: Ctx["users"]
   kicks: { exp: string; userId: string | null; reason: string }[]
+  /** The same API and database with hosted access approval on (WP-7.3). */
+  hosted: ReturnType<typeof testApp>
 }
 
 async function addSource(ctx: Ctx, s: Setup) {
@@ -415,11 +424,9 @@ beforeAll(async () => {
     registry: JOB_KINDS,
   })
   const jobs = createJobRunner({ engine, registry: JOB_KINDS, relay })
-  const app = testApp(TEST_ENV, db, relay, {
-    jobs,
-    blobs: memoryBlobStore(),
-    mailer: memoryMailer(),
-  })
+  const services = { jobs, blobs: memoryBlobStore(), mailer: memoryMailer() }
+  const app = testApp(TEST_ENV, db, relay, services)
+  const hosted = testApp(HOSTED_ENV, db, relay, services)
   const users = {
     owner: await signUp(app, "olive"),
     editor: await signUp(app, "eddie"),
@@ -427,7 +434,7 @@ beforeAll(async () => {
     extra: await signUp(app, "xavi"),
     stranger: await signUp(app, "stan"),
   }
-  s = { db, app, users, kicks }
+  s = { db, app, users, kicks, hosted }
 }, 60_000)
 
 /**
@@ -765,5 +772,310 @@ describe("the permissions matrix against the MCP tools", () => {
       const ctx = await fresh()
       expect(await callTool(null, route.tool, route.args(ctx))).toBe(401)
     })
+  })
+})
+
+// --- Hosted access approval (WP-7.3) ---------------------------------------------
+// With ACCESS_APPROVAL=1, the gated routes (creating Expeditions, starting
+// work on the instance AI key) as an approved and an unapproved account, both
+// editors of the Expedition. Unapproved, each is 403 `approval_required`;
+// everything else an editor does still works. With the flag off (every table
+// above: none of those accounts is approved) nothing is gated.
+type Gated = {
+  name: string
+  /** [approved, unapproved] */
+  expect: [Cell, Cell]
+  prepare?: (ctx: Ctx, s: Setup) => Promise<void>
+  request: (ctx: Ctx) => [string, RequestInit?]
+}
+
+const APPROVAL_REQUIRED = 403
+
+const GATED: Gated[] = [
+  // --- creating Expeditions ---
+  {
+    name: "POST /expeditions",
+    expect: [201, APPROVAL_REQUIRED],
+    request: () => ["/api/expeditions", json("POST", { title: "Mine" })],
+  },
+  {
+    name: "POST /import",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: () => ["/api/import", json("POST", {})],
+  },
+  {
+    name: "POST /expeditions/:id/fork",
+    expect: [201, APPROVAL_REQUIRED],
+    request: (x) => [`/api/expeditions/${x.exp}/fork`, json("POST", {})],
+  },
+  // --- AI work on the instance key ---
+  {
+    name: "POST /expeditions/:id/skim",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: (x) => [`/api/expeditions/${x.exp}/skim`, json("POST", {})],
+  },
+  {
+    name: "POST /expeditions/:id/build",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: (x) => [`/api/expeditions/${x.exp}/build`, json("POST", {})],
+  },
+  {
+    name: "POST /expeditions/:id/jobs",
+    expect: [201, APPROVAL_REQUIRED],
+    request: (x) => [
+      `/api/expeditions/${x.exp}/jobs`,
+      json("POST", { kind: "fake", input: { views: 1 } }),
+    ],
+  },
+  {
+    name: "POST /jobs/:id/retry",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    prepare: startJob,
+    request: (x) => [`/api/jobs/${x.jobId}/retry`, { method: "POST" }],
+  },
+  {
+    name: "POST /jobs/:id/continue",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    prepare: startJob,
+    request: (x) => [`/api/jobs/${x.jobId}/continue`, { method: "POST" }],
+  },
+  {
+    name: "POST /ai/estimate",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: () => ["/api/ai/estimate", json("POST", { sourceChars: 1000 })],
+  },
+  {
+    name: "POST /ai/estimate/article",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: (x) => [
+      "/api/ai/estimate/article",
+      json("POST", { expeditionId: x.exp }),
+    ],
+  },
+  {
+    name: "POST /ai/estimate/ask",
+    expect: [ALLOWED, APPROVAL_REQUIRED],
+    request: (x) => [
+      "/api/ai/estimate/ask",
+      json("POST", { expeditionId: x.exp }),
+    ],
+  },
+  // --- not gated: reading, editing, sharing, stopping AI work ---
+  {
+    name: "GET /pull",
+    expect: [200, 200],
+    request: (x) => [`/api/pull?expedition=${x.exp}&since=0`],
+  },
+  {
+    name: "GET /expeditions",
+    expect: [200, 200],
+    request: () => ["/api/expeditions"],
+  },
+  {
+    name: "PUT /expeditions/:id/plan",
+    expect: [ALLOWED, ALLOWED],
+    request: (x) => [
+      `/api/expeditions/${x.exp}/plan`,
+      json("PUT", { title: "Compute", views: [] }),
+    ],
+  },
+  {
+    name: "POST /sources/:id",
+    expect: [201, 201],
+    request: (x) => [
+      `/api/sources/${x.exp}`,
+      json("POST", { type: "paste", text: "User: what is attention?" }),
+    ],
+  },
+  {
+    name: "POST /expeditions/:id/invites",
+    expect: [201, 201],
+    request: (x) => [
+      `/api/expeditions/${x.exp}/invites`,
+      json("POST", { email: "friend@example.com", role: "viewer" }),
+    ],
+  },
+  {
+    name: "POST /jobs/:id/cancel",
+    expect: [ALLOWED, ALLOWED],
+    prepare: startJob,
+    request: (x) => [`/api/jobs/${x.jobId}/cancel`, { method: "POST" }],
+  },
+]
+
+describe("hosted access approval against the API routes", () => {
+  let approved: TestUser
+  let unapproved: TestUser
+  beforeAll(async () => {
+    approved = await signUp(s.hosted, "apple")
+    unapproved = await signUp(s.hosted, "una")
+    await s.db
+      .update(schema.users)
+      .set({ approvedAt: new Date() })
+      .where(eq(schema.users.id, approved.id))
+  })
+
+  /** A fresh Expedition (olive's) that both edit. */
+  async function shared(): Promise<Ctx> {
+    const ctx = await fresh()
+    const seenAt = new Date().toISOString()
+    await s.db.insert(schema.collaborators).values([
+      { expeditionId: ctx.exp, userId: approved.id, role: "editor", seenAt },
+      { expeditionId: ctx.exp, userId: unapproved.id, role: "editor", seenAt },
+    ])
+    return ctx
+  }
+
+  describe.each(GATED)("$name", (route) => {
+    it.each([
+      ["approved", route.expect[0]],
+      ["unapproved", route.expect[1]],
+    ] as const)("%s → %s", async (who, cell) => {
+      const ctx = await shared()
+      await route.prepare?.(ctx, s)
+      const as = who === "approved" ? approved : unapproved
+      const [path, init = {}] = route.request(ctx)
+      const res = await s.hosted.request(path, {
+        ...init,
+        headers: { ...as.headers },
+      })
+      const text = await res.text()
+      if (cell === ALLOWED)
+        expect([401, 403, 404], `${who}: ${text}`).not.toContain(res.status)
+      else expect(res.status, `${who}: ${text}`).toBe(cell)
+      if (res.status === 403)
+        expect(JSON.parse(text)).toMatchObject({
+          code: "approval_required",
+          message: expect.stringMatching(/waiting for approval/),
+        })
+    })
+  })
+
+  it("still hides a private Expedition from an unapproved stranger (404 before the guard)", async () => {
+    const ctx = await fresh()
+    for (const path of ["fork", "skim", "build"]) {
+      const res = await s.hosted.request(`/api/expeditions/${ctx.exp}/${path}`, {
+        method: "POST",
+        headers: unapproved.headers,
+        body: "{}",
+      })
+      expect(res.status, path).toBe(404)
+    }
+  })
+
+  it("gates AI work only on the instance key (BYOK: readers pay)", async () => {
+    const byok = testApp(
+      {
+        ...HOSTED_ENV,
+        AI_KEY_MODE: "byok",
+        AI_KEYS_MASTER_KEY: "ZTJlLW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy1sb24=",
+      },
+      s.db
+    )
+    const ctx = await shared()
+    const skim = await byok.request(`/api/expeditions/${ctx.exp}/skim`, {
+      method: "POST",
+      headers: unapproved.headers,
+      body: "{}",
+    })
+    expect([401, 403, 404]).not.toContain(skim.status)
+    const create = await byok.request("/api/expeditions", {
+      method: "POST",
+      headers: unapproved.headers,
+      body: "{}",
+    })
+    expect(create.status).toBe(403)
+  })
+
+  // MCP: create_expedition is refused plainly; propose_changes isn't gated
+  // (the agent's own model; a person reviews the Proposal anyway).
+  async function mcp(as: TestUser, name: string, args: unknown) {
+    const tokenRes = await s.hosted.request("/api/agents/tokens", {
+      method: "POST",
+      headers: as.headers,
+      body: JSON.stringify({
+        name: "approval",
+        scopes: ["expeditions:read", "expeditions:create", "proposals:write"],
+      }),
+    })
+    const { key } = (await tokenRes.json()) as { key: string }
+    const res = await s.hosted.request("http://localhost:8787/mcp", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+        "mcp-protocol-version": "2025-06-18",
+        authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name, arguments: args },
+      }),
+    })
+    const text = await res.text()
+    const json = text.startsWith("{") ? text : /^data: (.*)$/m.exec(text)![1]!
+    const body = JSON.parse(json) as {
+      result: { isError?: boolean; content: { text: string }[] }
+    }
+    return { ok: !body.result.isError, text: body.result.content[0]!.text }
+  }
+
+  const createArgs = {
+    title: "Mine",
+    sources: [
+      {
+        ref: "new:notes",
+        kind: "document",
+        title: "Notes",
+        segments: [{ id: "s1", text: "Attention weighs every token." }],
+      },
+    ],
+    concepts: [
+      {
+        ref: "new:attn",
+        title: "Attention",
+        kind: "builtin:idea",
+        summary: "Each token weighs every other token.",
+      },
+    ],
+    views: [
+      {
+        viewType: "outline",
+        label: "Outline",
+        question: "What's in here?",
+        settings: { relationshipTypes: ["builtin:part-of"] },
+      },
+    ],
+  }
+
+  it("refuses create_expedition over MCP for an unapproved account, plainly", async () => {
+    const out = await mcp(unapproved, "create_expedition", createArgs)
+    expect(out.ok).toBe(false)
+    expect(out.text).toMatch(/waiting for approval/)
+    // Approved: past the guard (this test app can't check Views).
+    const ok = await mcp(approved, "create_expedition", createArgs)
+    expect(ok.text).not.toMatch(/waiting for approval/)
+  })
+
+  it("lets an unapproved account's agent propose changes", async () => {
+    const ctx = await shared()
+    const out = await mcp(unapproved, "propose_changes", {
+      expedition: ctx.exp,
+      rationale: "r",
+      items: [
+        {
+          tool: "concept_create",
+          input: {
+            title: "T",
+            kind: "builtin:idea",
+            summary: "s",
+            overview: "o",
+          },
+        },
+      ],
+    })
+    expect(out, out.text).toMatchObject({ ok: true })
   })
 })

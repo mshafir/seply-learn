@@ -37,6 +37,19 @@ export type ServerEnv = {
   /** The Neon branch this deploy reads from (reported by /api/health). */
   DB_BRANCH?: string
 
+  // --- Hosted access approval (spec §2.6; approval.ts) ---
+  /**
+   * "1" turns access approval on (the hosted deploy only): only approved
+   * accounts create Expeditions or start work on the instance AI key. Off
+   * (anything else, the default), every account can, as on self-host.
+   */
+  ACCESS_APPROVAL?: string
+  /**
+   * The admins, by email, comma-separated: they approve or decline access
+   * requests, get an email for each, and count as approved themselves.
+   */
+  ADMIN_EMAILS?: string
+
   // --- AI (spec §5.6; see ai-config.ts) ---
   /** "instance" (default): the operator's key serves everyone. "byok": each reader adds their own. */
   AI_KEY_MODE?: string
@@ -129,6 +142,11 @@ export type ServerConfig = {
   /** Whether email + password sign-up is open (AUTH_EMAIL_SIGNUP). */
   emailSignUp: boolean
   dbBranch?: string
+  /**
+   * Hosted access approval (ACCESS_APPROVAL, ADMIN_EMAILS): `approval` is on
+   * only for "1"; `admins` are lower-cased emails.
+   */
+  access: { approval: boolean; admins: string[] }
   mail: MailConfig
   /** The Map View's basemap, when set at runtime (MAP_TILES_URL, MAP_ASSETS_URL). */
   map: { tiles?: string; assets?: string }
@@ -211,6 +229,13 @@ export function readConfig(env: ServerEnv): ServerConfig {
     emailPassword,
     emailSignUp,
     dbBranch: env.DB_BRANCH,
+    access: {
+      approval: env.ACCESS_APPROVAL?.trim() === "1",
+      admins: (env.ADMIN_EMAILS ?? "")
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean),
+    },
     mail,
     map: {
       tiles: env.MAP_TILES_URL?.trim() || undefined,

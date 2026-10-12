@@ -40,6 +40,7 @@ import {
   type KeySummary,
 } from "./ai-keys.ts"
 import type { AppEnv } from "./app.ts"
+import { requireApprovalFor } from "./approval.ts"
 import { ConfigError, type ServerEnv } from "./config.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
@@ -311,6 +312,7 @@ export function aiRoutes(options?: ProviderOptions) {
     const body = EstimateBody.safeParse(await c.req.json().catch(() => null))
     if (!body.success)
       return c.json({ error: "invalid body", issues: body.error.issues }, 400)
+    await requireApprovalFor(c, "ai")
     // The provider and models are enough: no key is decrypted for an estimate.
     const { mode, active } = await overview(await c.var.db(), c.env ?? {}, c.var.user.id)
     if (!active)
@@ -334,6 +336,7 @@ export function aiRoutes(options?: ProviderOptions) {
     const a = await access(db, body.data.expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
+    await requireApprovalFor(c, "ai")
     const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
     if (!active)
       return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
@@ -357,6 +360,7 @@ export function aiRoutes(options?: ProviderOptions) {
     const a = await access(db, body.data.expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
+    await requireApprovalFor(c, "ai")
     const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
     if (!active)
       return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
