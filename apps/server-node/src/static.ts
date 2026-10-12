@@ -70,6 +70,25 @@ export function serveSpa(dist: string): MiddlewareHandler {
 }
 
 /**
+ * The live embed's page (`embed.html`), for `@seply/server`'s embed route,
+ * which adds its own headers. Null when the build has none.
+ */
+export function embedPage(dist: string): () => Promise<Response | null> {
+  const root = resolve(dist)
+  return async () => {
+    const file = await fileAt(root, "/embed.html")
+    if (!file) return null
+    const body = Readable.toWeb(createReadStream(file.path)) as ReadableStream
+    return new Response(body, {
+      headers: {
+        "content-type": TYPES[".html"]!,
+        "content-length": String(file.size),
+      },
+    })
+  }
+}
+
+/**
  * One file with Range requests (a PMTiles archive: MapLibre's pmtiles
  * protocol reads its header, directories and tiles as byte ranges). A
  * satisfiable `bytes=a-b`, `a-` or `-n` gets 206 with that slice; an

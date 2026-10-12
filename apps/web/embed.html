@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <!-- The live embed (spec §9.3; src/embed/): served at /e/:id/embed for
+         Public Expeditions only. No-flash theme: ?theme=light|dark, else the
+         system's (never the app's saved choice). src/embed/params.ts reads
+         the same parameter. -->
+    <script>
+      ;(function () {
+        var theme = new URLSearchParams(location.search).get("theme")
+        var dark =
+          theme === "dark" ||
+          (theme !== "light" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        var root = document.documentElement
+        if (dark) root.classList.add("dark")
+        root.style.colorScheme = dark ? "dark" : "light"
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Seply Learn</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/embed/main.tsx"></script>
+  </body>
+</html>

@@ -145,6 +145,7 @@ jobs:
           URL: ${{ steps.urls.outputs.url }}
           PRODUCTION_URL: ${{ steps.urls.outputs.production_url }}
           PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
+          EMBED_FRAME_ANCESTORS: ${{ steps.urls.outputs.embed_frame_ancestors }}
           # The invite sender; empty: the server's default.
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
         run: |
@@ -159,6 +160,7 @@ jobs:
             --var "BETTER_AUTH_URL:$URL" \
             --var "AUTH_PROXY_URL:$PRODUCTION_URL" \
             --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
+            --var "EMBED_FRAME_ANCESTORS:$EMBED_FRAME_ANCESTORS" \
             "${mail[@]}" | tee deploy.log
           deployed=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
           if [ "$deployed" != "$URL" ]; then
@@ -362,6 +364,7 @@ jobs:
           BRANCH: ${{ steps.neon.outputs.name }}
           URL: ${{ steps.urls.outputs.url }}
           PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
+          EMBED_FRAME_ANCESTORS: ${{ steps.urls.outputs.embed_frame_ancestors }}
           # The invite sender; empty: the server's default.
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
           # Hosted access approval (WP-7.3): "1" turns it on; unset, it's off.
@@ -379,6 +382,7 @@ jobs:
             --var "BETTER_AUTH_URL:$URL" \
             --var "AUTH_PROXY_URL:$URL" \
             --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
+            --var "EMBED_FRAME_ANCESTORS:$EMBED_FRAME_ANCESTORS" \
             "${mail[@]}" "${approval[@]}" | tee deploy.log
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
