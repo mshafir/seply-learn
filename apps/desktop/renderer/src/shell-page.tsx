@@ -1,4 +1,4 @@
-// The shell page (spec §9.1, §9.2): the only UI the app ships. It chooses the
+// The shell page (spec §10.1, §10.2): the only UI the app ships. It chooses the
 // server (the hosted one, or a self-hosted address that is checked before it
 // is saved), and it is what shows when the chosen server can't be reached.
 import * as React from "react"

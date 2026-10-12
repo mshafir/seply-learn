@@ -1,6 +1,6 @@
 # The desktop app starts as a shell that loads the server's web client
 
-The first desktop app is an Electron shell. Its window loads the web client from the server the reader chose: `learn.seply.app` by default, or a self-hosted instance. It adds deep links, files opened from the OS and native notifications through a small preload bridge. The spec had desktop as phase 2 and **local-first** (a bundled client editing offline on SQLite); that is still the direction, and it now comes after the shell rather than instead of it. Spec: [9. Desktop app](../spec/v1/09-desktop.md).
+The first desktop app is an Electron shell. Its window loads the web client from the server the reader chose: `learn.seply.app` by default, or a self-hosted instance. It adds deep links, files opened from the OS and native notifications through a small preload bridge. The spec had desktop as phase 2 and **local-first** (a bundled client editing offline on SQLite); that is still the direction, and it now comes after the shell rather than instead of it. Spec: [9. Desktop app](../spec/v1/10-desktop.md).
 
 ## Why
 
@@ -19,7 +19,7 @@ The first desktop app is an Electron shell. Its window loads the web client from
 ## Consequences
 
 - **The app is only as offline as the PWA:** read-only, for Expeditions already opened. It can't start for the first time without the network.
-- **A server's code runs inside the app.** The shell treats the page as untrusted: a sandboxed renderer, and a bridge limited to notifications, browser sign-in and files the reader opened ([§9.5](../spec/v1/09-desktop.md#95-trust-boundary)).
+- **A server's code runs inside the app.** The shell treats the page as untrusted: a sandboxed renderer, and a bridge limited to notifications, browser sign-in and files the reader opened ([§10.5](../spec/v1/10-desktop.md#105-trust-boundary)).
 - **Google sign-in leaves the window:** it runs in the system browser and returns through a `seply://` link carrying a one-time token. This is the one new credential path on the server.
 - **Three small server additions:** `GET /api/instance`, `GET /api/notifications`, and the desktop sign-in page with its token.
 - **Local-first later reuses the shell:** the main process, bridge, `seply://` scheme, packaging and release pipeline stay. It changes what the window loads and adds storage, so the bridge is versioned from the start.

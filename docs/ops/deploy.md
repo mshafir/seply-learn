@@ -11,7 +11,9 @@ Two workflows:
 
 **CI** runs `pnpm check` (dependency rule, typecheck, lint, Vitest), `pnpm check:private`, `pnpm --filter web build`, a dry-run bundle of the Worker, and Playwright: the smoke test (light and dark) and the API tests, which run the Worker (`wrangler dev`) against a migrated Postgres service container and sign in with a test account. The Playwright report is uploaded as an artifact when it fails.
 
-**Deploy** starts with a `gate` job. If any of the four (three secrets and the `NEON_PROJECT_ID` variable) is missing, it logs a notice (_"Deploys skipped: missing repo secrets …"_) and every other job is skipped, so the workflow passes. Fork PRs never get secrets, so they skip too.
+**Deploy** starts with a `gate` job. If any of the four (three secrets and the `NEON_PROJECT_ID` variable) is missing, it logs a notice (_"Deploys skipped: missing repo secrets …"_) and every app job is skipped, so the workflow passes. Fork PRs never get secrets, so they skip too. The site's jobs ([below](#the-site-seplyapp)) need only the two Cloudflare secrets.
+
+CI's `pnpm check` also builds and checks the site (`apps/site`, WP-7.1).
 
 ## Owner checklist (issue #40)
 
@@ -65,6 +67,11 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **`RESEND_API_KEY`:** a _Sending access_ key restricted to `mail.seply.app`.
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Seply Learn <invites@mail.seply.app>`.
   - From WP-5.1 the deploy uploads `RESEND_API_KEY` to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists) and passes `EMAIL_FROM` with `--var` (when the variable is set; the server's default is the same address). Previews send real invite emails too, with links to the preview. Local e2e and unit tests never send: with `AUTH_TEST_CREDENTIALS=1` the server only logs that an email would go out, whatever `.dev.vars` holds.
+
+- [ ] **Hosted access approval** (WP-7.3, spec §2.6): only approved accounts create Expeditions or start work on the instance AI key.
+  - **`ACCESS_APPROVAL`** (a repo **variable**): `1`. The production deploy passes it with `--var` when it is set; previews leave it off.
+  - **`ADMIN_EMAILS`** (a repo **secret**, so the addresses stay out of the public Actions logs): the admins, comma-separated. `ci.mjs secrets-file` uploads it with the other optional secrets.
+  - Every account that existed when migration `0009_access_approval` ran is approved. Admins find the requests under Settings › Access requests, and each request emails them through Resend.
 
 When the Cloudflare and Neon secrets and the variable exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
@@ -135,6 +142,20 @@ The cost is `ci.mjs`, a small script that calls the Hyperdrive API and patches t
 
 A preview alias shares the production Worker's bindings, so every PR would share one Hyperdrive config and one database. A separate `seply-pr-<n>` Worker has its own Hyperdrive binding, and later its own Durable Object namespace, so PRs stay isolated. Tearing it down is one API call.
 
+## The site (seply.app)
+
+`apps/site` (WP-7.1, spec 9.1) is a static Astro build served by its own Worker, **`seply-site`**: static assets only, no Worker script, no database and no Worker secrets. Its README has the routes and build settings. Three jobs in the Deploy workflow, all gated on `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` only:
+
+- **`site-preview`**, on each PR push, only when the PR changes something under `apps/site`, `apps/video` or `packages/ui` (read from the PR's file list): builds with `SITE_ENV=preview` (noindex meta tag and `X-Robots-Tag: noindex` header, no analytics), deploys `wrangler deploy --name seply-site-pr-<n>` to `https://seply-site-pr-<n>.<subdomain>.workers.dev`, runs `apps/site/scripts/check-deploy.mjs` (home page, 404 status and page, `og.png`, `sitemap.xml`, the noindex header) and comments the URL on the PR (its own comment, beside the app's).
+- **`site-teardown`**, on close: deletes `seply-site-pr-<n>` (`ci.mjs script-delete`; a no-op when the PR never had one) and marks the comment.
+- **`site-production`**, after CI passes on `main` (every time; an unchanged site uploads nothing new): builds with `SITE_ENV=production` and `CF_ANALYTICS_TOKEN`, then `wrangler deploy --domain seply.app`, which attaches the apex as the Worker's custom domain (and creates its DNS record) on the first run. It checks the workers.dev URL, then `https://seply.app` (retrying for up to five minutes while a new certificate is issued). It runs in the `site` GitHub environment.
+
+### Owner checklist (site)
+
+- [ ] **Custom domain.** CI attaches `seply.app` itself: the API token already has Zone: Read, DNS: Edit and Workers Routes: Edit on the `seply.app` zone (added for `learn.seply.app`). The apex must have no A, AAAA or CNAME record of its own (it had none when this was written; the mail records are on `mail.seply.app` and `send.mail.seply.app`). If the first production run fails at **Deploy** with a custom-domain or permission error, attach it by hand: _Workers & Pages → seply-site → Settings → Domains & Routes → Add → Custom domain → `seply.app`_; the next run then finds it attached. Until it is attached, the site is at `https://seply-site.<subdomain>.workers.dev`; to deploy there only, set the repo **variable** `SITE_DOMAIN=none`. `www.seply.app` is not set up; add it the same way, or as a redirect rule, if wanted.
+- [ ] **Web Analytics.** In the Cloudflare dashboard, _Analytics & Logs → Web Analytics → Add a site_, hostname `seply.app`, and choose the **JS snippet** install (not the automatic setup, which injects its own beacon on proxied zones and would count pages twice). Copy the `token` from the snippet and set it as the repo **variable** `CF_ANALYTICS_TOKEN` (`gh variable set CF_ANALYTICS_TOKEN -R mshafir/seply-learn`). It is public, since every page carries it; a repo secret of the same name works too. The next production deploy adds the beacon (`static.cloudflareinsights.com/beacon.min.js`). Previews never get it. Web Analytics sets no cookies, so the site needs no consent banner.
+- [ ] **Optional:** required reviewers on the `site` environment (_Settings → Environments_), as for `production`.
+
 ## Running it locally
 
 ```sh
@@ -163,4 +184,6 @@ curl localhost:8787/api/health   # {"ok":true,"db":"db","branch":"local"}
 - **"Check sign-in" fails with a 503 `server not configured`:** a Worker secret or `BETTER_AUTH_URL` is missing. Check the three auth repo secrets exist.
 - **Sign-in on a preview ends at `/api/auth/error?error=state_mismatch` or `invalid_profile`:** the preview and production have different `BETTER_AUTH_SECRET`s (redeploy both), or the round trip took over 60 seconds.
 - **Google says `redirect_uri_mismatch`:** the Google client must list production's callback exactly (checklist above).
-- **Leftovers after a failed teardown:** re-run the job, or delete `seply-pr-<n>` (Worker and Hyperdrive config) and the Neon branch `preview/pr-<n>` by hand.
+- **Leftovers after a failed teardown:** re-run the job, or delete `seply-pr-<n>` (Worker and Hyperdrive config) and the Neon branch `preview/pr-<n>` by hand. For the site, delete the Worker `seply-site-pr-<n>`.
+- **Site deploy fails at "Deploy" with a custom-domain error:** the apex has a DNS record of its own, or the token lacks the zone permissions. See the site checklist above.
+- **"Check the custom domain" times out on the first deploy:** the certificate for `seply.app` was still being issued. Re-run the job a few minutes later.

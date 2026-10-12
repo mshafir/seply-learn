@@ -1,21 +1,21 @@
-# 9. Desktop app
+# 10. Desktop app
 
 An installed app for macOS, Windows and Linux. It is a **shell**: an Electron window that loads the web client of one Seply Learn server, `https://learn.seply.app` by default or a self-hosted instance the reader chooses. It adds what a browser tab can't do: links that open in the app, files opened from the OS, and native notifications. The decision and what it defers are in [ADR 0003](../../adr/0003-desktop-shell-before-local-first.md).
 
 **Not in this release:** a bundled client, offline editing, SQLite (the local-first desktop of the [Phase 2 sketch](08-phase-2.md) builds on this shell later), several servers at once, quick capture, folder watching, and app-store distribution.
 
-## 9.1 Shape
+## 10.1 Shape
 
 - **`apps/desktop`** is an Electron app. It composes only `@seply/config` and, for the picker's tokens and the brand folder, `@seply/ui`, so the dependency rule doesn't change.
   - **Main process:** the window, the server setting, the `seply://` scheme, file-open events, the tray and updates.
-  - **Preload bridge:** `window.seplyDesktop`, exposed only to pages on the chosen server's origin (§9.5).
-  - **Server picker:** a local page bundled in the app (§9.2). It is the only UI the app ships; it uses the brand tokens and no custom components.
-- *As built (WP-7.1):* the picker and "Can't reach" are one shell page in a small window of its own, with its own preload, so a server's page and the app's page never share a window. The workspace install doesn't fetch Electron's binary; the desktop scripts fetch it on first use, so the server image and the other packages' CI never download it. A headless Playwright run drives the built app against stand-in servers (`pnpm --filter desktop test:e2e`).
+  - **Preload bridge:** `window.seplyDesktop`, exposed only to pages on the chosen server's origin (§10.5).
+  - **Server picker:** a local page bundled in the app (§10.2). It is the only UI the app ships; it uses the brand tokens and no custom components.
+- *As built (WP-8.1):* the picker and "Can't reach" are one shell page in a small window of its own, with its own preload, so a server's page and the app's page never share a window. The workspace install doesn't fetch Electron's binary; the desktop scripts fetch it on first use, so the server image and the other packages' CI never download it. A headless Playwright run drives the built app against stand-in servers (`pnpm --filter desktop test:e2e`).
 - **The window loads `<server>/`**, the same SPA a browser gets, from the same origin. So `/api`, the session cookie, the Relay socket, IndexedDB and the service worker all work as on the web, and a self-hosted server always gets the client that matches its version.
 - **`apps/web` feature-detects the bridge.** Without `window.seplyDesktop` it behaves exactly as today. Nothing in `packages/*` knows about desktop.
 - **Offline** is the PWA's: the service worker opens the app shell, and Expeditions kept in IndexedDB open read-only (§2.9). If the server can't be reached and nothing is cached, the app shows a local "Can't reach `<server>`" page with Retry and Change server.
 
-## 9.2 Choosing a server
+## 10.2 Choosing a server
 
 - **Default:** `https://learn.seply.app`. First run opens it directly; the picker is under **Seply Learn → Server…** in the app menu.
 - **The picker** takes a URL, reduces it to its origin, and calls `GET <origin>/api/instance` (new, public):
@@ -29,7 +29,7 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 - **One server at a time.** Switching reloads the window on the new origin. Each origin keeps its own cookies and IndexedDB, so switching back finds the reader still signed in.
 - **The setting** lives in the app's user-data folder as JSON. It holds the server origin and window bounds, and nothing secret.
 
-## 9.3 Sign-in
+## 10.3 Sign-in
 
 - **Email and password** works in the window as on the web.
 - **Google** can't run in the window: Google refuses OAuth in embedded browsers. So on desktop the sign-in screen's Google button calls `seplyDesktop.signInWithBrowser()` instead of redirecting:
@@ -41,12 +41,12 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 - **An auth link for another server** than the chosen one is refused with a message; it never switches servers.
 - **Sign-out** is the web client's. MCP and API tokens are unaffected.
 
-## 9.4 Native integration
+## 10.4 Native integration
 
 - **Deep links:** `seply://<server-host>/<path>` opens `https://<server-host>/<path>` in the window, so every route (`/e/<id>`, `/invite/<token>`) works with no per-route code.
   - A link for a server that isn't the chosen one asks "Switch to `<host>`?" and validates it as the picker would.
   - On the web, an Expedition's Share dialog and its public page offer **Open in app**, which links to the `seply://` form.
-  - Verified `https` links (Universal Links, App Links) need signed builds and come with signing (§9.6).
+  - Verified `https` links (Universal Links, App Links) need signed builds and come with signing (§10.6).
 - **Local files as Sources:**
   - The app appears under "Open with" for the types Sources accept (`SOURCE_ACCEPT`: PDF, DOCX, Markdown, text, HTML, JSON, ZIP). It never makes itself the default handler.
   - Files opened that way, or dropped on the app icon, reach the page through `seplyDesktop.onOpenFiles`. The page asks **Add to which Expedition?** (the current one first, then recent ones, then New Expedition) and uploads through the existing Source flow, with the same 25 MB cap and checks.
@@ -58,7 +58,7 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 - **Connecting an agent:** the setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), is the web client's. The shell adds **Connect an agent…** to the app menu. The web client, when it finds the bridge, shows the page once after the first sign-in if the reader has no connected agents; the flag is kept on the device.
 - **Tray:** closing the window keeps the app in the tray (the menu bar on macOS) so notifications still arrive. **Quit** stops them. Nothing arrives after a quit in this release.
 
-## 9.5 Trust boundary
+## 10.5 Trust boundary
 
 A self-hosted server's code runs in the window, so the shell treats the page as untrusted.
 
@@ -78,7 +78,7 @@ A self-hosted server's code runs in the window, so the shell treats the page as 
 - **`seply://` links are input from outside.** Only `auth` and plain paths are handled, the host is always checked, and a path is opened as a navigation, never run.
 - **Permissions** the page asks for (camera, microphone, location and the rest) are denied, except notifications and clipboard write.
 
-## 9.6 Packaging, updates and tests
+## 10.6 Packaging, updates and tests
 
 - **Packages** (electron-builder): a universal `.dmg`, an NSIS `.exe` (x64 and arm64), and `.AppImage` and `.deb` (x64 and arm64).
 - **Releases:** a `desktop-v*` tag runs a GitHub Actions matrix (macOS, Windows, Linux) and attaches the packages to a GitHub Release. The desktop version is its own; it doesn't follow the server image's tags.

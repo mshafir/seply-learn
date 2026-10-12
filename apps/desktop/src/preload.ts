@@ -1,5 +1,5 @@
 // Preload for the main window: the bridge a server's page sees as
-// `window.seplyDesktop` (spec §9.5). It is the whole native surface, and it is
+// `window.seplyDesktop` (spec §10.5). It is the whole native surface, and it is
 // attached only on the chosen server's origin. This work package ships it
 // with its version alone; sign-in, notifications and files add their members.
 import { contextBridge } from "electron"

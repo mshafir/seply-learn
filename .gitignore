@@ -45,3 +45,9 @@ dist-ssr/
 /basemap-*.pmtiles
 # The Docker compose tiles folder (docs/self-host.md).
 /tiles/
+
+# Astro generated types
+.astro/
+
+# Site media: rendered and captured in CI, never committed (apps/site/src/media.ts)
+apps/site/public/media/

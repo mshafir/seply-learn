@@ -1,4 +1,4 @@
-// The desktop app's main process (spec §9): one window that loads the chosen
+// The desktop app's main process (spec §10): one window that loads the chosen
 // server's web client, a small shell window for choosing the server and for
 // "Can't reach the server", and the menu. The rules it applies live in
 // navigation.ts, server-url.ts and settings.ts.
@@ -76,7 +76,7 @@ function createMainWindow() {
   mainWindow = win
   const contents = win.webContents
 
-  // The window stays on the chosen server (spec §9.5).
+  // The window stays on the chosen server (spec §10.5).
   const guard = (event: Electron.Event, url: string) => {
     const where = navigation(url, server)
     if (where === "allow") return
@@ -245,7 +245,7 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
-/** A server's page gets notifications and copying; nothing else (spec §9.5). */
+/** A server's page gets notifications and copying; nothing else (spec §10.5). */
 function restrictPermissions() {
   const allowed = (permission: string, url: string | undefined) =>
     !!url &&

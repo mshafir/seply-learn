@@ -1,0 +1,62 @@
+---
+// The header on every page: the wordmark, the section links and Request
+// access. Below the md breakpoint the links fold into a menu button that opens
+// a panel (src/scripts/menu.ts). The wordmark is @seply/ui's React component,
+// rendered to HTML at build time.
+import { Wordmark } from "@seply/ui/components/brand"
+import { cn } from "@seply/ui/lib/utils"
+
+import { GITHUB_URL } from "../learn/content"
+import { APP_URL } from "../lib/env"
+import { primaryButton } from "../lib/styles"
+
+const links = [
+  { href: "/#how", label: "How it works" },
+  { href: "/#views", label: "Views" },
+  { href: "/#examples", label: "Examples" },
+  { href: "/#agents", label: "For agents" },
+  { href: "/#self-host", label: "Self-host" },
+  { href: GITHUB_URL, label: "GitHub" },
+]
+---
+
+<header class="sticky top-0 z-10 border-b border-border bg-background" data-site-header>
+  <div class="mx-auto flex max-w-[1120px] items-center gap-x-7 gap-y-3 px-6 py-3.5">
+    <a href="/#top" class="shrink-0 rounded-md" aria-label="Seply Learn home">
+      <Wordmark className="text-2xl [&>svg]:size-7" />
+    </a>
+    <nav aria-label="Main" class="hidden flex-1 flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:flex">
+      {links.map((l) => <a href={l.href} class="rounded-sm hover:text-foreground">{l.label}</a>)}
+    </nav>
+    <a href={APP_URL} class={cn(primaryButton, "hidden min-h-10 px-4 text-sm md:inline-flex")}>Request access</a>
+    <div class="flex-1 md:hidden"></div>
+    <button
+      type="button"
+      class="flex size-11 items-center justify-center rounded-lg border border-border bg-card text-foreground md:hidden"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      aria-label="Menu"
+      data-menu-button
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
+      </svg>
+    </button>
+  </div>
+  <nav id="mobile-menu" aria-label="Main" class="flex flex-col bg-background px-6 pt-1 pb-5 md:hidden" hidden data-menu>
+    {
+      links.map((l) => (
+        <a href={l.href} class="flex min-h-12 items-center border-b border-border px-1">
+          {l.label}
+        </a>
+      ))
+    }
+    <a href={APP_URL} class={cn(primaryButton, "mt-4 w-full")}>Request access</a>
+  </nav>
+</header>
+
+<script>
+  import "../scripts/menu"
+</script>

@@ -1,11 +1,11 @@
-// Which server the app talks to (spec §9.2): reducing what a person types to
+// Which server the app talks to (spec §10.2): reducing what a person types to
 // an origin, the https rule, and checking that a Seply Learn server answers
 // there. Pure, apart from the fetch it is handed.
 
 /** The hosted instance: the server the app opens until another is chosen. */
 export const DEFAULT_SERVER = "https://learn.seply.app"
 
-/** The bridge version this shell provides (spec §9.5). */
+/** The bridge version this shell provides (spec §10.5). */
 export const BRIDGE_VERSION = 1
 
 export type ParsedServer =

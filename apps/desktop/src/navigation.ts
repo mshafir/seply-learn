@@ -1,4 +1,4 @@
-// Where the window may go (spec §9.5). A server's code runs in it, so the
+// Where the window may go (spec §10.5). A server's code runs in it, so the
 // shell decides: the chosen server's own pages stay in the window, other web
 // links open in the system browser, and everything else is refused.
 

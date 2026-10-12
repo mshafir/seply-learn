@@ -7,7 +7,9 @@
 // Expeditions saved on this device. Global search, New and Import (our JSON,
 // or a zip export with Source files; spec §1.9) sit in the header. **Trash**
 // (WP-5.2), for owners: what I moved there, with when it will be deleted for
-// good (30 days on) and Restore.
+// good (30 days on) and Restore. With hosted access approval (WP-7.3, spec
+// §3.12), an account waiting for approval sees the waiting-list banner, and
+// New and Import explain instead of failing.
 import * as React from "react"
 import {
   BookOpenIcon,
@@ -64,6 +66,11 @@ import type { OfflineEntry } from "@seply/sync"
 import { ConnectLink } from "@/connect/connect-link.tsx"
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { GlobalSearch } from "@/components/global-search.tsx"
+import {
+  WaitingListBanner,
+  WaitingListDialog,
+} from "@/components/waiting-list.tsx"
+import { useApprovalGate } from "@/lib/approval.ts"
 import {
   ApiError,
   continueReading,
@@ -476,6 +483,9 @@ export function LibraryScreen() {
     [offline]
   )
 
+  // Hosted access approval: New and Import explain instead of failing.
+  const approval = useApprovalGate()
+
   const [trash, setTrash] = React.useState<TrashedCard[]>([])
   const load = React.useCallback(() => {
     listExpeditions().then(
@@ -546,6 +556,7 @@ export function LibraryScreen() {
       navigate(`/new/${created.id}`)
     } catch (e) {
       setBusy(null)
+      if (approval.refused(e)) return
       toast.add({
         title: "Couldn't create an Expedition",
         description: (e as Error).message,
@@ -566,6 +577,7 @@ export function LibraryScreen() {
       navigate(`/e/${expedition.id}`)
     } catch (e) {
       setBusy(null)
+      if (approval.refused(e)) return
       toast.add({
         title: "Couldn't import that file",
         description:
@@ -581,13 +593,13 @@ export function LibraryScreen() {
     <>
       <Button
         variant="outline"
-        onClick={() => fileInput.current?.click()}
+        onClick={() => approval.gate(() => fileInput.current?.click())}
         disabled={!!busy}
       >
         {busy === "import" ? <Spinner /> : <UploadIcon />}
         Import
       </Button>
-      <Button onClick={onNew} disabled={!!busy}>
+      <Button onClick={() => approval.gate(onNew)} disabled={!!busy}>
         {busy === "new" ? <Spinner /> : <PlusIcon />}
         New
       </Button>
@@ -707,6 +719,7 @@ export function LibraryScreen() {
 
         <main className="flex min-w-0 flex-1 flex-col gap-10">
           <h1 className="sr-only">Library</h1>
+          <WaitingListBanner />
           <ContinueReading cards={byId} />
 
           {unreachable && (
@@ -796,6 +809,7 @@ export function LibraryScreen() {
           )}
         </main>
       </div>
+      <WaitingListDialog {...approval.dialog} />
     </div>
   )
 }

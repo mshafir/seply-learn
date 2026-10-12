@@ -11,10 +11,10 @@ import {
   type Page,
 } from "@playwright/test"
 
-// WP-7.1: the shell, driven as a person would, against stand-in servers
+// WP-8.1: the shell, driven as a person would, against stand-in servers
 // (each a few lines of HTTP: a page and /api/instance). It needs the built
 // app (`pnpm --filter desktop build`). The full flow against a real server
-// (sign-in, links, files) comes with WP-7.5.
+// (sign-in, links, files) comes with WP-8.5.
 
 const APP = path.resolve(import.meta.dirname, "..")
 

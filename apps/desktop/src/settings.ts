@@ -1,4 +1,4 @@
-// The app's stored setting (spec §9.2): the chosen server and the window's
+// The app's stored setting (spec §10.2): the chosen server and the window's
 // bounds, as JSON in the user-data folder. Nothing secret. A missing, broken
 // or tampered file reads as the defaults.
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
