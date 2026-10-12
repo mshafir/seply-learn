@@ -1,0 +1,6 @@
+# Packaged installers (electron-builder)
+release/
+
+# Playwright output
+test-results/
+playwright-report/

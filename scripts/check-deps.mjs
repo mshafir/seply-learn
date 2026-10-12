@@ -12,6 +12,8 @@ const allowed = {
   "@seply/ai": ["@seply/domain"],
   "@seply/server": ["@seply/domain", "@seply/ai"],
   web: ["@seply/ui", "@seply/views", "@seply/sync", "@seply/domain"],
+  // The desktop shell loads a server's web client; ui is for its one local page (spec §9.1).
+  desktop: ["@seply/ui"],
   "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
   "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
 };
