@@ -144,7 +144,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 - **Theme:** System / Light / Dark.
 - **AI** (bring-your-own-key mode): keys per provider (the last 4 characters, Test, Delete). The model per stage is under Advanced. There's also the per-ask spending cap.
-- **Connected agents:** MCP OAuth grants, and personal API tokens, each optionally restricted to chosen Expeditions.
+- **Connected agents:** MCP OAuth grants, and personal API tokens, each optionally restricted to chosen Expeditions. **Connect an agent** opens the step-by-step setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), which is also linked from Create: Sources, the Suggestions tab, Ask and the empty Library.
 - **Notifications:** web push on or off.
 
 ## 3.11 Anonymous and viewer experience

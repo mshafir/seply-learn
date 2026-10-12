@@ -338,6 +338,18 @@ Each package is sized to about one agent session. The format is parsed by `make_
   - The skill as a Claude Code plugin with a marketplace entry, mirrored in the server instructions.
 - **Done when:** Claude Code connects, lists Expeditions, runs `create_expedition` from a chat, and has its `propose_changes` show up in Suggestions.
 
+### WP-5.5: Connect an agent
+- lane: D
+- milestone: M5
+- depends: WP-5.4
+- spec: 06-mcp.md#64-connecting-an-agent
+- **Build:**
+  - `GET /api/instance` in `packages/server` (with `hosted`), if WP-7.1 hasn't added it.
+  - `/connect` in `apps/web`: the four steps, the five agent tabs, hosted and self-hosted commands, the connected-agent check, and the first prompts for the Library and for `?e=<id>`.
+  - Every command checked against the agent's current release; the plugin README gains the same steps.
+  - The entry points: Create: Sources, the Suggestions tab and its empty state, Ask, the empty Library, and Settings → Connected agents (which loses its own command).
+- **Done when:** following the Claude Code tab on a preview connects Claude Code and its first prompt creates an Expedition; the step ticks itself when the agent connects; a self-hosted server shows `claude mcp add` with its own address and no plugin; e2e covers the page and one entry point in light and dark.
+
 ## M6: Self-host
 
 ### WP-6.1: Node entry
@@ -384,9 +396,10 @@ Each package is sized to about one agent session. The format is parsed by `make_
 ### WP-7.3: Deep links and files
 - lane: D
 - milestone: M7
-- depends: WP-7.2
+- depends: WP-7.2, WP-5.5
 - spec: 09-desktop.md#94-native-integration
 - **Build:**
+  - **Connect an agent…** in the app menu, and the once-after-first-sign-in landing on `/connect` when the bridge is there.
   - `seply://<host>/<path>` navigation, with the switch-server prompt for another host.
   - **Open in app** in the Share dialog and on the public page.
   - "Open with" registration for the Source types, `onOpenFiles` on the bridge, and the **Add to which Expedition?** dialog in `apps/web` (prebuilt components) feeding the existing upload.

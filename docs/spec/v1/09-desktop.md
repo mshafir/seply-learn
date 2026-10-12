@@ -20,10 +20,10 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 - **The picker** takes a URL, reduces it to its origin, and calls `GET <origin>/api/instance` (new, public):
 
   ```json
-  { "product": "seply-learn", "version": "1.4.0", "desktopBridge": 1 }
+  { "product": "seply-learn", "version": "1.4.0", "desktopBridge": 1, "hosted": false }
   ```
 
-  It saves the server only if `product` is `seply-learn`. `desktopBridge` is the newest bridge version the server's client understands; a shell newer than that still works, because the client only calls what it finds.
+  It saves the server only if `product` is `seply-learn`. `hosted` is true only on `learn.seply.app`; the setup page uses it ([MCP §6.4](06-mcp.md#64-connecting-an-agent)). `desktopBridge` is the newest bridge version the server's client understands; a shell newer than that still works, because the client only calls what it finds.
 - **`https` is required,** except for `localhost`, `*.local` and private-network addresses, so a home self-host isn't blocked. A plain-`http` server shows "not encrypted" beside its name in the picker.
 - **One server at a time.** Switching reloads the window on the new origin. Each origin keeps its own cookies and IndexedDB, so switching back finds the reader still signed in.
 - **The setting** lives in the app's user-data folder as JSON. It holds the server origin and window bounds, and nothing secret.
@@ -54,6 +54,7 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
   - `GET /api/notifications?since=<time>` (new, signed in) answers the caller's jobs that ended since then, as the payloads web push sends (`title`, `body`, `url`, `tag`). It reads the `jobs` table; it adds no table.
   - On desktop the web client polls it every 30 seconds, and on window focus, and passes each new one to `seplyDesktop.notify`. `tag` stops a repeat. Clicking one opens its `url` in the window.
   - The "Leave it building" prompt (§2.5) asks for OS notification permission through the bridge instead of web push. The web push subscription isn't made on desktop.
+- **Connecting an agent:** the setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), is the web client's. The shell adds **Connect an agent…** to the app menu. The web client, when it finds the bridge, shows the page once after the first sign-in if the reader has no connected agents; the flag is kept on the device.
 - **Tray:** closing the window keeps the app in the tray (the menu bar on macOS) so notifications still arrive. **Quit** stops them. Nothing arrives after a quit in this release.
 
 ## 9.5 Trust boundary
