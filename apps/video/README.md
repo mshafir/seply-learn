@@ -35,19 +35,21 @@ Times and captions live in `src/timing.ts`; the burned-in captions and `explaine
 
 ## Outputs, CI and the site
 
+**Colour.** Both codecs render with `colorSpace: "bt709"` and `pixelFormat: "yuv420p"`, so `ffmpeg -i` reports `yuv420p(tv, bt709, progressive)`. Remotion's default left them full range (`pc`) with untagged primaries, which hardware decoders in Chrome-family browsers drew as blank white or garbled frames. The posters are WebP, whose lossy format is always BT.601 limited range (`ffmpeg -i` says `tv, bt470bg`); browsers decode them as images, not through the video decoder.
+
 `out/` uses the site's file names (`apps/site/src/media.ts`), so the files go into `apps/site/public/media/video/` as they are:
 
 | File | What |
 |---|---|
-| `explainer.mp4` | The full video, H.264 (yuv420p), 1920 × 1080, 30 fps, captions burned in, no audio track |
-| `explainer.webm` | The same, VP9 |
+| `explainer.mp4` | The full video, H.264 (yuv420p, limited range, tagged BT.709), 1920 × 1080, 30 fps, captions burned in, no audio track, `moov` first (faststart) |
+| `explainer.webm` | The same, VP9 (yuv420p, limited range, tagged BT.709) |
 | `explainer.vtt` | WebVTT captions for it (also burned in; note the site's `<track>` is `default`, so a player may show both) |
 | `explainer-poster.webp` | The poster frame (23 s: the Learning path fully drawn), no captions; also `.png` |
 | `hero-loop.mp4`, `hero-loop.webm` | The 12 s hero loop: scenes 3-4 (14-26 s) without captions, faded at both ends so it loops cleanly. Muted |
 | `hero-loop-poster.webp` | Its poster (the same frame) |
 | `manifest.json` | `{ width, height, fps, duration, hero: { start, duration }, files: { name: bytes } }` |
 
-**Rendered only when the inputs change.** `.github/actions/explainer-video` restores the render cached under `explainer-video-<hash>` (a hash of `apps/video`, `packages/views`, `packages/ui` and `packages/domain/fixtures`), renders and saves it on a miss, and copies the files where it's told. It runs in:
+**Rendered only when the inputs change.** `.github/actions/explainer-video` restores the render cached under `explainer-video-v2-<hash>` (the v2 changes to force a re-render; the hash is of `apps/video`, `packages/views`, `packages/ui` and `packages/domain/fixtures`), renders and saves it on a miss, and copies the files where it's told. It runs in:
 
 - **CI** (`ci.yml`, "Explainer video"): renders on a miss and uploads the files as the `explainer-video` artifact (30 days).
 - **The site's preview and production deploys** (`preview.yml`): copies them into `apps/site/public/media/video/` before `astro build`. Production runs after CI passed on main, so its render is always cached; a preview that gets there before CI's render renders it itself.

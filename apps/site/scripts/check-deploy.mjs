@@ -4,7 +4,8 @@
 //   node apps/site/scripts/check-deploy.mjs <url> <preview|production> [tries]
 //
 // The home page answers 200 with HTML, an unknown path answers 404 with the
-// 404 page, og.png and sitemap.xml are there, and previews send
+// 404 page, og.png and sitemap.xml are there, the explainer (when deployed)
+// answers byte ranges with 206 and 416, and previews send
 // `X-Robots-Tag: noindex` while production doesn't. Retries the home page
 // first (every 10 s, default 18 tries), since a new workers.dev hostname or
 // custom domain takes a moment to answer. Writes the home page's status line
@@ -61,6 +62,25 @@ const og = await get("/og.png")
 check(og.status === 200 && og.headers.get("content-type") === "image/png", "/og.png is a PNG")
 const sitemap = await get("/sitemap.xml")
 check(sitemap.status === 200 && (await sitemap.text()).includes("<urlset"), "/sitemap.xml is a sitemap")
+
+// The video answers byte ranges (worker/index.ts), when the build has it.
+const VIDEO = "/media/video/explainer.mp4"
+const whole = await fetch(base + VIDEO, { method: "HEAD" })
+if (whole.status === 200) {
+  const size = Number(whole.headers.get("content-length"))
+  check(whole.headers.get("accept-ranges") === "bytes", `${VIDEO} sends Accept-Ranges: bytes`)
+  const part = await fetch(base + VIDEO, { headers: { Range: "bytes=0-99" } })
+  const body = await part.arrayBuffer()
+  check(
+    part.status === 206 && part.headers.get("content-range") === `bytes 0-99/${size}` && body.byteLength === 100,
+    `${VIDEO} answers a Range with 206 (got ${part.status} ${part.headers.get("content-range")})`
+  )
+  const past = await fetch(base + VIDEO, { headers: { Range: `bytes=${size}-` } })
+  await past.arrayBuffer()
+  check(past.status === 416, `${VIDEO} answers a Range past the end with 416 (got ${past.status})`)
+} else {
+  console.log(`skip ${VIDEO}: ${whole.status} (no video in this build)`)
+}
 
 if (process.env.GITHUB_OUTPUT)
   appendFileSync(process.env.GITHUB_OUTPUT, `summary=${home.status} ${robots ? `(X-Robots-Tag: ${robots})` : ""}\n`)

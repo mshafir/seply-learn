@@ -4,12 +4,12 @@
 
 ## Contract
 
-`seply.app`: the static site that explains Seply Learn and sends people to the app at `learn.seply.app` (spec [9. Landing site](../../docs/spec/v1/09-landing-site.md)). An **Astro** static build, served by the `seply-site` Cloudflare Worker (static assets only, no Worker script).
+`seply.app`: the static site that explains Seply Learn and sends people to the app at `learn.seply.app` (spec [9. Landing site](../../docs/spec/v1/09-landing-site.md)). An **Astro** static build, served by the `seply-site` Cloudflare Worker: static assets, plus a small Worker script for `/media/*` only (below, under Deploy).
 
 - **Composes `@seply/ui` only** (`pnpm check:deps`): its tokens (`tokens.css`, `tokens-dark.css`), fonts (`fonts.css`, the same Fontsource packages as the app), Typeset (`typeset.css`, for `/self-host`), the `Wordmark` and `SeplyGlyph` components, `buttonVariants`, `cn`, the brand folder's favicons and wordmark, and `lib/color` for the Open Graph card. It doesn't import `globals.css`, which scans the app's sources for Tailwind classes and carries Base UI fixes the site doesn't need.
 - **Colours come from tokens**, as in the app: Tailwind utilities such as `bg-background` and `text-muted-foreground`. No hex values in pages or components (a test checks).
 - **Light and dark follow the system, with no JavaScript.** `<html class="theme-system">`, and `src/styles/site.css` imports `@seply/ui/tokens-dark.css` under `(prefers-color-scheme: dark)`; that file's selector is `.dark, .theme-system`, so the app and the site share one dark palette. Tailwind's `dark:` variant is the same media query here.
-- **Little JavaScript, and only where spec 9.1 allows it:** the phone menu (`src/scripts/menu.ts`), the Views gallery tabs (`tabs.ts`), copy buttons (`copy.ts`) and the hero loop's pause button (`hero-loop.ts`), about 2 KB in all; a test holds every page under 60 KB. Each works without the others, and without JavaScript the page still reads (the first gallery tab shows; snippets have no Copy button). React renders `@seply/ui` components at build time only (`@astrojs/react`, no `client:` directives). The integration emits its client runtime anyway; `astro.config.mjs` (`seply-drop-unused-react-client`) deletes it when nothing refers to it, so it is never deployed.
+- **Little JavaScript, and only where spec 9.1 allows it:** the phone menu (`src/scripts/menu.ts`), the Views gallery tabs (`tabs.ts`), copy buttons (`copy.ts`) and the hero loop's start and pause button (`hero-loop.ts`), about 2 KB in all; a test holds every page under 60 KB. Each works without the others, and without JavaScript the page still reads (the first gallery tab shows; snippets have no Copy button). React renders `@seply/ui` components at build time only (`@astrojs/react`, no `client:` directives). The integration emits its client runtime anyway; `astro.config.mjs` (`seply-drop-unused-react-client`) deletes it when nothing refers to it, so it is never deployed.
 
 ## Routes
 
@@ -51,7 +51,7 @@ Read from the environment at `astro build` (`src/lib/env.ts`):
 |---|---|---|
 | Screenshots (`IMAGE_SLOTS`) | `shots/<file>-light.webp` (required), `-light.avif`, `-dark.webp`, `-dark.avif` (optional; dark falls back to light), `shots/manifest.json` (where each came from; an `alt` there replaces the slot's) | WP-7.6: `scripts/capture.ts` (below); the site jobs in `preview.yml` copy this week's cached capture in (`.github/actions/site-screenshots`) |
 | Explainer | `video/explainer.mp4` and/or `.webm`, `explainer.vtt` (captions), `explainer-poster.webp` | WP-7.4: the site jobs in `preview.yml` copy the cached render in (`.github/actions/explainer-video`); locally, `pnpm --filter video render` and copy `apps/video/out/` |
-| Hero loop | `video/hero-loop.mp4` and/or `.webm`, `hero-loop-poster.webp`; replaces the sketch, plays unless the reader prefers reduced motion, with a Pause button | WP-7.4, as above |
+| Hero loop | `video/hero-loop.mp4` and/or `.webm`, `hero-loop-poster.webp`; replaces the sketch at its own 16:9 (the whole frame; the sketch keeps 7:5), plays unless the reader prefers reduced motion, with a Pause button. It starts once it can play and stays hidden over its poster until its first frame is up (`src/scripts/hero-loop.ts`) | WP-7.4, as above |
 | Live embed | `SITE_EMBED_URL` at build time (`https://learn.seply.app/e/<id>/embed?view=<id>`); a lazy iframe, else the Read together screenshot | WP-7.5 |
 
 `MEDIA_DIR` overrides where the build looks (the tests use it).
@@ -98,7 +98,9 @@ mise exec -- pnpm --filter @seply/site test       # builds four ways (test/build
 
 ## Deploy
 
-`wrangler.jsonc` is the `seply-site` Worker: `dist/` as static assets, `auto-trailing-slash`, `404-page`, `workers_dev` on. `.github/workflows/preview.yml` deploys it:
+`wrangler.jsonc` is the `seply-site` Worker: `dist/` as static assets, `auto-trailing-slash`, `404-page`, `workers_dev` on.
+
+**The media script.** Workers static assets answer every request with the whole file and no `Accept-Ranges`, and there is no setting to change that; Chrome-family browsers then load and seek video unreliably. So `/media/*`, and only that (`assets.run_worker_first`), goes through `worker/index.ts`: it fetches the whole file from the `ASSETS` binding and answers a single `Range` with `206` and `Content-Range` (`worker/range.ts`), one past the end with `416`, and anything else (no Range, several ranges, a stale `If-Range`) with the whole file. Every media response says `Accept-Ranges: bytes` and `Cache-Control: public, max-age=3600, stale-while-revalidate=86400` (file names aren't hashed, so not immutable). Every other path never runs the script. `test/range.test.ts` covers it; `scripts/check-deploy.mjs` checks the 206 and 416 on each deploy. `.github/workflows/preview.yml` deploys it:
 
 - **Production:** after CI passes on `main`, as `seply-site` with `--domain seply.app` (the repo variable `SITE_DOMAIN` overrides it; `none` keeps it on workers.dev), then `scripts/check-deploy.mjs` checks the workers.dev URL and the domain.
 - **Previews:** each PR that touches `apps/site`, `apps/video` or `packages/ui` gets `seply-site-pr-<n>` on workers.dev, built with `SITE_ENV=preview`, checked, and commented on the PR. Closing the PR deletes it.
