@@ -346,9 +346,10 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - **Build:**
   - `GET /api/instance` in `packages/server` (with `hosted`), if WP-7.1 hasn't added it.
   - `/connect` in `apps/web`: the four steps, the five agent tabs, hosted and self-hosted commands, the connected-agent check, and the first prompts for the Library and for `?e=<id>`.
-  - Every command checked against the agent's current release; the plugin README gains the same steps.
+  - The plugin's server address made configurable, defaulting to `https://learn.seply.app` (`SEPLY_LEARN_URL`, or plugin `userConfig` if it can prompt with a default).
+  - Every command checked against the agent's current release; the plugin README and the self-host guide gain the same steps.
   - The entry points: Create: Sources, the Suggestions tab and its empty state, Ask, the empty Library, and Settings → Connected agents (which loses its own command).
-- **Done when:** following the Claude Code tab on a preview connects Claude Code and its first prompt creates an Expedition; the step ticks itself when the agent connects; a self-hosted server shows `claude mcp add` with its own address and no plugin; e2e covers the page and one entry point in light and dark.
+- **Done when:** following the Claude Code tab on a preview connects Claude Code and its first prompt creates an Expedition; the step ticks itself when the agent connects; the plugin installed with no setting connects to `learn.seply.app`, and with the address set connects to a local Node entry; a self-hosted server's page shows the plugin steps with its own address filled in; e2e covers the page and one entry point in light and dark.
 
 ## M6: Self-host
 

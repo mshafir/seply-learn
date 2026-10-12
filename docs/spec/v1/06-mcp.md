@@ -41,7 +41,7 @@ All output is compact markdown with ids, not raw JSON dumps.
 
 ## 6.3 The `seply-learn` skill
 
-- **One Agent Skill,** shipped as a Claude Code plugin through a repo marketplace, and mirrored in the server's `instructions` and tool descriptions for hosted chat clients. It covers:
+- **One Agent Skill,** shipped as a Claude Code plugin through a repo marketplace (its server address defaults to `learn.seply.app` and can point at a self-hosted server, §6.4), and mirrored in the server's `instructions` and tool descriptions for hosted chat clients. It covers:
   - how to decompose Sources into right-sized Concepts, Relationships and provenance
   - how to choose and configure View Types (bundles `docs/view-types/`)
   - how to propose well: small, coherent batches with a rationale
@@ -67,7 +67,8 @@ One page, **`/connect`**, takes a signed-in reader from nothing to their agent's
   | **Other** | The server address, and **Create a token** in place (the Settings form, §3.10) with the `Authorization: Bearer` header to copy | None: the step ticks when the token is first used |
 
   The work package checks every command against the agent's current release before it ships; the table is the intent, not a guarantee of syntax.
-- **On a self-hosted server** the plugin isn't offered, because its bundled server address is the hosted one. Claude Code gets `claude mcp add --transport http seply-learn <origin>/mcp` instead; the server's `instructions` carry the playbook (§6.3). Claude apps shows a note that the server must be reachable from the internet over `https`. Whether the server is the hosted one comes from `GET /api/instance` (`hosted: true`).
+- **The plugin's server address is configurable** and defaults to the hosted one: its `.mcp.json` reads `${SEPLY_LEARN_URL:-https://learn.seply.app}/mcp`. If Claude Code's plugin `userConfig` can ask for the address at install with that default, the work package uses it instead of the environment variable, since it needs no extra step.
+- **On a self-hosted server** Claude Code gets the same two plugin commands, plus one step before them that sets the address to this server's origin, with the value filled in to copy. Under it, for readers who don't want the plugin: `claude mcp add --transport http seply-learn <origin>/mcp` (the server's `instructions` carry the playbook, §6.3). Claude apps shows a note that the server must be reachable from the internet over `https`. Whether the server is the hosted one comes from `GET /api/instance` (`hosted: true`).
 - **The first prompt fits where the reader came from:**
   - From the Library or New Expedition: *"Make a Seply Learn Expedition from this conversation."* and *"Make a Seply Learn Expedition about `<the subject typed so far, or a placeholder>`."*
   - From an Expedition (`/connect?e=<id>`): *"Read my Seply Learn Expedition "`<title>`" and suggest what's missing."* The step says the result will arrive in that Expedition's Suggestions, with a link back.
