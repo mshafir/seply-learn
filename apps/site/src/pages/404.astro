@@ -1,0 +1,19 @@
+---
+// Served for any path with no page (wrangler.jsonc: not_found_handling "404-page").
+import Base from "../layouts/Base.astro"
+import SiteHeader from "../components/SiteHeader.astro"
+import { APP_URL } from "../lib/env"
+import { link } from "../lib/styles"
+---
+
+<Base title="Page not found" description="There is no page at this address." noindex>
+  <SiteHeader />
+  <main class="mx-auto w-full max-w-3xl px-6 pt-16 pb-24 sm:pt-28">
+    <h1 class="font-reading text-4xl leading-tight font-medium [font-variation-settings:'opsz'_72]">
+      There is no page at this address.
+    </h1>
+    <p class="mt-6 text-lg leading-relaxed text-muted-foreground">
+      It may have moved, or the link may have a typo. Go to the <a class={link} href="/">home page</a>, or open <a class={link} href={APP_URL}>Seply Learn</a> if you were looking for an Expedition.
+    </p>
+  </main>
+</Base>

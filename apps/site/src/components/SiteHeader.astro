@@ -1,0 +1,15 @@
+---
+// The header on every page: the wordmark (home link) and Request access.
+// The wordmark is @seply/ui's React component, rendered to HTML at build time.
+import { Wordmark } from "@seply/ui/components/brand"
+import { buttonVariants } from "@seply/ui/components/button"
+
+import { APP_URL } from "../lib/env"
+---
+
+<header class="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-6 py-5">
+  <a href="/" class="rounded-md" aria-label="Seply Learn, home">
+    <Wordmark className="text-2xl" />
+  </a>
+  <a href={APP_URL} class={buttonVariants({ variant: "outline" })}>Request access</a>
+</header>

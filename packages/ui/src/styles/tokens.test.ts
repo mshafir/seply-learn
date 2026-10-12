@@ -4,13 +4,16 @@ import { describe, expect, it } from "vitest"
 import { contrastRatio, parseOklch } from "../lib/color"
 import { KIND_HUES } from "../lib/kinds"
 
-const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8")
+// The light palette is in tokens.css, the dark one in tokens-dark.css.
+const css = ["./tokens.css", "./tokens-dark.css"]
+  .map((file) => readFileSync(new URL(file, import.meta.url), "utf8"))
+  .join("\n")
 
 /** Reads the custom properties declared directly in one top-level block. */
 function readBlock(selector: string): Map<string, string> {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   const start = css.search(new RegExp(`^${escaped}[^{]*\\{`, "m"))
-  if (start < 0) throw new Error(`No ${selector} block in globals.css`)
+  if (start < 0) throw new Error(`No ${selector} block in tokens.css or tokens-dark.css`)
   const body = css.slice(css.indexOf("{", start) + 1, css.indexOf("\n}", start))
   const tokens = new Map<string, string>()
   for (const [, name, value] of body.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) {

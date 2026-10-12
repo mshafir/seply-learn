@@ -1,8 +1,9 @@
 # Per-PR previews and production deploys. See docs/ops/deploy.md.
 #
-# Every job is gated on three repo secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
+# The app's jobs are gated on three repo secrets (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID,
 # NEON_API_KEY) and the NEON_PROJECT_ID variable (as Neon's GitHub integration sets it). Without them the workflow skips with a notice, so it
 # is safe to merge before the accounts exist (issue #40) and on PRs from forks.
+# The site's jobs (apps/site: the seply-site Worker on seply.app) need only the two Cloudflare secrets.
 name: Deploy
 
 on:
@@ -25,6 +26,7 @@ concurrency:
 env:
   PR: ${{ github.event.pull_request.number }}
   WORKER_PREVIEW: seply-pr-${{ github.event.pull_request.number }}
+  SITE_PREVIEW: seply-site-pr-${{ github.event.pull_request.number }}
   NEON_BRANCH_PREVIEW: preview/pr-${{ github.event.pull_request.number }}
 
 jobs:
@@ -33,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
+      # The site's jobs need only the Cloudflare secrets.
+      cloudflare: ${{ steps.check.outputs.cloudflare }}
     steps:
       - id: check
         env:
@@ -50,6 +54,11 @@ jobs:
             echo "enabled=false" >> "$GITHUB_OUTPUT"
           else
             echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "cloudflare=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cloudflare=false" >> "$GITHUB_OUTPUT"
           fi
 
   preview:
@@ -384,3 +393,205 @@ jobs:
         env:
           URL: ${{ steps.deploy.outputs.url }}
         run: node apps/worker/scripts/check-signin.mjs "$URL" "$URL"
+
+  # The site (apps/site): the seply-site Worker, static assets only, on seply.app.
+  # No database, no secrets in the Worker. See docs/ops/deploy.md, "The site".
+
+  site-preview:
+    name: Deploy site preview
+    needs: gate
+    if: >-
+      needs.gate.outputs.cloudflare == 'true' &&
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      # Only PRs that touch the site or what it is built from get a site preview.
+      - name: Does this PR touch the site?
+        id: paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename')
+          if grep -qE '^(apps/site|apps/video|packages/ui)/' <<< "$files"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nothing under apps/site, apps/video or packages/ui changed: no site preview."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.paths.outputs.changed == 'true'
+      - uses: ./.github/actions/setup
+        if: steps.paths.outputs.changed == 'true'
+
+      # SITE_ENV=preview: noindex on every page and in a header, and no analytics.
+      - name: Build the site
+        if: steps.paths.outputs.changed == 'true'
+        env:
+          SITE_ENV: preview
+        run: pnpm --filter @seply/site build
+
+      - name: Work out the Worker URL
+        id: urls
+        if: steps.paths.outputs.changed == 'true'
+        working-directory: apps/worker
+        run: node scripts/ci.mjs worker-urls "$SITE_PREVIEW"
+
+      - name: Deploy the site preview Worker
+        id: deploy
+        if: steps.paths.outputs.changed == 'true'
+        working-directory: apps/site
+        env:
+          URL: ${{ steps.urls.outputs.url }}
+        run: |
+          set -o pipefail
+          pnpm exec wrangler deploy --name "$SITE_PREVIEW" | tee deploy.log
+          deployed=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
+          if [ "$deployed" != "$URL" ]; then
+            echo "::error::Deployed to '$deployed', expected $URL. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
+            exit 1
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Check the site preview
+        id: check
+        if: steps.paths.outputs.changed == 'true'
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: node apps/site/scripts/check-deploy.mjs "$URL" preview
+
+      - name: Comment the site preview URL
+        if: steps.paths.outputs.changed == 'true'
+        uses: actions/github-script@v9
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          SUMMARY: ${{ steps.check.outputs.summary }}
+        with:
+          script: |
+            const marker = "<!-- seply-site-preview -->"
+            const body = [
+              marker,
+              `**Site preview** (seply.app): ${process.env.URL}`,
+              "",
+              `- Worker: \`${process.env.SITE_PREVIEW}\``,
+              `- \`/\`: ${process.env.SUMMARY}; the 404 page, \`/og.png\` and \`/sitemap.xml\` checked`,
+              `- Commit: ${context.payload.pull_request.head.sha}`,
+            ].join("\n")
+            const { owner, repo } = context.repo
+            const issue_number = context.payload.pull_request.number
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+            const mine = comments.find((c) => c.body?.includes(marker))
+            if (mine) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body })
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body })
+
+  site-teardown:
+    name: Tear down site preview
+    needs: gate
+    if: >-
+      needs.gate.outputs.cloudflare == 'true' &&
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: apps/worker/scripts
+      - uses: jdx/mise-action@v4
+
+      # A no-op when the PR never had a site preview.
+      - name: Delete the site preview Worker
+        run: node apps/worker/scripts/ci.mjs script-delete "$SITE_PREVIEW"
+
+      - name: Mark the site preview comment as torn down
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const marker = "<!-- seply-site-preview -->"
+            const { owner, repo } = context.repo
+            const issue_number = context.payload.pull_request.number
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number })
+            const mine = comments.find((c) => c.body?.includes(marker))
+            if (mine) {
+              const body = `${marker}\n**Site preview torn down** (PR closed): Worker \`${process.env.SITE_PREVIEW}\` was deleted.`
+              await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body })
+            }
+
+  site-production:
+    name: Deploy site
+    needs: gate
+    if: >-
+      needs.gate.outputs.cloudflare == 'true' &&
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: site
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # The custom domain; the repo variable SITE_DOMAIN=none keeps it on workers.dev.
+      SITE_DOMAIN: ${{ vars.SITE_DOMAIN || 'seply.app' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The commit CI just passed, not whatever main is now.
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: ./.github/actions/setup
+
+      - name: Build the site
+        env:
+          SITE_ENV: production
+          # The Web Analytics site token. It is public (the page carries it), so a
+          # repo variable; a secret of the same name works too. Unset: no beacon.
+          CF_ANALYTICS_TOKEN: ${{ vars.CF_ANALYTICS_TOKEN || secrets.CF_ANALYTICS_TOKEN }}
+        run: pnpm --filter @seply/site build
+
+      # --domain attaches the custom domain (and its DNS record) to this Worker
+      # only; previews deploy from the same config without it. The token needs
+      # Zone: Read, DNS: Edit and Workers Routes: Edit on the zone (docs/ops/deploy.md).
+      - name: Deploy
+        id: deploy
+        working-directory: apps/site
+        run: |
+          set -o pipefail
+          domain=()
+          if [ "$SITE_DOMAIN" != "none" ]; then domain=(--domain "$SITE_DOMAIN"); fi
+          pnpm exec wrangler deploy "${domain[@]}" | tee deploy.log
+          workers_dev=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
+          echo "workers_dev=$workers_dev" >> "$GITHUB_OUTPUT"
+          if [ "$SITE_DOMAIN" != "none" ]; then
+            echo "url=https://$SITE_DOMAIN" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=$workers_dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check the workers.dev URL
+        if: steps.deploy.outputs.workers_dev != ''
+        env:
+          URL: ${{ steps.deploy.outputs.workers_dev }}
+        run: node apps/site/scripts/check-deploy.mjs "$URL" production
+
+      # A newly attached custom domain can take a few minutes to get its certificate.
+      - name: Check the custom domain
+        if: env.SITE_DOMAIN != 'none'
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: node apps/site/scripts/check-deploy.mjs "$URL" production 30

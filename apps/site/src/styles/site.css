@@ -1,0 +1,32 @@
+/*
+ * The site's one stylesheet. It takes the app's tokens and fonts from
+ * @seply/ui but not globals.css: that also scans the app's sources for
+ * Tailwind classes and carries Typeset and Base UI fixes the site doesn't need.
+ */
+@import "tailwindcss" source(none);
+@import "@seply/ui/fonts.css";
+@import "@seply/ui/tokens.css";
+/* The dark palette follows the system: <html class="theme-system"> plus this media query. */
+@import "@seply/ui/tokens-dark.css" (prefers-color-scheme: dark);
+
+@source "../**/*.{astro,ts,tsx}";
+/* The @seply/ui components the pages render at build time. */
+@source "../../../../packages/ui/src/components/brand.tsx";
+@source "../../../../packages/ui/src/components/button.tsx";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}

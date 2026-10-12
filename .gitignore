@@ -45,3 +45,6 @@ dist-ssr/
 /basemap-*.pmtiles
 # The Docker compose tiles folder (docs/self-host.md).
 /tiles/
+
+# Astro generated types
+.astro/
