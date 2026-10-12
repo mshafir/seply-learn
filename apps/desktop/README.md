@@ -10,12 +10,14 @@ It ships no copy of the web client. A server always gets the client it serves, s
 - **A server's page is untrusted.** The renderer is sandboxed, with context isolation, no Node and no `webview`. It may ask for notifications and clipboard write; every other permission is refused.
 - **The bridge** is `window.seplyDesktop`, attached by `src/preload.ts` only on the chosen server's origin. It is the whole native surface:
 
-  | Member    | Does                     | Since  |
-  | --------- | ------------------------ | ------ |
-  | `version` | The bridge version (`1`) | WP-8.1 |
+  | Member                | Does                                                                                                                                                                            | Since  |
+  | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+  | `version`             | The bridge version (`1`)                                                                                                                                                        | WP-8.1 |
+  | `signInWithBrowser()` | Opens `<server>/desktop/sign-in` in the system browser with a challenge; the `seply://<host>/auth?token=…` link that comes back finishes the sign-in in the window (spec §10.3) | WP-8.2 |
 
-  Sign-in through the browser, notifications and opened files add their members in WP-8.2 to WP-8.4. The web client feature-detects each one.
+  Notifications and opened files add their members in WP-8.3 and WP-8.4. The web client feature-detects each one.
 
+- **`seply://` links** come from outside, so each is checked first (`src/deep-link.ts`): the host must be the chosen server, and only `seply://<host>/auth?token=…` is handled so far. It finishes a sign-in only if the app started one in the last 10 minutes (`src/sign-in.ts`); the app keeps the verifier the server asks for, so a link from anywhere else signs nobody in. A packaged app registers the scheme; an unpackaged run does with `SEPLY_DESKTOP_REGISTER_SCHEME=1`.
 - **The chosen server** is checked before it is saved: the address is reduced to its origin, must be `https` unless it is on this machine or a private network, and must answer `GET /api/instance` as `seply-learn` (`src/server-url.ts`).
 - **The setting** is `settings.json` in the user-data folder: the server's origin and the window's bounds. Nothing secret. A broken or edited file reads as the defaults (`src/settings.ts`).
 - **The shell page** (`renderer/`) is the only UI the app ships: the server picker (**Server…** in the app menu) and "Can't reach the server". It is built from `@seply/ui` components and loaded from disk in its own small window, with its own preload (`src/shell-preload.ts`). A server's page never sees it.

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { mkdtempSync, readFileSync } from "node:fs"
 import { createServer, type Server } from "node:http"
 import type { AddressInfo } from "node:net"
@@ -12,7 +13,8 @@ import {
 } from "@playwright/test"
 
 // WP-8.1: the shell, driven as a person would, against stand-in servers
-// (each a few lines of HTTP: a page and /api/instance). It needs the built
+// (each a few lines of HTTP: a page and /api/instance). WP-8.2 adds sign-in
+// through the browser: the link out, and the seply:// link back. It needs the built
 // app (`pnpm --filter desktop build`). The full flow against a real server
 // (sign-in, links, files) comes with WP-8.5.
 
@@ -31,7 +33,10 @@ async function standIn(product: string | null): Promise<Server> {
       res.setHeader("content-type", "text/html")
       res.end(
         `<title>Stand-in</title><h1>Stand-in ${product}</h1>
-         <a id="out" href="https://example.com/elsewhere">out</a>`
+         <a id="out" href="https://example.com/elsewhere">out</a>
+         <button id="google" onclick="seplyDesktop.signInWithBrowser()">
+           Continue with Google
+         </button>`
       )
     }
   })
@@ -89,7 +94,15 @@ test("opens the chosen server, with the bridge, and keeps other sites out", asyn
   await expect(page.locator("h1")).toHaveText("Stand-in seply-learn")
 
   // The bridge, and nothing of Node.
-  expect(await page.evaluate(() => window.seplyDesktop)).toEqual({ version: 1 })
+  expect(
+    await page.evaluate(() =>
+      Object.entries(window.seplyDesktop!).map(([k, v]) => [k, typeof v])
+    )
+  ).toEqual([
+    ["version", "number"],
+    ["signInWithBrowser", "function"],
+  ])
+  expect(await page.evaluate(() => window.seplyDesktop!.version)).toBe(1)
   expect(await page.evaluate(() => [typeof require, typeof process])).toEqual([
     "undefined",
     "undefined",
@@ -179,8 +192,84 @@ test("an unreachable server shows the shell page; a checked address is saved", a
   ).toMatchObject({ server: originOf(seply) })
 })
 
+/** Records what the app would open in the browser, and what it would say. */
+async function watch(app: ElectronApplication) {
+  await app.evaluate(({ shell, dialog }) => {
+    const seen = { opened: [] as string[], told: [] as string[] }
+    ;(globalThis as { seen?: typeof seen }).seen = seen
+    shell.openExternal = async (url) => void seen.opened.push(url)
+    dialog.showMessageBox = (async (...args: unknown[]) => {
+      const options = args.at(-1) as { message: string }
+      seen.told.push(options.message)
+      return { response: 0, checkboxChecked: false }
+    }) as typeof dialog.showMessageBox
+  })
+  const seen = () =>
+    app.evaluate(
+      () =>
+        (globalThis as { seen?: { opened: string[]; told: string[] } }).seen!
+    )
+  /** A seply:// link arriving from outside, as macOS delivers it. */
+  const link = (url: string) =>
+    app.evaluate(
+      ({ app }, url) => void app.emit("open-url", { preventDefault() {} }, url),
+      url
+    )
+  return { seen, link }
+}
+
+const TOKEN = "Zk3vQ9xT1mB7cR5wYp2LhN8dJ6sAf4Gu"
+
+test("Google sign-in goes out to the browser and comes back as a link", async () => {
+  const seply = await standIn("seply-learn")
+  servers.push(seply)
+  const origin = originOf(seply)
+  const host = new URL(origin).host
+  const { app } = await launch(origin)
+  running = app
+  const page = await windowAt(app, /^http:\/\/localhost/)
+  const { seen, link } = await watch(app)
+
+  // A link nobody asked for signs nobody in.
+  await link(`seply://${host}/auth?token=${TOKEN}`)
+  await expect.poll(async () => (await seen()).told).toHaveLength(1)
+  expect(page.url()).toBe(`${origin}/`)
+
+  // The app sends the browser a challenge, and keeps the verifier.
+  await page.locator("#google").click()
+  await expect.poll(async () => (await seen()).opened).toHaveLength(1)
+  const sent = new URL((await seen()).opened[0]!)
+  expect(sent.origin + sent.pathname).toBe(`${origin}/desktop/sign-in`)
+  const challenge = sent.searchParams.get("challenge")!
+  expect(challenge).toMatch(/^[A-Za-z0-9_-]{43}$/)
+
+  // A link for another server is refused, and the sign-in is still waiting.
+  await link(`seply://evil.example.com/auth?token=${TOKEN}`)
+  await expect.poll(async () => (await seen()).told).toHaveLength(2)
+  expect((await seen()).told[1]).toContain("evil.example.com")
+  expect(page.url()).toBe(`${origin}/`)
+
+  // The browser's link: the window finishes the sign-in with the verifier
+  // that matches the challenge, and nothing was said.
+  await link(`seply://${host}/auth?token=${TOKEN}`)
+  await expect
+    .poll(() => page.url())
+    .toContain(`${origin}/desktop/complete#token=${TOKEN}&verifier=`)
+  const verifier = new URLSearchParams(new URL(page.url()).hash.slice(1)).get(
+    "verifier"
+  )!
+  expect(createHash("sha256").update(verifier).digest("base64url")).toBe(
+    challenge
+  )
+  expect((await seen()).told).toHaveLength(2)
+
+  // The same link again: that sign-in is over.
+  await link(`seply://${host}/auth?token=${TOKEN}`)
+  await expect.poll(async () => (await seen()).told).toHaveLength(3)
+})
+
 declare global {
   interface Window {
-    seplyDesktop?: { version: number }
+    seplyDesktop?: { version: number; signInWithBrowser: () => Promise<void> }
   }
 }

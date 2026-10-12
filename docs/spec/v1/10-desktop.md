@@ -33,13 +33,17 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 
 - **Email and password** works in the window as on the web.
 - **Google** can't run in the window: Google refuses OAuth in embedded browsers. So on desktop the sign-in screen's Google button calls `seplyDesktop.signInWithBrowser()` instead of redirecting:
-  1. The app opens `<server>/desktop/sign-in` in the system browser.
-  2. That page signs the reader in the normal way (or finds them signed in), asks "Open Seply Learn?", and on confirm asks the server for a **one-time token** for their session.
-  3. It redirects to `seply://<server-host>/auth?token=<token>`.
-  4. The app checks the host is the chosen server, then loads `<server>/api/auth/one-time-token/verify` in the window. The server sets the ordinary session cookie and the window lands on the Library.
-- **The token** is single-use and expires in 60 seconds (Better Auth's `one-time-token` plugin, stored hashed). It is the only new credential path. The app never stores it and never sees the session cookie's value.
+  1. The app makes a random **verifier**, keeps it, and opens `<server>/desktop/sign-in?challenge=<SHA-256 of the verifier>` in the system browser.
+  2. That page signs the reader in the normal way (or finds them signed in), asks "Open Seply Learn?" with the account's email, and on confirm asks the server for a **one-time token** for that challenge (`POST /api/auth/desktop/handoff`, signed in).
+  3. It opens `seply://<server-host>/auth?token=<token>`.
+  4. The app checks the host is the chosen server and that it is waiting for a sign-in it started in the last 10 minutes. Then it loads `<server>/desktop/complete#token=…&verifier=…` in the window. That page posts both to `POST /api/auth/desktop/session`, the server sets an ordinary session cookie, and the window lands on the Library.
+- **The token** is single-use, expires in 60 seconds and is stored hashed, in Better Auth's `verifications` table (no new table). It is the only new credential path.
+- **The token alone signs nobody in.** The server gives a session only for the token together with the verifier whose hash the token was made for (as in PKCE). So a link that leaks, a link another program on the machine picks up, or a link made by somebody else's browser to sign the reader in to the wrong account, all fail. A token gets one try: a wrong verifier spends it.
+- **The app gets a session of its own,** so signing out in the app leaves the browser signed in, and the other way round.
+- **The app never stores** the token, the verifier (memory only) or the session cookie's value.
 - **An auth link for another server** than the chosen one is refused with a message; it never switches servers.
 - **Sign-out** is the web client's. MCP and API tokens are unaffected.
+- *As built (WP-8.2):* Better Auth's `one-time-token` plugin was not used (assumption 2). Its verify is a POST that hands back the browser's own session, so signing out of the app would have signed the browser out, and it has no verifier. The handoff is a small Better Auth plugin of ours (`packages/server/src/desktop-handoff.ts`) built on the same parts. Until installers register the scheme (WP-8.5), an unpackaged run handles `seply://` links only with `SEPLY_DESKTOP_REGISTER_SCHEME=1`.
 
 ## 10.4 Native integration
 
@@ -68,7 +72,7 @@ A self-hosted server's code runs in the window, so the shell treats the page as 
   | Member | Does |
   |---|---|
   | `version` | The bridge version (1) |
-  | `signInWithBrowser()` | Opens `<server>/desktop/sign-in` in the system browser |
+  | `signInWithBrowser()` | Opens `<server>/desktop/sign-in` in the system browser, with a challenge only the app can answer |
   | `notify({ title, body, url, tag })` | Shows a notification; `url` must be a path on the server |
   | `requestNotificationPermission()` | Asks the OS, answers granted or denied |
   | `onOpenFiles(cb)` | Delivers files the reader opened with the app, as name, type and bytes |
@@ -94,5 +98,5 @@ A self-hosted server's code runs in the window, so the shell treats the page as 
 ## Assumptions
 
 1. The `jobs` table records when a job ended; if it doesn't, the notifications work package adds the column.
-2. `one-time-token` in Better Auth 1.7 can mint a token for the current session from a server route and set the session cookie on verify by navigation. The sign-in work package confirms this first and falls back to a small purpose-built handoff table if not.
+2. ~~`one-time-token` in Better Auth 1.7 can mint a token for the current session from a server route and set the session cookie on verify by navigation.~~ It can't do what §10.3 needs; WP-8.2 built a small handoff plugin instead (see §10.3, *As built*).
 3. The service worker and IndexedDB behave in Electron as in Chrome for the server's origin; the Electron e2e run covers the offline open.

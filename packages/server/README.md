@@ -41,6 +41,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
 
 - `GET /sign-in-options`: `{ google, emailPassword, signUp }` (see "Email + password sign-in" below).
 - `GET /instance`: `{ product: "seply-learn", desktopBridge, hosted }`, with no session and no database. `hosted` is true only when `BETTER_AUTH_URL` is `https://learn.seply.app` (`HOSTED_ORIGIN`). The setup page (`/connect`, spec §6.4) and the desktop app (spec §10.2) read it.
+- `POST /auth/desktop/handoff` and `POST /auth/desktop/session` (WP-8.2, spec §10.3; `src/desktop-handoff.ts`, a Better Auth plugin): the desktop app's sign-in through the system browser. A signed-in browser gets a one-time token for the app's `challenge` (a SHA-256 in base64url); the app's window trades `{ token, verifier }` for a session of its own. The token is single-use, lasts 60 seconds, is stored hashed in `verifications`, and is spent by a wrong verifier.
 - `GET /map-config`: `{ tiles, assets }`, the Map View's basemap when the runtime sets it (`MAP_TILES_URL`, `MAP_ASSETS_URL`; each `null` otherwise). The web app prefers these over its build's `VITE_MAP_*`, so a prebuilt self-host image can point at its own PMTiles extract (WP-6.2, [docs/ops/basemap-tiles.md](../../docs/ops/basemap-tiles.md)).
 - `GET /health`: `{ ok, db, branch }`. `db` is `select current_database()`, `"unconfigured"` with no database, `"error"` (503) when it fails.
 - `/auth/*`: Better Auth (sign-in, callbacks including `/auth/callback/google/oauth-proxy`, session, sign-out).

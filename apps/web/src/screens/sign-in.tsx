@@ -33,6 +33,7 @@ import {
   signInWithGoogle,
   type SignInOptions,
 } from "@/lib/api.ts"
+import { desktopBridge } from "@/lib/desktop.ts"
 import { authorizeUrl, signedOAuthQuery } from "@/lib/oauth.ts"
 import { useSession } from "@/lib/session.ts"
 
@@ -49,6 +50,8 @@ export function SignInScreen() {
   const oauthQuery = signedOAuthQuery(window.location.search)
   const signedIn = session.status === "signed-in"
   const [options, setOptions] = React.useState<SignInOptions | null>(null)
+  // On desktop: the sign-in has gone out to the system browser.
+  const [inBrowser, setInBrowser] = React.useState(false)
 
   React.useEffect(() => {
     let live = true
@@ -72,7 +75,22 @@ export function SignInScreen() {
       <Redirect to={next} replace />
     )
 
+  // In the desktop app Google can't run in the window (it refuses embedded
+  // browsers), so the app opens the system browser and the sign-in comes back
+  // as a link (spec §10.3).
+  const viaBrowser = desktopBridge()?.signInWithBrowser
   const start = () => {
+    if (viaBrowser) {
+      viaBrowser().then(
+        () => setInBrowser(true),
+        () =>
+          toast.add({
+            title: "Couldn't open your browser",
+            type: "error",
+          })
+      )
+      return
+    }
     setStarting(true)
     signInWithGoogle(next, oauthQuery ?? undefined).catch(() => {
       setStarting(false)
@@ -127,6 +145,15 @@ export function SignInScreen() {
                   {starting && <Spinner />}
                   Continue with Google
                 </Button>
+              )}
+              {inBrowser && (
+                <p
+                  role="status"
+                  className="text-center text-sm text-muted-foreground"
+                >
+                  Finish signing in in your browser. This window signs in when
+                  you come back.
+                </p>
               )}
             </FieldGroup>
           )}
