@@ -17,6 +17,7 @@ This spec is **build-ready**: every decision it relies on was made on the [wayfi
 | 7 | [Design system](07-design-system.md) | shadcn with Base UI, tokens, dark mode, divergences, branding |
 | 8 | [Phase 2 sketch](08-phase-2.md) | What comes after v1, and what v1 must not block |
 | 9 | [Landing site](09-landing-site.md) | `seply.app`: the static site, its pages, screenshots, the explainer video, the live embed and the showcases |
+| 10 | [Desktop app](10-desktop.md) | The Electron shell: choosing a server, sign-in, deep links, files, notifications, packaging |
 
 ## Vocabulary
 
@@ -29,7 +30,7 @@ This spec is **build-ready**: every decision it relies on was made on the [wayfi
   - Tailwind v4, with **dark mode** required.
   - Hono backend; Drizzle over Postgres; Better Auth (Google login by default).
   - **Core AI SDK 7** for in-app AI; MCP TS SDK for the MCP server.
-- **Hosting:** the **web app on Cloudflare** is the first milestone. **Self-hosting** (docker compose) comes next. A **desktop** app (Electron, local-first) is phase 2; v1 is an installable PWA.
+- **Hosting:** the **web app on Cloudflare** is the first milestone. **Self-hosting** (docker compose) comes next. v1 is an installable PWA. A **desktop** app comes after self-hosting, first as an Electron shell around a server's web client ([§10](10-desktop.md)); local-first desktop is phase 2.
 - **Collaboration:** multi-editor, recorded as operations. v1 has live presence and live updates. Character-level text co-editing is phase 2, and the model doesn't block it.
 
 ## v1 scope in one screen

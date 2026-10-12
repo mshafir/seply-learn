@@ -18,6 +18,7 @@ apps/
   web          Vite SPA (routes, screens), installable PWA
   worker       Cloudflare entry: Worker + Expedition Durable Object + build Workflow
   server-node  Node entry: Hono + in-process rooms + pg-boss worker (self-host image)
+  desktop      Electron shell: loads a server's web client; takes only config and ui's tokens and brand (§10)
 packages/
   domain   Drizzle schema, op kinds, pure apply(), View Type Zod schemas (shared + personal), permissions
   sync     op engine, push/pull client, TanStack DB collections, Relay client (partysocket)
@@ -139,3 +140,4 @@ Relay {
 - **Self-host:** release tags publish the Node image. `docker compose` runs the app and Postgres, with an optional S3 bucket. Configuration is env vars only. *As built (WP-6.1):* `apps/server-node` validates its env at startup and stops with every problem listed, applies migrations on start (or `migrate`), and shuts down gracefully on SIGTERM. Its README lists every variable. *As built (WP-6.2):* the root `Dockerfile` bundles the Node entry with esbuild into one module and ships it with the migrations and the SPA on `node:24-alpine` (no `node_modules`; about 70 MB compressed), running as a non-root user with a health check. `docker-compose.yml` runs it with Postgres 17, and the `s3` profile adds MinIO (a community build: MinIO no longer publishes images) with a one-shot bucket container. The Image workflow runs a compose smoke test on pull requests and publishes `ghcr.io/mshafir/seply-learn` (amd64 and arm64) on `v*` tags. Guide: [docs/self-host.md](../../self-host.md).
 - **Landing site:** `apps/site` is a separate static Worker on the `seply.app` apex, deployed by the same workflow; see [9. Landing site](09-landing-site.md).
 - **Desktop:** none in v1. Electron (local-first, SQLite, offline op queue) is phase 2.
+- **Desktop:** an Electron shell that loads a server's web client, released from `desktop-v*` tags ([§10](10-desktop.md)). Local-first (SQLite, offline op queue) is phase 2.
