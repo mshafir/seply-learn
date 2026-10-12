@@ -25,7 +25,7 @@ const video = explainer()
         >
           {video.webm && <source src={video.webm} type="video/webm" />}
           {video.mp4 && <source src={video.mp4} type="video/mp4" />}
-          {video.captions && <track kind="captions" srclang="en" label="English" src={video.captions} default />}
+          {video.captions && <track kind="captions" srclang="en" label="English" src={video.captions} />}
         </video>
       ) : (
         <div
