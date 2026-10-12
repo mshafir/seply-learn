@@ -456,6 +456,8 @@ jobs:
         if: steps.paths.outputs.changed == 'true'
         env:
           SITE_ENV: preview
+          # A public showcase View for the Read together section (spec 9.3); unset shows the screenshot.
+          SITE_EMBED_URL: ${{ vars.SITE_EMBED_URL }}
         run: pnpm --filter @seply/site build
 
       - name: Work out the Worker URL
@@ -584,6 +586,7 @@ jobs:
       - name: Build the site
         env:
           SITE_ENV: production
+          SITE_EMBED_URL: ${{ vars.SITE_EMBED_URL }}
           # The Web Analytics site token. It is public (the page carries it), so a
           # repo variable; a secret of the same name works too. Unset: no beacon.
           CF_ANALYTICS_TOKEN: ${{ vars.CF_ANALYTICS_TOKEN || secrets.CF_ANALYTICS_TOKEN }}
