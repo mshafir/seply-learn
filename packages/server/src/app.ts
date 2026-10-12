@@ -18,6 +18,7 @@ import { createFlowRoutes } from "./create.ts"
 import type { BlobStore } from "./blobs.ts"
 import {
   ConfigError,
+  HOSTED_ORIGIN,
   readConfig,
   type ServerConfig,
   type ServerEnv,
@@ -284,6 +285,16 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
       return c.json({ ok: false, db: "error", branch }, 503)
     }
   })
+
+  // What this server is (spec §9.2, §6.4): the desktop app checks it before
+  // it saves a server, and the setup page picks hosted or self-hosted steps.
+  app.get("/instance", (c) =>
+    c.json({
+      product: "seply-learn",
+      desktopBridge: 1,
+      hosted: c.var.config().baseURL === HOSTED_ORIGIN,
+    })
+  )
 
   // How the sign-in screen offers sign-in (WP-6.1). Google shows whenever
   // email + password isn't on, as hosted. Test credentials have no UI.

@@ -20,7 +20,7 @@ An installed app for macOS, Windows and Linux. It is a **shell**: an Electron wi
 - **The picker** takes a URL, reduces it to its origin, and calls `GET <origin>/api/instance` (new, public):
 
   ```json
-  { "product": "seply-learn", "version": "1.4.0", "desktopBridge": 1, "hosted": false }
+  { "product": "seply-learn", "desktopBridge": 1, "hosted": false }
   ```
 
   It saves the server only if `product` is `seply-learn`. `hosted` is true only on `learn.seply.app`; the setup page uses it ([MCP §6.4](06-mcp.md#64-connecting-an-agent)). `desktopBridge` is the newest bridge version the server's client understands; a shell newer than that still works, because the client only calls what it finds.
