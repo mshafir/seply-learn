@@ -5,6 +5,9 @@
 //   /                   the Library
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
+//   /e/:id/embed        the live embed is its own page (embed.html, served
+//                       by the server for Public Expeditions only); the app
+//                       shell (an older cached service worker) shows nothing
 //   /new/:id(/views)    the create flow: Sources, then Choose Views (WP-3.4)
 //   /settings           Settings: AI keys, models and the per-ask cap (WP-3.3)
 //   /settings/access-requests  Admin › Access requests (hosted access approval, WP-7.3)
@@ -77,6 +80,11 @@ export function App() {
             <InviteScreen token={params.token} />
           </WaitForSession>
         )}
+      </Route>
+      <Route path="/e/:id/embed">
+        <div className="flex min-h-svh items-center justify-center p-6 text-sm text-muted-foreground">
+          This Expedition isn't available.
+        </div>
       </Route>
       <Route path="/e/:id/:viewId?">
         {(params) => (

@@ -4,6 +4,8 @@ import type { ExpeditionRoom } from "./room.ts"
 /** This Worker's env: the server's vars and secrets, plus its bindings. */
 export type Bindings = ServerEnv & {
   HYPERDRIVE?: Hyperdrive
+  /** The web build (apps/web/dist): the live embed's page comes from here. */
+  ASSETS?: Fetcher
   /** Source files and segments. */
   SOURCES?: R2Bucket
   EXPEDITION_ROOM: DurableObjectNamespace<ExpeditionRoom>
