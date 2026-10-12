@@ -1,0 +1,26 @@
+/* The app's look: @seply/ui's tokens and fonts, React Flow's sheet, then the Views' own. */
+@import "@seply/ui/globals.css";
+@import "@xyflow/react/dist/style.css";
+@import "@seply/views/canvas.css";
+
+/* Tailwind scans the video's components and the @seply/ui components it uses. */
+@source "./**/*.tsx";
+@source "../../../packages/ui/src/components/**/*.tsx";
+
+/*
+ * Motion comes only from the frame. CSS transitions and animations run on the
+ * wall clock, which a rendered frame doesn't have, so they are off.
+ */
+*,
+*::before,
+*::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Zoom controls have nothing to do in a video. */
+.react-flow__controls,
+.react-flow__attribution,
+.maplibregl-ctrl-top-right {
+  display: none;
+}

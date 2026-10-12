@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "id": "ebike",
+  "title": "E-bike for the commute",
+  "summary": "Synthetic fixture: three made-up e-bikes compared for a hilly commute, with what you need to know to judge them. The bikes and their numbers are invented.",
+  "tags": [
+    "synthetic",
+    "comparison"
+  ],
+  "bestViewId": "compare",
+  "kinds": [],
+  "relationshipTypes": [],
+  "attributes": [
+    {
+      "id": "torque",
+      "label": "Torque",
+      "type": "number",
+      "unit": "Nm"
+    },
+    {
+      "id": "weight",
+      "label": "Weight",
+      "type": "number",
+      "unit": "kg"
+    },
+    {
+      "id": "price",
+      "label": "Price",
+      "type": "money"
+    },
+    {
+      "id": "drivetrain",
+      "label": "Drivetrain",
+      "type": "text"
+    },
+    {
+      "id": "standing",
+      "label": "Standing",
+      "type": "enum",
+      "enumValues": [
+        "chosen",
+        "in-play",
+        "ruled-out"
+      ]
+    },
+    {
+      "id": "priority",
+      "label": "Priority",
+      "type": "enum",
+      "enumValues": [
+        "hard",
+        "nice",
+        "dropped"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "question",
+      "kind": "prompt",
+      "title": "Which e-bike gets me up the hills on my commute?",
+      "addedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "commute-chat",
+      "kind": "chat",
+      "title": "Chat: e-bikes for a hilly commute",
+      "addedAt": "2026-09-01T00:00:00.000Z"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "alder-c5",
+      "title": "Alder C5",
+      "kind": "builtin:thing",
+      "tags": [
+        "option"
+      ],
+      "summary": "A mid-drive commuter with a 10-speed chain.",
+      "attributes": {
+        "torque": 75,
+        "weight": 24,
+        "price": 3200,
+        "drivetrain": "10-speed chain",
+        "standing": "in-play"
+      }
+    },
+    {
+      "id": "birch-metro-8",
+      "title": "Birch Metro 8",
+      "kind": "builtin:thing",
+      "tags": [
+        "option"
+      ],
+      "summary": "A strong mid-drive with a belt and an 8-speed internal hub.",
+      "attributes": {
+        "torque": 85,
+        "weight": 26,
+        "price": 3400,
+        "drivetrain": "Belt + internal hub",
+        "standing": "chosen"
+      }
+    },
+    {
+      "id": "cedar-urban",
+      "title": "Cedar Urban",
+      "kind": "builtin:thing",
+      "tags": [
+        "option"
+      ],
+      "summary": "A light, cheaper rear-hub bike with a 9-speed chain.",
+      "attributes": {
+        "torque": 80,
+        "weight": 23,
+        "price": 2300,
+        "drivetrain": "9-speed chain",
+        "standing": "in-play"
+      }
+    },
+    {
+      "id": "hills",
+      "title": "Hill climbing",
+      "kind": "builtin:criterion",
+      "tags": [],
+      "summary": "Gets up the 12% ramp on the way home without walking.",
+      "attributes": {
+        "priority": "hard"
+      }
+    },
+    {
+      "id": "low-maintenance",
+      "title": "Low maintenance",
+      "kind": "builtin:criterion",
+      "tags": [],
+      "summary": "Rides through winter with little cleaning or adjusting.",
+      "attributes": {
+        "priority": "nice"
+      }
+    },
+    {
+      "id": "stairs",
+      "title": "Weight for the stairs",
+      "kind": "builtin:criterion",
+      "tags": [],
+      "summary": "Light enough to carry up two flights to the flat.",
+      "attributes": {
+        "priority": "hard"
+      }
+    },
+    {
+      "id": "theft",
+      "title": "Theft protection",
+      "kind": "builtin:criterion",
+      "tags": [],
+      "summary": "Parked at the station all day, so it needs to be hard to steal.",
+      "attributes": {
+        "priority": "nice"
+      }
+    },
+    {
+      "id": "price",
+      "title": "Price",
+      "kind": "builtin:criterion",
+      "tags": [],
+      "summary": "Stays near the $3,000 budget.",
+      "attributes": {
+        "priority": "hard"
+      }
+    },
+    {
+      "id": "motor-types",
+      "title": "Motor types",
+      "kind": "builtin:topic",
+      "tags": [
+        "topic"
+      ],
+      "summary": "Where the motor sits, and what that does on a climb."
+    },
+    {
+      "id": "battery-size",
+      "title": "Battery size",
+      "kind": "builtin:topic",
+      "tags": [
+        "topic"
+      ],
+      "summary": "How much energy the bike carries, and how far it goes on hills."
+    },
+    {
+      "id": "mid-drive",
+      "title": "Mid-drive motor",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "A motor at the cranks that drives through the bike's gears."
+    },
+    {
+      "id": "hub-motor",
+      "title": "Rear hub motor",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "A motor in the back wheel: simpler and cheaper, weaker on long climbs."
+    },
+    {
+      "id": "torque",
+      "title": "Torque (Nm)",
+      "kind": "builtin:measurement",
+      "tags": [],
+      "summary": "How hard the motor pushes; what matters most on steep hills.",
+      "prov": [
+        {
+          "source": "commute-chat",
+          "segment": "turn-3",
+          "quote": "On a 12% ramp, look at torque before anything else."
+        }
+      ]
+    },
+    {
+      "id": "watt-hours",
+      "title": "Watt-hours",
+      "kind": "builtin:measurement",
+      "tags": [],
+      "summary": "Battery capacity: a 500 Wh pack is about 40 hilly kilometres."
+    },
+    {
+      "id": "range-on-hills",
+      "title": "Range on hills",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "Climbing uses the battery about twice as fast as the flat."
+    },
+    {
+      "id": "chain-drive",
+      "title": "Chain and derailleur",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "Light and cheap, but needs cleaning and wears out."
+    },
+    {
+      "id": "belt-hub",
+      "title": "Belt and internal hub",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "A sealed, quiet drivetrain that needs almost no care."
+    },
+    {
+      "id": "frame-lock",
+      "title": "Frame lock and GPS tag",
+      "kind": "builtin:idea",
+      "tags": [],
+      "summary": "A built-in ring lock plus a hidden tracker."
+    }
+  ],
+  "relationships": [
+    {
+      "from": "mid-drive",
+      "type": "builtin:example",
+      "to": "motor-types"
+    },
+    {
+      "from": "hub-motor",
+      "type": "builtin:example",
+      "to": "motor-types"
+    },
+    {
+      "from": "hub-motor",
+      "type": "builtin:alternative-to",
+      "to": "mid-drive"
+    },
+    {
+      "from": "torque",
+      "type": "builtin:prerequisite",
+      "to": "mid-drive"
+    },
+    {
+      "from": "torque",
+      "type": "builtin:prerequisite",
+      "to": "hub-motor"
+    },
+    {
+      "from": "mid-drive",
+      "type": "builtin:prerequisite",
+      "to": "hills"
+    },
+    {
+      "from": "hub-motor",
+      "type": "builtin:prerequisite",
+      "to": "hills"
+    },
+    {
+      "from": "watt-hours",
+      "type": "builtin:prerequisite",
+      "to": "battery-size"
+    },
+    {
+      "from": "battery-size",
+      "type": "builtin:prerequisite",
+      "to": "range-on-hills"
+    },
+    {
+      "from": "range-on-hills",
+      "type": "builtin:prerequisite",
+      "to": "hills"
+    },
+    {
+      "from": "chain-drive",
+      "type": "builtin:prerequisite",
+      "to": "low-maintenance"
+    },
+    {
+      "from": "belt-hub",
+      "type": "builtin:prerequisite",
+      "to": "low-maintenance"
+    },
+    {
+      "from": "hills",
+      "type": "builtin:prerequisite",
+      "to": "alder-c5"
+    },
+    {
+      "from": "hills",
+      "type": "builtin:prerequisite",
+      "to": "birch-metro-8"
+    },
+    {
+      "from": "hills",
+      "type": "builtin:prerequisite",
+      "to": "cedar-urban"
+    },
+    {
+      "from": "low-maintenance",
+      "type": "builtin:prerequisite",
+      "to": "birch-metro-8"
+    },
+    {
+      "from": "frame-lock",
+      "type": "builtin:prerequisite",
+      "to": "theft"
+    },
+    {
+      "from": "theft",
+      "type": "builtin:prerequisite",
+      "to": "birch-metro-8"
+    },
+    {
+      "from": "stairs",
+      "type": "builtin:prerequisite",
+      "to": "cedar-urban"
+    },
+    {
+      "from": "price",
+      "type": "builtin:prerequisite",
+      "to": "cedar-urban"
+    },
+    {
+      "from": "alder-c5",
+      "type": "builtin:meets",
+      "to": "hills",
+      "note": "mid-drive"
+    },
+    {
+      "from": "alder-c5",
+      "type": "builtin:partly-meets",
+      "to": "low-maintenance",
+      "note": "chain"
+    },
+    {
+      "from": "alder-c5",
+      "type": "builtin:partly-meets",
+      "to": "stairs"
+    },
+    {
+      "from": "alder-c5",
+      "type": "builtin:fails",
+      "to": "theft"
+    },
+    {
+      "from": "alder-c5",
+      "type": "builtin:meets",
+      "to": "price",
+      "note": "$200 over"
+    },
+    {
+      "from": "birch-metro-8",
+      "type": "builtin:meets",
+      "to": "hills",
+      "note": "mid-drive"
+    },
+    {
+      "from": "birch-metro-8",
+      "type": "builtin:meets",
+      "to": "low-maintenance",
+      "note": "belt drive"
+    },
+    {
+      "from": "birch-metro-8",
+      "type": "builtin:fails",
+      "to": "stairs"
+    },
+    {
+      "from": "birch-metro-8",
+      "type": "builtin:meets",
+      "to": "theft",
+      "note": "frame lock"
+    },
+    {
+      "from": "birch-metro-8",
+      "type": "builtin:partly-meets",
+      "to": "price",
+      "note": "$400 over"
+    },
+    {
+      "from": "cedar-urban",
+      "type": "builtin:partly-meets",
+      "to": "hills",
+      "note": "fades on climbs"
+    },
+    {
+      "from": "cedar-urban",
+      "type": "builtin:partly-meets",
+      "to": "low-maintenance",
+      "note": "chain"
+    },
+    {
+      "from": "cedar-urban",
+      "type": "builtin:meets",
+      "to": "stairs"
+    },
+    {
+      "from": "cedar-urban",
+      "type": "builtin:fails",
+      "to": "theft"
+    },
+    {
+      "from": "cedar-urban",
+      "type": "builtin:meets",
+      "to": "price",
+      "note": "under budget"
+    }
+  ],
+  "views": [
+    {
+      "id": "compare",
+      "viewType": "comparison-table",
+      "label": "Which bike?",
+      "question": "How do the three bikes stack up against the commute?",
+      "settings": {
+        "rows": {
+          "kinds": [
+            "builtin:thing"
+          ],
+          "tags": [
+            "option"
+          ]
+        },
+        "columns": [
+          {
+            "attribute": "torque"
+          },
+          {
+            "attribute": "weight"
+          },
+          {
+            "attribute": "price"
+          },
+          {
+            "criteria": "auto"
+          }
+        ],
+        "sortBy": "price",
+        "standing": "standing",
+        "priority": "priority"
+      },
+      "settingsVersion": 1
+    },
+    {
+      "id": "learn",
+      "viewType": "learning-path",
+      "label": "Learning path",
+      "question": "What do you need to understand to judge each bike?",
+      "settings": {
+        "relationshipTypes": [
+          "builtin:prerequisite"
+        ],
+        "targets": {
+          "tags": [
+            "option"
+          ]
+        }
+      },
+      "settingsVersion": 1
+    }
+  ]
+}

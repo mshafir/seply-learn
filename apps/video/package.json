@@ -1,0 +1,41 @@
+{
+  "name": "video",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "node --experimental-strip-types --no-warnings scripts/render.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@seply/domain": "workspace:*",
+    "@seply/ui": "workspace:*",
+    "@seply/views": "workspace:*",
+    "@xyflow/react": "^12.12.0",
+    "lucide-react": "^1.48.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "remotion": "4.0.527"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@remotion/bundler": "4.0.527",
+    "@remotion/cli": "4.0.527",
+    "@remotion/renderer": "4.0.527",
+    "@remotion/tailwind-v4": "4.0.527",
+    "@seply/config": "workspace:*",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^10",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17",
+    "tailwindcss": "^4",
+    "typescript": "~6",
+    "typescript-eslint": "^8",
+    "vitest": "^4"
+  }
+}

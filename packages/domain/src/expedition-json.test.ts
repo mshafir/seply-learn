@@ -227,6 +227,28 @@ describe("synthetic trip fixture", () => {
   })
 })
 
+describe("synthetic e-bike fixture", () => {
+  // Hand-written (no prototype): three made-up bikes for the explainer video
+  // (apps/video), with a Comparison Table and a Learning path.
+  it("imports with its bikes, criteria, a Source tag and both Views", () => {
+    const file = read("../fixtures/ebike.json")
+    const { state } = importExpeditionJson(file, options())
+    expect(counts(state)).toEqual({
+      concepts: file.concepts.length,
+      relationships: file.relationships.length,
+      views: file.views.length,
+    })
+    const concepts = Object.values(state.concepts)
+    expect(concepts.filter((c) => c.kind === builtinId("thing")).length).toBe(3)
+    expect(concepts.filter((c) => c.kind === builtinId("criterion")).length).toBe(5)
+    expect(concepts.filter((c) => c.prov.length > 0).length).toBeGreaterThan(0)
+    expect(Object.values(state.views).map((v) => v.viewType).sort()).toEqual([
+      "comparison-table",
+      "learning-path",
+    ])
+  })
+})
+
 describe("id re-minting", () => {
   it("gives every entity a fresh ULID and remaps references", () => {
     const opts = options()

@@ -102,6 +102,59 @@ jobs:
             packages/views/test-results/
           retention-days: 14
 
+  # WP-7.4: the explainer video (apps/video). It re-renders only when its
+  # inputs change: the outputs are cached under a hash of apps/video,
+  # packages/views, packages/ui and the fixtures, and a hit skips the render.
+  # Either way they are uploaded as the `explainer-video` artifact, which the
+  # site build (apps/site) takes; apps/video/README.md has the file layout.
+  video:
+    name: Explainer video
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Hash the inputs
+        id: inputs
+        run: echo "hash=${{ hashFiles('apps/video/**', 'packages/views/**', 'packages/ui/**', 'packages/domain/fixtures/**', '!**/node_modules/**', '!apps/video/out/**') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore a render of these inputs
+        id: cache
+        uses: actions/cache/restore@v6
+        with:
+          path: apps/video/out
+          key: explainer-video-${{ steps.inputs.outputs.hash }}
+
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup
+
+      # Remotion downloads its own headless Chrome; MapLibre gets WebGL from ANGLE.
+      - name: Render
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pnpm --filter video render
+
+      - name: Save the render
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: apps/video/out
+          key: explainer-video-${{ steps.inputs.outputs.hash }}
+
+      - name: Sizes
+        run: cat apps/video/out/manifest.json
+
+      - name: Upload the video for the site build
+        uses: actions/upload-artifact@v7
+        with:
+          name: explainer-video
+          path: |
+            apps/video/out/*.mp4
+            apps/video/out/*.webm
+            apps/video/out/poster.*
+            apps/video/out/captions.vtt
+            apps/video/out/manifest.json
+          retention-days: 30
+
   # WP-6.1: the Node entry (apps/server-node). Its database tests (the pg-boss
   # runner, two instances sharing live edits through LISTEN/NOTIFY), the S3
   # blob store against a real S3-compatible server (moto), then the API and
