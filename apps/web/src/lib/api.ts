@@ -229,6 +229,19 @@ export async function getSignInOptions(): Promise<SignInOptions> {
   }
 }
 
+/** What this server is (`GET /api/instance`): the hosted one, or a self-hosted one. */
+export type Instance = { hosted: boolean }
+
+/** Self-hosted when the server doesn't say (an older server, or offline). */
+export async function getInstance(): Promise<Instance> {
+  try {
+    const { hosted } = await call<{ hosted?: boolean }>("/instance")
+    return { hosted: hosted === true }
+  } catch {
+    return { hosted: false }
+  }
+}
+
 /** The Map View's basemap as the server sets it at runtime (`GET /api/map-config`). */
 export type MapConfig = { tiles: string | null; assets: string | null }
 

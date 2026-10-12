@@ -2,7 +2,7 @@
 // sign-in steps for this server, the first prompts, and whether an agent has
 // connected since the page opened. Pure; connect-screen.tsx lays it out.
 // Commands were checked against each agent's docs on 2026-10-12.
-import type { AgentsOverview } from "@/lib/api.ts"
+import type { AgentsOverview, Instance } from "@/lib/api.ts"
 
 export type AgentId =
   "claude-code" | "claude-apps" | "codex" | "cursor" | "other"
@@ -14,9 +14,6 @@ export const AGENTS: { id: AgentId; label: string }[] = [
   { id: "cursor", label: "Cursor" },
   { id: "other", label: "Other" },
 ]
-
-/** What `GET /api/instance` says that the steps depend on. */
-export type Instance = { hosted: boolean }
 
 export type InstallItem =
   | { kind: "command"; label: string; value: string }

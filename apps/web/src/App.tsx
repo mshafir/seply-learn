@@ -7,12 +7,15 @@
 //                       public and unlisted Expeditions need no login)
 //   /new/:id(/views)    the create flow: Sources, then Choose Views (WP-3.4)
 //   /settings           Settings: AI keys, models and the per-ask cap (WP-3.3)
+//   /connect            Connect an agent, step by step (WP-5.5); ?e=<id>: for
+//                       that Expedition
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
 
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Spinner } from "@seply/ui/components/spinner"
 
+import { ConnectScreen } from "@/connect/connect-screen.tsx"
 import { ConsentScreen } from "@/screens/consent.tsx"
 import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
@@ -91,6 +94,11 @@ export function App() {
       <Route path="/consent">
         <RequireUser>
           <ConsentScreen />
+        </RequireUser>
+      </Route>
+      <Route path="/connect">
+        <RequireUser>
+          <ConnectScreen />
         </RequireUser>
       </Route>
       <Route path="/settings">
