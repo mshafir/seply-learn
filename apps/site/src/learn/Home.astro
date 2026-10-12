@@ -1,41 +1,33 @@
 ---
-// The Learn page. A placeholder until WP-7.2 builds the full page.
+// The Learn landing page (spec 9.2), ported from the approved mockup.
 // Mounted at / by src/pages/index.astro (see README.md, "Routes").
-import { buttonVariants } from "@seply/ui/components/button"
-import { cn } from "@seply/ui/lib/utils"
-
 import Base from "../layouts/Base.astro"
+import SiteFooter from "../components/SiteFooter.astro"
 import SiteHeader from "../components/SiteHeader.astro"
-import { APP_URL } from "../lib/env"
-import { link } from "../lib/styles"
-import { DESCRIPTION, HEADLINE } from "./copy"
+import { DESCRIPTION } from "./copy"
+import Agents from "./sections/Agents.astro"
+import Closing from "./sections/Closing.astro"
+import Examples from "./sections/Examples.astro"
+import Hero from "./sections/Hero.astro"
+import HowItWorks from "./sections/HowItWorks.astro"
+import ReadTogether from "./sections/ReadTogether.astro"
+import SelfHost from "./sections/SelfHost.astro"
+import VideoSection from "./sections/Video.astro"
+import ViewsGallery from "./sections/ViewsGallery.astro"
 ---
 
 <Base description={DESCRIPTION}>
   <SiteHeader />
-  <main class="mx-auto w-full max-w-3xl px-6 pt-16 pb-24 sm:pt-28">
-    <h1
-      class="font-reading text-4xl leading-tight font-medium tracking-tight text-balance [font-variation-settings:'opsz'_72] sm:text-5xl"
-    >
-      {HEADLINE}
-    </h1>
-    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-      Bring an AI chat, your notes or a few articles. Seply Learn builds an
-      Expedition from them: the subject split into Concepts and the links
-      between them, which you read through Views such as an outline, a
-      timeline or a map. You can share it, read it with other people and add
-      to it as you learn more.
-    </p>
-    <p class="mt-10 flex flex-wrap items-center gap-x-4 gap-y-3">
-      <a href={APP_URL} class={cn(buttonVariants({ size: "lg" }), "h-10 px-4 text-base")}>
-        Request access
-      </a>
-      <span class="text-sm text-muted-foreground">Seply Learn is in early access.</span>
-    </p>
+  <main id="top" class="scroll-mt-20">
+    <Hero />
+    <HowItWorks />
+    <VideoSection />
+    <ViewsGallery />
+    <Agents />
+    <ReadTogether />
+    <Examples />
+    <SelfHost />
+    <Closing />
   </main>
-  <footer class="mx-auto w-full max-w-3xl px-6 pb-12 text-sm text-muted-foreground">
-    <p>
-      Seply Learn is open source. The code is on <a class={link} href="https://github.com/mshafir/seply-learn">GitHub</a>.
-    </p>
-  </footer>
+  <SiteFooter />
 </Base>

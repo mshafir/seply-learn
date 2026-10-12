@@ -1,0 +1,25 @@
+---
+import { SeplyGlyph } from "@seply/ui/components/brand"
+
+import { GITHUB_URL, MCP_GUIDE_URL, RELEASES_URL } from "../learn/content"
+
+const links = [
+  { href: GITHUB_URL, label: "GitHub" },
+  { href: "/self-host/", label: "Self-host" },
+  { href: MCP_GUIDE_URL, label: "MCP docs" },
+  { href: RELEASES_URL, label: "Releases" },
+]
+---
+
+<footer class="border-t border-border">
+  <div class="mx-auto flex max-w-[1120px] flex-wrap items-center gap-x-7 gap-y-4 px-6 py-8 text-sm text-muted-foreground">
+    <span class="flex items-center gap-2">
+      <SeplyGlyph className="size-5" />
+      Seply Learn is part of Seply
+    </span>
+    <nav aria-label="Footer" class="flex flex-auto flex-wrap justify-end gap-x-5 gap-y-2">
+      {links.map((l) => <a href={l.href} class="rounded-sm hover:text-foreground">{l.label}</a>)}
+      <span>MIT licence</span>
+    </nav>
+  </div>
+</footer>
