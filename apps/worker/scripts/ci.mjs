@@ -246,6 +246,7 @@ const OPTIONAL_SECRETS = [
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
   "RESEND_API_KEY",
+  "ADMIN_EMAILS",
 ]
 
 function secretsFile(path) {

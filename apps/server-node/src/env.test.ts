@@ -53,6 +53,8 @@ describe("readNodeConfig", () => {
       emailSignUp: true,
       google: undefined,
       mail: null,
+      // Self-host: access approval off unless asked for.
+      access: { approval: false, admins: [] },
     })
   })
 

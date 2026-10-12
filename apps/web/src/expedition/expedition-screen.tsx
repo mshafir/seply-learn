@@ -190,6 +190,8 @@ import {
 } from "@/lib/reader.ts"
 import { matchConcepts } from "@/lib/search.ts"
 import { useSession } from "@/lib/session.ts"
+import { WaitingListDialog } from "@/components/waiting-list.tsx"
+import { useApprovalGate } from "@/lib/approval.ts"
 import { useSyncClient, type SyncHealth } from "@/lib/sync.ts"
 import { useMediaQuery } from "@/lib/use-media-query.ts"
 
@@ -459,6 +461,8 @@ function ExpeditionFrame({
   // manage access there; readers of a link see it and can Fork (WP-5.2).
   const [shareOpen, setShareOpen] = React.useState(false)
   const canShare = signInHref === null && offlineSince === null
+  // Hosted access approval: Fork from History explains instead of failing.
+  const approval = useApprovalGate()
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
 
   const reader = useReader()
@@ -796,6 +800,8 @@ function ExpeditionFrame({
 
   // Fork (WP-5.2): my own copy, of now or as of a Change; it opens at once.
   const fork = async (change?: ChangeSummary) => {
+    // Waiting for approval: explain instead of failing (spec 3.12).
+    if (approval.waiting) return approval.explain()
     setHistoryBusy(true)
     try {
       const out = await forkExpedition(expeditionId, change?.id)
@@ -809,6 +815,7 @@ function ExpeditionFrame({
       setShareOpen(false)
       navigate(`/e/${out.expedition.id}`)
     } catch (err) {
+      if (approval.refused(err)) return
       toast.add({
         title: "Couldn't fork it",
         description: err instanceof Error ? err.message : String(err),
@@ -1383,6 +1390,7 @@ function ExpeditionFrame({
         target={sourceTarget}
         onClose={() => setSourceTarget(null)}
       />
+      <WaitingListDialog {...approval.dialog} />
       {canShare && (
         <ShareDialog
           open={shareOpen}

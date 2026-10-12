@@ -89,6 +89,8 @@ Everything is an env var. Unknown variables are ignored; a bad value stops the s
 | `MAP_TILES_URL` | `/tiles/basemap.pmtiles` with `MAP_TILES_FILE` | The Map View's PMTiles archive: a URL (it must allow Range requests and CORS) or a path on this origin. Unset: OpenFreeMap's styles. Served by `GET /api/map-config`. |
 | `MAP_ASSETS_URL` | Protomaps' | A copy of Protomaps' fonts and sprites ([basemaps-assets](https://github.com/protomaps/basemaps-assets)). |
 | `DB_BRANCH` | | A label `/api/health` reports. |
+| `ACCESS_APPROVAL` | off | `1`: only approved accounts create Expeditions or start AI work on the instance key; others read what is shared with them and can ask for access (hosted access approval). Leave it off on a private instance. |
+| `ADMIN_EMAILS` | | With `ACCESS_APPROVAL=1`: who approves requests, comma-separated. Admins get an email for each request and count as approved. |
 | `AUTH_TEST_CREDENTIALS` | | Tests only; honoured only on a localhost `BETTER_AUTH_URL`. |
 
 ## Tests
