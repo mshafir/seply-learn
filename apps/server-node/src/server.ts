@@ -32,7 +32,7 @@ import { createPgBossEngine } from "./jobs.ts"
 import { createNodeRooms, type NodeRooms } from "./live.ts"
 import { mailerFor } from "./mailer.ts"
 import { runMigrations } from "./migrate.ts"
-import { serveRangeFile, serveSpa } from "./static.ts"
+import { embedPage, serveRangeFile, serveSpa } from "./static.ts"
 
 export const TRASH_QUEUE = "seply-trash-purge"
 
@@ -181,6 +181,9 @@ export async function startServer(config: NodeConfig): Promise<RunningServer> {
     views: { read: readView },
     // Resolves the host once and refuses private addresses and redirects.
     cimdFetch: fetchClientMetadataResource,
+    // The live embed (spec §9.3): the build's embed.html, for Public
+    // Expeditions only (the route checks first).
+    ...(config.webDist && { embedPage: embedPage(config.webDist) }),
   }
   const app = new Hono<{ Bindings: ServerEnv }>()
   app.route("/api", createApp<ServerEnv>(options))

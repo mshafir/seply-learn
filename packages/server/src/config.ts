@@ -102,6 +102,15 @@ export type ServerEnv = {
   MAP_TILES_URL?: string
   /** A copy of Protomaps' fonts and sprites (basemaps-assets), likewise. */
   MAP_ASSETS_URL?: string
+
+  // --- The live embed (spec §9.3; embed.ts) ---
+  /**
+   * Who may frame `/e/:id/embed`: CSP `frame-ancestors` sources, separated
+   * by commas or spaces (origins, `*.` wildcards on the left label, or
+   * `'self'`). Default: `https://seply.app`. Every other route keeps its
+   * own framing policy.
+   */
+  EMBED_FRAME_ANCESTORS?: string
 }
 
 /** An SMTP server (self-host). */
@@ -150,6 +159,8 @@ export type ServerConfig = {
   mail: MailConfig
   /** The Map View's basemap, when set at runtime (MAP_TILES_URL, MAP_ASSETS_URL). */
   map: { tiles?: string; assets?: string }
+  /** The `frame-ancestors` sources of the live embed (EMBED_FRAME_ANCESTORS). */
+  embedFrameAncestors: string[]
 }
 
 export class ConfigError extends Error {}
@@ -241,7 +252,34 @@ export function readConfig(env: ServerEnv): ServerConfig {
       tiles: env.MAP_TILES_URL?.trim() || undefined,
       assets: env.MAP_ASSETS_URL?.trim() || undefined,
     },
+    embedFrameAncestors: readFrameAncestors(env.EMBED_FRAME_ANCESTORS),
   }
+}
+
+/** Who may frame the live embed when EMBED_FRAME_ANCESTORS is unset. */
+export const DEFAULT_EMBED_FRAME_ANCESTORS = ["https://seply.app"]
+
+// A CSP host-source: a scheme, a host whose leftmost label may be `*`, and
+// an optional port. No paths, so a value can't smuggle in another directive.
+const FRAME_SOURCE =
+  /^https?:\/\/(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)*(:(\d{1,5}|\*))?$/i
+
+/** EMBED_FRAME_ANCESTORS, validated; the default when unset. */
+function readFrameAncestors(raw: string | undefined): string[] {
+  const list = (raw ?? "").split(/[\s,]+/).filter(Boolean)
+  if (!list.length) return DEFAULT_EMBED_FRAME_ANCESTORS
+  for (const source of list)
+    if (
+      source !== "'self'" &&
+      source !== "'none'" &&
+      !FRAME_SOURCE.test(source)
+    )
+      throw new ConfigError(
+        `EMBED_FRAME_ANCESTORS: ${source} is not an origin (e.g. https://seply.app, https://*.example.workers.dev or 'self')`
+      )
+  if (list.includes("'none'") && list.length > 1)
+    throw new ConfigError("EMBED_FRAME_ANCESTORS: 'none' can't be combined")
+  return list
 }
 
 const flag = (v: string | undefined) =>

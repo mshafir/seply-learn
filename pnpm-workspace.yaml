@@ -3,5 +3,7 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  # apps/desktop fetches the binary when it needs it (scripts/ensure-electron.mjs).
+  electron: false
   esbuild: true
   msw: false

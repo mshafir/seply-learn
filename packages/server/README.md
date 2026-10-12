@@ -97,7 +97,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
   - `POST /ai/estimate/ask` `{ expeditionId }` (WP-4.4): what one Grow ask would cost on that Expedition (its Sources and Concept set, `@seply/ai`'s `estimateAsk`): `{ usd, model, sourceChars, askCapUsd, keySource: "reader" | "instance" }`. Owners and editors; 404/409 as below.
   - `POST /ai/estimate/article` `{ expeditionId }`: what "Write the article" would cost at each length on that Expedition's Sources: `{ lengths: { short | standard | long: { words, usd, model } }, sourceChars, askCapUsd }`. Owners and editors (`useAi`); 404 when the caller can't see it; 409 as above. The `article` job takes `{ conceptId, length?, capUsd? }`.
 
-**Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `AUTH_EMAIL_PASSWORD` (`1`: email + password sign-in; the Node entry's default, WP-6.1), `AUTH_EMAIL_SIGNUP` (`0` closes email sign-up), `DB_BRANCH`, `MAP_TILES_URL` and `MAP_ASSETS_URL` (the basemap, served by `GET /map-config`), and for web push `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) and `VAPID_SUBJECT`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
+**Env** (`ServerEnv`): `BETTER_AUTH_URL` (this deploy's origin), `BETTER_AUTH_SECRET` (the same on every deploy), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_PROXY_URL` (production's origin, on previews and production), `AUTH_TRUSTED_ORIGINS` (comma-separated, `*` allowed), `AUTH_TEST_CREDENTIALS`, `AUTH_EMAIL_PASSWORD` (`1`: email + password sign-in; the Node entry's default, WP-6.1), `AUTH_EMAIL_SIGNUP` (`0` closes email sign-up), `DB_BRANCH`, `MAP_TILES_URL` and `MAP_ASSETS_URL` (the basemap, served by `GET /map-config`), `EMBED_FRAME_ANCESTORS` (who may frame the live embed; below), and for web push `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (base64url) and `VAPID_SUBJECT`. See [docs/ops/deploy.md](../../docs/ops/deploy.md#sign-in-better-auth).
 
 **Permissions and sharing** (WP-5.1; spec §1.8, §3.9; `access.ts`, `sharing.ts`, `mailer.ts`):
 
@@ -118,7 +118,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
 
 **MCP** (WP-5.4, spec §6; `mcp/`, `agents.ts`, `auth.ts`):
 
-- **Where:** `createRootRoutes(opts)` serves the routes that live at the origin's root, which each runtime mounts at `/` next to `createApp` at `/api`:
+- **Where:** `createRootRoutes(opts)` serves the routes that live at the origin's root, which each runtime mounts at `/` next to `createApp` at `/api` (also the live embed's page, below):
   - `POST|GET|DELETE /mcp`: streamable HTTP, stateless, with the MCP TS SDK v2's `createMcpHandler` (a fresh `McpServer` per request; 2026-07-28 clients and, through the SDK's stateless fallback, 2025-era ones such as today's Claude Code). The answer is buffered before the database connection closes. CORS is open (Bearer tokens, no cookies).
   - `GET /.well-known/oauth-protected-resource[/mcp]` (RFC 9728) and `GET /.well-known/oauth-authorization-server[/api/auth]` (RFC 8414), served by Better Auth's handler.
   - Without a valid Bearer token, `/mcp` answers 401 with `WWW-Authenticate: Bearer resource_metadata="<origin>/.well-known/oauth-protected-resource/mcp", scope="…"`.
@@ -131,6 +131,12 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
 - **Options:** `AppOptions.views` (`@seply/views/inspect`'s `readView`) and `AppOptions.cimdFetch` (a metadata fetch the runtime can make safe: the Worker's refuses redirects, and Workers can't reach private addresses; Node will use `@better-auth/cimd/node`).
 - **Schema** (`0007_mcp.sql`): `api_keys` is now the API key plugin's table (the old one was never written), plus Better Auth's `jwks`, `oauth_clients`, `oauth_resources`, `oauth_client_resources`, `oauth_access_tokens`, `oauth_refresh_tokens`, `oauth_consents`, `oauth_client_assertions`, and our `agent_grants` (`user_id`, `client_id`, `expedition_ids`).
 - **Keep `BETTER_AUTH_SECRET` stable:** the JWT signing keys in `jwks` are encrypted with it. After a rotation, delete the `jwks` rows (a new key is made on the next token; connected agents sign in again).
+
+**Live embed** (WP-7.5, spec §9.3; `embed.ts`):
+
+- `GET|HEAD /e/:id/embed[?view=<viewId>&theme=light|dark]`, served by `createRootRoutes` at the origin's root: the runtime's `embedPage(env, request)` (`AppOptions`; the web build's `embed.html`) for a **Public** Expedition, else `404 Not found` (private, unlisted, in Trash, missing, or no `embedPage`). The check is anonymous on purpose (`expeditionAccess(db, id, null)` plus `visibility === "public"`): the session is never read, so private and unlisted Expeditions are a 404 here **even for their owner**, and an embed never shows more than anyone may see. The page then reads like any anonymous reader (`/api/pull`, the live room).
+- Every answer on that route, 404s included, carries `Content-Security-Policy: frame-ancestors <sources>`, `Cache-Control: no-store` (Visibility can change), `X-Content-Type-Options: nosniff` and `Referrer-Policy: strict-origin-when-cross-origin`; the page's own `etag` and `last-modified` are dropped. **No other route's framing policy changes** (none sets one today).
+- `EMBED_FRAME_ANCESTORS`: the `frame-ancestors` sources, separated by commas or spaces: origins (`https://seply.app`), a `*.` wildcard on the leftmost label (`https://*.example.workers.dev`), an optional port, or `'self'` (or `'none'` alone). Default `https://seply.app` (`DEFAULT_EMBED_FRAME_ANCESTORS`). Anything else (a path, a bare host, a partial-label wildcard such as `https://seply-pr-*.…`, which CSP doesn't support) makes `readConfig` throw `ConfigError` (`ServerConfig.embedFrameAncestors`).
 
 **Visibility, Fork and Trash** (WP-5.2; spec §1.4, §1.8, §3.2, §3.9; `sharing.ts`, `fork.ts`, `trash.ts`):
 
