@@ -69,7 +69,14 @@ async function video(id: string, file: string, codec: Codec, inputProps: Record<
     muted: true,
     // Flat motion graphics compress well; these keep the full video near 2 MB a file.
     crf: codec === "h264" ? 28 : 40,
-    ...(codec === "h264" ? { x264Preset: "slow" as const, pixelFormat: "yuv420p" as const } : {}),
+    // Limited-range BT.709, tagged: what every browser's hardware decoder
+    // expects. Remotion's default left both files full range ("pc") with
+    // untagged primaries, which Chrome-family browsers on Linux drew as blank
+    // white or garbled frames. "bt709" converts with zscale and tags the
+    // stream (matrix, primaries, transfer, range=tv).
+    colorSpace: "bt709",
+    pixelFormat: "yuv420p",
+    ...(codec === "h264" ? { x264Preset: "slow" as const } : {}),
     browserExecutable,
     chromiumOptions,
     onProgress: ({ progress }) => process.stdout.write(`\r${file} ${Math.round(progress * 100)}%`),

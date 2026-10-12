@@ -22,7 +22,8 @@ runs:
       uses: actions/cache/restore@v6
       with:
         path: apps/video/out
-        key: explainer-video-${{ hashFiles('apps/video/**', 'packages/views/**', 'packages/ui/**', 'packages/domain/fixtures/**', '!**/node_modules/**', '!apps/video/out/**') }}
+        # The v2 marks renders in limited-range, tagged BT.709; bump it to force a re-render.
+        key: explainer-video-v2-${{ hashFiles('apps/video/**', 'packages/views/**', 'packages/ui/**', 'packages/domain/fixtures/**', '!**/node_modules/**', '!apps/video/out/**') }}
 
     # Remotion downloads its own headless Chrome; MapLibre gets WebGL from SwiftShader.
     - name: Render (inputs changed)

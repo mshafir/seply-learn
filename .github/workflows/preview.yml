@@ -416,7 +416,7 @@ jobs:
           URL: ${{ steps.deploy.outputs.url }}
         run: node apps/worker/scripts/check-signin.mjs "$URL" "$URL"
 
-  # The site (apps/site): the seply-site Worker, static assets only, on seply.app.
+  # The site (apps/site): the seply-site Worker, static assets (plus a Range script for /media/*), on seply.app.
   # No database, no secrets in the Worker. See docs/ops/deploy.md, "The site".
 
   site-preview:
@@ -522,7 +522,7 @@ jobs:
               `**Site preview** (seply.app): ${process.env.URL}`,
               "",
               `- Worker: \`${process.env.SITE_PREVIEW}\``,
-              `- \`/\`: ${process.env.SUMMARY}; the 404 page, \`/og.png\` and \`/sitemap.xml\` checked`,
+              `- \`/\`: ${process.env.SUMMARY}; the 404 page, \`/og.png\`, \`/sitemap.xml\` and the video's byte ranges checked`,
               `- Commit: ${context.payload.pull_request.head.sha}`,
             ].join("\n")
             const { owner, repo } = context.repo

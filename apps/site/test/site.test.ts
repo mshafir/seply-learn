@@ -235,6 +235,20 @@ describe("media manifest", () => {
     expect(html()).toContain('poster="/media/video/explainer-poster.webp"')
   })
 
+  it("shows the whole hero loop at 16:9, over its poster, in place of the sketch", () => {
+    const video = html().match(/<video[^>]*data-hero-loop[^>]*>/)?.[0] ?? ""
+    expect(video).toContain("aspect-video")
+    expect(video).toContain("object-contain")
+    expect(video).not.toContain("object-cover")
+    expect(video).toContain('poster="/media/video/hero-loop-poster.webp"')
+    expect(video).not.toContain("autoplay")
+    expect(html()).toMatch(
+      /<img src="\/media\/video\/hero-loop-poster\.webp" alt="" aria-hidden="true"/
+    )
+    expect(html()).toContain('<source src="/media/video/hero-loop.webm" type="video/webm"')
+    expect(html()).not.toContain("HERO LOOP · 12 S · CUT FROM THE EXPLAINER")
+  })
+
   it("embeds the live View when SITE_EMBED_URL is set", () => {
     expect(html()).toMatch(
       /<iframe src="https:\/\/learn\.seply\.app\/e\/test\/embed\?view=v"[^>]*loading="lazy"/

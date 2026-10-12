@@ -1,7 +1,8 @@
 ---
 // The hero: the headline and calls to action, and the E-bike learning-path
 // sketch under its question. The hero loop (WP-7.4) replaces the sketch once
-// its file is in the media manifest.
+// its file is in the media manifest, shown whole at its own 16:9; the sketch
+// keeps its 7:5.
 import { APP_URL } from "../../lib/env"
 import { container, eyebrow, monoLabel, primaryButton, secondaryButton } from "../../lib/styles"
 import { heroLoop } from "../../media"
@@ -57,9 +58,13 @@ const concepts: { x: number; y: number; w: number; kind?: [string, string]; labe
     </figcaption>
     {
       loop.present ? (
-        <div class="relative">
+        <div class="relative aspect-video">
+          {/* The poster stays underneath until the loop is really playing (hero-loop.ts), so it never flashes blank. */}
+          {loop.poster && (
+            <img src={loop.poster} alt="" aria-hidden="true" class="absolute inset-0 size-full object-contain" fetchpriority="high" />
+          )}
           <video
-            class="aspect-[7/5] w-full object-cover"
+            class="relative block aspect-video w-full object-contain transition-opacity duration-300 data-[waiting]:opacity-0"
             muted
             loop
             playsinline

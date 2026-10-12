@@ -49,6 +49,9 @@ export default function setup() {
     "video/explainer.webm",
     "video/explainer.vtt",
     "video/explainer-poster.webp",
+    "video/hero-loop.mp4",
+    "video/hero-loop.webm",
+    "video/hero-loop-poster.webp",
   ])
     writeFileSync(SOME_MEDIA + f, "")
   // The capture's manifest: a shot taken from a fallback View has its own alt.
