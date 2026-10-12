@@ -355,3 +355,56 @@ Each package is sized to about one agent session. The format is parsed by `make_
 - spec: 02-architecture.md#210-deployment
 - **Build:** a multi-stage image, `docker-compose.yml` (app + Postgres, optional MinIO), and a self-host guide (keys mode, SMTP, PMTiles download and extract).
 - **Done when:** `docker compose up` on a clean machine reaches sign-in, imports a fixture, and builds one Expedition with an instance key.
+
+## M7: Landing site
+
+Spec: [9. Landing site](../../spec/v1/09-landing-site.md). The three showcase Expeditions are tidied from Claude Code through the `seply-learn` MCP server in the owner's session, not by a builder; the owner then sets them public.
+
+### WP-7.1: Site scaffold and deploy
+- lane: B
+- milestone: M7
+- depends: none
+- spec: 09-landing-site.md#91-address-and-stack
+- **Build:** `apps/site` (Astro, static output) composing `packages/ui` tokens, fonts, glyph and wordmark, with light and dark from the system; a `seply-site` Worker serving the static assets on the `seply.app` apex (`learn/` internal route served at `/`); a 404; `sitemap.xml`, canonical URLs, build-time Open Graph card, `noindex` on previews, the Cloudflare Web Analytics beacon behind a `CF_ANALYTICS_TOKEN` variable (production only). CI: build and check it in `pnpm check`; deploy on main; a preview Worker per PR that touches `apps/site`, `apps/video` or `packages/ui`. `pnpm check:deps` knows the new app. Update `docs/ops/deploy.md` (custom domain, analytics token).
+- **Done when:** a PR preview serves a placeholder page with the wordmark in light and dark, main deploys to `seply.app` (or, before the domain is attached, the Worker URL), and Lighthouse on the placeholder scores 100 for accessibility and best practices.
+
+### WP-7.2: Landing and Self-host pages
+- lane: D
+- milestone: M7
+- depends: WP-7.1
+- spec: 09-landing-site.md#92-pages
+- **Build:** the landing page as in the mockup (sections, copy, the E-bike hero sketch with its question, the five-tab Views gallery, the suggestions panel, the plugin and Docker snippets, the phone menu below the breakpoint) and `/self-host` rendered from `docs/self-host.md` with a table of contents and copy buttons. Media slots (hero loop, video, gallery and example screenshots, live embed) read from a manifest with labelled placeholders until 7.4 to 7.6 fill them. Links into the app point at `learn.seply.app`.
+- **Done when:** both pages match the mockup at 1440 px and 390 px in light and dark, have no horizontal scroll at 320 px, pass axe with no violations, and ship under 60 KB of JavaScript.
+
+### WP-7.3: Hosted access approval
+- lane: B
+- milestone: M7
+- depends: none
+- spec: 02-architecture.md#26-auth-keys-and-tokens
+- **Build:** `ACCESS_APPROVAL` and `ADMIN_EMAILS` config; `users.approved_at` and `access_requests` (migration approves existing accounts); one server guard on creating Expeditions (new, import, Fork, MCP `create_expedition`) and on starting instance-key AI work, refusing with `approval_required`; request, approve and decline endpoints with Mailer emails; the waiting-list banner, the create/import/Fork dialog and Admin › Access requests in `apps/web` (spec 3.12). Self-host behaviour unchanged with the flag off. Add the guarded routes to the permissions matrix.
+- **Done when:** with the flag on, an unapproved account can read shared Expeditions and send a request but is refused (and told why) on every gated route, including MCP; approving lets it create; existing accounts are approved; with the flag off nothing changes; e2e covers the banner, request and admin approve.
+
+### WP-7.4: Explainer video
+- lane: C
+- milestone: M7
+- depends: none
+- spec: 09-landing-site.md#93-media
+- **Build:** `apps/video`, a Remotion project that renders the storyboard in the design doc: seven scenes, about 60 s, 1920 × 1080 at 30 fps, captions burned in plus WebVTT. Product visuals are the real `packages/views` renderers fed committed fixtures (the compute sample; the Swiss rail fixture for the Map scene once it lands), animated, in the app's tokens and fonts; amber only for suggestions. Outputs MP4 (H.264), WebM (VP9), a 12 s hero loop, a poster frame. A `render` script and a CI job that renders only when `apps/video`, `packages/views` or the fixtures change, caching by hash, and hands the files to the site build. Note Remotion's licence terms in the app README.
+- **Done when:** CI produces the video under 6 MB with captions that match the storyboard, renders reproducibly from a clean checkout, and the site preview plays it.
+
+### WP-7.5: Live embed
+- lane: D
+- milestone: M7
+- depends: none
+- spec: 09-landing-site.md#93-media
+- **Build:** `learn.seply.app/e/:id/embed?view=<id>`: one public View, read-only, without the app header, rail or panels; Concepts open a small read-only card; an "Open in Seply Learn" link. `Content-Security-Policy: frame-ancestors https://seply.app` (plus preview origins) on that route only; private and unlisted Expeditions return 404 there. The site's Read together section embeds it lazily, with the screenshot as the fallback.
+- **Done when:** the embed renders a public showcase View on the site preview, refuses a private one, cannot be framed by another origin, and e2e covers it.
+
+### WP-7.6: Screenshot pipeline
+- lane: D
+- milestone: M7
+- depends: WP-7.1, WP-7.5
+- spec: 09-landing-site.md#93-media
+- **Build:** `apps/site/scripts/capture.ts` (Playwright) taking the shot list from the design doc against the public showcases on `learn.seply.app`, light and dark, 1440 × 900 at 2×, encoded to AVIF and WebP; signed-in shots use the demo account from CI secrets (`DEMO_EMAIL`, `DEMO_PASSWORD`) and reset its demo Expedition first. A CI job runs it on demand and weekly, caching the output, and the site build reads it through the media manifest from 7.2.
+- **Done when:** every placeholder on the site preview shows a real screenshot in both themes, and a rerun with nothing changed reuses the cache.
+
