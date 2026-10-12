@@ -12,7 +12,8 @@
 //                                                  connection string to $GITHUB_OUTPUT as db_url
 //   node scripts/ci.mjs neon-branch-delete <name>  delete a Neon branch by name (no-op if absent)
 //   node scripts/ci.mjs worker-urls <name>         write url= (this Worker's URL),
-//                                                  production_url= and preview_origins= to
+//                                                  production_url=, preview_origins= and
+//                                                  embed_frame_ancestors= to
 //                                                  $GITHUB_OUTPUT, before the first deploy
 //   node scripts/ci.mjs custom-domain <hostname>   add <hostname> to wrangler.ci.json as the
 //                                                  Worker's custom domain (production only)
@@ -221,6 +222,9 @@ async function workerUrls(name) {
         : `https://${name}.${sub}.workers.dev`,
     production_url: productionUrl,
     preview_origins: `https://seply-pr-*.${sub}.workers.dev`,
+    // Who may frame the live embed (WP-7.5): the site, and its previews
+    // (Workers on this account). CSP wildcards cover a whole label only.
+    embed_frame_ancestors: `https://seply.app,https://*.${sub}.workers.dev`,
   }
   output(values)
   console.log(values)

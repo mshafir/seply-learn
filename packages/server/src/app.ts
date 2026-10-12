@@ -15,6 +15,7 @@ import { agentRoutes } from "./agents.ts"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
 import { createFlowRoutes } from "./create.ts"
+import { embedRoutes, type EmbedPage } from "./embed.ts"
 import type { BlobStore } from "./blobs.ts"
 import {
   ConfigError,
@@ -103,6 +104,12 @@ export type AppOptions<Env extends ServerEnv> = {
    * Without it, MCP clients can't register, and agents use API tokens.
    */
   cimdFetch?: ClientMetadataResourceFetch
+  /**
+   * The live embed's page (spec §9.3): the web build's `embed.html`, served
+   * at `/e/:id/embed` for Public Expeditions only (embed.ts). Without it,
+   * that route is a 404.
+   */
+  embedPage?: EmbedPage<Env>
 }
 
 /** SMTP needs sockets: the runtime passes `mailer` (the Node entry does). */
@@ -232,16 +239,19 @@ const onError: ErrorHandler<AppEnv> = (err, c) => {
 
 /**
  * The routes that live at the origin's root, not under /api (spec §6.1):
- * `/mcp` and the OAuth discovery documents under `/.well-known/`. Each
- * runtime mounts them at `/`, next to `createApp` at `/api`.
+ * `/mcp` and the OAuth discovery documents under `/.well-known/`, and the
+ * live embed's page at `/e/:id/embed` (spec §9.3). Each runtime mounts them
+ * at `/`, next to `createApp` at `/api`.
  */
 export function createRootRoutes<Env extends ServerEnv>(opts: AppOptions<Env>) {
   const app = new Hono<AppEnv>()
   const res = resources(opts)
   app.use("/mcp", res)
   app.use("/.well-known/*", res)
+  app.use("/e/*", res)
   app.onError(onError)
   app.route("/", mcpRoutes(opts.relay ?? noopRelay, { views: opts.views }))
+  app.route("/", embedRoutes(opts.embedPage))
   return app
 }
 

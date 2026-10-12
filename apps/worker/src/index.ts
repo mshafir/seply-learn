@@ -1,7 +1,7 @@
 // @seply/worker: see README.md for this package's contract.
 // Static assets (the SPA) are served by Cloudflare before this code runs;
-// only /api/*, /mcp and /.well-known/* reach the Worker (see
-// run_worker_first in wrangler.jsonc).
+// only /api/*, /mcp, /.well-known/* and the live embed (/e/*/embed) reach
+// the Worker (see run_worker_first in wrangler.jsonc).
 import {
   connectPg,
   createApp,
@@ -79,10 +79,14 @@ const options: AppOptions<Bindings> = {
   // MCP (WP-5.4): Views read as a reader sees them, and checked.
   views: { read: readView },
   cimdFetch,
+  // The live embed (spec §9.3): the build's embed.html (served as /embed;
+  // Cloudflare drops the .html), once the route has found a Public Expedition.
+  embedPage: async (env, request) =>
+    env?.ASSETS ? env.ASSETS.fetch(new URL("/embed", request.url)) : null,
 }
 
 app.route("/api", createApp<Bindings>(options))
-// /mcp and the OAuth discovery documents live at the origin's root.
+// /mcp, the OAuth discovery documents and the live embed live at the origin's root.
 app.route("/", createRootRoutes<Bindings>(options))
 
 app.notFound((c) => c.json({ error: "not found" }, 404))

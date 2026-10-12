@@ -178,6 +178,21 @@ describe("readNodeConfig", () => {
     ).toMatchObject({ kind: "smtp" })
   })
 
+  it("reads who may frame the live embed, and refuses what isn't an origin", () => {
+    expect(readNodeConfig(valid).server.embedFrameAncestors).toEqual([
+      "https://seply.app",
+    ])
+    expect(
+      readNodeConfig({
+        ...valid,
+        EMBED_FRAME_ANCESTORS: "'self' https://site.example.com",
+      }).server.embedFrameAncestors
+    ).toEqual(["'self'", "https://site.example.com"])
+    expect(
+      problems({ ...valid, EMBED_FRAME_ANCESTORS: "https://x.example/path" })
+    ).toContain("EMBED_FRAME_ANCESTORS")
+  })
+
   it("turns off the Trash purge with TRASH_PURGE_CRON=off", () => {
     expect(
       readNodeConfig({ ...valid, TRASH_PURGE_CRON: "off" }).trashPurgeCron

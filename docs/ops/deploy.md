@@ -121,6 +121,8 @@ This only works because every Worker has the **same** `BETTER_AUTH_SECRET`, and 
 
 **Owner click-tests** (need a real Google account): sign in on production, then on a preview (through the proxy). The preview PR comment shows the redirect check CI already ran.
 
+**Live embed** (WP-7.5, spec §9.3): `/e/:id/embed` (Public Expeditions only) sends `Content-Security-Policy: frame-ancestors` from the `EMBED_FRAME_ANCESTORS` var; no other route sends a framing policy. `ci.mjs worker-urls` writes `embed_frame_ancestors` (`https://seply.app,https://*.<subdomain>.workers.dev`: the site and its preview Workers; CSP wildcards cover a whole label, so it can't be narrowed to `seply-site-pr-*`), and both deploys pass it with `--var`. Unset (local dev), the server's default is `https://seply.app`.
+
 ### Why Hyperdrive per preview, not a connection-string secret
 
 The alternative was one shared Hyperdrive config, or none, with each preview getting its branch's URL as a Worker secret (`DATABASE_URL`). We chose a Hyperdrive config per PR because:

@@ -49,6 +49,7 @@ export {
   type ApiToken,
 } from "./agents.ts"
 export { mcpRoutes } from "./mcp/routes.ts"
+export { type EmbedPage } from "./embed.ts"
 export {
   AGENT_TTL_MS,
   mcpServer,
@@ -109,6 +110,7 @@ export {
   readConfig,
   isLocalURL,
   ConfigError,
+  DEFAULT_EMBED_FRAME_ANCESTORS,
   type MailConfig,
   type SmtpConfig,
   type ServerConfig,

@@ -11,6 +11,7 @@ import { Hono } from "hono"
 import { fileURLToPath } from "node:url"
 import { createApp, createRootRoutes, type AppOptions } from "./app.ts"
 import type { BlobStore } from "./blobs.ts"
+import type { EmbedPage } from "./embed.ts"
 import type { JobRunner } from "./jobs/types.ts"
 import type { Mailer } from "./mailer.ts"
 import type { ServerEnv } from "./config.ts"
@@ -38,6 +39,7 @@ export function testApp(
     mailer,
     views,
     cimdFetch,
+    embedPage,
   }: {
     blobs?: BlobStore
     ai?: ProviderOptions
@@ -45,6 +47,7 @@ export function testApp(
     mailer?: Mailer | null
     views?: ViewReader
     cimdFetch?: ClientMetadataResourceFetch
+    embedPage?: EmbedPage<ServerEnv>
   } = {}
 ) {
   const root = new Hono()
@@ -56,10 +59,11 @@ export function testApp(
     jobs,
     views,
     cimdFetch,
+    embedPage,
     ...(mailer !== undefined && { mailer: () => mailer }),
   }
   root.route("/api", createApp(opts))
-  // /mcp and /.well-known/*, at the origin's root as the Worker mounts them.
+  // /mcp, /.well-known/* and the embed, at the origin's root as the Worker mounts them.
   root.route("/", createRootRoutes(opts))
   const request = (path: string, init: RequestInit = {}) =>
     root.request(path, init, env)
