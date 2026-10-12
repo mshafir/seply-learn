@@ -28,8 +28,8 @@ const SCALE = 1.5;
 const BUDGET = 6 * 1024 * 1024;
 
 const browserExecutable = process.env.REMOTION_BROWSER_EXECUTABLE || null;
-// MapLibre (the Map scene) needs WebGL; ANGLE gives it one in headless Chrome.
-const chromiumOptions = { gl: "angle" as const };
+// MapLibre (the Map scene) needs WebGL: SwiftShader through ANGLE, which needs no GPU (CI runners have none).
+const chromiumOptions = { gl: "swangle" as const };
 
 console.log("Bundling…");
 const serveUrl = await bundle({
@@ -69,6 +69,10 @@ async function video(id: string, file: string, codec: Codec, inputProps: Record<
     browserExecutable,
     chromiumOptions,
     onProgress: ({ progress }) => process.stdout.write(`\r${file} ${Math.round(progress * 100)}%`),
+  }).catch((e: Error) => {
+    // Remotion's error carries the page's whole React stack; the message comes first.
+    console.error(`\n${file} failed: ${e.message}`);
+    process.exit(1);
   });
   console.log(`\r${file}: ${kb(file)} in ${Math.round((Date.now() - started) / 1000)} s`);
 }

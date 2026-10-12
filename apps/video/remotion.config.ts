@@ -4,5 +4,5 @@ import { Config } from "@remotion/cli/config";
 import { enableTailwind } from "@remotion/tailwind-v4";
 
 Config.overrideWebpackConfig((config) => enableTailwind(config));
-// MapLibre (the Map scene) needs WebGL.
-Config.setChromiumOpenGlRenderer("angle");
+// MapLibre (the Map scene) needs WebGL; SwiftShader needs no GPU.
+Config.setChromiumOpenGlRenderer("swangle");

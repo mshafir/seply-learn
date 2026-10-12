@@ -128,7 +128,7 @@ jobs:
       - if: steps.cache.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup
 
-      # Remotion downloads its own headless Chrome; MapLibre gets WebGL from ANGLE.
+      # Remotion downloads its own headless Chrome; MapLibre gets WebGL from SwiftShader.
       - name: Render
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm --filter video render
