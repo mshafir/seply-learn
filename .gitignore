@@ -48,3 +48,6 @@ dist-ssr/
 
 # Astro generated types
 .astro/
+
+# Site media: rendered and captured in CI, never committed (apps/site/src/media.ts)
+apps/site/public/media/

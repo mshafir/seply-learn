@@ -1,0 +1,148 @@
+---
+// The hero: the headline and calls to action, and the E-bike learning-path
+// sketch under its question. The hero loop (WP-7.4) replaces the sketch once
+// its file is in the media manifest.
+import { APP_URL } from "../../lib/env"
+import { container, eyebrow, monoLabel, primaryButton, secondaryButton } from "../../lib/styles"
+import { heroLoop } from "../../media"
+import { HEADLINE } from "../copy"
+
+const loop = heroLoop()
+
+// The sketch's boxes, placed in % of the 7:5 figure. Text sizes scale with
+// the figure's width (container query units) so the sketch holds at 320 px.
+const concepts: { x: number; y: number; w: number; kind?: [string, string]; label: string; tone?: "focus" | "suggested" }[] = [
+  { x: 4, y: 12, w: 20, kind: ["TOPIC", "text-kind-teal"], label: "Motor types" },
+  { x: 4, y: 44, w: 20, kind: ["TOPIC", "text-kind-teal"], label: "Battery size" },
+  { x: 4, y: 76, w: 20, kind: ["CRITERION", "text-kind-orange"], label: "Hill climbing" },
+  { x: 48, y: 31, w: 20, kind: ["THING", "text-kind-blue"], label: "Mid-drive motor", tone: "focus" },
+  { x: 48, y: 59, w: 20, kind: ["MEASUREMENT", "text-kind-violet"], label: "Range per charge" },
+  { x: 79, y: 17, w: 18, label: "Torque on steep hills" },
+  { x: 79, y: 45, w: 18, label: "Commute in winter" },
+  { x: 79, y: 73, w: 18, label: "Theft protection", tone: "suggested" },
+]
+---
+
+<section class:list={[container, "grid grid-cols-1 items-center gap-14 pt-[88px] pb-[72px] lg:grid-cols-2"]}>
+  <div class="flex flex-col gap-6">
+    <span class={eyebrow}>Seply Learn</span>
+    <h1
+      class="m-0 font-reading text-[clamp(40px,5vw,60px)] leading-[1.05] font-medium tracking-[-0.015em] [font-variation-settings:'opsz'_72]"
+    >
+      {HEADLINE}
+    </h1>
+    <p class="m-0 max-w-[34em] text-[19px] leading-[1.55] text-muted-foreground">
+      Ask a question in the app or from your own agent, and Seply Learn builds an Expedition about it recording the
+      concepts and how they relate as a kind of instant wiki. You can then read it as a map, a timeline or a learning
+      path, and keep adding to it with your agent and the people you share it with.
+    </p>
+    <div class="flex flex-wrap gap-3 pt-2">
+      <a href={APP_URL} class={primaryButton}>Request access</a>
+      <a href="#video" class={secondaryButton}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="6 3 20 12 6 21 6 3"></polygon>
+        </svg>
+        Watch the 60-second tour
+      </a>
+    </div>
+    <span class="text-[13px] text-muted-foreground">Anyone can read a public Expedition without an account.</span>
+  </div>
+
+  <figure class="m-0 flex min-w-0 flex-col overflow-hidden rounded-[14px] border border-border bg-card">
+    <figcaption class="flex flex-col gap-1 border-b border-border px-5 pt-4 pb-3.5">
+      <span class={monoLabel}>E-BIKE FOR THE COMMUTE · LEARNING PATH</span>
+      <span class="font-reading text-[21px] leading-[1.3]">
+        Which e-bike gets me up the hills on my commute, and what do I need to understand first?
+      </span>
+    </figcaption>
+    {
+      loop.present ? (
+        <div class="relative">
+          <video
+            class="aspect-[7/5] w-full object-cover"
+            muted
+            loop
+            playsinline
+            preload="metadata"
+            poster={loop.poster}
+            aria-label="A question becoming a learning path, then a suggestion from the agent being accepted"
+            data-hero-loop
+          >
+            {loop.webm && <source src={loop.webm} type="video/webm" />}
+            {loop.mp4 && <source src={loop.mp4} type="video/mp4" />}
+          </video>
+          <button
+            type="button"
+            class="absolute right-3 bottom-3 min-h-8 rounded-lg border border-border bg-card px-3 text-[13px] font-medium"
+            hidden
+            data-hero-loop-toggle
+          >
+            Pause
+          </button>
+        </div>
+      ) : (
+        <div
+          class="sketch relative aspect-[7/5] overflow-hidden"
+          role="img"
+          aria-label="A learning path for choosing an e-bike: basics lead to the choices that depend on them, and one suggested Concept waits for review"
+        >
+          <svg viewBox="0 0 700 500" preserveAspectRatio="none" class="absolute inset-0 size-full" aria-hidden="true">
+            <g fill="none" class="stroke-muted-foreground" stroke-width="1.25" opacity="0.55">
+              <path d="M150 90 C 250 90, 250 190, 340 190" />
+              <path d="M150 250 C 240 250, 250 190, 340 190" />
+              <path d="M150 250 C 240 250, 250 330, 340 330" />
+              <path d="M150 410 C 240 410, 250 330, 340 330" />
+              <path d="M480 190 C 540 190, 520 120, 560 120" />
+              <path d="M480 330 C 540 330, 520 260, 560 260" />
+            </g>
+            <path d="M480 330 C 540 330, 520 410, 560 410" fill="none" class="stroke-suggested" stroke-width="1.5" stroke-dasharray="5 5" />
+          </svg>
+          {concepts.map((c) => (
+            <div
+              class:list={[
+                "concept absolute rounded-lg",
+                c.tone === "focus" && "border-2 border-primary bg-card font-semibold",
+                c.tone === "suggested" && "border-[1.5px] border-dashed border-suggested bg-card font-medium",
+                !c.tone && "border border-border bg-background font-medium",
+              ]}
+              style={`left:${c.x}%;top:${c.y}%;width:${c.w}%`}
+            >
+              {c.kind && <span class:list={["kind block font-mono tracking-[0.06em]", c.kind[1]]}>{c.kind[0]}</span>}
+              {c.label}
+              {c.tone === "suggested" && <span class="note block font-normal text-suggested-text">Suggested by the agent</span>}
+            </div>
+          ))}
+          <span class:list={[monoLabel, "kind slot-label absolute bottom-3 left-4"]}>{loop.label}</span>
+        </div>
+      )
+    }
+  </figure>
+</section>
+
+<style>
+  .sketch {
+    container-type: inline-size;
+  }
+  /* 13 px text at the 508 px the figure has at 1440 px; smaller below that. */
+  .concept {
+    padding: min(10px, 2cqw) min(12px, 2.4cqw);
+    font-size: min(13px, 2.6cqw);
+    line-height: 1.35;
+  }
+  .kind {
+    font-size: min(10px, 2cqw);
+  }
+  .note {
+    font-size: min(11px, 2.2cqw);
+  }
+  /* On a phone the wrapped boxes reach the bottom: the slot label gives way. */
+  @container (max-width: 440px) {
+    .slot-label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import "../../scripts/hero-loop"
+</script>

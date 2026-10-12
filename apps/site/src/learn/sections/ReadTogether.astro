@@ -1,0 +1,32 @@
+---
+// Read together, with the live embed slot (WP-7.5): a lazy iframe once the
+// embed URL is set (src/media.ts), else the read-together screenshot or its
+// placeholder.
+import MediaImage from "../../components/MediaImage.astro"
+import { container, eyebrow, h2 } from "../../lib/styles"
+import { EMBED } from "../../media"
+
+const box = "aspect-[16/10] min-w-0 rounded-xl border border-border bg-background"
+---
+
+<section class="border-t border-border bg-card">
+  <div class:list={[container, "grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2"]}>
+    <div class="flex flex-col gap-4">
+      <span class={eyebrow}>Read together</span>
+      <h2 class={h2}>Read and edit with other people</h2>
+      <ul class="m-0 flex list-disc flex-col gap-2 pl-5 text-muted-foreground">
+        <li>You can see who else has the Expedition open and which View they are looking at.</li>
+        <li>Each person is an owner, editor or viewer, and a link can be private, unlisted or public.</li>
+        <li>Every Change is kept in a history, so you can undo it or go back to an earlier state.</li>
+        <li>You can fork any Expedition you can read and carry on with it as your own.</li>
+      </ul>
+    </div>
+    {
+      EMBED.url ? (
+        <iframe src={EMBED.url} title={EMBED.title} loading="lazy" class:list={[box, "w-full"]} />
+      ) : (
+        <MediaImage slot={EMBED.fallback} class={box} labelClass="text-xs p-6" extraLabels={[EMBED.label]} />
+      )
+    }
+  </div>
+</section>

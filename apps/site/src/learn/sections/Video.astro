@@ -1,0 +1,52 @@
+---
+// The explainer (WP-7.4). Until its files are in the media manifest, a
+// placeholder in the mockup's look: the calyx panel, the play mark and the
+// opening caption.
+import { cn } from "@seply/ui/lib/utils"
+
+import { container, h2 } from "../../lib/styles"
+import { explainer } from "../../media"
+
+const video = explainer()
+---
+
+<section id="video" class="scroll-mt-20 border-t border-border">
+  <div class={cn(container, "flex max-w-[960px] flex-col items-center gap-6 py-20 text-center")}>
+    <h2 class={h2}>A one-minute introduction to Expeditions</h2>
+    {
+      video.present ? (
+        <video
+          class="aspect-video w-full rounded-[14px] bg-calyx"
+          controls
+          preload="none"
+          playsinline
+          poster={video.poster}
+          aria-label="A one-minute introduction to Expeditions"
+        >
+          {video.webm && <source src={video.webm} type="video/webm" />}
+          {video.mp4 && <source src={video.mp4} type="video/mp4" />}
+          {video.captions && <track kind="captions" srclang="en" label="English" src={video.captions} default />}
+        </video>
+      ) : (
+        <div
+          class="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-[14px] bg-calyx"
+          data-media-placeholder="explainer"
+        >
+          <span class="absolute top-5 left-6 font-mono text-[11px] tracking-[0.06em] text-sprout">{video.label}</span>
+          <span class="flex size-[76px] items-center justify-center rounded-full bg-sprout text-calyx" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="7 4 20 12 7 20 7 4" />
+            </svg>
+          </span>
+          <span class="absolute inset-x-4 bottom-7 font-reading text-[clamp(16px,2.4vw,22px)] text-sprout">
+            Long AI chats are hard to come back to.
+          </span>
+        </div>
+      )
+    }
+    <p class="m-0 text-sm text-muted-foreground">
+      The video follows a question as it becomes an Expedition, shows a few of its Views, and shows how you review an
+      agent's suggestions.
+    </p>
+  </div>
+</section>

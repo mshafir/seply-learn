@@ -53,6 +53,7 @@
   "exports": {
     "./globals.css": "./src/styles/globals.css",
     "./fonts.css": "./src/styles/fonts.css",
+    "./typeset.css": "./src/styles/typeset.css",
     "./tokens.css": "./src/styles/tokens.css",
     "./tokens-dark.css": "./src/styles/tokens-dark.css",
     "./lib/*": "./src/lib/*.ts",

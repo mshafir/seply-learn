@@ -56,6 +56,9 @@ const beacon = analyticsToken ? JSON.stringify({ token: analyticsToken }) : unde
   </head>
   <body>
     <slot />
+    <script>
+      import "../scripts/copy"
+    </script>
     {
       beacon && (
         <script
