@@ -220,7 +220,7 @@ describe("media manifest", () => {
       '<source src="/media/video/explainer.webm" type="video/webm">'
     )
     expect(html()).toContain(
-      '<track kind="captions" srclang="en" label="English" src="/media/video/explainer.vtt" default>'
+      '<track kind="captions" srclang="en" label="English" src="/media/video/explainer.vtt">'
     )
     expect(html()).toContain('poster="/media/video/explainer-poster.webp"')
   })
