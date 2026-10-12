@@ -16,6 +16,8 @@ const allowed = {
   "@seply/site": ["@seply/ui"],
   // The explainer video (WP-7.4) draws the real Views over committed fixtures.
   video: ["@seply/ui", "@seply/views", "@seply/domain"],
+  // The desktop shell loads a server's web client; ui is for its one local page (spec §10.1).
+  desktop: ["@seply/ui"],
   "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
   "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
 };
