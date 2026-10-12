@@ -14,6 +14,17 @@ on:
     workflows: [CI]
     types: [completed]
     branches: [main]
+  # The site again (only the site), weekly and on demand: its screenshots of
+  # the public showcases and the Examples' counts go stale as they grow
+  # (WP-7.6). The week is in the screenshot cache's key.
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      recapture:
+        description: Capture the screenshots again, ignoring this week's cache
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -416,8 +427,9 @@ jobs:
       github.event_name == 'pull_request' &&
       github.event.action != 'closed'
     runs-on: ubuntu-latest
-    # Room for rendering the explainer (about 10 minutes) when no cached render fits.
-    timeout-minutes: 35
+    # Room for rendering the explainer (about 10 minutes) and capturing the
+    # screenshots (about 5) when nothing cached fits.
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: write
@@ -450,6 +462,13 @@ jobs:
         if: steps.paths.outputs.changed == 'true'
         with:
           to: apps/site/public/media/video
+
+      # The screenshots (WP-7.6), from this week's cached capture; captured
+      # here on a miss (the public showcases, and a local app for the rest).
+      - uses: ./.github/actions/site-screenshots
+        if: steps.paths.outputs.changed == 'true'
+        with:
+          to: apps/site/public/media/shots
 
       # SITE_ENV=preview: noindex on every page and in a header, and no analytics.
       - name: Build the site
@@ -552,17 +571,24 @@ jobs:
               await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body })
             }
 
+  # After CI passes on main, and weekly / on demand (schedule, workflow_dispatch:
+  # main as it is), for fresh screenshots and counts.
   site-production:
     name: Deploy site
     needs: gate
     if: >-
       needs.gate.outputs.cloudflare == 'true' &&
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push'
+      (
+        (github.event_name == 'workflow_run' &&
+         github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.event == 'push') ||
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch'
+      )
     runs-on: ubuntu-latest
-    # Room for rendering the explainer (about 10 minutes) when no cached render fits.
-    timeout-minutes: 35
+    # Room for rendering the explainer (about 10 minutes) and capturing the
+    # screenshots (about 5) when nothing cached fits.
+    timeout-minutes: 45
     environment:
       name: site
       url: ${{ steps.deploy.outputs.url }}
@@ -574,14 +600,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # The commit CI just passed, not whatever main is now.
-          ref: ${{ github.event.workflow_run.head_sha }}
+          # The commit CI just passed, not whatever main is now (on a
+          # schedule or dispatch: main).
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: ./.github/actions/setup
 
       # The explainer and hero loop (WP-7.4): CI rendered and cached them for this commit's inputs.
       - uses: ./.github/actions/explainer-video
         with:
           to: apps/site/public/media/video
+
+      # The screenshots (WP-7.6): this week's cached capture, or a new one.
+      - uses: ./.github/actions/site-screenshots
+        with:
+          to: apps/site/public/media/shots
+          recapture: ${{ github.event_name == 'workflow_dispatch' && inputs.recapture && 'true' || 'false' }}
 
       - name: Build the site
         env:

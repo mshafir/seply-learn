@@ -106,6 +106,44 @@ describe("the fake job on the inline engine", () => {
     s = await setup()
   })
 
+  it("names its Views, their View Types and previews when asked (screenshots)", async () => {
+    const job = await start(s, {
+      views: 2,
+      labels: ["What to learn first", "Compare the bikes"],
+      viewTypes: [
+        { viewType: "learning-path", settings: { relationshipTypes: [] } },
+        {
+          viewType: "comparison-table",
+          settings: { rows: { tags: [] }, columns: [] },
+        },
+      ],
+      previews: [["Torque (Nm)", "Mid-drive motor", "Battery size"]],
+    })
+    await s.engine.settled(instanceId({ jobId: job.id, attempt: 1 }))
+    const views = await liveViews(s)
+    expect(views.map((v) => [v.label, v.viewType, v.status])).toEqual([
+      ["Compare the bikes", "comparison-table", "ready"],
+      ["What to learn first", "learning-path", "ready"],
+    ])
+    const first = views.find((v) => v.label === "What to learn first")!
+    const building = s.events.find(
+      (e) => e.viewId === first.id && e.status === "building"
+    )!
+    expect(building.previewNodes?.map((n) => n.title)).toEqual([
+      "Torque (Nm)",
+      "Mid-drive motor",
+      "Battery size",
+    ])
+    // A View without previews of its own gets the default two.
+    const second = s.events.find(
+      (e) => e.viewId !== first.id && e.status === "building" && e.viewId
+    )!
+    expect(second.previewNodes?.map((n) => n.title)).toEqual([
+      "Preview 2.1",
+      "Preview 2.2",
+    ])
+  })
+
   it("builds each View as its own Change and survives a forced step failure", async () => {
     const job = await start(s, { views: 3, failOnce: [2] })
     expect(job).toMatchObject({ kind: "fake", status: "queued", attempt: 1 })

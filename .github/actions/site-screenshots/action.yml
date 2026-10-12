@@ -1,0 +1,143 @@
+name: Site screenshots
+description: >-
+  The site's screenshots (apps/site/scripts/capture.ts, WP-7.6): restores the
+  capture cached for this week and these inputs (the capture script, the
+  site's media manifest and its package.json), captures on a miss, and copies
+  the files into a folder (the site's media). The public showcases are read
+  from learn.seply.app; the signed-in screens come from a local Worker on a
+  throwaway Postgres (a container, only on a miss), seeded with the committed
+  fixtures. The week number in the key refreshes the public shots weekly.
+  Needs ./.github/actions/setup first.
+inputs:
+  to:
+    description: A folder to copy the files into (e.g. apps/site/public/media/shots); empty for none.
+    required: false
+    default: ""
+  recapture:
+    description: "'true' to ignore the cache and capture again."
+    required: false
+    default: "false"
+outputs:
+  hit:
+    description: "'true' when the capture came from the cache."
+    value: ${{ steps.cache.outputs.cache-matched-key != '' }}
+runs:
+  using: composite
+  steps:
+    # Keys are immutable, so each capture is saved under its own run and the
+    # restore takes the newest one with this week's inputs (the prefix).
+    - name: Work out the cache key
+      id: key
+      shell: bash
+      env:
+        HASH: ${{ hashFiles('apps/site/scripts/capture.ts', 'apps/site/src/media.ts', 'apps/site/package.json') }}
+      run: |
+        prefix="site-shots-$HASH-$(date -u +%G-W%V)-"
+        echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
+        echo "key=$prefix$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+
+    - name: Restore this week's capture
+      id: cache
+      if: inputs.recapture != 'true'
+      uses: actions/cache/restore@v6
+      with:
+        path: apps/site/.capture/shots
+        key: ${{ steps.key.outputs.key }}
+        restore-keys: ${{ steps.key.outputs.prefix }}
+
+    - name: Start Postgres for the signed-in screens
+      if: steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      run: |
+        # The official image through Google's mirror: Docker Hub rate-limits
+        # unauthenticated pulls per runner IP.
+        docker run -d --name seply-capture-pg \
+          -e POSTGRES_USER=seply -e POSTGRES_PASSWORD=seply -e POSTGRES_DB=seply_capture \
+          -p 55433:5432 mirror.gcr.io/library/postgres:17
+        for _ in $(seq 1 60); do
+          docker exec seply-capture-pg pg_isready -U seply -d seply_capture && exit 0
+          sleep 1
+        done
+        docker logs seply-capture-pg; exit 1
+
+    - name: Migrate it and build the app
+      if: steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      env:
+        DATABASE_URL: postgres://seply:seply@localhost:55433/seply_capture
+      run: |
+        pnpm --filter @seply/server db:migrate
+        # The Worker serves apps/web/dist.
+        pnpm --filter web build
+
+    - name: Playwright version
+      id: pw
+      if: steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      run: echo "version=$(pnpm --filter @seply/site exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browsers
+      if: steps.cache.outputs.cache-matched-key == ''
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+    - name: Install Chromium
+      if: steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      run: pnpm --filter @seply/site exec playwright install --with-deps chromium
+
+    # A shot that fails (not one whose Expedition is private: that is skipped)
+    # fails this step; the site still builds with what was captured, but the
+    # capture isn't cached, so the next run tries again.
+    - name: Capture
+      id: capture
+      if: steps.cache.outputs.cache-matched-key == ''
+      continue-on-error: true
+      shell: bash
+      env:
+        CAPTURE_DATABASE_URL: postgres://seply:seply@localhost:55433/seply_capture
+      run: |
+        pnpm --filter @seply/site capture \
+          --out="$GITHUB_WORKSPACE/apps/site/.capture/shots" \
+          --debug="$GITHUB_WORKSPACE/apps/site/.capture/debug"
+
+    - name: Keep what a failed capture looked like
+      if: steps.capture.outcome == 'failure'
+      uses: actions/upload-artifact@v7
+      with:
+        name: site-capture-debug-${{ github.job }}
+        path: apps/site/.capture/debug/
+        retention-days: 14
+
+    - name: Warn about a failed capture
+      if: steps.capture.outcome == 'failure'
+      shell: bash
+      run: echo "::warning title=Screenshots::Some screenshots failed (see the Capture step and the site-capture-debug artifact); their slots show placeholders and the capture isn't cached."
+
+    # Another job may have captured meanwhile; saving then only warns.
+    - name: Save the capture
+      if: steps.capture.outcome == 'success'
+      uses: actions/cache/save@v6
+      with:
+        path: apps/site/.capture/shots
+        key: ${{ steps.key.outputs.key }}
+
+    - name: Stop Postgres
+      if: always() && steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      run: docker rm -f seply-capture-pg || true
+
+    - name: Copy the files
+      if: inputs.to != ''
+      shell: bash
+      env:
+        TO: ${{ inputs.to }}
+      run: |
+        mkdir -p "$TO"
+        if [ -f apps/site/.capture/shots/manifest.json ]; then
+          cp apps/site/.capture/shots/*.webp apps/site/.capture/shots/*.avif apps/site/.capture/shots/manifest.json "$TO"/ 2>/dev/null || true
+          cat apps/site/.capture/shots/manifest.json
+        fi
+        ls -la "$TO"

@@ -51,3 +51,4 @@ dist-ssr/
 
 # Site media: rendered and captured in CI, never committed (apps/site/src/media.ts)
 apps/site/public/media/
+apps/site/.capture/

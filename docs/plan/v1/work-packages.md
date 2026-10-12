@@ -419,6 +419,7 @@ Spec: [9. Landing site](../../spec/v1/09-landing-site.md). The three showcase Ex
 - depends: WP-7.1, WP-7.5
 - spec: 09-landing-site.md#93-media
 - **Build:** `apps/site/scripts/capture.ts` (Playwright) taking the shot list from the design doc against the public showcases on `learn.seply.app`, light and dark, 1440 × 900 at 2×, encoded to AVIF and WebP; signed-in shots use the demo account from CI secrets (`DEMO_EMAIL`, `DEMO_PASSWORD`) and reset its demo Expedition first. A CI job runs it on demand and weekly, caching the output, and the site build reads it through the media manifest from 7.2.
+- *As built:* no demo account (hosted sign-in is Google only). Gallery and Examples shots read the public showcases anonymously, skipping (and logging) any that isn't readable; signed-in shots come from a local Worker on a throwaway Postgres with the committed fixtures and the fake build job, no secrets. `.github/actions/site-screenshots` restores the capture cached under the script, the media manifest and the ISO week, captures on a miss, and copies it into `public/media/shots/` before both site builds; the Deploy workflow redeploys the site weekly and on `workflow_dispatch` (with a `recapture` option). The Examples' counts are read from the public API at build time.
 - **Done when:** every placeholder on the site preview shows a real screenshot in both themes, and a rerun with nothing changed reuses the cache.
 
 ## M8: Desktop shell

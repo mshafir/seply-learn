@@ -51,6 +51,15 @@ export default function setup() {
     "video/explainer-poster.webp",
   ])
     writeFileSync(SOME_MEDIA + f, "")
+  // The capture's manifest: a shot taken from a fallback View has its own alt.
+  writeFileSync(
+    `${SOME_MEDIA}shots/manifest.json`,
+    JSON.stringify({
+      shots: {
+        "01-learning-path": { from: "test", alt: "A fallback Learning path" },
+      },
+    })
+  )
 
   for (const [name, env] of Object.entries(builds)) {
     rmSync(outDir(name), { recursive: true, force: true })
@@ -64,7 +73,13 @@ export default function setup() {
       delete clean[k]
     execFileSync("astro", ["build", "--outDir", outDir(name)], {
       cwd: root,
-      env: { ...clean, ...env, ASTRO_TELEMETRY_DISABLED: "1" },
+      // SITE_COUNTS=offline: the Examples' last known counts, no network.
+      env: {
+        ...clean,
+        ...env,
+        SITE_COUNTS: "offline",
+        ASTRO_TELEMETRY_DISABLED: "1",
+      },
       stdio: "pipe",
     })
   }
