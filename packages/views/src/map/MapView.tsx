@@ -10,6 +10,8 @@
 //   portals, so they survive the swap.
 // - Clicking a pin selects its Concept; selecting one elsewhere pans to it
 //   when it's out of view. `matches` dims the rest; `covered` checks read ones.
+// - Under the app's floating controls (`overlayTop`): the map fills the area,
+//   opens its pins below them, and its zoom buttons sit just under them.
 import { useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import maplibregl, { type StyleSpecification } from "maplibre-gl";
@@ -46,7 +48,7 @@ function addPmtilesProtocol() {
   protocolAdded = true;
 }
 
-export function MapView({ expedition, view, selected, onSelect, matches, covered, onSettled, transitionMs, basemap }: MapViewProps) {
+export function MapView({ expedition, view, selected, onSelect, matches, covered, onSettled, transitionMs, basemap, overlayTop = 0 }: MapViewProps) {
   const model = useMemo(() => mapModel(expedition, view), [expedition, view]);
   const frame = useRef<HTMLDivElement>(null);
   const host = useRef<HTMLDivElement>(null);
@@ -84,7 +86,7 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
     const m = new maplibregl.Map({
       container: host.current!,
       style: withCoarseWorld(undefined, coarseWorld(), coarseColors(frame.current!)),
-      ...initialView(model.bounds),
+      ...initialView(model.bounds, overlayTop),
       attributionControl: { compact: false },
       fadeDuration: 0,
     });
@@ -164,14 +166,19 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
     if (!map || !p) return;
     const at = map.project([p.lon, p.lat]);
     const { clientWidth: w, clientHeight: h } = map.getContainer();
-    if (at.x < 40 || at.y < 40 || at.x > w - 40 || at.y > h - 40)
+    if (at.x < 40 || at.y < overlayTop + 40 || at.x > w - 40 || at.y > h - 40)
       map.easeTo({ center: [p.lon, p.lat], duration: transitionMs ?? 500 });
     // Only a new selection pans, not new data.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, selected]);
 
   return (
-    <div className="seply-map" ref={frame} data-testid="map">
+    <div
+      className={cx("seply-map", overlayTop > 0 && "seply-map--overlay")}
+      ref={frame}
+      data-testid="map"
+      style={overlayTop ? ({ "--seply-overlay-top": `${overlayTop}px` } as CSSProperties) : undefined}
+    >
       <div className="seply-map__canvas" ref={host} />
       {model.pins.map((p) =>
         createPortal(
@@ -253,11 +260,11 @@ function MapPin({
   );
 }
 
-function initialView(bounds?: [number, number, number, number]) {
+function initialView(bounds: [number, number, number, number] | undefined, top: number) {
   if (!bounds) return { center: [0, 20] as [number, number], zoom: 1 };
   const [w, s, e, n] = bounds;
   if (w === e && s === n) return { center: [w, s] as [number, number], zoom: 10 };
-  return { bounds, fitBoundsOptions: { padding: 72, maxZoom: 11 } };
+  return { bounds, fitBoundsOptions: { padding: { top: top + 72, right: 72, bottom: 72, left: 72 }, maxZoom: 11 } };
 }
 
 /** The basemap for a theme: our PMTiles, else the fallback style (fetched; undefined if it can't load). */
