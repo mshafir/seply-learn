@@ -1,0 +1,70 @@
+---
+// Every page's document: meta, canonical URL, Open Graph, favicons, the
+// noindex on previews and (production only) the analytics beacon.
+import "../styles/site.css"
+
+import appleTouchIcon from "@seply/ui/brand/apple-touch-icon.png?url"
+import favicon32 from "@seply/ui/brand/favicon-32.png?url"
+import faviconSvg from "@seply/ui/brand/favicon.svg?url"
+
+import { analyticsToken, isPreview, SITE_URL } from "../lib/env"
+
+interface Props {
+  /** The page's own title; the site name is added after it. Leave out on the home page. */
+  title?: string
+  description: string
+  /** Leave the page out of search results (the 404 also has no canonical URL). */
+  noindex?: boolean
+}
+
+const { title, description, noindex = false } = Astro.props
+const fullTitle = title ? `${title} · Seply Learn` : "Seply Learn"
+const is404 = Astro.url.pathname.startsWith("/404")
+// Pages build as <path>/index.html, which the Worker serves at <path>/.
+const path = Astro.url.pathname.replace(/\/?$/, "/")
+const canonical = is404 ? undefined : new URL(path, SITE_URL).href
+const ogImage = new URL("/og.png", SITE_URL).href
+const beacon = analyticsToken ? JSON.stringify({ token: analyticsToken }) : undefined
+---
+
+<!doctype html>
+<html lang="en" class="theme-system">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {(isPreview || noindex) && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+
+    <link rel="icon" href={faviconSvg} type="image/svg+xml" />
+    <link rel="icon" href={favicon32} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={appleTouchIcon} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Seply Learn" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Seply Learn: Turn questions into something you can read and come back to." />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="sitemap" href="/sitemap.xml" />
+  </head>
+  <body>
+    <slot />
+    {
+      beacon && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={beacon}
+        />
+      )
+    }
+  </body>
+</html>

@@ -8,7 +8,10 @@ shadcn components on Base UI, design tokens (light + warm charcoal dark), fonts,
 
 | Export | What it is |
 |---|---|
-| `@seply/ui/globals.css` | Tailwind v4, shadcn tokens, our tokens, fonts, Typeset. Import once, in the app entry. |
+| `@seply/ui/globals.css` | Tailwind v4, shadcn tokens, our tokens, fonts, Typeset. Import once, in the app entry. It imports the three files below. |
+| `@seply/ui/tokens.css` | The Tailwind theme (font and colour tokens) and the light palette (`:root, .light`). Tailwind-only syntax (`@theme`). |
+| `@seply/ui/tokens-dark.css` | The dark palette (`.dark, .theme-system`). |
+| `@seply/ui/fonts.css` | The Fontsource `@font-face` imports. `apps/site` takes these three without `globals.css`. |
 | `@seply/ui/components/*` | shadcn (Base UI) components: `alert`, `avatar`, `badge`, `button`, `card`, `combobox` (with `multi-combobox`'s `MultiCombobox` and `SearchCombobox`; the markdown editor's link popover uses `SearchCombobox`), `command` (cmdk, as shadcn's), `dialog`, `dropdown-menu`, `empty`, `input`, `label`, `scroll-area`, `separator`, `sheet`, `sidebar`, `skeleton`, `spinner`, `switch`, `tabs`, `popover`, `progress`, `toast`, `toggle`, `toggle-group`, `tooltip`, plus `step-indicator` (`StepIndicator`, divergence 5), `file-drop-zone` (`FileDropZone`, divergence 6) and `view-type-thumbnail` (`ViewTypeThumbnail` and `THUMBNAIL_VIEW_TYPES`: the fixed illustration of each View Type, divergence 3). Add more with `mise exec -- pnpm dlx shadcn@latest add <name>` from `apps/web` (hooks land in `apps/web/src/hooks`; move them to `src/hooks`, which is where the components import them from). `command`, `dialog`, `label` and `switch` (WP-2.6), and `popover` (WP-3.7), were transcribed from the base-nova registry by hand because the sessions that added them couldn't reach ui.shadcn.com; re-running `shadcn add` over them should leave only formatting differences. |
 | `@seply/ui/hooks/use-mobile` | shadcn's `useIsMobile` (below 768 px), used by `sidebar`. Rewritten with `useSyncExternalStore` so it passes the React Compiler lint rule against setState in effects; same behaviour. |
 | `@seply/ui/components/theme-provider` | `ThemeProvider` and `useTheme()` → `{ theme, resolvedTheme, setTheme }`. `theme` is `system \| light \| dark` (persisted under `seply-theme`); `resolvedTheme` is what is on screen and follows the OS live. |
@@ -24,10 +27,11 @@ shadcn components on Base UI, design tokens (light + warm charcoal dark), fonts,
 
 Colours come only from tokens (`bg-background`, `text-suggested-text`, `fill-[var(--kind-teal)]` …), never hex values in components.
 
-- **shadcn tokens** (`--background`, `--card`, `--primary` …) carry the spec's palette, converted from its hex values to oklch. The source hex is in a comment beside each value in `globals.css`. Spec names map as: ground = `--background`, surface = `--card` / `--popover`, ink = `--foreground`, muted ink = `--muted-foreground`, accent = `--primary` (and `--ring`).
+- **shadcn tokens** (`--background`, `--card`, `--primary` …) carry the spec's palette, converted from its hex values to oklch. The source hex is in a comment beside each value in `tokens.css` and `tokens-dark.css`. Spec names map as: ground = `--background`, surface = `--card` / `--popover`, ink = `--foreground`, muted ink = `--muted-foreground`, accent = `--primary` (and `--ring`).
 - **Our tokens:** `--suggested` (fills, dashes, borders; non-text), `--suggested-text`, `--success`, `--font-reading` (Newsreader), and `--kind-<name>` for the 12 hues. Each has a Tailwind colour (`bg-suggested`, `text-kind-violet` …).
 - **Islands:** `.dark` on any element switches its subtree to the dark palette, and `.light` forces the light one inside a dark page. `ThemeProvider` only ever puts `.dark` on `<html>`; `.light` is for islands such as the showcase.
-- **Contrast is tested.** `src/styles/tokens.test.ts` parses `globals.css` and asserts, in both themes, on ground and surface: ink, muted ink, accent, suggested-text and success ≥ 4.5:1; `--suggested` and all 12 Kind hues ≥ 3:1.
+- **Following the system without JavaScript:** `.theme-system` shares the dark palette's rule. A page that imports `tokens-dark.css` under `(prefers-color-scheme: dark)` and puts `.theme-system` on `<html>` is dark exactly when the system is (`apps/site` does this). The app never uses the class.
+- **Contrast is tested.** `src/styles/tokens.test.ts` parses `tokens.css` and `tokens-dark.css` and asserts, in both themes, on ground and surface: ink, muted ink, accent, suggested-text and success ≥ 4.5:1; `--suggested` and all 12 Kind hues ≥ 3:1.
 
 ### Kind hues
 

@@ -1,0 +1,63 @@
+/*
+ * Warm charcoal. `.dark` is the app's theme (ThemeProvider puts it on <html>)
+ * and any dark island. `.theme-system` is for pages that follow the system
+ * without JavaScript: apps/site imports this file under
+ * `(prefers-color-scheme: dark)` and puts the class on <html>.
+ */
+.dark,
+.theme-system {
+    --background: oklch(0.2138 0.0042 84.59); /* ground #1A1917 */
+    --foreground: oklch(0.9347 0.0087 84.57); /* ink #ECE9E3 */
+    --card: oklch(0.2523 0.004 84.58); /* surface #232220 */
+    --card-foreground: oklch(0.9347 0.0087 84.57);
+    --popover: oklch(0.2523 0.004 84.58);
+    --popover-foreground: oklch(0.9347 0.0087 84.57);
+    --primary: oklch(0.7072 0.1328 278.13); /* accent #8E97F2 */
+    --primary-foreground: oklch(0.2138 0.0042 84.59);
+    --secondary: oklch(0.289 0.0055 91.57); /* fill #2C2B28 */
+    --secondary-foreground: oklch(0.9347 0.0087 84.57);
+    --muted: oklch(0.289 0.0055 91.57);
+    --muted-foreground: oklch(0.7006 0.0154 84.59); /* muted ink #A39E94 */
+    --accent: oklch(0.3022 0.006 78.24); /* hover #302E2B */
+    --accent-foreground: oklch(0.9347 0.0087 84.57);
+    --destructive: oklch(0.7403 0.126 26.45); /* #F08A80 */
+    --border: oklch(0.3253 0.0091 88.75); /* #36342F */
+    --input: oklch(0.3804 0.0093 80.68); /* #45423D */
+    --ring: oklch(0.7072 0.1328 278.13);
+
+    --suggested: oklch(0.7912 0.1184 79.71); /* #E3B25C */
+    --suggested-text: oklch(0.7912 0.1184 79.71); /* #E3B25C */
+    --success: oklch(0.7812 0.1199 157.83); /* #6FCF9A */
+    --calyx: oklch(0.7802 0.0804 153.84); /* #8FC7A0 */
+    --sprout: oklch(0.3121 0.0267 155.38); /* #26352B */
+
+    /* Same hues, lighter: >= 6:1 on ground and surface. */
+    --kind-blue: oklch(0.702 0.126 250);
+    --kind-teal: oklch(0.692 0.09 195);
+    --kind-green: oklch(0.69 0.117 150);
+    --kind-amber: oklch(0.708 0.117 75);
+    --kind-orange: oklch(0.714 0.135 50);
+    --kind-red: oklch(0.722 0.153 25);
+    --kind-pink: oklch(0.722 0.144 355);
+    --kind-violet: oklch(0.718 0.144 305);
+    --kind-indigo: oklch(0.712 0.149 275);
+    --kind-slate: oklch(0.702 0.027 255);
+    --kind-brown: oklch(0.68 0.07 55);
+    --kind-olive: oklch(0.698 0.09 115);
+
+    /* Re-declared so a .dark island resolves them against its own hues. */
+    --chart-1: var(--kind-blue);
+    --chart-2: var(--kind-teal);
+    --chart-3: var(--kind-amber);
+    --chart-4: var(--kind-violet);
+    --chart-5: var(--kind-red);
+
+    --sidebar: oklch(0.2354 0.0041 84.59); /* #1F1E1C */
+    --sidebar-foreground: oklch(0.9347 0.0087 84.57);
+    --sidebar-primary: oklch(0.7072 0.1328 278.13);
+    --sidebar-primary-foreground: oklch(0.2138 0.0042 84.59);
+    --sidebar-accent: oklch(0.289 0.0055 91.57);
+    --sidebar-accent-foreground: oklch(0.9347 0.0087 84.57);
+    --sidebar-border: oklch(0.3253 0.0091 88.75);
+    --sidebar-ring: oklch(0.7072 0.1328 278.13);
+}

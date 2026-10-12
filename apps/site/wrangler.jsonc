@@ -1,0 +1,19 @@
+// The seply-site Worker: static assets only, no Worker script.
+// CI deploys it (docs/ops/deploy.md): production as seply-site with the
+// seply.app custom domain (--domain), each PR preview as seply-site-pr-<n>.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "seply-site",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    // Build it first: `pnpm --filter @seply/site build`.
+    "directory": "./dist",
+    // /self-host serves self-host/index.html (redirecting to /self-host/).
+    "html_handling": "auto-trailing-slash",
+    // Unknown paths get dist/404.html with a 404 status.
+    "not_found_handling": "404-page",
+  },
+  // Keep the workers.dev URL working next to the custom domain.
+  "workers_dev": true,
+  "preview_urls": false,
+}
