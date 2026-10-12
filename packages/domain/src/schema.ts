@@ -14,6 +14,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
 import { PALETTE, type AttributeValue, type Prov } from "./common.ts"
 import type { OpBody } from "./ops.ts"
 import { VIEW_TYPE_IDS } from "./view-types.ts"
@@ -38,6 +39,12 @@ export const users = pgTable("users", {
   image: text("image"),
   createdAt: authTs("created_at").notNull().defaultNow(),
   updatedAt: authTs("updated_at").notNull().defaultNow(),
+  /**
+   * Hosted access approval (spec §2.6; WP-7.3): set when an admin approves
+   * the account. Read only with ACCESS_APPROVAL=1. The migration that added
+   * it approved every account that existed then.
+   */
+  approvedAt: authTs("approved_at"),
 })
 
 export const sessions = pgTable("sessions", {
@@ -729,6 +736,32 @@ export const invites = pgTable(
   (t) => [
     index("invites_expedition_idx").on(t.expeditionId),
     index("invites_email_idx").on(t.email),
+  ]
+)
+
+/**
+ * Hosted access approval (spec §2.6; WP-7.3): an unapproved account's request
+ * to create Expeditions. At most one pending (undecided) request per user.
+ */
+export const accessRequests = pgTable(
+  "access_requests",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    note: text("note").notNull().default(""),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    decidedAt: ts("decided_at"),
+    decision: text("decision", { enum: ["approved", "declined"] }),
+    decidedBy: text("decided_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+  },
+  (t) => [
+    uniqueIndex("access_requests_pending_idx")
+      .on(t.userId)
+      .where(sql`decided_at is null`),
   ]
 )
 

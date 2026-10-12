@@ -48,7 +48,12 @@ import {
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { describeItem } from "@/expedition/suggestions.ts"
-import { ApiError, type AskEstimate, type AskView } from "@/lib/api.ts"
+import {
+  ApiError,
+  isApprovalRequired,
+  type AskEstimate,
+  type AskView,
+} from "@/lib/api.ts"
 
 export type GrowTab = "ask" | "suggestions" | "activity"
 
@@ -120,8 +125,10 @@ export function AskPanel({
   const [sending, setSending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const end = React.useRef<HTMLDivElement | null>(null)
-  const noKey =
-    estimateError instanceof ApiError && estimateError.status === 409
+  // Hosted access approval: an account waiting for approval can't ask yet.
+  const noKey = isApprovalRequired(estimateError)
+    ? "waiting"
+    : estimateError instanceof ApiError && estimateError.status === 409
       ? estimateError.body.error === "no-key"
         ? "no-key"
         : "not-configured"
@@ -224,6 +231,8 @@ export function AskPanel({
               <>
                 No AI key: <Link href="/settings">add one in Settings</Link>.
               </>
+            ) : noKey === "waiting" ? (
+              "Your account is waiting for approval, so you can't ask yet."
             ) : noKey ? (
               "This server has no AI configured."
             ) : estimate ? (

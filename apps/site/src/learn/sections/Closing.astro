@@ -1,0 +1,24 @@
+---
+// The closing band, on the brand's sprout green. The owner's own words.
+import { cn } from "@seply/ui/lib/utils"
+
+import { APP_URL } from "../../lib/env"
+import { container, link, primaryButton } from "../../lib/styles"
+---
+
+<section class="bg-sprout">
+  <div class:list={[container, "flex flex-col items-center gap-5 py-[88px] text-center"]}>
+    <h2 class="m-0 font-reading text-[clamp(32px,4vw,44px)] leading-[1.1] font-medium text-calyx [font-variation-settings:'opsz'_72]">
+      Coming soon.
+    </h2>
+    <p class="m-0 max-w-[36em] text-foreground">
+      When you sign in, you join the waiting list. You can read anything that has been shared with you straight away,
+      and you can build your own Expeditions once your account is approved. I'm working on getting the experience right
+      and making sure it's stable before opening it up more broadly, but you are welcome to <a
+        href="/self-host/"
+        class:list={[link, "font-medium"]}>self-host</a
+      > in the meantime.
+    </p>
+    <a href={APP_URL} class={cn(primaryButton, "px-6")}>Request access</a>
+  </div>
+</section>

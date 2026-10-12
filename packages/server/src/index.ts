@@ -67,6 +67,21 @@ export {
   type ExpeditionAccess,
 } from "./access.ts"
 export {
+  accessState,
+  APPROVAL_REQUIRED,
+  ApprovalRequired,
+  isAdmin,
+  requireApproval,
+  type AccessRequestsOverview,
+  type AccessState,
+  type ApprovedAccount,
+  type GatedWork,
+  type OwnAccessRequest,
+  type PendingAccessRequest,
+} from "./approval.ts"
+export {
+  accessApprovedEmail,
+  accessRequestEmail,
   DEFAULT_EMAIL_FROM,
   inviteEmail,
   logMailer,

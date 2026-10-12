@@ -1,0 +1,18 @@
+---
+// A code snippet on the ink colour, with a Copy button (src/scripts/copy.ts
+// adds it to every `pre[data-copy]`; without JavaScript there is none).
+import { cn } from "@seply/ui/lib/utils"
+
+import { snippet } from "../lib/styles"
+
+interface Props {
+  code: string
+  /** What the snippet is, for the Copy button's accessible name. */
+  label: string
+  class?: string
+}
+
+const { code, label, class: className } = Astro.props
+---
+
+<pre class={cn(snippet, className)} data-copy={label} tabindex="0">{code}</pre>

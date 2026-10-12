@@ -1,0 +1,66 @@
+/*
+ * The site's one stylesheet. It takes the app's tokens and fonts from
+ * @seply/ui but not globals.css: that also scans the app's sources for
+ * Tailwind classes and carries Typeset and Base UI fixes the site doesn't need.
+ */
+@import "tailwindcss" source(none);
+@import "@seply/ui/fonts.css";
+@import "@seply/ui/tokens.css";
+/* Prose on /self-host: shadcn Typeset, as the app uses for overviews. */
+@import "@seply/ui/typeset.css";
+/* The dark palette follows the system: <html class="theme-system"> plus this media query. */
+@import "@seply/ui/tokens-dark.css" (prefers-color-scheme: dark);
+
+@source "../**/*.{astro,ts,tsx}";
+/* The @seply/ui components the pages render at build time. */
+@source "../../../../packages/ui/src/components/brand.tsx";
+@source "../../../../packages/ui/src/components/button.tsx";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  /* In-page links land below the sticky header. */
+  html {
+    scroll-padding-top: 5rem;
+  }
+}
+
+/*
+ * Typeset reads the --color-* aliases, which @theme inline doesn't emit:
+ * point them at the tokens (as packages/ui globals.css does). The guide reads
+ * in Plex Sans, a reference rather than an article.
+ */
+.typeset {
+  --typeset-font-heading: var(--font-reading);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+}
+
+@layer components {
+  /* Copy buttons (src/scripts/copy.ts) on the inverted code snippets. */
+  .copy-wrap {
+    @apply relative min-w-0;
+  }
+  .copy-button {
+    @apply absolute top-2 right-2 inline-flex min-h-8 cursor-pointer items-center rounded-md border border-background/30 bg-foreground px-2.5 font-sans text-xs font-medium text-background hover:border-background/60;
+  }
+  .copy-wrap > pre {
+    padding-right: 5.5rem;
+  }
+}

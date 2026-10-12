@@ -131,6 +131,9 @@ export { LearningPathCanvas, type LearningPathCanvasProps } from "./canvas/Learn
 export { ViewCanvas, type ViewCanvasProps } from "./canvas/ViewCanvas.tsx";
 export { KindIcon } from "./canvas/KindIcon.tsx";
 export { buildEdges } from "./canvas/edges.ts";
+// The canvas's own node and edge components, for a host that drives React Flow
+// itself (the explainer video in apps/video tweens them frame by frame).
+export { ConceptNode, edgeTypes, FloatingEdge, nodeTypes, type ConceptData } from "./canvas/parts.tsx";
 
 // Map (MapLibre + our PMTiles) and Timeline (vis-timeline): pure models here;
 // ExpeditionView loads their renderers lazily.

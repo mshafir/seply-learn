@@ -102,6 +102,36 @@ jobs:
             packages/views/test-results/
           retention-days: 14
 
+  # WP-7.4: the explainer video (apps/video). It re-renders only when its
+  # inputs change (.github/actions/explainer-video caches the render under a
+  # hash of apps/video, packages/views, packages/ui and the fixtures), and
+  # uploads the files as the `explainer-video` artifact. The site's build
+  # jobs (preview.yml) take the same cached render into apps/site/public/media/video/.
+  video:
+    name: Explainer video
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - uses: ./.github/actions/explainer-video
+
+      - name: Sizes
+        run: cat apps/video/out/manifest.json
+
+      - name: Upload the video
+        uses: actions/upload-artifact@v7
+        with:
+          name: explainer-video
+          path: |
+            apps/video/out/*.mp4
+            apps/video/out/*.webm
+            apps/video/out/*.vtt
+            apps/video/out/*.webp
+            apps/video/out/*.png
+            apps/video/out/manifest.json
+          retention-days: 30
+
   # WP-6.1: the Node entry (apps/server-node). Its database tests (the pg-boss
   # runner, two instances sharing live edits through LISTEN/NOTIFY), the S3
   # blob store against a real S3-compatible server (moto), then the API and

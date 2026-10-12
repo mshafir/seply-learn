@@ -90,6 +90,8 @@ Everything is an env var. Unknown variables are ignored; a bad value stops the s
 | `MAP_ASSETS_URL` | Protomaps' | A copy of Protomaps' fonts and sprites ([basemaps-assets](https://github.com/protomaps/basemaps-assets)). |
 | `EMBED_FRAME_ANCESTORS` | `https://seply.app` | Who may frame the live embed (`/e/:id/embed`, Public Expeditions only): CSP `frame-ancestors` sources, comma- or space-separated (`https://site.example.com`, `https://*.example.com`, `'self'`). Only that route sends it. |
 | `DB_BRANCH` | | A label `/api/health` reports. |
+| `ACCESS_APPROVAL` | off | `1`: only approved accounts create Expeditions or start AI work on the instance key; others read what is shared with them and can ask for access (hosted access approval). Leave it off on a private instance. |
+| `ADMIN_EMAILS` | | With `ACCESS_APPROVAL=1`: who approves requests, comma-separated. Admins get an email for each request and count as approved. |
 | `AUTH_TEST_CREDENTIALS` | | Tests only; honoured only on a localhost `BETTER_AUTH_URL`. |
 
 ## Tests
