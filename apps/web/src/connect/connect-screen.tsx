@@ -242,23 +242,23 @@ function useNewAgent() {
   return { overview: first, connected }
 }
 
-/** The Expedition `?e=` names, when the reader can suggest on it. */
-function useExpedition(id: string | null) {
-  const [found, setFound] = React.useState<{
-    id: string
-    title: string
-  } | null>(null)
+type Named = { id: string; title: string }
+
+/**
+ * The Expedition `?e=` names, when the reader can suggest on it; null when
+ * there is none (the create prompts show), undefined while it loads.
+ */
+function useExpedition(id: string | null): Named | null | undefined {
+  const [found, setFound] = React.useState<Named | null | undefined>(undefined)
   React.useEffect(() => {
     if (!id) return
     let live = true
     listExpeditions().then(
       (all) => {
         const e = all.find((x) => x.id === id && x.role !== "viewer")
-        if (live && e) setFound({ id: e.id, title: e.title })
+        if (live) setFound(e ? { id: e.id, title: e.title } : null)
       },
-      () => {
-        // The create prompts show instead.
-      }
+      () => live && setFound(null)
     )
     return () => {
       live = false
@@ -383,17 +383,21 @@ export function ConnectScreen() {
               : `Paste one of these into ${label}.`
           }
         >
-          {firstPrompts(expedition).map((p, i) => (
-            <div key={p.prompt} className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">{p.label}</span>
-              <CopyField
-                id={`connect-prompt-${i}`}
-                value={p.prompt}
-                label="prompt"
-              />
-              <span className="text-sm text-muted-foreground">{p.then}</span>
-            </div>
-          ))}
+          {expedition === undefined && (
+            <Spinner className="text-muted-foreground" />
+          )}
+          {expedition !== undefined &&
+            firstPrompts(expedition).map((p, i) => (
+              <div key={p.prompt} className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium">{p.label}</span>
+                <CopyField
+                  id={`connect-prompt-${i}`}
+                  value={p.prompt}
+                  label="prompt"
+                />
+                <span className="text-sm text-muted-foreground">{p.then}</span>
+              </div>
+            ))}
           <div>
             <Button variant="outline" render={<Link href={back} />}>
               {expedition ? "Back to the Expedition" : "Go to the Library"}

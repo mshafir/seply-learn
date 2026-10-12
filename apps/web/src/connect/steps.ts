@@ -52,7 +52,10 @@ export function installSteps(
           "add the marketplace",
           "claude plugin marketplace add mshafir/seply-learn"
         ),
-        command("install the plugin", "claude plugin install seply-learn@seply"),
+        command(
+          "install the plugin",
+          "claude plugin install seply-learn@seply"
+        ),
       ]
       if (instance.hosted)
         return [
@@ -96,7 +99,11 @@ export function installSteps(
       ]
     case "cursor":
       return [
-        { kind: "link", label: "Add to Cursor", href: cursorInstallLink(origin) },
+        {
+          kind: "link",
+          label: "Add to Cursor",
+          href: cursorInstallLink(origin),
+        },
         text("Or add this to ~/.cursor/mcp.json yourself:"),
         command(
           "mcp.json",
@@ -176,7 +183,8 @@ export function firstPrompts(
         then: "What it suggests waits in this Expedition's Suggestions until you accept it.",
       },
     ]
-  const then = "The new Expedition appears in your Library when the agent is done."
+  const then =
+    "The new Expedition appears in your Library when the agent is done."
   return [
     {
       label: "In a chat you want to keep",

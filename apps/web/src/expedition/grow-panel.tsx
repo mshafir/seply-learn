@@ -37,6 +37,7 @@ import { Tabs, TabsList, TabsTrigger } from "@seply/ui/components/tabs"
 import { Textarea } from "@seply/ui/components/textarea"
 import type { DomainState, ProposalView } from "@seply/domain"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
 import {
   activityItems,
   askStatus,
@@ -222,14 +223,16 @@ export function AskPanel({
           >
             {noKey === "no-key" ? (
               <>
-                No AI key: <Link href="/settings">add one in Settings</Link>.
+                No AI key: <Link href="/settings">add one in Settings</Link>,
+                or get suggestions from the agent you already use.
               </>
             ) : noKey ? (
-              "This server has no AI configured."
+              "This server has no AI configured. The agent you already use can suggest instead."
             ) : estimate ? (
               <>
                 {keyCopy(estimate.keySource)} · {costCopy(estimate)}.
-                Suggestions stay dashed until someone accepts them.
+                Suggestions stay dashed until someone accepts them. Or{" "}
+                <ConnectLink as="text">ask your own agent</ConnectLink>.
               </>
             ) : (
               "Suggestions stay dashed until someone accepts them."
@@ -245,6 +248,13 @@ export function AskPanel({
             Ask
           </Button>
         </div>
+        {noKey && (
+          <div>
+            <ConnectLink variant="default" size="sm">
+              Connect your own agent
+            </ConnectLink>
+          </div>
+        )}
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}

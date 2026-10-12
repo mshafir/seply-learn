@@ -28,6 +28,7 @@ import { Textarea } from "@seply/ui/components/textarea"
 import { toast } from "@seply/ui/components/toast"
 import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
 import {
   addTextSource,
   ApiError,
@@ -165,6 +166,11 @@ export function SourcesStep({
         <p className="text-muted-foreground">
           Start from anything: an AI chat, some files, or just a question. Add as many
           Sources as you like; each Concept remembers where it came from.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Already talking it through with an AI agent?{" "}
+          <ConnectLink as="text">Create it from your own agent</ConnectLink>{" "}
+          instead.
         </p>
       </div>
 

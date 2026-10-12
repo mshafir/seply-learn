@@ -167,7 +167,10 @@ describe("newAgent", () => {
     const before = overview([grant("a", "Cursor")], [token("t", "2026-10-01")])
     expect(newAgent(before, before)).toBeNull()
     expect(
-      newAgent(before, overview([grant("a", "Cursor")], [token("t", "2026-10-12")]))
+      newAgent(
+        before,
+        overview([grant("a", "Cursor")], [token("t", "2026-10-12")])
+      )
     ).toBeNull()
   })
 

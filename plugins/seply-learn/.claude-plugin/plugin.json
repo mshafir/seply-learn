@@ -6,5 +6,13 @@
   "homepage": "https://learn.seply.app",
   "repository": "https://github.com/mshafir/seply-learn",
   "license": "MIT",
-  "keywords": ["seply", "learning", "knowledge", "mcp"]
+  "keywords": ["seply", "learning", "knowledge", "mcp"],
+  "userConfig": {
+    "server_url": {
+      "type": "string",
+      "title": "Server address",
+      "description": "The Seply Learn server to connect to. Keep the default for learn.seply.app, or enter your self-hosted server's address, like https://learn.example.com, with no slash at the end.",
+      "default": "https://learn.seply.app"
+    }
+  }
 }

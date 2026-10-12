@@ -32,6 +32,7 @@ import { Skeleton } from "@seply/ui/components/skeleton"
 import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
 import { CopyField } from "@/connect/copy-field.tsx"
 import {
   createApiToken,
@@ -300,11 +301,12 @@ export function ConnectedAgentsSection() {
             <FieldLabel htmlFor="mcp-url">Server address</FieldLabel>
             <CopyField id="mcp-url" value={mcpUrl()} label="server address" />
             <FieldDescription>
-              In Claude Code, add it with the command below, then sign in when
-              it asks. The seply-learn plugin adds it with the skill that
-              teaches Claude how to work here.
+              The setup page has the steps for Claude Code, the Claude apps,
+              Codex, Cursor and others.
             </FieldDescription>
-            <CopyField id="mcp-command" value={command} label="command" />
+            <div>
+              <ConnectLink>Connect an agent</ConnectLink>
+            </div>
           </Field>
 
           {overview.grants.length > 0 && (

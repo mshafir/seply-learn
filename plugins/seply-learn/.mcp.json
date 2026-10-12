@@ -2,7 +2,7 @@
   "mcpServers": {
     "seply-learn": {
       "type": "http",
-      "url": "https://learn.seply.app/mcp"
+      "url": "${user_config.server_url}/mcp"
     }
   }
 }

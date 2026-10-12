@@ -51,10 +51,10 @@ All output is compact markdown with ids, not raw JSON dumps.
 
 One page, **`/connect`**, takes a signed-in reader from nothing to their agent's first result. It replaces the single command in Settings → Connected agents. It is part of the web client, so the web and the [desktop app](09-desktop.md) show the same page.
 
-- **Four steps** on one page, each ticked as it is done:
+- **Four steps** on one page, all visible at once:
   1. **Choose your agent:** tabs for Claude Code, Claude apps, Codex, Cursor and Other. The choice is remembered on the device.
   2. **Install:** the exact commands or clicks for that agent, each command in a copy field, with this server's address already filled in (`<origin>/mcp`).
-  3. **Sign in:** what to do in the agent so it opens the consent screen (§6.1). While this step is open the page checks the reader's connected agents every few seconds, and ticks the step with the agent's name when a new one appears. "I've done this" moves on without waiting.
+  3. **Sign in:** what to do in the agent so it opens the consent screen (§6.1). While this step is open the page checks the reader's connected agents every few seconds, and ticks the step with the agent's name when a new one appears. Nothing is locked behind it: the prompts below are always there.
   4. **Give it a first prompt:** one or two prompts to copy (below).
 - **Per agent** (hosted, `learn.seply.app`):
 
@@ -64,7 +64,7 @@ One page, **`/connect`**, takes a signed-in reader from nothing to their agent's
   | **Claude apps** (desktop and claude.ai) | Settings → Connectors → Add custom connector, and paste the server address | Connect, then allow in the browser |
   | **Codex** | `codex mcp add seply-learn --url <origin>/mcp` | `codex mcp login seply-learn` |
   | **Cursor** | An **Add to Cursor** install link, and the `mcp.json` snippet to paste instead | Cursor's prompt on first use |
-  | **Other** | The server address, and **Create a token** in place (the Settings form, §3.10) with the `Authorization: Bearer` header to copy | None: the step ticks when the token is first used |
+  | **Other** | The server address, and **Create a token** in place (every scope, every Expedition; Settings makes narrower ones, §3.10) with the `Authorization: Bearer` header to copy | None: the step ticks when the token is first used |
 
   The work package checks every command against the agent's current release before it ships; the table is the intent, not a guarantee of syntax.
 - **The plugin's server address is configurable** and defaults to the hosted one: it is a plugin option (`userConfig.server_url`) that Claude Code asks for when the plugin is enabled, and its `.mcp.json` reads `${user_config.server_url}/mcp`.
