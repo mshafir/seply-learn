@@ -39,7 +39,8 @@ Read from the environment at `astro build` (`src/lib/env.ts`):
 ## The landing page
 
 - **Sections** (`src/learn/sections/`), in order: Hero (the E-bike learning-path sketch under its question), How it works, Video, Views gallery, Agents, Read together, Examples, Self-host, Closing; then `SiteFooter`. `SiteHeader` has the inline links from the `md` breakpoint (768 px) and a menu button opening a panel below it.
-- **Copy** is the mockup's, word for word. The E-bike example's summary and the Swiss rail counts are still the mockup's bracketed placeholders (`EXAMPLES` in `src/learn/content.ts`); fill them in when those Expeditions are tidied (spec 9.4). The showcase ids are `SHOWCASE` in the same file.
+- **Copy** is the mockup's, word for word. The showcase ids are `SHOWCASE` in `src/learn/content.ts`.
+- **The Examples' counts** ("206 CONCEPTS · 12 VIEWS") are read at build time from the public API (`src/learn/counts.ts`: `GET /api/pull` on learn.seply.app, anonymously, folded into live Concepts and Views), so each redeploy has them right. A showcase that can't be read (offline, private) keeps its last known counts (`LAST_KNOWN` in `content.ts`). `SITE_COUNTS=offline` skips the network; the tests set it.
 - **Layout:** the mockup's sizes and token use, as Tailwind utilities (`src/lib/styles.ts` holds the shared ones). The hero sketch's boxes are placed in % of the figure and sized in container query units, so it holds down to 320 px.
 
 ## Media
@@ -48,12 +49,32 @@ Read from the environment at `astro build` (`src/lib/env.ts`):
 
 | Slot | Files under `public/media/` | Filled by |
 |---|---|---|
-| Screenshots (`IMAGE_SLOTS`) | `shots/<file>-light.webp` (required), `-light.avif`, `-dark.webp`, `-dark.avif` (optional; dark falls back to light) | WP-7.6 |
+| Screenshots (`IMAGE_SLOTS`) | `shots/<file>-light.webp` (required), `-light.avif`, `-dark.webp`, `-dark.avif` (optional; dark falls back to light), `shots/manifest.json` (where each came from; an `alt` there replaces the slot's) | WP-7.6: `scripts/capture.ts` (below); the site jobs in `preview.yml` copy this week's cached capture in (`.github/actions/site-screenshots`) |
 | Explainer | `video/explainer.mp4` and/or `.webm`, `explainer.vtt` (captions), `explainer-poster.webp` | WP-7.4: the site jobs in `preview.yml` copy the cached render in (`.github/actions/explainer-video`); locally, `pnpm --filter video render` and copy `apps/video/out/` |
 | Hero loop | `video/hero-loop.mp4` and/or `.webm`, `hero-loop-poster.webp`; replaces the sketch, plays unless the reader prefers reduced motion, with a Pause button | WP-7.4, as above |
 | Live embed | `SITE_EMBED_URL` at build time (`https://learn.seply.app/e/<id>/embed?view=<id>`); a lazy iframe, else the Read together screenshot | WP-7.5 |
 
 `MEDIA_DIR` overrides where the build looks (the tests use it).
+
+### Screenshots
+
+`scripts/capture.ts` (Playwright and sharp, pinned) shoots every image slot in light and dark at 1440 × 900 and 2×, and writes `<file>-<theme>.avif|webp` and `manifest.json` to `public/media/shots/` (or `--out`). There's no demo account (hosted sign-in is Google only), so there are two sources:
+
+| Shots | Source |
+|---|---|
+| Views gallery (01, 02, 03, 05, 07) and Examples (14, plus 02 and 05 again) | The public showcases on learn.seply.app (`CAPTURE_PUBLIC_URL`), read anonymously at `/e/<id>/<viewId>`. A shot whose Expedition isn't readable is skipped and logged, and its slot keeps its placeholder; 01 and 03 have fallback Views (E-bike's Learning path, AI compute's Timeline) whose alt text goes in the manifest. 01 selects MLA, so its prerequisites light up. |
+| How it works (16, 17, 15) and Read together (19) | The app as the e2e tests run it: the Worker (`wrangler dev`) with test credentials on a migrated Postgres, started and stopped by the script when `CAPTURE_DATABASE_URL` (or `E2E_DATABASE_URL`) is set and `apps/web` is built, or `CAPTURE_APP_URL` for one already running. Seeded through the API with the committed fixtures: 16 is the create flow with a synthetic E-bike question and a stubbed skim; 17 is the fake build job with E-bike labels and previews; 15 is GQA's article in the compute fixture; 19 is three readers on the E-bike Learning path, seen by one of them. No secrets. |
+
+Each shot waits for the canvas's `data-settled` (the app's readiness signal), fonts and a quiet network, with reduced motion, toasts and carets hidden, and the pointer parked off the canvas. A shot that fails for any other reason fails the run (exit 1) after the rest are done, and its pages are saved as PNGs under `--debug`.
+
+```sh
+mise exec -- pnpm --filter @seply/site capture                 # both sources
+mise exec -- pnpm --filter @seply/site capture --public-only   # the showcases only
+mise exec -- pnpm --filter @seply/site capture --app-only      # the signed-in screens only
+mise exec -- pnpm --filter @seply/site capture --only=17-mid-build,19-two-readers
+```
+
+In CI, `.github/actions/site-screenshots` restores the capture cached under a hash of this script, `src/media.ts` and `package.json` plus the ISO week, so the public shots refresh weekly; on a miss it starts Postgres in a container, migrates it, builds `apps/web`, captures, and caches the result (unless a shot failed). The site jobs copy it into `public/media/shots/` before `astro build`.
 
 ## /self-host
 
@@ -81,6 +102,7 @@ mise exec -- pnpm --filter @seply/site test       # builds four ways (test/build
 
 - **Production:** after CI passes on `main`, as `seply-site` with `--domain seply.app` (the repo variable `SITE_DOMAIN` overrides it; `none` keeps it on workers.dev), then `scripts/check-deploy.mjs` checks the workers.dev URL and the domain.
 - **Previews:** each PR that touches `apps/site`, `apps/video` or `packages/ui` gets `seply-site-pr-<n>` on workers.dev, built with `SITE_ENV=preview`, checked, and commented on the PR. Closing the PR deletes it.
+- **Weekly and on demand:** the same workflow's `schedule` (Mondays) and `workflow_dispatch` (with `recapture` to ignore the screenshot cache) rebuild and redeploy production from `main`, for fresh screenshots of the showcases and fresh Examples counts.
 
 What the owner sets up (the custom domain, the analytics site and token) is in [docs/ops/deploy.md](../../docs/ops/deploy.md#the-site-seplyapp).
 

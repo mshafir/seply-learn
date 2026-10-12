@@ -6,9 +6,10 @@
 //
 //   public/media/shots/<file>-light.avif|webp   1440 × 900 at 2× (2880 × 1800)
 //   public/media/shots/<file>-dark.avif|webp    optional; else the light one
+//   public/media/shots/manifest.json            where each shot came from (scripts/capture.ts)
 //   public/media/video/explainer.mp4|webm, explainer.vtt, explainer-poster.webp
 //   public/media/video/hero-loop.mp4|webm, hero-loop-poster.webp
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 /**
@@ -18,6 +19,22 @@ import { join } from "node:path"
 const MEDIA_DIR =
   process.env.MEDIA_DIR ?? join(process.cwd(), "public", "media")
 const has = (file: string) => existsSync(join(MEDIA_DIR, file))
+
+/**
+ * The capture's manifest (scripts/capture.ts): per shot file, where it came
+ * from, and an alt text when it was taken from a fallback View (e.g. the
+ * AI compute Timeline while Swiss rail is private).
+ */
+type ShotManifest = { shots?: Record<string, { from: string; alt?: string }> }
+const shotManifest: ShotManifest = (() => {
+  try {
+    return JSON.parse(
+      readFileSync(join(MEDIA_DIR, "shots", "manifest.json"), "utf8")
+    ) as ShotManifest
+  } catch {
+    return {}
+  }
+})()
 
 export type ImageSlot = {
   /** Shot list entry and contents, shown on the placeholder. */
@@ -87,7 +104,7 @@ export const IMAGE_SLOTS = {
   },
   "read-together": {
     label: "FALLBACK: SHOT 19 · TWO READERS ON ONE VIEW",
-    alt: "Two people reading the same View, each with their own cursor",
+    alt: "Readers on the same View: their avatars in the header and each one's cursor on the canvas",
     file: "19-two-readers",
   },
 } satisfies Record<string, ImageSlot>
@@ -112,6 +129,7 @@ export function image(id: ImageSlotId): ResolvedImage {
   const slot: ImageSlot = IMAGE_SLOTS[id]
   return {
     ...slot,
+    alt: shotManifest.shots?.[slot.file]?.alt ?? slot.alt,
     light: shot(`${slot.file}-light`),
     dark: shot(`${slot.file}-dark`),
   }

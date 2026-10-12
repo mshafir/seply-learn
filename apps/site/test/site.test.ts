@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 import { EXAMPLES, GALLERY, SHOWCASE } from "../src/learn/content"
+import { countOps, countsLabel } from "../src/learn/counts"
 import { HEADLINE } from "../src/learn/copy"
 import { lightTokens } from "../src/lib/og"
 import { IMAGE_SLOTS } from "../src/media"
@@ -208,6 +209,15 @@ describe("media manifest", () => {
     )
   })
 
+  it("takes a shot's alt text from the capture manifest when it has one", () => {
+    expect(html()).toMatch(
+      /<img src="\/media\/shots\/01-learning-path-light\.webp" alt="A fallback Learning path"/
+    )
+    expect(html()).toMatch(
+      /<img src="\/media\/shots\/14-outline-light\.webp" alt="The Outline View of AI compute and model internals"/
+    )
+  })
+
   it("falls back to the light screenshot in dark mode when there is no dark one", () => {
     expect(html()).toContain(
       '<source srcset="/media/shots/14-outline-light.webp" type="image/webp" media="(prefers-color-scheme: dark)">'
@@ -298,5 +308,43 @@ describe("tokens", () => {
     expect(css).toMatch(
       /@media \(prefers-color-scheme:\s*dark\)\s*\{\s*\.dark,\s*\.theme-system\s*\{\s*--background:/
     )
+  })
+})
+
+describe("Examples counts", () => {
+  it("counts live Concepts and Views from an op log", () => {
+    const op = (serverSeq: number, kind: string, target: string) => ({
+      serverSeq,
+      kind,
+      target,
+    })
+    expect(
+      countOps([
+        op(1, "expedition.set", "e"),
+        op(2, "concept.create", "a"),
+        op(3, "concept.create", "b"),
+        op(4, "concept.set", "a"),
+        op(5, "concept.tag.add", "b"),
+        op(6, "view.create", "v"),
+        op(7, "concept.delete", "b"),
+        op(8, "relationship.add", "a|t|b"),
+      ])
+    ).toEqual({ concepts: 1, views: 1 })
+    expect(countsLabel({ concepts: 1, views: 2 })).toBe("1 CONCEPT · 2 VIEWS")
+  })
+
+  it("shows the last known counts when the API isn't read (SITE_COUNTS=offline)", () => {
+    const html = prod("index.html")
+    for (const label of [
+      "206 CONCEPTS · 12 VIEWS",
+      "59 CONCEPTS · 4 VIEWS",
+      "39 CONCEPTS · 2 VIEWS",
+    ])
+      expect(html).toContain(label)
+    expect(EXAMPLES.map((e) => e.counts)).toEqual([
+      "206 CONCEPTS · 12 VIEWS",
+      "59 CONCEPTS · 4 VIEWS",
+      "39 CONCEPTS · 2 VIEWS",
+    ])
   })
 })

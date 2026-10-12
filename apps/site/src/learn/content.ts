@@ -2,6 +2,7 @@
 // gallery tabs and the Examples. Copy is the approved mockup's, word for word.
 import type { ImageSlotId } from "../media"
 import { APP_URL } from "../lib/env"
+import { countsLabel, showcaseCounts } from "./counts"
 
 /** The public showcase Expeditions on learn.seply.app (spec 9.4). */
 export const SHOWCASE = {
@@ -98,9 +99,22 @@ export const MORE_VIEWS = [
 ]
 
 /**
- * The Examples. The E-bike summary and the Swiss rail counts are the mockup's
- * placeholders until those Expeditions are tidied (spec 9.4); replace them here.
+ * The showcases' Concept and View counts, read from the public API at build
+ * time (./counts.ts); these are the last known ones, used when a showcase
+ * can't be read (offline, still private). Update them now and then.
  */
+const LAST_KNOWN = {
+  compute: { concepts: 206, views: 12 },
+  ebike: { concepts: 59, views: 4 },
+  swissRail: { concepts: 39, views: 2 },
+}
+const [computeCounts, ebikeCounts, swissRailCounts] = await Promise.all([
+  showcaseCounts(SHOWCASE.compute, LAST_KNOWN.compute),
+  showcaseCounts(SHOWCASE.ebike, LAST_KNOWN.ebike),
+  showcaseCounts(SHOWCASE.swissRail, LAST_KNOWN.swissRail),
+])
+
+/** The Examples; each card's counts are the showcase's, at build time. */
 export const EXAMPLES: {
   title: string
   summary: string
@@ -112,14 +126,14 @@ export const EXAMPLES: {
     title: "AI compute and model internals",
     summary:
       "Why capacity is scarce, why inference keeps getting cheaper, and how transformers and mixture of experts work.",
-    counts: "206 CONCEPTS · 12 VIEWS",
+    counts: countsLabel(computeCounts),
     shot: "example-compute",
     href: expeditionUrl(SHOWCASE.compute),
   },
   {
     title: "E-bike for the commute",
     summary: "Choosing an e-bike for a hilly 14 km commute: three bikes compared on climbing, upkeep, weight, theft protection and price, with three years of running costs.",
-    counts: "59 CONCEPTS · 4 VIEWS",
+    counts: countsLabel(ebikeCounts),
     shot: "example-ebike",
     href: expeditionUrl(SHOWCASE.ebike),
   },
@@ -127,7 +141,7 @@ export const EXAMPLES: {
     title: "A week on the Swiss rail loop",
     summary:
       "A week by train through Swiss landmarks, planned from first idea to photo book.",
-    counts: "39 CONCEPTS · 2 VIEWS",
+    counts: countsLabel(swissRailCounts),
     shot: "example-swiss-rail",
     href: expeditionUrl(SHOWCASE.swissRail),
   },

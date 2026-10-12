@@ -8,9 +8,10 @@
 // it built before stay as they are.
 //
 // Startable only where test credentials are on (a localhost Worker). The
-// Building UX (WP-3.7) and the e2e tests use it.
+// Building UX (WP-3.7), the e2e tests and the site's screenshots (WP-7.6,
+// which name the Views and their previews) use it.
 import { SpendMeter } from "@seply/ai"
-import { isLive, keysAfter, ulid, type OpBody } from "@seply/domain"
+import { isLive, keysAfter, ulid, ViewTypeId, type OpBody } from "@seply/domain"
 import { z } from "zod"
 import { loadState } from "../projection.ts"
 import type { JobDefinition } from "./types.ts"
@@ -39,6 +40,18 @@ export const FakeJobInput = z.strictObject({
    * the cap raised, goes on past it).
    */
   capAt: z.number().int().min(1).optional(),
+  /**
+   * What the Views look like, for screenshots (apps/site/scripts/capture.ts):
+   * each View's label, View Type (with settings valid for it) and the
+   * preview Concepts it streams. Unset, a View is "Test View <n>", an
+   * Outline, with two "Preview <n>.<i>"s.
+   */
+  labels: z.array(z.string().min(1).max(120)).max(5).optional(),
+  viewTypes: z
+    .array(z.strictObject({ viewType: ViewTypeId, settings: z.record(z.string(), z.unknown()) }))
+    .max(5)
+    .optional(),
+  previews: z.array(z.array(z.string().min(1).max(200)).max(12)).max(5).optional(),
 })
 
 /** The fake job's spending cap, in USD (it has spent it all by `capAt`). */
@@ -60,6 +73,16 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
 
   async run(ctx) {
     const { views, stepMs, failOnce, failView, capAt } = ctx.input
+    const labelOf = (n: number) => ctx.input.labels?.[n - 1] ?? fakeViewLabel(n)
+    const typeOf = (n: number) =>
+      ctx.input.viewTypes?.[n - 1] ?? {
+        viewType: "outline",
+        settings: { relationshipTypes: [] },
+      }
+    const previewsOf = (n: number, viewId: string) =>
+      (ctx.input.previews?.[n - 1] ?? [`Preview ${n}.1`, `Preview ${n}.2`]).map(
+        (title, i) => ({ id: `${viewId}-${i}`, title })
+      )
     const failing = (n: number) =>
       failView?.n === n && ctx.job.attempt <= failView.jobAttempts
     const { expeditionId } = ctx.job
@@ -73,7 +96,7 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
         const live = Object.values(state.views).filter(isLive)
         const out: Planned[] = []
         for (let n = 1; n <= views; n++) {
-          const found = live.find((v) => v.label === fakeViewLabel(n))
+          const found = live.find((v) => v.label === labelOf(n))
           out.push({
             n,
             viewId: found?.id ?? ulid(Date.now()),
@@ -100,10 +123,10 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
                 kind: "view.create",
                 target: v.viewId,
                 value: {
-                  viewType: "outline",
-                  label: fakeViewLabel(v.n),
+                  viewType: typeOf(v.n).viewType,
+                  label: labelOf(v.n),
                   orderKey: plan.keys[v.n - 1]!,
-                  settings: { relationshipTypes: [] },
+                  settings: typeOf(v.n).settings,
                   status: "queued",
                 },
               }
@@ -118,7 +141,7 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
 
     for (const { n, viewId, status } of plan.views) {
       if (status === "ready") continue
-      const label = fakeViewLabel(n)
+      const label = labelOf(n)
       if (capAt === n)
         await ctx.step(`spend before View ${n}`, async () => {
           // The whole cap is spent by here; each Continue raises it once.
@@ -136,10 +159,7 @@ export const fakeJob: JobDefinition<FakeJobInput> = {
         status: "building",
         step: `Building ${label}`,
         progress: (n - 1) / views,
-        previewNodes: [
-          { id: `${viewId}-a`, title: `Preview ${n}.1` },
-          { id: `${viewId}-b`, title: `Preview ${n}.2` },
-        ],
+        previewNodes: previewsOf(n, viewId),
       })
       try {
         await ctx.step(
