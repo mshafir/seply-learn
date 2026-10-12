@@ -6,7 +6,12 @@
 // Connected agents (connected-agents.tsx): MCP OAuth grants and API tokens.
 // Notifications come with their work package.
 import * as React from "react"
-import { ArrowLeftIcon, ChevronDownIcon, KeyRoundIcon } from "lucide-react"
+import {
+  ArrowLeftIcon,
+  ChevronDownIcon,
+  KeyRoundIcon,
+  ShieldCheckIcon,
+} from "lucide-react"
 import { Link } from "wouter"
 
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
@@ -47,6 +52,7 @@ import { toast } from "@seply/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { ConnectedAgentsSection } from "@/screens/connected-agents.tsx"
+import { useUser } from "@/lib/session.ts"
 import {
   deleteAiKey,
   getAi,
@@ -395,6 +401,33 @@ function AiSection() {
   )
 }
 
+/** Admin (hosted access approval, WP-7.3): only admins see it. */
+function AdminSection() {
+  const user = useUser()
+  if (!user.access?.approvalRequired || !user.access.admin) return null
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ShieldCheckIcon className="size-4" />
+          Admin
+        </CardTitle>
+        <CardDescription>
+          People who signed in and asked to create their own Expeditions.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button
+          variant="outline"
+          render={<Link href="/settings/access-requests" />}
+        >
+          Access requests
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 export function SettingsScreen() {
   return (
     <div className="flex min-h-svh flex-col bg-background">
@@ -417,6 +450,7 @@ export function SettingsScreen() {
           </Button>
           <h1 className="text-2xl font-semibold">Settings</h1>
         </div>
+        <AdminSection />
         <AiSection />
         <ConnectedAgentsSection />
       </main>

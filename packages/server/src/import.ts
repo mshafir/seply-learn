@@ -28,6 +28,7 @@ import { strFromU8, unzipSync, type Unzipped } from "fflate"
 import { Hono } from "hono"
 import { bodyLimit } from "hono/body-limit"
 import type { AppEnv } from "./app.ts"
+import { requireApprovalFor } from "./approval.ts"
 import { sourceBlobKeys, type BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
 import { createExpedition, type ExpeditionSummary } from "./expeditions.ts"
@@ -247,6 +248,7 @@ export function importRoutes(relay: Relay) {
       onError: (c) => c.json({ error: "file too large" }, 413),
     }),
     async (c) => {
+      await requireApprovalFor(c, "create")
       try {
         const bytes = new Uint8Array(await c.req.arrayBuffer())
         const { file, sourceFiles } = readImportBody(bytes)

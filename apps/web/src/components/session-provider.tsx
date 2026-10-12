@@ -1,6 +1,12 @@
 import * as React from "react"
 
-import { ApiError, getMe, signOut as apiSignOut, type User } from "@/lib/api.ts"
+import {
+  ApiError,
+  getMe,
+  signOut as apiSignOut,
+  type AccessState,
+  type User,
+} from "@/lib/api.ts"
 import { clearOffline } from "@/lib/offline.ts"
 import { SessionContext, type Session } from "@/lib/session.ts"
 
@@ -66,6 +72,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setSession({ status: "signed-out" })
   }, [])
 
-  const value = React.useMemo(() => ({ session, signOut }), [session, signOut])
+  const setAccess = React.useCallback((access: AccessState) => {
+    setSession((s) =>
+      s.status === "signed-in"
+        ? { status: "signed-in", user: { ...s.user, access } }
+        : s
+    )
+  }, [])
+
+  const value = React.useMemo(
+    () => ({ session, signOut, setAccess }),
+    [session, signOut, setAccess]
+  )
   return <SessionContext value={value}>{children}</SessionContext>
 }

@@ -2,7 +2,7 @@
 // from GET /api/me once on load.
 import * as React from "react"
 
-import type { User } from "@/lib/api.ts"
+import type { AccessState, User } from "@/lib/api.ts"
 
 export type Session =
   | { status: "loading" }
@@ -13,6 +13,8 @@ export type Session =
 export type SessionContextValue = {
   session: Session
   signOut: () => Promise<void>
+  /** Replaces the signed-in user's access state (after a request is sent). */
+  setAccess: (access: AccessState) => void
 }
 
 export const SessionContext = React.createContext<

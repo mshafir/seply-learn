@@ -11,6 +11,12 @@ import {
   type MiddlewareHandler,
 } from "hono"
 import { AccessDenied } from "./access.ts"
+import {
+  accessState,
+  APPROVAL_REQUIRED,
+  ApprovalRequired,
+  approvalRoutes,
+} from "./approval.ts"
 import { agentRoutes } from "./agents.ts"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
@@ -218,6 +224,11 @@ export function requireUser(): MiddlewareHandler<AppEnv> {
 const onError: ErrorHandler<AppEnv> = (err, c) => {
   if (err instanceof AccessDenied)
     return c.json({ error: err.message }, err.status)
+  if (err instanceof ApprovalRequired)
+    return c.json(
+      { error: APPROVAL_REQUIRED, code: APPROVAL_REQUIRED, message: err.message },
+      403
+    )
   if (err instanceof NoDatabase)
     return c.json({ error: "no database configured" }, 503)
   if (err instanceof NoBlobStore)
@@ -312,7 +323,15 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   })
 
   const signedIn = requireUser()
-  app.get("/me", signedIn, (c) => c.json({ user: c.var.user }))
+  // The account, and its standing under hosted access approval (approval.ts).
+  app.get("/me", signedIn, async (c) => {
+    const db = await c.var.db()
+    const access = await accessState(db, c.var.config(), c.var.user.id)
+    return c.json({ user: c.var.user, access })
+  })
+  app.use("/access-requests", signedIn)
+  app.use("/admin/*", signedIn)
+  app.route("/", approvalRoutes())
   // The live room lets anonymous readers of a link in: before sign-in is required.
   app.route("/", liveRoutes(relay))
   app.use("/expeditions", signedIn)

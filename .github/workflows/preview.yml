@@ -348,6 +348,9 @@ jobs:
           VAPID_SUBJECT: ${{ vars.VAPID_SUBJECT }}
           # Optional: invite emails are off without it (WP-5.1).
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          # Hosted access approval (WP-7.3): the admins, comma-separated. A secret,
+          # not a variable, so the addresses stay out of the public logs.
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
         run: node scripts/ci.mjs secrets-file "$RUNNER_TEMP/worker-secrets.json"
 
       # AUTH_PROXY_URL is production itself: the OAuth proxy plugin only unwraps
@@ -361,18 +364,22 @@ jobs:
           PREVIEW_ORIGINS: ${{ steps.urls.outputs.preview_origins }}
           # The invite sender; empty: the server's default.
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          # Hosted access approval (WP-7.3): "1" turns it on; unset, it's off.
+          ACCESS_APPROVAL: ${{ vars.ACCESS_APPROVAL }}
         run: |
           trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
           # The sender only when the repo variable is set (else the server's default).
           mail=()
           if [ -n "$EMAIL_FROM" ]; then mail=(--var "EMAIL_FROM:$EMAIL_FROM"); fi
+          approval=()
+          if [ -n "$ACCESS_APPROVAL" ]; then approval=(--var "ACCESS_APPROVAL:$ACCESS_APPROVAL"); fi
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
             --var "DB_BRANCH:$BRANCH" \
             --var "BETTER_AUTH_URL:$URL" \
             --var "AUTH_PROXY_URL:$URL" \
             --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
-            "${mail[@]}" | tee deploy.log
+            "${mail[@]}" "${approval[@]}" | tee deploy.log
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Check /api/health

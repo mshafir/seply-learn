@@ -5,7 +5,25 @@
 
 import type { ProposalView, SegmentsDoc } from "@seply/domain"
 
-export type User = { id: string; email: string; name: string }
+export type User = {
+  id: string
+  email: string
+  name: string
+  /** Hosted access approval (the server's approval.ts); from GET /me. */
+  access?: AccessState
+}
+
+/** My pending access request. */
+export type OwnAccessRequest = { id: string; note: string; createdAt: string }
+
+/** The account's standing under hosted access approval (spec §2.6, §3.12). */
+export type AccessState = {
+  /** Access approval is on (the hosted instance). Off: everyone may create. */
+  approvalRequired: boolean
+  approved: boolean
+  admin: boolean
+  request: OwnAccessRequest | null
+}
 
 export type Role = "owner" | "editor" | "viewer"
 
@@ -93,11 +111,64 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 /** The signed-in user, or null when signed out. */
 export async function getMe(): Promise<User | null> {
   try {
-    return (await call<{ user: User }>("/me")).user
+    const me = await call<{ user: User; access?: AccessState }>("/me")
+    return { ...me.user, ...(me.access && { access: me.access }) }
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) return null
     throw e
   }
+}
+
+// --- Hosted access approval (spec §2.6, §3.12; the server's approval.ts) ------
+
+/** A gated route refused: the account is waiting for approval. */
+export const isApprovalRequired = (e: unknown): e is ApiError =>
+  e instanceof ApiError &&
+  e.status === 403 &&
+  (e.body as { code?: string }).code === "approval_required"
+
+/** Asks for access, with an optional note; one pending request per account. */
+export async function requestAccess(note: string): Promise<OwnAccessRequest> {
+  return (
+    await call<{ request: OwnAccessRequest }>("/access-requests", {
+      method: "POST",
+      body: JSON.stringify({ note }),
+    })
+  ).request
+}
+
+export type PendingAccessRequest = {
+  id: string
+  user: { id: string; name: string; email: string }
+  note: string
+  createdAt: string
+}
+
+export type ApprovedAccount = {
+  id: string
+  name: string
+  email: string
+  approvedAt: string
+}
+
+export type AccessRequestsOverview = {
+  pending: PendingAccessRequest[]
+  approved: ApprovedAccount[]
+}
+
+/** Admins: the pending requests (oldest first) and the approved accounts. */
+export function listAccessRequests(): Promise<AccessRequestsOverview> {
+  return call<AccessRequestsOverview>("/admin/access-requests")
+}
+
+/** Admins: approve (emails the requester) or decline a request. */
+export async function decideAccessRequest(
+  id: string,
+  decision: "approve" | "decline"
+): Promise<void> {
+  await call(`/admin/access-requests/${encodeURIComponent(id)}/${decision}`, {
+    method: "POST",
+  })
 }
 
 /** Every Expedition I collaborate on, newest first, as Library cards. */
