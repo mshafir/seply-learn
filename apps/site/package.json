@@ -1,0 +1,39 @@
+{
+  "name": "@seply/site",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@seply/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-remark": "^7.3.2",
+    "@astrojs/react": "^7.0.1",
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@resvg/resvg-js": "^2.6.2",
+    "@seply/config": "workspace:*",
+    "@tailwindcss/vite": "^4",
+    "@types/fontkit": "^2.0.9",
+    "@types/node": "^24",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "astro": "^7.3.8",
+    "fontkit": "^2.0.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4",
+    "typescript": "~6",
+    "vitest": "^4",
+    "wawoff2": "^2.0.1",
+    "wrangler": "^4.143.0"
+  }
+}

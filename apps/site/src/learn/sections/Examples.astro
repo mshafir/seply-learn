@@ -1,0 +1,32 @@
+---
+import MediaImage from "../../components/MediaImage.astro"
+import { container, eyebrow, h2, monoLabel } from "../../lib/styles"
+import { EXAMPLES } from "../content"
+---
+
+<section id="examples" class="scroll-mt-20 border-t border-border">
+  <div class:list={[container, "flex flex-col gap-8 py-20"]}>
+    <div class="flex max-w-[40em] flex-col gap-3">
+      <span class={eyebrow}>Examples</span>
+      <h2 class={h2}>Some public Expeditions to look at</h2>
+      <p class="m-0 text-muted-foreground">You don't need an account to read these.</p>
+    </div>
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-6">
+      {
+        EXAMPLES.map((e) => (
+          <a
+            href={e.href}
+            class="flex flex-col overflow-hidden rounded-[14px] border border-border bg-card hover:border-muted-foreground"
+          >
+            <MediaImage slot={e.shot} class="aspect-[16/10] border-b border-border bg-background" />
+            <div class="flex flex-col gap-2 px-5 pt-[18px] pb-5">
+              <span class="font-reading text-[22px] leading-[1.2] font-medium">{e.title}</span>
+              <span class="text-sm text-muted-foreground">{e.summary}</span>
+              <span class={monoLabel}>{e.counts}</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>

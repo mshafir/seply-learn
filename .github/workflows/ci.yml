@@ -103,55 +103,32 @@ jobs:
           retention-days: 14
 
   # WP-7.4: the explainer video (apps/video). It re-renders only when its
-  # inputs change: the outputs are cached under a hash of apps/video,
-  # packages/views, packages/ui and the fixtures, and a hit skips the render.
-  # Either way they are uploaded as the `explainer-video` artifact, which the
-  # site build (apps/site) takes; apps/video/README.md has the file layout.
+  # inputs change (.github/actions/explainer-video caches the render under a
+  # hash of apps/video, packages/views, packages/ui and the fixtures), and
+  # uploads the files as the `explainer-video` artifact. The site's build
+  # jobs (preview.yml) take the same cached render into apps/site/public/media/video/.
   video:
     name: Explainer video
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
-
-      - name: Hash the inputs
-        id: inputs
-        run: echo "hash=${{ hashFiles('apps/video/**', 'packages/views/**', 'packages/ui/**', 'packages/domain/fixtures/**', '!**/node_modules/**', '!apps/video/out/**') }}" >> "$GITHUB_OUTPUT"
-
-      - name: Restore a render of these inputs
-        id: cache
-        uses: actions/cache/restore@v6
-        with:
-          path: apps/video/out
-          key: explainer-video-${{ steps.inputs.outputs.hash }}
-
-      - if: steps.cache.outputs.cache-hit != 'true'
-        uses: ./.github/actions/setup
-
-      # Remotion downloads its own headless Chrome; MapLibre gets WebGL from SwiftShader.
-      - name: Render
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm --filter video render
-
-      - name: Save the render
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: apps/video/out
-          key: explainer-video-${{ steps.inputs.outputs.hash }}
+      - uses: ./.github/actions/setup
+      - uses: ./.github/actions/explainer-video
 
       - name: Sizes
         run: cat apps/video/out/manifest.json
 
-      - name: Upload the video for the site build
+      - name: Upload the video
         uses: actions/upload-artifact@v7
         with:
           name: explainer-video
           path: |
             apps/video/out/*.mp4
             apps/video/out/*.webm
-            apps/video/out/poster.*
-            apps/video/out/captions.vtt
+            apps/video/out/*.vtt
+            apps/video/out/*.webp
+            apps/video/out/*.png
             apps/video/out/manifest.json
           retention-days: 30
 

@@ -1,0 +1,64 @@
+---
+// Working with agents: the suggestions panel (a static picture of the app's,
+// amber for suggestions only; its Accept and Dismiss are decoration, hidden
+// from assistive technology) and the plugin snippet.
+import CodeBlock from "../../components/CodeBlock.astro"
+import { container, eyebrow, h2, h3, textLink } from "../../lib/styles"
+import { MCP_GUIDE_URL } from "../content"
+
+const suggestions = [
+  { title: "Add Concept: Belt drive", by: "Suggested by the agent" },
+  { title: "Link: Belt drive lowers Maintenance", by: "Suggested by Claude Code" },
+]
+
+const plugin = `/plugin marketplace add mshafir/seply-learn
+/plugin install seply-learn
+
+> Make an Expedition from what we just discussed.`
+---
+
+<section id="agents" class="scroll-mt-20 border-t border-border">
+  <div class:list={[container, "flex flex-col gap-10 py-20"]}>
+    <div class="flex max-w-[40em] flex-col gap-3">
+      <span class={eyebrow}>Working with agents</span>
+      <h2 class={h2}>Agents can add to an Expedition, and you review what they add</h2>
+    </div>
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div class="flex min-w-0 flex-col gap-4">
+        <h3 class={h3}>Changes from agents wait for your review</h3>
+        <p class="m-0 text-muted-foreground">
+          The curator in the app and your own agent through MCP both make suggestions instead of editing directly. A
+          suggestion has a dashed amber outline until you accept or dismiss it.
+        </p>
+        <div class="flex flex-col gap-2.5 rounded-xl border border-border bg-card p-4">
+          <span class="text-sm font-semibold">Suggestions · {suggestions.length}</span>
+          {
+            suggestions.map((s) => (
+              <div
+                class="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border-[1.5px] border-dashed border-suggested p-3"
+              >
+                <div class="flex-[1_1_180px]">
+                  <div class="text-sm font-medium">{s.title}</div>
+                  <div class="text-xs text-suggested-text">{s.by}</div>
+                </div>
+                <span aria-hidden="true" class="inline-flex min-h-8 items-center rounded-lg bg-primary px-3 text-[13px] font-medium text-primary-foreground">
+                  Accept
+                </span>
+                <span aria-hidden="true" class="inline-flex min-h-8 items-center rounded-lg border border-border px-3 text-[13px]">Dismiss</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <div class="flex min-w-0 flex-col gap-4">
+        <h3 class={h3}>Use it from Claude Code</h3>
+        <p class="m-0 text-muted-foreground">
+          Install the seply-learn plugin and sign in once. After that you can ask your agent to make an Expedition from
+          the conversation you are having, or to add to one you already have.
+        </p>
+        <CodeBlock code={plugin} label="the plugin commands" />
+        <a href={MCP_GUIDE_URL} class={textLink}>Read the MCP guide</a>
+      </div>
+    </div>
+  </div>
+</section>

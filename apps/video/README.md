@@ -14,7 +14,7 @@ The explainer video for the landing site (spec [9.3](../../docs/spec/v1/09-landi
 
 ## Storyboard
 
-Times and captions live in `src/timing.ts`; the burned-in captions and `captions.vtt` both come from it.
+Times and captions live in `src/timing.ts`; the burned-in captions and `explainer.vtt` both come from it.
 
 | # | Time | Scene | Drawn with |
 |---|---|---|---|
@@ -33,20 +33,24 @@ Times and captions live in `src/timing.ts`; the burned-in captions and `captions
 - `pnpm --filter video studio`: Remotion Studio, to scrub through the compositions.
 - `pnpm --filter video test`: the storyboard clock and the WebVTT writer.
 
-## Outputs and the CI artifact
+## Outputs, CI and the site
 
-The `Explainer video` job in `.github/workflows/ci.yml` renders on every run whose inputs changed, and otherwise restores the last render of the same inputs from the Actions cache (key: `explainer-video-<hash>`, a hash of `apps/video`, `packages/views`, `packages/ui` and `packages/domain/fixtures`). Either way it uploads the files as the artifact **`explainer-video`** (kept 30 days), flat:
+`out/` uses the site's file names (`apps/site/src/media.ts`), so the files go into `apps/site/public/media/video/` as they are:
 
 | File | What |
 |---|---|
 | `explainer.mp4` | The full video, H.264 (yuv420p), 1920 × 1080, 30 fps, captions burned in, no audio track |
 | `explainer.webm` | The same, VP9 |
-| `hero.mp4`, `hero.webm` | The 12 s hero loop: scenes 3-4 (14-26 s) without captions, faded at both ends so it loops cleanly. Muted |
-| `poster.png`, `poster.webp` | The poster frame (23 s: the Learning path fully drawn), no captions |
-| `captions.vtt` | WebVTT captions for the full video |
+| `explainer.vtt` | WebVTT captions for it (also burned in; note the site's `<track>` is `default`, so a player may show both) |
+| `explainer-poster.webp` | The poster frame (23 s: the Learning path fully drawn), no captions; also `.png` |
+| `hero-loop.mp4`, `hero-loop.webm` | The 12 s hero loop: scenes 3-4 (14-26 s) without captions, faded at both ends so it loops cleanly. Muted |
+| `hero-loop-poster.webp` | Its poster (the same frame) |
 | `manifest.json` | `{ width, height, fps, duration, hero: { start, duration }, files: { name: bytes } }` |
 
-**For the site (WP-7.2):** download the `explainer-video` artifact from the CI run of the same commit (`actions/download-artifact` with `name: explainer-video`) into the site's media folder before `astro build`, and read `manifest.json` for sizes. The full video is meant for `<video controls preload="none" poster="poster.webp">` with both `<source>`s (WebM first) and `<track kind="captions" srclang="en" src="captions.vtt" default>`; the captions are also burned in, so the track can stay off by default if the player shows both. The hero loop is `<video autoplay muted loop playsinline>` with the same poster.
+**Rendered only when the inputs change.** `.github/actions/explainer-video` restores the render cached under `explainer-video-<hash>` (a hash of `apps/video`, `packages/views`, `packages/ui` and `packages/domain/fixtures`), renders and saves it on a miss, and copies the files where it's told. It runs in:
+
+- **CI** (`ci.yml`, "Explainer video"): renders on a miss and uploads the files as the `explainer-video` artifact (30 days).
+- **The site's preview and production deploys** (`preview.yml`): copies them into `apps/site/public/media/video/` before `astro build`. Production runs after CI passed on main, so its render is always cached; a preview that gets there before CI's render renders it itself.
 
 ## Licence
 

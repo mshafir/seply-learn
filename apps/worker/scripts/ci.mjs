@@ -8,6 +8,8 @@
 //   node scripts/ci.mjs hyperdrive-delete <name>   delete a Hyperdrive config (no-op if absent)
 //   node scripts/ci.mjs worker-delete <name>       delete a Worker script and its Workflows
 //                                                  (no-op if absent)
+//   node scripts/ci.mjs script-delete <name>       delete a Worker script only, e.g. a site
+//                                                  preview (apps/site; no-op if absent)
 //   node scripts/ci.mjs neon-default-branch        print name=, and write the default branch's
 //                                                  connection string to $GITHUB_OUTPUT as db_url
 //   node scripts/ci.mjs neon-branch-delete <name>  delete a Neon branch by name (no-op if absent)
@@ -138,7 +140,7 @@ function workflowName(worker, wf) {
   return `${worker}-${wf.binding.toLowerCase()}`
 }
 
-async function workerDelete(name) {
+async function scriptDelete(name) {
   const res = await cf(
     "DELETE",
     `/workers/scripts/${encodeURIComponent(name)}?force=true`
@@ -148,6 +150,10 @@ async function workerDelete(name) {
       ? `worker deleted: ${name}`
       : `worker ${name}: not found, nothing to delete`
   )
+}
+
+async function workerDelete(name) {
+  await scriptDelete(name)
   // Its Workflows outlive the script; delete them too, instances included.
   for (const binding of WORKFLOW_BINDINGS) {
     const wf = workflowName(name, { binding })
@@ -307,6 +313,7 @@ const commands = {
   "hyperdrive-upsert": hyperdriveUpsert,
   "hyperdrive-delete": hyperdriveDelete,
   "worker-delete": workerDelete,
+  "script-delete": scriptDelete,
   "neon-default-branch": neonDefaultBranch,
   "neon-branch-delete": neonBranchDelete,
 }

@@ -1,5 +1,5 @@
 // The storyboard's clock (spec 9.3, issue #121): seven scenes over 60 s at
-// 30 fps, and the captions burned into the video and written to captions.vtt.
+// 30 fps, and the captions burned into the video and written to explainer.vtt.
 export const FPS = 30;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;

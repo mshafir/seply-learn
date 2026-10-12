@@ -1,0 +1,35 @@
+---
+import { buttonVariants } from "@seply/ui/components/button"
+import { cn } from "@seply/ui/lib/utils"
+
+import CodeBlock from "../../components/CodeBlock.astro"
+import { container, eyebrow, h2 } from "../../lib/styles"
+import { GITHUB_URL } from "../content"
+
+const button = cn(
+  buttonVariants({ variant: "outline" }),
+  "h-auto min-h-11 rounded-lg bg-background px-[18px] text-base dark:bg-background"
+)
+
+const compose = `curl -LO https://raw.githubusercontent.com/mshafir/seply-learn/main/docker-compose.yml
+cp .env.example .env    # add your AI key
+docker compose up -d`
+---
+
+<section id="self-host" class="scroll-mt-20 border-t border-border bg-card">
+  <div class:list={[container, "grid grid-cols-1 items-center gap-12 py-20 lg:grid-cols-2"]}>
+    <div class="flex flex-col gap-4">
+      <span class={eyebrow}>Open source</span>
+      <h2 class={h2}>You can also run it yourself</h2>
+      <p class="m-0 text-muted-foreground">
+        Seply Learn is open source under the MIT licence. It runs from one Docker Compose file with your own AI key, and
+        people sign in with an email and password.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/self-host/" class={button}>Self-host guide</a>
+        <a href={GITHUB_URL} class={button}>GitHub</a>
+      </div>
+    </div>
+    <CodeBlock code={compose} label="the Docker Compose commands" class="min-w-0 px-[22px] py-5" />
+  </div>
+</section>

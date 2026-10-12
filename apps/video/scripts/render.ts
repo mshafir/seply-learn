@@ -1,17 +1,21 @@
 // Renders the explainer and its cuts into out/ (git-ignored):
 //
-//   explainer.mp4   H.264, 1920 × 1080, 30 fps, captions burned in
-//   explainer.webm  VP9, the same
-//   hero.mp4        the 12 s muted hero loop (scenes 3-4, no captions)
-//   hero.webm
-//   poster.png      the poster frame (also poster.webp)
-//   captions.vtt    WebVTT captions for the full video
-//   manifest.json   what was rendered: files, sizes, durations
+//   explainer.mp4           H.264, 1920 × 1080, 30 fps, captions burned in
+//   explainer.webm          VP9, the same
+//   explainer.vtt           WebVTT captions for it
+//   explainer-poster.webp   the poster frame (also .png)
+//   hero-loop.mp4           the 12 s muted hero loop (scenes 3-4, no captions)
+//   hero-loop.webm
+//   hero-loop-poster.webp   its poster: the same frame
+//   manifest.json           what was rendered: files, sizes, durations
+//
+// The names are the site's (apps/site/src/media.ts): CI copies these files
+// into apps/site/public/media/video/ as they are.
 //
 // `pnpm --filter video render`; `pnpm --filter video render --stills 90,600`
 // renders only those frames of the full video, to out/stills/. REMOTION_BROWSER_EXECUTABLE points it at a
 // local Chrome; otherwise Remotion downloads its own headless shell.
-import { mkdirSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, statSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, renderStill, selectComposition, type Codec } from "@remotion/renderer";
@@ -79,8 +83,8 @@ async function video(id: string, file: string, codec: Codec, inputProps: Record<
 
 await video("Explainer", "explainer.mp4", "h264", { captions: true });
 await video("Explainer", "explainer.webm", "vp9", { captions: true });
-await video("HeroLoop", "hero.mp4", "h264", {});
-await video("HeroLoop", "hero.webm", "vp9", {});
+await video("HeroLoop", "hero-loop.mp4", "h264", {});
+await video("HeroLoop", "hero-loop.webm", "vp9", {});
 
 const explainer = await selectComposition({ serveUrl, id: "Explainer", inputProps: { captions: false }, browserExecutable, chromiumOptions });
 for (const imageFormat of ["png", "webp"] as const) {
@@ -89,18 +93,20 @@ for (const imageFormat of ["png", "webp"] as const) {
     composition: explainer,
     inputProps: { captions: false },
     frame: POSTER_FRAME,
-    output: out + `poster.${imageFormat}`,
+    output: out + `explainer-poster.${imageFormat}`,
     imageFormat,
     scale: SCALE,
     browserExecutable,
     chromiumOptions,
   });
-  console.log(`poster.${imageFormat}: ${kb(`poster.${imageFormat}`)}`);
+  console.log(`explainer-poster.${imageFormat}: ${kb(`explainer-poster.${imageFormat}`)}`);
 }
 
-writeFileSync(out + "captions.vtt", toWebVtt());
+// The hero loop opens on the same Learning path, so it shares the poster.
+copyFileSync(out + "explainer-poster.webp", out + "hero-loop-poster.webp");
+writeFileSync(out + "explainer.vtt", toWebVtt());
 
-const files = ["explainer.mp4", "explainer.webm", "hero.mp4", "hero.webm", "poster.png", "poster.webp", "captions.vtt"];
+const files = ["explainer.mp4", "explainer.webm", "explainer.vtt", "explainer-poster.webp", "explainer-poster.png", "hero-loop.mp4", "hero-loop.webm", "hero-loop-poster.webp"];
 const manifest = {
   width: 1920,
   height: 1080,
