@@ -152,3 +152,10 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - Viewing public or unlisted Expeditions needs no login, and live updates still arrive.
 - Reading status and position stay in the browser until sign-in, then merge into the account.
 - Viewers get no AI, no Suggestions tab and no History. They can Fork and Export.
+
+## 3.12 Waiting for approval (hosted)
+
+- With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), an unapproved account sees the Library as usual, with Expeditions shared with it, and a calm banner: "Your account is on the waiting list. You can read anything shared with you now, and you can create your own Expeditions once you're approved." with **Request access** (an optional note, then "Request sent" with the date).
+- Create, Import and Fork stay visible but open a small dialog with the same explanation and button, instead of failing.
+- **Admin › Access requests** (admins only, from Settings): pending requests first, with name, email, note and date, and **Approve** / **Decline**; a second tab lists approved accounts.
+

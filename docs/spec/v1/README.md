@@ -16,6 +16,7 @@ This spec is **build-ready**: every decision it relies on was made on the [wayfi
 | 6 | [MCP and skills](06-mcp.md) | The remote MCP server, tools, auth and the `seply-learn` skill |
 | 7 | [Design system](07-design-system.md) | shadcn with Base UI, tokens, dark mode, divergences, branding |
 | 8 | [Phase 2 sketch](08-phase-2.md) | What comes after v1, and what v1 must not block |
+| 9 | [Landing site](09-landing-site.md) | `seply.app`: the static site, its pages, screenshots, the explainer video, the live embed and the showcases |
 
 ## Vocabulary
 
