@@ -152,6 +152,7 @@ and `docker compose up -d`. The app serves the file at `/tiles/basemap.pmtiles` 
 ## Running it on a server
 
 - **HTTPS:** put a reverse proxy (Caddy, nginx, Traefik…) in front of port 3000 and set `BETTER_AUTH_URL` to the public origin people type, e.g. `https://learn.example.com`. Sign-in cookies, invite links, OAuth callbacks and the MCP server all use it. Browsers only offer installing the app, web push and offline reading over HTTPS (or on `localhost`).
+- **AI agents (MCP):** each person connects their own agent from **Connect an agent** in the app (the empty Library, Settings, or `/connect`). The page shows the commands for Claude Code, the Claude apps, Codex and Cursor with your server's address filled in. The `seply-learn` Claude Code plugin connects to `learn.seply.app` by default: enter your server's address when Claude Code asks for it. The Claude apps connect from Anthropic's servers, so they need your server reachable from the internet over HTTPS.
 - **WebSockets:** live editing upgrades `/api/expeditions/<id>/live` on the same port; the proxy must pass `Upgrade` and `Connection` headers (Caddy does by default; in nginx, `proxy_http_version 1.1` with `proxy_set_header Upgrade $http_upgrade` and `proxy_set_header Connection "upgrade"`).
 - **Uploads** go up to 25 MB: raise the proxy's body limit (nginx: `client_max_body_size 30m`).
 - **Several app instances** can share one database behind one origin; they pass live edits to each other through Postgres. No sticky sessions needed.

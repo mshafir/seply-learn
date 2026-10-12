@@ -50,6 +50,37 @@ describe("/api/health", () => {
   })
 })
 
+describe("/api/instance", () => {
+  it("says this is a Seply Learn server, signed out, with no database", async () => {
+    const app = testApp(localEnv, null)
+    const res = await app.request(`${LOCAL}/api/instance`)
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({
+      product: "seply-learn",
+      desktopBridge: 1,
+      hosted: false,
+    })
+  })
+
+  it("is hosted only on learn.seply.app", async () => {
+    const env = { BETTER_AUTH_SECRET: SECRET }
+    const hosted = testApp(
+      { ...env, BETTER_AUTH_URL: "https://learn.seply.app" },
+      null
+    )
+    expect(
+      await (await hosted.request("https://learn.seply.app/api/instance")).json()
+    ).toMatchObject({ hosted: true })
+    const other = testApp(
+      { ...env, BETTER_AUTH_URL: "https://learn.example.com" },
+      null
+    )
+    expect(
+      await (await other.request("https://learn.example.com/api/instance")).json()
+    ).toMatchObject({ hosted: false })
+  })
+})
+
 describe("/api/map-config", () => {
   it("is empty unless the runtime sets the basemap", async () => {
     const app = testApp(localEnv, null)

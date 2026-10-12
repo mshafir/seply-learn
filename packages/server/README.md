@@ -40,6 +40,7 @@ Today (WP-1.1, WP-1.2, WP-1.4, WP-2.5, WP-2.6, WP-3.1, WP-3.2, WP-3.3, WP-3.4, W
 **Routes** (under `/api`):
 
 - `GET /sign-in-options`: `{ google, emailPassword, signUp }` (see "Email + password sign-in" below).
+- `GET /instance`: `{ product: "seply-learn", desktopBridge, hosted }`, with no session and no database. `hosted` is true only when `BETTER_AUTH_URL` is `https://learn.seply.app` (`HOSTED_ORIGIN`). The setup page (`/connect`, spec §6.4) and the desktop app (spec §10.2) read it.
 - `GET /map-config`: `{ tiles, assets }`, the Map View's basemap when the runtime sets it (`MAP_TILES_URL`, `MAP_ASSETS_URL`; each `null` otherwise). The web app prefers these over its build's `VITE_MAP_*`, so a prebuilt self-host image can point at its own PMTiles extract (WP-6.2, [docs/ops/basemap-tiles.md](../../docs/ops/basemap-tiles.md)).
 - `GET /health`: `{ ok, db, branch }`. `db` is `select current_database()`, `"unconfigured"` with no database, `"error"` (503) when it fails.
 - `/auth/*`: Better Auth (sign-in, callbacks including `/auth/callback/google/oauth-proxy`, session, sign-out).

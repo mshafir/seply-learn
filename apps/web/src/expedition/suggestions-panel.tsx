@@ -50,6 +50,7 @@ import {
 } from "@seply/ui/components/dialog"
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -65,6 +66,7 @@ import {
 } from "@seply/ui/components/tooltip"
 import type { DomainState } from "@seply/domain"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import {
@@ -157,7 +159,11 @@ export function SuggestionsPanel({
       >
         <Description className="text-sm text-muted-foreground">
           What AI asks and agents suggested, shown dashed on the canvas. Each
-          accept is a Change you can undo.
+          accept is a Change you can undo.{" "}
+          <ConnectLink as="text">
+            Get suggestions from your own agent
+          </ConnectLink>
+          .
         </Description>
         {nav}
         {groups.length > 1 && (
@@ -198,6 +204,11 @@ export function SuggestionsPanel({
                   : "When an AI ask or an agent suggests changes, they wait here for you."}
               </EmptyDescription>
             </EmptyHeader>
+            {!error && (
+              <EmptyContent>
+                <ConnectLink>Connect your own agent</ConnectLink>
+              </EmptyContent>
+            )}
           </Empty>
         ) : (
           <div data-testid="suggestions-list" className="flex flex-col">

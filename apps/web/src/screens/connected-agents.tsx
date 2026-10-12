@@ -3,7 +3,7 @@
 // with its scopes and an optional restriction to chosen Expeditions. A new
 // token's key is shown once.
 import * as React from "react"
-import { BotIcon, CopyIcon, KeyRoundIcon } from "lucide-react"
+import { BotIcon, KeyRoundIcon } from "lucide-react"
 
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Badge } from "@seply/ui/components/badge"
@@ -26,18 +26,14 @@ import {
   FieldSet,
 } from "@seply/ui/components/field"
 import { Input } from "@seply/ui/components/input"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@seply/ui/components/input-group"
 import { Label } from "@seply/ui/components/label"
 import { RadioGroup, RadioGroupItem } from "@seply/ui/components/radio-group"
 import { Skeleton } from "@seply/ui/components/skeleton"
 import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
+import { CopyField } from "@/connect/copy-field.tsx"
 import {
   createApiToken,
   deleteApiToken,
@@ -62,48 +58,6 @@ const SCOPE_SHORT: Record<AgentScope, string> = {
 }
 
 const mcpUrl = () => `${window.location.origin}/mcp`
-
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.add({ title: "Copied.", type: "success" })
-  } catch {
-    // No clipboard (an insecure origin): the text is selectable.
-  }
-}
-
-/** A read-only value with a Copy button. */
-function CopyField({
-  id,
-  value,
-  label,
-}: {
-  id: string
-  value: string
-  label: string
-}) {
-  return (
-    <InputGroup>
-      <InputGroupInput
-        id={id}
-        readOnly
-        value={value}
-        className="font-mono text-xs"
-        aria-label={label}
-        onFocus={(e) => e.currentTarget.select()}
-      />
-      <InputGroupAddon align="inline-end">
-        <InputGroupButton
-          size="icon-xs"
-          aria-label={`Copy ${label}`}
-          onClick={() => void copy(value)}
-        >
-          <CopyIcon />
-        </InputGroupButton>
-      </InputGroupAddon>
-    </InputGroup>
-  )
-}
 
 function Scopes({ scopes }: { scopes: AgentScope[] }) {
   return (
@@ -347,11 +301,12 @@ export function ConnectedAgentsSection() {
             <FieldLabel htmlFor="mcp-url">Server address</FieldLabel>
             <CopyField id="mcp-url" value={mcpUrl()} label="server address" />
             <FieldDescription>
-              In Claude Code, add it with the command below, then sign in when
-              it asks. The seply-learn plugin adds it with the skill that
-              teaches Claude how to work here.
+              The setup page has the steps for Claude Code, the Claude apps,
+              Codex, Cursor and others.
             </FieldDescription>
-            <CopyField id="mcp-command" value={command} label="command" />
+            <div>
+              <ConnectLink>Connect an agent</ConnectLink>
+            </div>
           </Field>
 
           {overview.grants.length > 0 && (

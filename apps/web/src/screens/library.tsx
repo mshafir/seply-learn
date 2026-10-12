@@ -63,6 +63,7 @@ import {
 import { ViewTypeThumbnail } from "@seply/ui/components/view-type-thumbnail"
 import type { OfflineEntry } from "@seply/sync"
 
+import { ConnectLink } from "@/connect/connect-link.tsx"
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { GlobalSearch } from "@/components/global-search.tsx"
 import {
@@ -760,11 +761,13 @@ export function LibraryScreen() {
                     </EmptyMedia>
                     <EmptyTitle>No Expeditions yet</EmptyTitle>
                     <EmptyDescription>
-                      Start a new one, or import one exported as JSON.
+                      Start a new one, import one exported as JSON, or have
+                      the agent you already use make one from a chat.
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent className="flex-row justify-center">
+                  <EmptyContent className="flex-row flex-wrap justify-center">
                     {actions}
+                    <ConnectLink>Connect an agent</ConnectLink>
                   </EmptyContent>
                 </Empty>
               )}

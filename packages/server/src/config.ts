@@ -154,6 +154,9 @@ export type ServerConfig = {
 
 export class ConfigError extends Error {}
 
+/** The hosted instance's origin (ADR 0002). The seply-learn plugin defaults to it. */
+export const HOSTED_ORIGIN = "https://learn.seply.app"
+
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"])
 
 /** Whether a URL points at this machine (tests and local dev only). */
