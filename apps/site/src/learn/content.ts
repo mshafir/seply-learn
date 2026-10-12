@@ -118,8 +118,8 @@ export const EXAMPLES: {
   },
   {
     title: "E-bike for the commute",
-    summary: "[One-line summary, written when the Expedition is tidied]",
-    counts: "50 CONCEPTS · 4 VIEWS",
+    summary: "Choosing an e-bike for a hilly 14 km commute: three bikes compared on climbing, upkeep, weight, theft protection and price, with three years of running costs.",
+    counts: "59 CONCEPTS · 4 VIEWS",
     shot: "example-ebike",
     href: expeditionUrl(SHOWCASE.ebike),
   },
@@ -127,7 +127,7 @@ export const EXAMPLES: {
     title: "A week on the Swiss rail loop",
     summary:
       "A week by train through Swiss landmarks, planned from first idea to photo book.",
-    counts: "[COUNTS AFTER REBUILD]",
+    counts: "39 CONCEPTS · 2 VIEWS",
     shot: "example-swiss-rail",
     href: expeditionUrl(SHOWCASE.swissRail),
   },
