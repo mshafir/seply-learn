@@ -164,13 +164,11 @@ export function SourcesStep({
       <div className="flex flex-col gap-2">
         <h1 className="font-reading text-3xl font-medium">What should this Expedition be about?</h1>
         <p className="text-muted-foreground">
-          Start from anything: an AI chat, some files, or just a question. Add as many
-          Sources as you like; each Concept remembers where it came from.
+          Start from an AI chat, some files or a question.
         </p>
         <p className="text-sm text-muted-foreground">
-          Already talking it through with an AI agent?{" "}
-          <ConnectLink as="text">Create it from your own agent</ConnectLink>{" "}
-          instead.
+          You can also{" "}
+          <ConnectLink as="text">create it from the agent you already use</ConnectLink>.
         </p>
       </div>
 
@@ -204,13 +202,9 @@ export function SourcesStep({
                 rows={8}
                 value={chat}
                 onChange={(e) => setChat(e.target.value)}
-                placeholder="Copy the whole conversation from ChatGPT, Claude, Gemini or any assistant, and paste it here."
+                placeholder="Paste the whole conversation from ChatGPT, Claude, Gemini or another assistant."
                 className="max-h-80"
               />
-              <FieldDescription>
-                Share links can't be read without your assistant's login, so paste the
-                conversation instead. Your own questions count most.
-              </FieldDescription>
             </Field>
             <Button type="submit" className="self-start" disabled={!chat.trim() || busy === "chat"}>
               {busy === "chat" && <Spinner />}
@@ -224,7 +218,7 @@ export function SourcesStep({
             accept={SOURCE_ACCEPT}
             disabled={busy === "files"}
             title={busy === "files" ? "Reading…" : "Drop files here"}
-            hint="Chat exports from ChatGPT, Claude or Gemini, PDF, Word, Markdown, text or saved web pages. Up to 25 MB each."
+            hint="Chat exports, PDF, Word, Markdown, text or saved web pages, up to 25 MB each."
           />
         </TabsContent>
         <TabsContent value="prompt" className="pt-2">
@@ -245,8 +239,8 @@ export function SourcesStep({
                 placeholder="How do mixture-of-experts models work, and why are they cheaper to serve?"
               />
               <FieldDescription>
-                With no other Source, the Expedition is drafted from background knowledge,
-                and every Concept says so.
+                If this is the only Source, the Expedition is written from general
+                knowledge. Each Concept is marked that way.
               </FieldDescription>
             </Field>
             <Button type="submit" className="self-start" disabled={!prompt.trim() || busy === "prompt"}>
@@ -311,10 +305,7 @@ export function SourcesStep({
 
       <EstimateLine estimate={estimate} />
 
-      <div className="flex flex-col-reverse items-stretch gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Next, you'll pick the Views to build. Nothing is built until you say so.
-        </p>
+      <div className="flex flex-col-reverse items-stretch gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
         <Button
           size="lg"
           disabled={

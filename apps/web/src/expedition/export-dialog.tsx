@@ -182,8 +182,8 @@ function ChooseExport({
       <DialogHeader>
         <DialogTitle>Export {title || "this Expedition"}</DialogTitle>
         <DialogDescription>
-          Its current Concepts, Relationships and Views. History, suggestions,
-          collaborators and your reading aren't included.
+          This exports the current Concepts, Relationships and Views. It doesn't
+          include history, suggestions, collaborators or your reading.
         </DialogDescription>
       </DialogHeader>
 

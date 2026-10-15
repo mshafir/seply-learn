@@ -242,10 +242,6 @@ export function ChooseViewsStep({ flow }: { flow: Flow }) {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-2">
         <h1 className="font-reading text-3xl font-medium">Here are the questions your Sources raise</h1>
-        <p className="text-muted-foreground">
-          Each View answers one. Pick the ones to start with; the first you pick is where the
-          Expedition opens.
-        </p>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -286,7 +282,7 @@ export function ChooseViewsStep({ flow }: { flow: Flow }) {
         >
           <span className="text-sm text-muted-foreground">
             {skim.mode === "propose"
-              ? "Reading your Sources to find the questions they raise. This takes 10 to 20 seconds."
+              ? "Reading your Sources to find their questions. This takes 10 to 20 seconds."
               : skim.mode === "more"
                 ? "Looking for other questions…"
                 : "Working out that View…"}
@@ -362,7 +358,7 @@ export function ChooseViewsStep({ flow }: { flow: Flow }) {
 
       <div className="sticky bottom-0 -mx-4 mt-auto flex flex-col-reverse gap-3 border-t bg-background/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p className="text-sm text-muted-foreground">
-          You can add, change or remove Views any time after the Expedition is built.
+          You can add, change or remove Views after the Expedition is built.
         </p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" disabled={!choice || !!busy} onClick={() => void save("save")}>

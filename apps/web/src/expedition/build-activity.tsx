@@ -262,8 +262,8 @@ export function LeaveBuildingDialog({
         <DialogHeader>
           <DialogTitle>Leave it building</DialogTitle>
           <DialogDescription>
-            The build carries on without this page. We can send a notification
-            to this device when it's done; your browser will ask first.
+            The build keeps going if you leave this page. We can notify this
+            device when it's done. Your browser will ask you first.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

@@ -320,9 +320,9 @@ export function ConnectScreen() {
             <h1 className="text-2xl font-semibold">Connect an agent</h1>
           </div>
           <p className="text-muted-foreground">
-            Let the AI agent you already use read your Expeditions, make new
-            ones from a chat, and suggest changes, as you. What it suggests
-            waits in Suggestions until you accept it.
+            The AI agent you already use can read your Expeditions, create new
+            ones from a chat and suggest changes. Its suggestions wait in
+            Suggestions until you accept them.
           </p>
         </div>
 

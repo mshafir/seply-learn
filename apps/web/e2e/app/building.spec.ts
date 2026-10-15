@@ -249,7 +249,7 @@ test("Leave it building: asks about notifications, then goes to the Library", as
     .getByRole("button", { name: "Leave it building" })
     .click()
   const dialog = page.getByTestId("leave-building")
-  await expect(dialog).toContainText("We can send a notification")
+  await expect(dialog).toContainText("We can notify this device")
 
   // This Worker has no VAPID keys, so the server can't send one; it says so.
   await dialog.getByRole("button", { name: "Notify me" }).click()

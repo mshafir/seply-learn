@@ -290,9 +290,9 @@ export function ConnectedAgentsSection() {
       <CardHeader>
         <CardTitle>Connected agents</CardTitle>
         <CardDescription>
-          Let an AI agent such as Claude Code read your Expeditions, create new
-          ones from a chat, and suggest changes, as you. What it suggests waits
-          in Suggestions until you accept it.
+          An AI agent such as Claude Code can read your Expeditions, create new
+          ones from a chat and suggest changes. Its suggestions wait in
+          Suggestions until you accept them.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -300,10 +300,6 @@ export function ConnectedAgentsSection() {
           <Field>
             <FieldLabel htmlFor="mcp-url">Server address</FieldLabel>
             <CopyField id="mcp-url" value={mcpUrl()} label="server address" />
-            <FieldDescription>
-              The setup page has the steps for Claude Code, the Claude apps,
-              Codex, Cursor and others.
-            </FieldDescription>
             <div>
               <ConnectLink>Connect an agent</ConnectLink>
             </div>
