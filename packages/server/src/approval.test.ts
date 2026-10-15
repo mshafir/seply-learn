@@ -27,6 +27,16 @@ const HOSTED: ServerEnv = {
   ...TEST_ENV,
   ACCESS_APPROVAL: "1",
   ADMIN_EMAILS: " Ada@Example.com , root@example.com",
+  // An instance key (never called: the estimate doesn't reach the provider).
+  AI_GATEWAY_API_KEY: "vck_instance_not_real_0000",
+}
+/** The hosted setup with readers' own keys too. */
+const BOTH: ServerEnv = {
+  ...HOSTED,
+  AI_KEY_MODE: "both",
+  AI_KEYS_MASTER_KEY: btoa(
+    String.fromCharCode(...Array.from({ length: 32 }, (_, i) => i + 1))
+  ),
 }
 
 async function setup(env: ServerEnv = HOSTED) {
@@ -49,9 +59,12 @@ async function setup(env: ServerEnv = HOSTED) {
     })
   const create = (u: TestUser) =>
     post(u, "/api/expeditions", { title: "Compute" })
+  /** AI work on this server's key (the cheapest gated route). */
+  const estimate = (u: TestUser) =>
+    post(u, "/api/ai/estimate", { sourceChars: 1000 })
   const list = async (u: TestUser) =>
     app.request("/api/admin/access-requests", { headers: u.headers })
-  return { db, app, mailer, ada, bob, me, post, create, list }
+  return { db, app, mailer, ada, bob, me, post, create, estimate, list }
 }
 
 describe("readConfig: access approval", () => {
@@ -68,55 +81,86 @@ describe("readConfig: access approval", () => {
   })
 })
 
-describe("requireApproval (the guard)", () => {
-  const guard = (
-    db: Db,
-    env: ServerEnv,
-    userId: string,
-    work: "create" | "ai"
-  ) => requireApproval(db, readConfig(env), userId, work, env)
+describe("requireApproval (the guard on this server's AI)", () => {
+  const guard = (db: Db, env: ServerEnv, userId: string) =>
+    requireApproval(db, readConfig(env), userId, env)
+  const approve = (db: Db, userId: string) =>
+    db
+      .update(schema.users)
+      .set({ approvedAt: new Date() })
+      .where(eq(schema.users.id, userId))
 
   it("lets everyone through with the flag off", async () => {
     const s = await setup(TEST_ENV)
-    await expect(guard(s.db, TEST_ENV, s.bob.id, "create")).resolves.toBeUndefined()
-    await expect(guard(s.db, TEST_ENV, s.bob.id, "ai")).resolves.toBeUndefined()
+    await expect(guard(s.db, TEST_ENV, s.bob.id)).resolves.toBeUndefined()
+    await expect(
+      guard(s.db, { ...TEST_ENV, AI_KEY_MODE: "both" }, s.bob.id)
+    ).resolves.toBeUndefined()
   })
 
-  it("refuses an unapproved account, plainly, and lets approved ones and admins through", async () => {
+  it("instance mode: refuses an unapproved account, plainly, and lets approved ones and admins through", async () => {
     const s = await setup()
-    const refused = guard(s.db, HOSTED, s.bob.id, "create")
+    const refused = guard(s.db, HOSTED, s.bob.id)
     await expect(refused).rejects.toBeInstanceOf(ApprovalRequired)
-    await expect(refused).rejects.toThrow(/waiting for approval/)
-    await expect(guard(s.db, HOSTED, s.bob.id, "ai")).rejects.toBeInstanceOf(
-      ApprovalRequired
-    )
+    await expect(refused).rejects.toThrow(/only for accounts an admin has enabled/)
     // Ada is an admin (ADMIN_EMAILS matches whatever the case).
-    await expect(guard(s.db, HOSTED, s.ada.id, "create")).resolves.toBeUndefined()
-    await s.db
-      .update(schema.users)
-      .set({ approvedAt: new Date() })
-      .where(eq(schema.users.id, s.bob.id))
-    await expect(guard(s.db, HOSTED, s.bob.id, "create")).resolves.toBeUndefined()
-    await expect(guard(s.db, HOSTED, s.bob.id, "ai")).resolves.toBeUndefined()
+    await expect(guard(s.db, HOSTED, s.ada.id)).resolves.toBeUndefined()
+    await approve(s.db, s.bob.id)
+    await expect(guard(s.db, HOSTED, s.bob.id)).resolves.toBeUndefined()
   })
 
-  it("gates AI work only on the instance key", async () => {
+  it("byok mode: never gates (everyone spends their own key)", async () => {
     const s = await setup()
     const byok = { ...HOSTED, AI_KEY_MODE: "byok" }
-    await expect(guard(s.db, byok, s.bob.id, "ai")).resolves.toBeUndefined()
-    await expect(guard(s.db, byok, s.bob.id, "create")).rejects.toBeInstanceOf(
-      ApprovalRequired
-    )
+    await expect(guard(s.db, byok, s.bob.id)).resolves.toBeUndefined()
   })
 
-  it("answers a gated route with 403 approval_required and a plain message", async () => {
+  it("both mode: own key or approval; else needs-key", async () => {
+    const s = await setup(BOTH)
+    const refused = guard(s.db, BOTH, s.bob.id)
+    await expect(refused).rejects.toBeInstanceOf(ApprovalRequired)
+    await expect(refused).rejects.toMatchObject({ code: "needs-key", status: 409 })
+    await expect(guard(s.db, BOTH, s.ada.id)).resolves.toBeUndefined()
+    const put = await s.app.request("/api/ai/keys/anthropic", {
+      method: "PUT",
+      headers: s.bob.headers,
+      body: JSON.stringify({ apiKey: "sk-ant-api03-bobs-own-key-1234" }),
+    })
+    expect(put.status).toBe(200)
+    await expect(guard(s.db, BOTH, s.bob.id)).resolves.toBeUndefined()
+  })
+
+  it("answers an AI route with 403 approval_required (instance) or 409 needs-key (both)", async () => {
     const s = await setup()
-    const res = await s.create(s.bob)
+    const res = await s.estimate(s.bob)
     expect(res.status).toBe(403)
     const body = (await res.json()) as Record<string, string>
     expect(body.code).toBe("approval_required")
     expect(body.error).toBe("approval_required")
-    expect(body.message).toMatch(/waiting for approval/)
+    expect(body.message).toMatch(/ask to use it in Settings/)
+
+    const b = await setup(BOTH)
+    const both = await b.estimate(b.bob)
+    expect(both.status).toBe(409)
+    expect(await both.json()).toMatchObject({
+      error: "needs-key",
+      code: "needs-key",
+      message: expect.stringMatching(/Add your own AI key in Settings/),
+    })
+  })
+})
+
+describe("creating is open to every account", () => {
+  // Import and MCP create_expedition: permissions-matrix.test.ts.
+  it("creates and Forks without approval, in every key mode", async () => {
+    for (const env of [HOSTED, BOTH, { ...HOSTED, AI_KEY_MODE: "byok" }]) {
+      const s = await setup(env)
+      const created = await s.create(s.bob)
+      expect(created.status).toBe(201)
+      const { id } = (await created.json()) as { id: string }
+      const fork = await s.post(s.bob, `/api/expeditions/${id}/fork`)
+      expect(fork.status).toBe(201)
+    }
   })
 })
 
@@ -174,8 +218,10 @@ describe("access requests", () => {
       "root@example.com",
     ])
     const mail = s.mailer.sent[0]!
-    expect(mail.subject).toBe("bob asked for access to Seply Learn")
-    expect(mail.text).toContain("bob (bob@example.com) asked for access")
+    expect(mail.subject).toBe("bob asked to use the AI on Seply Learn")
+    expect(mail.text).toContain(
+      "bob (bob@example.com) asked to use this server's AI"
+    )
     expect(mail.text).toContain("Their note: For my reading group")
     expect(mail.text).toContain("/settings/access-requests")
   })
@@ -189,7 +235,7 @@ describe("access requests", () => {
     ).toBe(400)
   })
 
-  it("lists pending requests for admins only; approving lets the account create and emails it", async () => {
+  it("lists pending requests for admins only; approving lets the account use the server's AI and emails it", async () => {
     const s = await setup()
     await s.post(s.bob, "/api/access-requests", { note: "Please" })
     expect((await s.list(s.bob)).status).toBe(403)
@@ -212,10 +258,10 @@ describe("access requests", () => {
     expect(s.mailer.sent).toHaveLength(1)
     expect(s.mailer.sent[0]).toMatchObject({
       to: "bob@example.com",
-      subject: "You can now create Expeditions on Seply Learn",
+      subject: "You can now use the AI on Seply Learn",
     })
     expect((await s.me(s.bob)).approved).toBe(true)
-    expect((await s.create(s.bob)).status).toBe(201)
+    expect((await s.estimate(s.bob)).status).toBe(200)
 
     const after = (await (await s.list(s.ada)).json()) as AccessRequestsOverview
     expect(after.pending).toEqual([])
@@ -236,7 +282,7 @@ describe("access requests", () => {
     expect(res.status).toBe(200)
     expect(s.mailer.sent).toEqual([])
     expect(await s.me(s.bob)).toMatchObject({ approved: false, request: null })
-    expect((await s.create(s.bob)).status).toBe(403)
+    expect((await s.estimate(s.bob)).status).toBe(403)
     expect((await s.post(s.bob, "/api/access-requests")).status).toBe(201)
   })
 

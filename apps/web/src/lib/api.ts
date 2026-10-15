@@ -18,8 +18,9 @@ export type OwnAccessRequest = { id: string; note: string; createdAt: string }
 
 /** The account's standing under hosted access approval (spec §2.6, §3.12). */
 export type AccessState = {
-  /** Access approval is on (the hosted instance). Off: everyone may create. */
+  /** Access approval is on (the hosted instance). Off: everyone may use the server's AI. */
   approvalRequired: boolean
+  /** May use this server's AI key. Creating never needs it. */
   approved: boolean
   admin: boolean
   request: OwnAccessRequest | null
@@ -121,13 +122,33 @@ export async function getMe(): Promise<User | null> {
 
 // --- Hosted access approval (spec §2.6, §3.12; the server's approval.ts) ------
 
-/** A gated route refused: the account is waiting for approval. */
+/** An AI route refused: this server's AI isn't on for the account (instance mode). */
 export const isApprovalRequired = (e: unknown): e is ApiError =>
   e instanceof ApiError &&
   e.status === 403 &&
   (e.body as { code?: string }).code === "approval_required"
 
-/** Asks for access, with an optional note; one pending request per account. */
+/**
+ * Why AI can't run for this account, from an AI route's refusal:
+ * - `no-key`: no key of its own, and no server key to fall back on;
+ * - `needs-key`: no key of its own, and the server's AI isn't on for it;
+ * - `not-configured`: the server has no AI key (instance mode);
+ * - `approval`: the server's AI isn't on for it (instance mode).
+ */
+export type NoAiReason = "no-key" | "needs-key" | "not-configured" | "approval"
+
+export function noAiReason(e: unknown): NoAiReason | null {
+  if (isApprovalRequired(e)) return "approval"
+  if (!(e instanceof ApiError) || e.status !== 409) return null
+  const reason = e.body.error
+  return reason === "no-key" ||
+    reason === "needs-key" ||
+    reason === "not-configured"
+    ? reason
+    : null
+}
+
+/** Asks to use this server's AI, with an optional note; one pending request per account. */
 export async function requestAccess(note: string): Promise<OwnAccessRequest> {
   return (
     await call<{ request: OwnAccessRequest }>("/access-requests", {
@@ -563,11 +584,21 @@ export type AiSettings = {
 
 /** The server's `AiOverview`. */
 export type AiOverview = {
-  mode: "instance" | "byok"
+  mode: "instance" | "byok" | "both"
   ready: boolean
-  active: { provider: string; label: string; models: StageModels } | null
+  /** Why not ready (null when ready). */
+  unavailable: "no-key" | "needs-key" | "not-configured" | null
+  active: {
+    keySource: "reader" | "instance"
+    provider: string
+    label: string
+    models: StageModels
+  } | null
+  /** byok and both: my keys, and the providers I can add one for. */
   keys: AiKeySummary[]
   providers: { id: ByokProvider; label: string; defaults: StageModels }[]
+  /** instance and both: the server's own AI, and whether it's on for me. */
+  serverAi: { configured: boolean; enabled: boolean } | null
   settings: AiSettings
   defaultAskCapUsd: number
 }

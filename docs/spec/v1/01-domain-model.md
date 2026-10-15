@@ -45,7 +45,7 @@ collaborators    exp, user_id, role (owner|editor|viewer)              (plain ro
 users, sessions, accounts, api_keys                                    (Better Auth tables)
 jwks, oauth_clients, oauth_consents, oauth_access_tokens, …            (Better Auth's MCP OAuth server, WP-5.4)
 agent_grants     user, client, expedition_ids                           (an OAuth grant's chosen Expeditions)
-ai_keys          user_id, provider, ciphertext, iv, last4, created_at  (BYOK mode only)
+ai_keys          user_id, provider, ciphertext, iv, last4, created_at  (byok and both modes)
 ai_settings      user_id, provider, models{provider: {stage: model}}, ask_cap_cents, updated_at  (per reader)
 reading_status   user_id, concept_id, state (unread|read|known), at    (per reader)
 personal_view_settings  user_id, view_id, settings{}, at               (per reader)

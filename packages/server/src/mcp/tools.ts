@@ -29,7 +29,6 @@ import { McpServer } from "@modelcontextprotocol/server"
 import { and, desc, eq, isNull } from "drizzle-orm"
 import type { z } from "zod"
 import { expeditionAccess, type ExpeditionAccess } from "../access.ts"
-import { ApprovalRequired, requireApproval } from "../approval.ts"
 import { sourceBlobKeys, type BlobStore } from "../blobs.ts"
 import type { ServerConfig } from "../config.ts"
 import type { Db } from "../db.ts"
@@ -489,15 +488,6 @@ async function createFromAgent(
   ctx: ToolContext,
   input: CreateExpeditionInput
 ): Promise<string> {
-  try {
-    await requireApproval(ctx.db, ctx.config, ctx.agent.userId, "create")
-  } catch (err) {
-    if (err instanceof ApprovalRequired)
-      throw new Refusal(
-        "The user's account is waiting for approval, so it can't create Expeditions yet. They can ask for access from their Library in Seply Learn. Suggesting changes with propose_changes still works on Expeditions they own or edit."
-      )
-    throw err
-  }
   if (!ctx.views)
     throw new Refusal(
       "Expeditions can't be created here: this server can't check Views."

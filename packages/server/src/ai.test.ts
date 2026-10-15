@@ -28,6 +28,14 @@ const INSTANCE_ENV: ServerEnv = {
   ...TEST_ENV,
   AI_GATEWAY_API_KEY: "vck_INSTANCEkeySECRET_0000",
 }
+/** Readers' own keys, else the instance key for approved accounts (hosted). */
+const BOTH_ENV: ServerEnv = {
+  ...BYOK_ENV,
+  AI_KEY_MODE: "both",
+  AI_GATEWAY_API_KEY: INSTANCE_ENV.AI_GATEWAY_API_KEY,
+  ACCESS_APPROVAL: "1",
+  ADMIN_EMAILS: "admin@example.com",
+}
 
 describe("AES-GCM key storage", () => {
   it("round-trips a key", async () => {
@@ -63,14 +71,17 @@ describe("AES-GCM key storage", () => {
   })
 })
 
-async function byok(fetchSeen: { url: string; key: string | null }[] = []) {
+async function byok(
+  fetchSeen: { url: string; key: string | null }[] = [],
+  env: ServerEnv = BYOK_ENV
+) {
   const db = await testDb()
   const fetch = (async (url: string, init?: RequestInit) => {
     const h = new Headers(init?.headers)
     fetchSeen.push({ url, key: h.get("x-api-key") ?? h.get("authorization") })
     return new Response("{}", { status: 200 })
   }) as typeof globalThis.fetch
-  const app = testApp(BYOK_ENV, db, undefined, { ai: { fetch } })
+  const app = testApp(env, db, undefined, { ai: { fetch } })
   const ada = await signUp(app, "ada")
   const ed = await signUp(app, "ed")
   const call = async (user: { headers: Record<string, string> }, method: string, path: string, body?: unknown) => {
@@ -86,9 +97,18 @@ async function byok(fetchSeen: { url: string; key: string | null }[] = []) {
 }
 
 describe("keys are never returned by any API", () => {
-  it("no route's response carries a stored key, its ciphertext or its IV", async () => {
-    const { db, app, ada, call } = await byok()
-    const secrets = [ANTHROPIC_KEY, GATEWAY_KEY, ANTHROPIC_KEY.slice(4, -4), GATEWAY_KEY.slice(4, -4)]
+  it.each([
+    ["byok", BYOK_ENV],
+    ["both", BOTH_ENV],
+  ])("no route's response carries a stored key, its ciphertext or its IV (%s)", async (_mode, env) => {
+    const { db, app, ada, call } = await byok([], env)
+    const secrets = [
+      ANTHROPIC_KEY,
+      GATEWAY_KEY,
+      ANTHROPIC_KEY.slice(4, -4),
+      GATEWAY_KEY.slice(4, -4),
+      INSTANCE_ENV.AI_GATEWAY_API_KEY!,
+    ]
     const responses: { route: string; status: number; text: string }[] = []
     const record = (route: string, r: { status: number; text: string }) => responses.push({ route, ...r })
 
@@ -154,6 +174,7 @@ describe("bring your own key", () => {
     expect(o.keys).toHaveLength(1)
     expect(o.keys[0]!.last4).toBe("wxyz")
     expect(o.active).toEqual({
+      keySource: "reader",
       provider: "anthropic",
       label: "Anthropic",
       models: DEFAULT_MODELS.anthropic,
@@ -260,6 +281,102 @@ describe("instance key", () => {
     })
     const direct = await resolveAi(db, { ...TEST_ENV, ANTHROPIC_API_KEY: "sk-ant-direct-0000" }, ada.id)
     expect(direct.ok && direct.setup.models).toEqual(DEFAULT_MODELS.anthropic)
+  })
+})
+
+describe("both modes (AI_KEY_MODE=both)", () => {
+  async function both(env: ServerEnv = BOTH_ENV) {
+    const db = await testDb()
+    const fetch = (async () => new Response("{}", { status: 200 })) as unknown as typeof globalThis.fetch
+    const app = testApp(env, db, undefined, { ai: { fetch } })
+    const admin = await signUp(app, "admin") // ADMIN_EMAILS: counts as approved
+    const una = await signUp(app, "una") // not approved
+    const call = async (user: { headers: Record<string, string> }, method: string, path: string, body?: unknown) => {
+      const res = await app.request(path, {
+        method,
+        headers: user.headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+      return { status: res.status, body: (await res.text()) || "null" }
+    }
+    const overview = async (user: { headers: Record<string, string> }) =>
+      JSON.parse((await call(user, "GET", "/api/ai")).body) as AiOverview
+    return { db, app, admin, una, call, overview, env }
+  }
+
+  it("refuses an unapproved account without a key of its own: needs-key", async () => {
+    const { db, una, call, overview, env } = await both()
+    expect(await resolveAi(db, env, una.id)).toEqual({ ok: false, reason: "needs-key" })
+    const o = await overview(una)
+    expect(o).toMatchObject({
+      mode: "both",
+      ready: false,
+      unavailable: "needs-key",
+      active: null,
+      keys: [],
+      serverAi: { configured: true, enabled: false },
+    })
+    expect(o.providers.map((p) => p.id)).toEqual(["anthropic", "openai", "google", "gateway"])
+    const est = await call(una, "POST", "/api/ai/estimate", { sourceChars: 1000 })
+    expect(est.status).toBe(409)
+    expect(JSON.parse(est.body)).toMatchObject({ error: "needs-key" })
+  })
+
+  it("prefers the reader's own key, approved or not; the key routes work", async () => {
+    const { db, admin, una, call, overview, env } = await both()
+    for (const user of [una, admin]) {
+      expect((await call(user, "PUT", "/api/ai/keys/anthropic", { apiKey: ANTHROPIC_KEY })).status).toBe(200)
+      expect(JSON.parse((await call(user, "POST", "/api/ai/keys/anthropic/test")).body)).toEqual({ ok: true })
+      const ai = await resolveAi(db, env, user.id)
+      expect(ai.ok && ai.setup).toMatchObject({
+        keySource: "reader",
+        credentials: { provider: "anthropic", apiKey: ANTHROPIC_KEY },
+      })
+      const o = await overview(user)
+      expect(o).toMatchObject({ ready: true, unavailable: null, active: { keySource: "reader", provider: "anthropic" } })
+      expect(o.keys.map((k) => k.last4)).toEqual(["wxyz"])
+      expect((await call(user, "POST", "/api/ai/estimate", { sourceChars: 1000 })).status).toBe(200)
+    }
+    // Deleting it: back to the instance key for the approved account only.
+    expect((await call(una, "DELETE", "/api/ai/keys/anthropic")).status).toBe(204)
+    expect(await resolveAi(db, env, una.id)).toEqual({ ok: false, reason: "needs-key" })
+    expect((await call(admin, "DELETE", "/api/ai/keys/anthropic")).status).toBe(204)
+    const ai = await resolveAi(db, env, admin.id)
+    expect(ai.ok && ai.setup.keySource).toBe("instance")
+  })
+
+  it("serves an approved account without a key of its own on the instance key", async () => {
+    const { db, una, overview, env } = await both()
+    await db.update(schema.users).set({ approvedAt: new Date() }).where(eq(schema.users.id, una.id))
+    const ai = await resolveAi(db, env, una.id)
+    expect(ai.ok && ai.setup).toMatchObject({
+      keySource: "instance",
+      credentials: { provider: "gateway", apiKey: INSTANCE_ENV.AI_GATEWAY_API_KEY },
+      models: DEFAULT_MODELS.gateway,
+    })
+    expect(await overview(una)).toMatchObject({
+      ready: true,
+      active: { keySource: "instance", provider: "gateway" },
+      serverAi: { configured: true, enabled: true },
+    })
+  })
+
+  it("lets everyone use the instance key with ACCESS_APPROVAL off", async () => {
+    const { db, una, call, env } = await both({ ...BOTH_ENV, ACCESS_APPROVAL: undefined })
+    const ai = await resolveAi(db, env, una.id)
+    expect(ai.ok && ai.setup.keySource).toBe("instance")
+    const ask = await call(una, "POST", "/api/ai/estimate", { sourceChars: 1000 })
+    expect(ask.status).toBe(200)
+  })
+
+  it("says no-key when there's no instance key to fall back on", async () => {
+    const { db, admin, overview, env } = await both({ ...BOTH_ENV, AI_GATEWAY_API_KEY: undefined })
+    expect(await resolveAi(db, env, admin.id)).toEqual({ ok: false, reason: "no-key" })
+    expect(await overview(admin)).toMatchObject({
+      ready: false,
+      unavailable: "no-key",
+      serverAi: { configured: false, enabled: true },
+    })
   })
 })
 

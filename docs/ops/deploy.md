@@ -57,8 +57,8 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **Previous domain:** the product was Umbel Learn on `learn.umbel.dev` ([ADR 0002](../adr/0002-rename-to-seply.md)). It was switched off on 2026-09-30 with no redirect: the old Worker, its Hyperdrive config, the Resend domain `mail.umbel.dev` and its DNS records are deleted. Browser storage and sessions don't carry across origins, so readers sign in on the new domain.
 
 - [X] **`AI_GATEWAY_API_KEY`:** a Vercel AI Gateway key (_Vercel dashboard → AI Gateway → API keys_), the hosted instance key (spec §5.1, §5.7). Needed from WP-3.3. Set a spend limit in Vercel: previews use it too, and per-user caps are phase 2.
-  - From WP-3.3 the deploy uploads it to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists). The hosted instance runs in **instance-key mode** (`AI_KEY_MODE` unset), so this key pays for everyone's builds and asks.
-- [ ] **`AI_KEYS_MASTER_KEY`** (optional until the hosted instance switches to bring-your-own-key mode): the master key readers' own API keys are AES-GCM encrypted under (spec §2.6). Generate it without seeing it: `openssl rand -base64 32 | gh secret set AI_KEYS_MASTER_KEY -R mshafir/seply-learn`. The deploy uploads it when it exists. Never rotate it casually: keys stored under the old one become unreadable, and readers add them again.
+  - From WP-3.3 the deploy uploads it to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists). With `AI_KEY_MODE` unset (**instance-key mode**) this key pays for everyone's builds and asks; with `AI_KEY_MODE=both` it pays only for approved accounts without a key of their own.
+- [ ] **`AI_KEYS_MASTER_KEY`** (needed before `AI_KEY_MODE` is `byok` or `both`): the master key readers' own API keys are AES-GCM encrypted under (spec §2.6). Generate it without seeing it: `openssl rand -base64 32 | gh secret set AI_KEYS_MASTER_KEY -R mshafir/seply-learn`. The deploy uploads it when it exists. Never rotate it casually: keys stored under the old one become unreadable, and readers add them again.
 
 - [ ] **Web push (VAPID keys):** needed from WP-3.2 for build notifications; without them web push is off (`GET /api/web-push/key` answers 404) and everything else works. Generate a P-256 key pair once, without printing the private half, e.g. `npx web-push generate-vapid-keys --json`, then store `publicKey` as the secret **`VAPID_PUBLIC_KEY`** and `privateKey` as **`VAPID_PRIVATE_KEY`** (both base64url). Optionally set the repo **variable** `VAPID_SUBJECT` (`mailto:` or `https:` contact for push services; default `mailto:admin@localhost`). Keep the pair stable: a new pair invalidates every browser's subscription.
 - [X] **`CLOUDFLARE_API_TOKEN` and Workflows:** from WP-3.2 the Worker binds a Durable Object (the Expedition room) and a Workflow (jobs). Both deploy with the Worker under the token's existing Workers permissions (checked on PR #86's preview); nothing to add.
@@ -68,10 +68,11 @@ Add these under **Settings → Secrets and variables → Actions → Repository 
   - **`EMAIL_FROM`** (a repo **variable**, not a secret): `Seply Learn <invites@mail.seply.app>`.
   - From WP-5.1 the deploy uploads `RESEND_API_KEY` to every preview and production Worker as a secret (`ci.mjs secrets-file`, when the repo secret exists) and passes `EMAIL_FROM` with `--var` (when the variable is set; the server's default is the same address). Previews send real invite emails too, with links to the preview. Local e2e and unit tests never send: with `AUTH_TEST_CREDENTIALS=1` the server only logs that an email would go out, whatever `.dev.vars` holds.
 
-- [ ] **Hosted access approval** (WP-7.3, spec §2.6): only approved accounts create Expeditions or start work on the instance AI key.
+- [ ] **`AI_KEY_MODE`** (a repo **variable**): `both` lets every reader add their own key, and keeps the instance key for approved accounts (spec §2.6). Set `AI_KEYS_MASTER_KEY` first. Both deploys pass it with `--var` when it is set; unset, the Worker runs `instance`.
+- [ ] **Hosted access approval** (WP-7.3, spec §2.6): sign-up and creating are open to everyone; only approved accounts and admins use the instance AI key.
   - **`ACCESS_APPROVAL`** (a repo **variable**): `1`. The production deploy passes it with `--var` when it is set; previews leave it off.
   - **`ADMIN_EMAILS`** (a repo **secret**, so the addresses stay out of the public Actions logs): the admins, comma-separated. `ci.mjs secrets-file` uploads it with the other optional secrets.
-  - Every account that existed when migration `0009_access_approval` ran is approved. Admins find the requests under Settings › Access requests, and each request emails them through Resend.
+  - Every account that existed when migration `0009_access_approval` ran is approved. Admins find the requests to use the server's AI under Settings › Access requests, and each request emails them through Resend.
 
 When the Cloudflare and Neon secrets and the variable exist, the next PR push deploys a preview, and the next green CI run on `main` deploys production. Nothing else needs changing.
 
@@ -113,8 +114,8 @@ AI (WP-3.3; see the server README, "AI"):
 | Name | Kind | Preview | Production | Local (`apps/worker/.dev.vars`) |
 |---|---|---|---|---|
 | `AI_GATEWAY_API_KEY` | secret | repo secret | repo secret | a gateway key, or unset |
-| `AI_KEYS_MASTER_KEY` | secret | repo secret, if set | repo secret, if set | `openssl rand -base64 32` (BYOK mode only) |
-| `AI_KEY_MODE` | var | unset (`instance`) | unset (`instance`) | `byok` to try Settings → AI |
+| `AI_KEYS_MASTER_KEY` | secret | repo secret, if set | repo secret, if set | `openssl rand -base64 32` (`byok` and `both` modes) |
+| `AI_KEY_MODE` | var | repo variable, if set (else `instance`) | repo variable, if set (else `instance`) | `byok` or `both` to try Settings → AI |
 
 **Previews sign in through production.** Google allows no wildcard redirect URIs, and the Google client lists only production and localhost. Better Auth's [OAuth proxy plugin](https://www.better-auth.com/docs/plugins/oauth-proxy) handles this:
 

@@ -22,8 +22,9 @@ import { RadioGroup, RadioGroupItem } from "@seply/ui/components/radio-group"
 import { Skeleton } from "@seply/ui/components/skeleton"
 
 import { formatUsd } from "@/create/flow.ts"
+import { NoServerAi } from "@/components/server-ai.tsx"
 import {
-  ApiError,
+  noAiReason,
   type ArticleEstimate,
   type ArticleLength,
 } from "@/lib/api.ts"
@@ -71,7 +72,13 @@ export function WriteArticleDialog({
 type Pricing =
   | { status: "loading" }
   | { status: "ready"; estimate: ArticleEstimate }
-  | { status: "failed"; reason: string; noKey: boolean }
+  | {
+      status: "failed"
+      reason: string
+      noKey: boolean
+      /** No key of my own, and the server's AI isn't on for me. */
+      noServerAi: "needs-key" | "approval" | null
+    }
 
 function ChooseLength({
   conceptTitle,
@@ -93,17 +100,18 @@ function ChooseLength({
       (e) => live && setState({ status: "ready", estimate: e }),
       (err: unknown) => {
         if (!live) return
-        const noKey =
-          err instanceof ApiError &&
-          (err.body.error === "no-key" || err.body.error === "not-configured")
+        const noAi = noAiReason(err)
+        const noKey = noAi === "no-key" || noAi === "not-configured"
         setState({
           status: "failed",
           noKey,
-          reason: noKey
-            ? "There's no AI key to write with yet."
-            : err instanceof Error
-              ? err.message
-              : String(err),
+          noServerAi: noAi === "needs-key" || noAi === "approval" ? noAi : null,
+          reason:
+            noKey || noAi
+              ? "There's no AI key to write with yet."
+              : err instanceof Error
+                ? err.message
+                : String(err),
         })
       }
     )
@@ -174,6 +182,7 @@ function ChooseLength({
         <Alert variant="destructive">
           <AlertDescription>
             {state.reason}{" "}
+            {state.noServerAi && <NoServerAi reason={state.noServerAi} />}
             {state.noKey && (
               <Link href="/settings" className="underline">
                 Add one in Settings

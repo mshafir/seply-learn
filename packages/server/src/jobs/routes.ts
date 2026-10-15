@@ -53,7 +53,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     const a = await access(db, expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
-    await requireApprovalFor(c, "ai")
+    await requireApprovalFor(c)
     try {
       const job = await runner.start(db, {
         expeditionId,
@@ -106,7 +106,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     if (!runner) return noRunner(c)
     const { db, job, res } = await jobFor(c, "useAi")
     if (res) return res
-    await requireApprovalFor(c, "ai")
+    await requireApprovalFor(c)
     try {
       return c.json({ job: await runner.retry(db, job!.id) })
     } catch (err) {
@@ -118,7 +118,7 @@ export function jobRoutes(runner: JobRunner | undefined) {
     if (!runner) return noRunner(c)
     const { db, job, res } = await jobFor(c, "useAi")
     if (res) return res
-    await requireApprovalFor(c, "ai")
+    await requireApprovalFor(c)
     try {
       return c.json({ job: await runner.continue(db, job!.id) })
     } catch (err) {

@@ -1,8 +1,10 @@
 // Settings (spec §3.10). WP-3.3 brings the AI section: in bring-your-own-key
-// mode, a key per provider (shown by its last 4 characters, with Test and
-// Delete), which key builds use, and the model per stage under Advanced; in
-// either mode, the per-ask spending cap. A key goes to the server once, when
-// saved, and never comes back. Theme stays in the account menu. WP-5.4 brings
+// and both modes, a key per provider (shown by its last 4 characters, with
+// Test and Delete), which key builds use, and the model per stage under
+// Advanced; in every mode, the per-ask spending cap. A key goes to the server
+// once, when saved, and never comes back. In both and instance modes, a line
+// says whether this server's AI is on for the account, with "Ask to use this
+// server's AI" when it isn't. Theme stays in the account menu. WP-5.4 brings
 // Connected agents (connected-agents.tsx): MCP OAuth grants and API tokens.
 // Notifications come with their work package.
 import * as React from "react"
@@ -52,6 +54,8 @@ import { toast } from "@seply/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { InfoTip } from "@/components/info-tip.tsx"
+import { RequestServerAi } from "@/components/server-ai.tsx"
+import { useServerAiRequest } from "@/lib/approval.ts"
 import { ConnectedAgentsSection } from "@/screens/connected-agents.tsx"
 import { useUser } from "@/lib/session.ts"
 import {
@@ -331,14 +335,23 @@ function AiSection() {
         <CardDescription>
           {ai.mode === "byok"
             ? "This instance uses your own API keys. They are encrypted on the server. After you save a key, only its last 4 characters are shown."
-            : ai.ready
-              ? `This instance's key pays for AI here (${ai.active!.label}). Viewing and editing never need a key.`
-              : "This instance has no AI key set up yet. Viewing and editing still work."}
+            : ai.mode === "both"
+              ? "Use your own API key, or this server's AI if it's on for your account. Your own key is used first. Keys are encrypted on the server, and only their last 4 characters are shown."
+              : ai.ready
+                ? `This instance's key pays for AI here (${ai.active!.label}). Viewing and editing never need a key.`
+                : "This instance has no AI key set up yet. Viewing and editing still work."}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <FieldGroup>
-          {ai.mode === "byok" && (
+          {(ai.mode === "both" ||
+            (ai.mode === "instance" && ai.serverAi?.configured && !ai.serverAi.enabled)) && (
+            <>
+              <ServerAiLine ai={ai} />
+              <FieldSeparator />
+            </>
+          )}
+          {ai.mode !== "instance" && (
             <>
               {ai.providers.map((p) => (
                 <KeyRow
@@ -379,7 +392,7 @@ function AiSection() {
             </>
           )}
           <AskCap key={ai.settings.askCapUsd} ai={ai} onSaved={setAi} />
-          {ai.mode === "byok" && ai.ready && (
+          {ai.active?.keySource === "reader" && (
             <>
               <FieldSeparator />
               <div>
@@ -404,6 +417,33 @@ function AiSection() {
   )
 }
 
+/**
+ * This server's AI, for my account: on, or off with "Ask to use this
+ * server's AI" (hosted access approval, spec §3.12).
+ */
+function ServerAiLine({ ai }: { ai: AiOverview }) {
+  const request = useServerAiRequest()
+  const server = ai.serverAi
+  if (!server?.configured)
+    return (
+      <FieldDescription data-testid="server-ai">
+        This server has no AI of its own. Add your own key to build Expeditions and ask the AI.
+      </FieldDescription>
+    )
+  if (server.enabled)
+    return (
+      <FieldDescription data-testid="server-ai">
+        This server's AI is on for your account.
+      </FieldDescription>
+    )
+  return (
+    <Field data-testid="server-ai">
+      <FieldDescription>This server's AI isn't on for your account.</FieldDescription>
+      {request && <RequestServerAi access={request} />}
+    </Field>
+  )
+}
+
 /** Admin (hosted access approval, WP-7.3): only admins see it. */
 function AdminSection() {
   const user = useUser()
@@ -416,7 +456,7 @@ function AdminSection() {
           Admin
         </CardTitle>
         <CardDescription>
-          People who signed in and asked to create their own Expeditions.
+          People who asked to use this server's AI.
         </CardDescription>
       </CardHeader>
       <CardContent>

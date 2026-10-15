@@ -75,6 +75,8 @@ Building an Expedition, growing it and writing articles call a language model. `
 
 - **`byok`** (bring your own key): each reader adds their own key under **Settings**, and nobody can build without one. Set `AI_KEYS_MASTER_KEY` to 32 random bytes (`openssl rand -base64 32`). Readers' keys are encrypted under it in the database: **back it up with your database**, because changing or losing it makes every stored key unreadable (readers then add theirs again).
 
+- **`both`**: readers may add their own key, as in `byok`, and your instance key (set as for `instance`) serves everyone without one. A reader's own key is always used first. With access approval on (below), only approved accounts use your key; the rest add their own or use their own agent over MCP. Needs `AI_KEYS_MASTER_KEY` too.
+
 Every AI change is either a first build, a View someone asked for, or a suggestion to accept or dismiss; nothing else writes to an Expedition. Builds show their estimated cost first, and pause at a spending cap.
 
 ## Sign-in
@@ -82,12 +84,12 @@ Every AI change is either a first build, a View someone asked for, or a suggesti
 - **Email + password** is on by default (`AUTH_EMAIL_PASSWORD=1`). Anyone who can reach the instance can create an account until you close sign-up: once your accounts exist, set `AUTH_EMAIL_SIGNUP=0` and `docker compose up -d`. Existing accounts still sign in, and people you invite to an Expedition who already have an account can open it. To add someone later, open sign-up again for a moment (`AUTH_EMAIL_SIGNUP=1`), or connect Google.
 - Email addresses aren't verified, so a pending email invite isn't attached to a new account automatically; the invite link works.
 - **Google** (optional): create an OAuth client in the Google Cloud console (Web application), with the redirect URI `<BETTER_AUTH_URL>/api/auth/callback/google`, and set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. The sign-in screen then offers both. For Google only, also set `AUTH_EMAIL_PASSWORD=0`.
-- **Access approval** is off by default: every account can create Expeditions. To keep sign-up open but approve who creates, set `ACCESS_APPROVAL=1` and `ADMIN_EMAILS` (comma-separated). New accounts then read what is shared with them and can ask for access; admins approve or decline under Settings › Access requests, and get an email for each request when email is set up. Accounts that exist when you upgrade are approved already.
+- **Access approval** is off by default: every account may use the instance AI key. To keep sign-up open but choose who uses your key, set `ACCESS_APPROVAL=1` and `ADMIN_EMAILS` (comma-separated). Every account can still create, edit, share and use MCP; accounts that aren't approved can ask to use the server's AI, and pair well with `AI_KEY_MODE=both` so they can add their own key. Admins approve or decline under Settings › Access requests, and get an email for each request when email is set up. Accounts that exist when you upgrade are approved already.
 - `BETTER_AUTH_SECRET` signs sessions and the MCP server's keys. Keep it stable: changing it signs everyone out and disconnects agents.
 
 ## Email
 
-Seply Learn sends email only for invites (and, with access approval on, for access requests and approvals). Without a mail server, invites are logged (`docker compose logs app`), and the invite link and each person's in-app inbox still work.
+Seply Learn sends email only for invites (and, with access approval on, for requests to use the server's AI and their approvals). Without a mail server, invites are logged (`docker compose logs app`), and the invite link and each person's in-app inbox still work.
 
 - **SMTP:** `SMTP_HOST`, `SMTP_PORT` (587 by default, with STARTTLS when the server offers it; 465 with `SMTP_SECURE=1` for TLS from the start), `SMTP_USER`, `SMTP_PASS`, and `EMAIL_FROM` (required, e.g. `"Seply Learn <learn@example.com>"`).
 - **Resend** instead: `RESEND_API_KEY` (and `EMAIL_FROM`). Resend wins if both are set.

@@ -1,14 +1,20 @@
-// Hosted access approval (spec §2.6, §3.12; WP-7.3). With ACCESS_APPROVAL=1
-// anyone can sign in and read or collaborate on what is shared with them, but
-// only approved accounts create Expeditions (new, import, Fork, MCP
-// `create_expedition`) or start work on the instance AI key (skims, builds,
-// every job, Retry and Continue). Admins (ADMIN_EMAILS) count as approved.
+// Hosted access approval (spec §2.6, §3.12; WP-7.3). Sign-up and creating are
+// open: every signed-in account creates, imports and Forks Expeditions and
+// uses MCP. With ACCESS_APPROVAL=1, approval decides one thing: who may use
+// this server's AI key (the operator's money). Admins (ADMIN_EMAILS) count as
+// approved.
 //
-// `requireApproval` is the one guard every gated route calls, after its own
-// permission check (so an Expedition the caller can't read stays a 404). It
-// throws `ApprovalRequired`; the app answers it as
-// 403 `{ error: "approval_required", code: "approval_required", message }`
-// and the MCP tools as a plain refusal. With the flag off it does nothing.
+// `requireApproval` is the guard every route that starts AI work calls
+// (skims, builds, every job, Retry and Continue, the estimates), after its
+// own permission check (so an Expedition the caller can't read stays a 404).
+// By key mode (ai-config.ts):
+// - instance: an unapproved account is refused with
+//   403 `{ error: "approval_required", code: "approval_required", message }`;
+// - both: an account with a key of its own passes; one without passes only
+//   if approved, else 409 `{ error: "needs-key", code: "needs-key", message }`;
+// - byok: everyone spends their own key, so it does nothing.
+// With the flag off it does nothing. Jobs check again when they resolve
+// their key (ai.ts `resolveAi`, both mode).
 //
 //   POST /access-requests                     { note? } → 201 { request }  (one pending per user)
 //   GET  /admin/access-requests               → { pending, approved }      (admins)
@@ -21,6 +27,7 @@ import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm"
 import { Hono, type Context } from "hono"
 import { z } from "zod"
 import { readAiConfig } from "./ai-config.ts"
+import { listKeys } from "./ai-keys.ts"
 import type { AppEnv } from "./app.ts"
 import type { ServerConfig, ServerEnv } from "./config.ts"
 import type { Db } from "./db.ts"
@@ -29,34 +36,42 @@ import { accessApprovedEmail, accessRequestEmail, type Email } from "./mailer.ts
 const { users, accessRequests } = schema
 
 export const APPROVAL_REQUIRED = "approval_required"
+/** Both mode: no key of their own, and not enabled for this server's AI. */
+export const NEEDS_KEY = "needs-key"
 
-/** What may need approval: creating Expeditions, or AI work on the instance key. */
-export type GatedWork = "create" | "ai"
+export type ApprovalRefusal = typeof APPROVAL_REQUIRED | typeof NEEDS_KEY
 
-const REFUSALS: Record<GatedWork, string> = {
-  create:
-    "Your account is waiting for approval, so you can't create Expeditions yet. You can read anything shared with you, and ask for access from your Library.",
-  ai: "Your account is waiting for approval, so you can't start AI work yet. You can read anything shared with you, and ask for access from your Library.",
+const REFUSALS: Record<ApprovalRefusal, string> = {
+  [APPROVAL_REQUIRED]:
+    "This server's AI is only for accounts an admin has enabled. You can ask to use it in Settings, or use your own agent over MCP.",
+  [NEEDS_KEY]:
+    "Add your own AI key in Settings, or ask to use this server's AI. You can also use your own agent over MCP.",
 }
 
-/** A gated route refused: the account isn't approved (HTTP 403). */
+/**
+ * An AI route refused: the account may not use this server's AI key. HTTP
+ * 403 `approval_required` (instance mode) or 409 `needs-key` (both mode).
+ */
 export class ApprovalRequired extends Error {
-  readonly code = APPROVAL_REQUIRED
-  constructor(readonly work: GatedWork) {
-    super(REFUSALS[work])
+  constructor(readonly code: ApprovalRefusal = APPROVAL_REQUIRED) {
+    super(REFUSALS[code])
+  }
+  get status(): 403 | 409 {
+    return this.code === NEEDS_KEY ? 409 : 403
   }
 }
 
-export const isAdmin = (config: ServerConfig, email: string) =>
+export const isAdmin = (config: Pick<ServerConfig, "access">, email: string) =>
   config.access.admins.includes(email.trim().toLowerCase())
 
 /** A pending access request, as its requester sees it. */
 export type OwnAccessRequest = { id: string; note: string; createdAt: string }
 
-/** The caller's standing, for GET /me (the Library's banner, Settings' admin link). */
+/** The caller's standing, for GET /me (the Library's note, Settings). */
 export type AccessState = {
   /** ACCESS_APPROVAL is on. Off: everyone is approved and nobody is an admin. */
   approvalRequired: boolean
+  /** May use this server's AI key. */
   approved: boolean
   /** May approve requests (only with the flag on). */
   admin: boolean
@@ -115,35 +130,45 @@ export async function accessState(
 }
 
 /**
- * The guard. Throws `ApprovalRequired` when ACCESS_APPROVAL is on and
- * `userId` isn't approved (nor an admin). AI work is gated only on the
- * instance key (`AI_KEY_MODE=instance`): with their own key, readers spend
- * their own money.
+ * May `userId` use this server's AI key? Yes with ACCESS_APPROVAL off;
+ * with it on, only approved accounts and admins.
+ */
+export async function mayUseInstanceKey(
+  db: Db,
+  config: Pick<ServerConfig, "access">,
+  userId: string
+): Promise<boolean> {
+  if (!config.access.approval) return true
+  const u = await userRow(db, userId)
+  return !!u && (!!u.approvedAt || isAdmin(config, u.email))
+}
+
+/**
+ * The guard for AI work. Throws `ApprovalRequired` when `userId` would need
+ * this server's key and may not use it (see the top of this file). With
+ * their own key, readers spend their own money and pass.
  */
 export async function requireApproval(
   db: Db,
   config: ServerConfig,
   userId: string,
-  work: GatedWork,
   env: ServerEnv = {}
 ): Promise<void> {
   if (!config.access.approval) return
-  if (work === "ai" && readAiConfig(env).mode !== "instance") return
-  const u = await userRow(db, userId)
-  if (u && (u.approvedAt || isAdmin(config, u.email))) return
-  throw new ApprovalRequired(work)
+  const { mode } = readAiConfig(env)
+  if (mode === "byok") return
+  if (await mayUseInstanceKey(db, config, userId)) return
+  if (mode === "instance") throw new ApprovalRequired(APPROVAL_REQUIRED)
+  if ((await listKeys(db, userId)).length) return
+  throw new ApprovalRequired(NEEDS_KEY)
 }
 
 /** `requireApproval` for the signed-in caller of a route. */
-export async function requireApprovalFor(
-  c: Context<AppEnv>,
-  work: GatedWork
-): Promise<void> {
+export async function requireApprovalFor(c: Context<AppEnv>): Promise<void> {
   await requireApproval(
     await c.var.db(),
     c.var.config(),
     c.var.user.id,
-    work,
     c.env ?? {}
   )
 }

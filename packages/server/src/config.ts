@@ -40,18 +40,25 @@ export type ServerEnv = {
   // --- Hosted access approval (spec §2.6; approval.ts) ---
   /**
    * "1" turns access approval on (the hosted deploy only): only approved
-   * accounts create Expeditions or start work on the instance AI key. Off
-   * (anything else, the default), every account can, as on self-host.
+   * accounts and admins may use the instance AI key. Everyone can still sign
+   * up and create. Off (anything else, the default), every account may use
+   * it, as on self-host.
    */
   ACCESS_APPROVAL?: string
   /**
-   * The admins, by email, comma-separated: they approve or decline access
-   * requests, get an email for each, and count as approved themselves.
+   * The admins, by email, comma-separated: they approve or decline requests
+   * to use the instance AI key, get an email for each, and count as approved
+   * themselves.
    */
   ADMIN_EMAILS?: string
 
   // --- AI (spec §5.6; see ai-config.ts) ---
-  /** "instance" (default): the operator's key serves everyone. "byok": each reader adds their own. */
+  /**
+   * "instance" (default): the operator's key serves everyone. "byok": each
+   * reader adds their own. "both": readers may add their own, and the
+   * operator's key serves the rest (only approved accounts, with
+   * ACCESS_APPROVAL=1).
+   */
   AI_KEY_MODE?: string
   /** Instance key: a Vercel AI Gateway key (the hosted instance). */
   AI_GATEWAY_API_KEY?: string
@@ -187,6 +194,17 @@ function origin(url: string, name: string): string {
   }
 }
 
+/** Hosted access approval alone, for code that has only the env (AI jobs). */
+export function readAccess(env: ServerEnv): ServerConfig["access"] {
+  return {
+    approval: env.ACCESS_APPROVAL?.trim() === "1",
+    admins: (env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  }
+}
+
 export function readConfig(env: ServerEnv): ServerConfig {
   if (!env.BETTER_AUTH_URL) throw new ConfigError("BETTER_AUTH_URL is not set")
   if (!env.BETTER_AUTH_SECRET)
@@ -240,13 +258,7 @@ export function readConfig(env: ServerEnv): ServerConfig {
     emailPassword,
     emailSignUp,
     dbBranch: env.DB_BRANCH,
-    access: {
-      approval: env.ACCESS_APPROVAL?.trim() === "1",
-      admins: (env.ADMIN_EMAILS ?? "")
-        .split(",")
-        .map((s) => s.trim().toLowerCase())
-        .filter(Boolean),
-    },
+    access: readAccess(env),
     mail,
     map: {
       tiles: env.MAP_TILES_URL?.trim() || undefined,

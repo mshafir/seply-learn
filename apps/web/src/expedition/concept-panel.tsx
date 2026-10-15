@@ -40,9 +40,10 @@ import {
   WriteArticleDialog,
   type ArticleRequest,
 } from "@/expedition/write-article-dialog.tsx"
-import type { ArticleEstimate, GrowAction } from "@/lib/api.ts"
+import type { ArticleEstimate, GrowAction, NoAiReason } from "@/lib/api.ts"
 import { GROW_ACTIONS, type SessionAsk } from "@/expedition/asks.ts"
 import { InfoTip } from "@/components/info-tip.tsx"
+import { NoServerAi } from "@/components/server-ai.tsx"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
 
 /**
@@ -69,8 +70,11 @@ export type GrowActions = {
   cost: string | null
   /** Loads the estimate behind `cost`. */
   loadEstimate: () => void
-  /** No AI to ask with: no key of the reader's, or none on this server. */
-  noKey?: "no-key" | "not-configured"
+  /**
+   * No AI to ask with: no key of the reader's, none on this server, or the
+   * server's isn't on for them.
+   */
+  noKey?: NoAiReason
 }
 
 /** What the Concept panel reads from, and how it moves. */
@@ -473,7 +477,14 @@ function ConceptActions({
       {examples}
       {article}
       {related}
-      {noKey && (
+      {(noKey === "needs-key" || noKey === "approval") && (
+        <NoServerAi
+          reason={noKey}
+          data-testid="grow-no-ai"
+          className="text-xs text-muted-foreground"
+        />
+      )}
+      {(noKey === "no-key" || noKey === "not-configured") && (
         <p data-testid="grow-no-ai" className="text-xs text-muted-foreground">
           {noKey === "no-key" ? (
             <>

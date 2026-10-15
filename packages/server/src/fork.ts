@@ -29,7 +29,6 @@ import { Hono } from "hono"
 import { z } from "zod"
 import { authorize, AccessDenied } from "./access.ts"
 import type { AppEnv } from "./app.ts"
-import { requireApprovalFor } from "./approval.ts"
 import { sourceBlobKeys, type BlobStore, type StoredBlob } from "./blobs.ts"
 import type { Db } from "./db.ts"
 import { createExpedition, type ExpeditionSummary } from "./expeditions.ts"
@@ -91,15 +90,12 @@ export async function forkExpedition(
     userId: string
     asOf?: string
     now?: () => number
-    /** Runs once the caller may fork, before anything is written (access approval). */
-    guard?: () => Promise<void>
   }
 ): Promise<ForkResult & { logged: LoggedOp[] }> {
   const now = args.now ?? Date.now
   const a = await authorize(db, args.expeditionId, args.userId, "fork", {
     refusal: "sign in to fork",
   })
-  await args.guard?.()
   let seq = a.headSeq
   if (args.asOf) {
     if (!a.may("viewHistory"))
@@ -231,7 +227,6 @@ export function forkRoutes(relay: Relay) {
         expeditionId: c.req.param("id"),
         userId: c.var.user.id,
         asOf: body.data.asOf,
-        guard: () => requireApprovalFor(c, "create"),
       })
       await publishCommitted(relay, out.expedition.id, logged)
       return c.json(out satisfies ForkResult, 201)
