@@ -1,6 +1,8 @@
 // The Expedition screen's header (spec §3.6): the way back to the Library,
 // the title (editors rename it in place, through the sync client), sync
-// status, search inside the Expedition and the account menu. The Views bar
+// status, search inside the Expedition and the account menu. Next to the
+// title, editors get a pencil that opens the Expedition's details (title,
+// summary and Tags; details-dialog.tsx). The Views bar
 // (views-bar.tsx) sits under it.
 // While a build runs, the activity indicator sits before the search. The
 // presence avatars (presence-avatars.tsx) come next, then the Suggestions
@@ -17,6 +19,7 @@ import {
   HistoryIcon,
   LoaderCircleIcon,
   MessageCircleQuestionIcon,
+  PencilIcon,
   SparklesIcon,
   UsersIcon,
 } from "lucide-react"
@@ -45,6 +48,7 @@ export function ExpeditionHeader({
   ask,
   menu,
   share,
+  details,
 }: {
   title: string
   canEdit: boolean
@@ -68,6 +72,8 @@ export function ExpeditionHeader({
   menu?: React.ReactNode
   /** Share, the share dialog (anyone signed in and online); absent otherwise. */
   share?: { onOpen: () => void }
+  /** The Expedition's details: title, summary and Tags (owners and editors). */
+  details?: { onOpen: () => void }
 }) {
   const [editing, setEditing] = React.useState(false)
   const shown = title || "Untitled Expedition"
@@ -113,6 +119,18 @@ export function ExpeditionHeader({
         </Button>
       ) : (
         <h1 className="truncate px-2 text-base font-semibold">{shown}</h1>
+      )}
+      {details && !editing && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Edit the title, summary and Tags"
+          title="Edit the title, summary and Tags"
+          data-testid="details-open"
+          onClick={details.onOpen}
+        >
+          <PencilIcon />
+        </Button>
       )}
       <div className="flex-1" />
       {activity}

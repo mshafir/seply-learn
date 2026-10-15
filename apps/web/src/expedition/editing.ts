@@ -39,6 +39,29 @@ export function parseList(text: string): string[] {
 export const parseTags = (text: string) =>
   parseList(text.replace(/(^|,)\s*#/g, "$1"))
 
+// ─── The Expedition's details (details-dialog.tsx) ─────────────────────────
+
+export type ExpeditionDetails = {
+  title: string
+  summary: string
+  tags: string[]
+}
+
+/** What changed between two versions of the details; null fields didn't. */
+export function detailsChanges(
+  before: ExpeditionDetails,
+  after: ExpeditionDetails
+): Partial<ExpeditionDetails> {
+  const out: Partial<ExpeditionDetails> = {}
+  const title = after.title.trim()
+  if (title && title !== before.title) out.title = title
+  const summary = after.summary.trim()
+  if (summary !== (before.summary ?? "").trim()) out.summary = summary
+  const tags = [...new Set(after.tags)].sort()
+  if (tags.join("\n") !== [...before.tags].sort().join("\n")) out.tags = tags
+  return out
+}
+
 // ─── Vocabulary ────────────────────────────────────────────────────────────
 
 /** A Kind, Relationship Type or Attribute, as the vocabulary dialog lists it. */

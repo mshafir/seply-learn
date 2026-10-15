@@ -40,7 +40,11 @@ So every call must be worth accepting on its own, and right the first time. Ther
 
 ## Changes to existing Concepts
 
-Rare. Use `concept_update` only when the ask needs it: an alias the reader searched for, a missing Tag, a summary that is wrong. Never rewrite an overview a person wrote, and never pin Weight.
+Rare. Use `concept_update` only when the ask needs it: an alias the reader searched for, a missing Tag, a summary that is wrong, or an article the reader asked for. Never rewrite an overview or article a person wrote unless asked to, and never pin Weight.
+
+## Changes to the Expedition and its Attributes
+
+Only when the ask is about them: `expedition_update` for the Expedition's title, summary or Tags (a summary that no longer covers what's here, a Tag that is wrong), `attribute_create` for an Attribute the suggested Concepts need (create it before the Concepts that fill it in), `attribute_update` to relabel one or add an enum value.
 
 ## Provenance
 

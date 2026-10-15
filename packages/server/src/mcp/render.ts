@@ -188,7 +188,8 @@ export function renderConcept(
       .sort((a, b) => a.orderKey.localeCompare(b.orderKey))
     out.push("", "## Article", "")
     if (!sections.length) out.push("_No article yet._")
-    for (const x of sections) out.push(`### ${x.heading}`, "", x.md, "")
+    for (const x of sections)
+      out.push(...(x.heading ? [`### ${x.heading}`, ""] : []), x.md, "")
   }
   if (hops > 0) out.push("", ...renderNeighbours(s, id, hops))
   return out.join("\n").trim()

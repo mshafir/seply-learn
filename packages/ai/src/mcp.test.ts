@@ -76,7 +76,7 @@ describe("the MCP tool catalog", () => {
     }
     const variants =
       schema.properties.items.items.oneOf ?? schema.properties.items.items.anyOf
-    expect(variants).toHaveLength(5)
+    expect(variants).toHaveLength(8)
     // A positions field is refused, as by the curator's view_build.
     expect(
       ProposeChangesInput.safeParse({

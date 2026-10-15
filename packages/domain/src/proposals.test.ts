@@ -443,3 +443,44 @@ describe("Concept packages", () => {
     expect(withDependents(h.state, items, ["c-tie"])).toEqual(["c-tie"])
   })
 })
+
+describe("Attributes suggested with what needs them (issue #139)", () => {
+  const define: OpBody = {
+    kind: "attribute.define",
+    target: "priority",
+    value: { label: "Priority", type: "enum", enumValues: ["hard", "nice"] },
+  }
+  const table: OpBody = {
+    kind: "view.create",
+    target: "v-table",
+    value: {
+      viewType: "comparison-table",
+      label: "Teas",
+      orderKey: "z",
+      settings: {
+        rows: {},
+        columns: [{ criteria: "auto" }],
+        priority: "priority",
+      },
+    },
+  }
+
+  it("orders, waits for and cascades through a suggested Attribute", () => {
+    const h = seeded()
+    const pool = [
+      item(h, "v", [table]),
+      item(h, "e", [set("green", "attributes.priority", "hard")]),
+      item(h, "a", [define]),
+    ]
+    expect(itemRefs(pool[2]!).definesAttributes).toEqual(new Set(["priority"]))
+    expect(orderItems(h.state, pool).map((i) => i.id)).toEqual(["a", "v", "e"])
+    expect(withDependencies(h.state, pool, ["e"]).ids).toEqual(["a", "e"])
+    expect(waiting(h.state, pool, ["v"]).get("v")).toEqual(["priority"])
+    expect(acceptable(h.state, pool, ["v", "e"]).left).toEqual(["v", "e"])
+    expect(withDependents(h.state, pool, ["a"])).toEqual(["v", "e", "a"])
+    const entries = proposalEntries(h.state, pool)
+    expect(entries.find((e) => e.id === "e")!.waitsFor).toEqual(["priority"])
+    // Strings in settings that aren't suggested Attributes never count.
+    expect(waiting(h.state, [pool[0]!], ["v"]).size).toBe(0)
+  })
+})

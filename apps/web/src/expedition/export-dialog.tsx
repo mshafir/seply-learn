@@ -1,10 +1,12 @@
 // The Expedition menu (the header's "…") and its Export dialog (spec §1.9,
 // §3.9): anyone who can view can export. Two formats: our JSON, with the
 // Sources' files if the box is ticked (default on for owners and editors; a
-// zip then), or a Markdown folder (a zip) that opens in Obsidian. Fork and
-// Share join this menu with their work packages.
+// zip then), or a Markdown folder (a zip) that opens in Obsidian. Owners and
+// editors also find the Expedition's title, summary and Tags here
+// (details-dialog.tsx). Fork and Share join this menu with their work
+// packages.
 import * as React from "react"
-import { DownloadIcon, EllipsisIcon } from "lucide-react"
+import { DownloadIcon, EllipsisIcon, PencilIcon } from "lucide-react"
 
 import { Alert, AlertDescription } from "@seply/ui/components/alert"
 import { Button } from "@seply/ui/components/button"
@@ -49,11 +51,14 @@ export function ExpeditionMenu({
   expeditionId,
   title,
   canEdit,
+  onEditDetails,
 }: {
   expeditionId: string
   title: string
   /** Owners and editors: Source files are included by default. */
   canEdit: boolean
+  /** Owners and editors: opens the title, summary and Tags. */
+  onEditDetails?: () => void
 }) {
   const [exporting, setExporting] = React.useState(false)
   return (
@@ -71,7 +76,16 @@ export function ExpeditionMenu({
         >
           <EllipsisIcon />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-56">
+          {onEditDetails && (
+            <DropdownMenuItem
+              data-testid="details-item"
+              onClick={onEditDetails}
+            >
+              <PencilIcon />
+              Title, summary and Tags…
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             data-testid="export-item"
             onClick={() => setExporting(true)}

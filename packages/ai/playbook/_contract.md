@@ -53,6 +53,16 @@ Every Concept and Relationship from a Source carries `prov`: a list of `{ "sourc
 
 `attribute_define` takes `id`, `label`, `type` (`text`, `number`, `money`, `bool`, `enum`), and optionally `unit` and `enumValues` (listed low → high). Types are fixed once created. A range ("$60–80") is stored as the text "60–80". An unknown value is left out, never guessed; the View shows "?".
 
+On an existing Expedition (Grow, `propose_changes`), `attribute_create` takes the same fields and is refused if the id exists; `attribute_update` takes `id` and any of `label`, `unit` (null removes it) and `enumValues`, never `type`, and refuses to drop an enum value a Concept still has. Later items can use an Attribute an earlier one created: a criterion's `priority` value, a View's `priority` setting.
+
+## Expedition
+
+`expedition_update` takes any of `title`, `summary` (null clears it) and `addTags` / `removeTags` (Tags without the `#`). Removing a Tag the Expedition doesn't have is refused.
+
+## Article
+
+`concept_update` with `article` replaces a Concept's whole article with markdown: `## ` headings start its sections, the text before the first is the introduction, and `[title](#c/<id>)` links other Concepts. At most 50,000 characters and 40 sections; `null` removes the article. Its sections are background knowledge (`prov: []`).
+
 ## View
 
 `view_build` takes the View's `viewType`, `label`, `question`, and its `settings` in the View Type's shape (the View Type's definition says what it draws on). Layouts are always computed: you shape a View through its settings and the structure (targets, `placement`, `order`, `hide`, `fold`, real Relationships), **never positions**.
