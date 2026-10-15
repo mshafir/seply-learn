@@ -33,7 +33,7 @@ mise exec -- pnpm --filter desktop test:e2e   # the built app, headless, against
 
 - **Electron's binary** is fetched the first time one of these needs it (`scripts/ensure-electron.mjs`), not by `pnpm install`.
 - **Another server:** `SEPLY_DESKTOP_SERVER=http://localhost:3000 pnpm --filter desktop dev` opens it without saving it. `SEPLY_DESKTOP_USER_DATA=<dir>` moves the user-data folder.
-- **On Linux,** an unpackaged Electron may refuse to start until its sandbox helper is set up. For development, add `--no-sandbox`: `pnpm --filter desktop start -- --no-sandbox`.
+- **On Linux,** an unpackaged Electron may refuse to start until its sandbox helper is set up. For development, build once and start Electron with `--no-sandbox` from `apps/desktop`: `pnpm build && pnpm exec electron . --no-sandbox`. (Through `pnpm start -- --no-sandbox` the flag arrives after a `--` and Electron ignores it.)
 - **Layout:** `src/main.ts` (windows, menu, IPC) is bundled with the two preloads to `dist/*.cjs` by esbuild; a sandboxed preload can't be an ES module. Vite builds `renderer/` to `dist/renderer/`.
 
 Packaging and releases come with WP-8.5.
