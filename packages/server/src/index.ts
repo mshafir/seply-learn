@@ -145,7 +145,17 @@ export {
   type CardCollaborator,
   type LibraryCard,
   libraryCards,
+  cardDetails,
+  type CardDetails,
 } from "./expeditions.ts"
+export {
+  explore,
+  ExploreQuery,
+  EXPLORE_PAGE_SIZE,
+  type ExploreCard,
+  type ExplorePage,
+  type ExploreParams,
+} from "./explore.ts"
 export {
   importExpedition,
   IMPORT_MAX_BYTES,

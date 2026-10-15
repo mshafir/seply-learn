@@ -108,6 +108,16 @@ export function searchableExpeditions(
 
 const tsquery = (text: string) => sql`websearch_to_tsquery('english', ${text})`
 
+/**
+ * An Expedition `e` (with `title` and `search`) matches free text: the
+ * full-text vector, or its title fuzzily. `true` without text.
+ */
+export function expeditionMatch(text: string): SQL {
+  return text
+    ? sql`(e.search @@ ${tsquery(text)} OR ${text} % e.title OR ${text} <% e.title)`
+    : sql`true`
+}
+
 /** The row must carry every tag (`exists` tests one). */
 function tagFilter(tags: string[], exists: (tag: string) => SQL): SQL {
   if (!tags.length) return sql`true`
@@ -136,9 +146,7 @@ export function buildSearchQueries(
   // Concept's aliases): pg_trgm's similarity (`%`, a typo in a short title)
   // or word similarity (`<%`, a word within a long one), both GIN-indexed.
   // Rank: full-text rank plus title similarity.
-  const expMatch = text
-    ? sql`(e.search @@ ${tsquery(text)} OR ${text} % e.title OR ${text} <% e.title)`
-    : sql`true`
+  const expMatch = expeditionMatch(text)
   const expRank = text
     ? sql`ts_rank_cd(e.search, ${tsquery(text)}) + word_similarity(${text}, e.title) DESC,`
     : sql``

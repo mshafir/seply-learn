@@ -64,6 +64,16 @@ describe("production build", () => {
     expect(GALLERY).toHaveLength(5)
   })
 
+  it("links Explore from the header and the Examples", () => {
+    const html = prod("index.html")
+    const explore = 'href="https://learn.seply.app/explore"'
+    // The header nav, its mobile menu, and under the Examples.
+    expect(html.split(explore)).toHaveLength(4)
+    expect(html).toMatch(
+      /href="https:\/\/learn\.seply\.app\/explore"[^>]*>See all public Expeditions<\/a>/
+    )
+  })
+
   it("renders the gallery as an accessible tablist with the first panel showing", () => {
     const html = prod("index.html")
     expect(html).toContain('role="tablist" aria-label="View Types"')
@@ -245,7 +255,9 @@ describe("media manifest", () => {
     expect(html()).toMatch(
       /<img src="\/media\/video\/hero-loop-poster\.webp" alt="" aria-hidden="true"/
     )
-    expect(html()).toContain('<source src="/media/video/hero-loop.webm" type="video/webm"')
+    expect(html()).toContain(
+      '<source src="/media/video/hero-loop.webm" type="video/webm"'
+    )
     expect(html()).not.toContain("HERO LOOP · 12 S · CUT FROM THE EXPLAINER")
   })
 

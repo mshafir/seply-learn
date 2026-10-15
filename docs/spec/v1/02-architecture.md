@@ -123,6 +123,12 @@ Relay {
   - Default scope: Expeditions you own or collaborate on, with an "Include public Expeditions" toggle.
   - Results are grouped by Expedition, Concept and Tag, and `#tag` filters by Tag.
   - Access is enforced in the query.
+- **Explore** ([3.13](03-screens-and-flows.md#313-explore)): `GET /api/explore?q=&tag=&cursor=`, no sign-in.
+  - Public Expeditions only. Never unlisted, private, Trash or drafts.
+  - Newest Change first, 24 per page. `nextCursor` fetches the next page.
+  - `q` matches Expeditions as global search does, and `#tag` works in it. `tag` filters by an Expedition Tag.
+  - Each card has the id, title, summary, Tags, Concept and View counts, best View Type and `updatedAt`. It has no people.
+  - The first page also lists the most used Expedition Tags, for the filter.
 - **Inside an Expedition:** client-side over the loaded data, which also works offline.
 - Semantic search is phase 2.
 

@@ -182,30 +182,36 @@ export function expeditionRoutes(relay: Relay) {
 
 const ROLE_ORDER: Record<Role, number> = { owner: 0, editor: 1, viewer: 2 }
 
-/** Adds what a Library card shows to each summary (five queries in all). */
-export async function libraryCards(
+/** What every Expedition card shows, whoever reads it (no people). */
+export type CardDetails = {
+  tags: string[]
+  counts: { concepts: number; views: number }
+  bestViewType: ViewTypeId | null
+  updatedAt: string
+}
+
+const group = <T, K>(list: T[], keyOf: (t: T) => K) => {
+  const m = new Map<K, T[]>()
+  for (const t of list) m.set(keyOf(t), [...(m.get(keyOf(t)) ?? []), t])
+  return m
+}
+
+/**
+ * The parts of a card that say nothing about people, for each id (five
+ * queries): Expedition Tags, live Concept and View counts, the best View's
+ * View Type and when it last changed. The Library and Explore share them.
+ */
+export async function cardDetails(
   db: Db,
-  rows: (ExpeditionSummary & { seenAt?: string | null })[]
-): Promise<LibraryCard[]> {
-  if (!rows.length) return []
-  const ids = rows.map((r) => r.id)
-  const [tagRows, people, conceptCounts, viewRows, lastChanges, best] =
+  ids: string[]
+): Promise<Map<string, CardDetails>> {
+  if (!ids.length) return new Map()
+  const [tagRows, conceptCounts, viewRows, lastChanges, best] =
     await Promise.all([
       db
         .select({ id: expeditionTags.expeditionId, tag: expeditionTags.tag })
         .from(expeditionTags)
         .where(inArray(expeditionTags.expeditionId, ids)),
-      db
-        .select({
-          expeditionId: collaborators.expeditionId,
-          id: users.id,
-          name: users.name,
-          image: users.image,
-          role: collaborators.role,
-        })
-        .from(collaborators)
-        .innerJoin(users, eq(users.id, collaborators.userId))
-        .where(inArray(collaborators.expeditionId, ids)),
       db
         .select({ id: concepts.expeditionId, n: count() })
         .from(concepts)
@@ -236,39 +242,63 @@ export async function libraryCards(
         .where(inArray(expeditions.id, ids)),
     ])
 
-  const group = <T, K>(list: T[], keyOf: (t: T) => K) => {
-    const m = new Map<K, T[]>()
-    for (const t of list) m.set(keyOf(t), [...(m.get(keyOf(t)) ?? []), t])
-    return m
-  }
   const tagsOf = group(tagRows, (r) => r.id)
-  const peopleOf = group(people, (r) => r.expeditionId)
   const viewsOf = group(viewRows, (r) => r.expeditionId)
   const conceptsOf = new Map(conceptCounts.map((r) => [r.id, Number(r.n)]))
   const changedAt = new Map(lastChanges.map((r) => [r.id, Number(r.ms)]))
   const bestOf = new Map(best.map((r) => [r.id, r.bestViewId]))
 
-  return rows.map(({ seenAt, ...row }) => {
-    const vs = (viewsOf.get(row.id) ?? []).sort((a, b) =>
-      a.orderKey < b.orderKey ? -1 : a.orderKey > b.orderKey ? 1 : 0
-    )
-    const bestView =
-      vs.find((v) => v.id === bestOf.get(row.id)) ?? vs[0] ?? null
-    const at = changedAt.get(row.id)
-    return {
-      ...row,
-      isNew: row.role !== "owner" && seenAt === null,
-      tags: (tagsOf.get(row.id) ?? []).map((t) => t.tag).sort(),
-      collaborators: (peopleOf.get(row.id) ?? [])
-        .map(({ id, name, image, role }) => ({ id, name, image, role }))
-        .sort(
-          (a, b) =>
-            ROLE_ORDER[a.role] - ROLE_ORDER[b.role] ||
-            a.name.localeCompare(b.name)
-        ),
-      counts: { concepts: conceptsOf.get(row.id) ?? 0, views: vs.length },
-      bestViewType: bestView?.viewType ?? null,
-      updatedAt: new Date(at ?? ulidTime(row.id)).toISOString(),
-    }
-  })
+  return new Map(
+    ids.map((id) => {
+      const vs = (viewsOf.get(id) ?? []).sort((a, b) =>
+        a.orderKey < b.orderKey ? -1 : a.orderKey > b.orderKey ? 1 : 0
+      )
+      const bestView = vs.find((v) => v.id === bestOf.get(id)) ?? vs[0] ?? null
+      const at = changedAt.get(id)
+      const details: CardDetails = {
+        tags: (tagsOf.get(id) ?? []).map((t) => t.tag).sort(),
+        counts: { concepts: conceptsOf.get(id) ?? 0, views: vs.length },
+        bestViewType: bestView?.viewType ?? null,
+        updatedAt: new Date(at ?? ulidTime(id)).toISOString(),
+      }
+      return [id, details]
+    })
+  )
+}
+
+/** Adds what a Library card shows to each summary (six queries in all). */
+export async function libraryCards(
+  db: Db,
+  rows: (ExpeditionSummary & { seenAt?: string | null })[]
+): Promise<LibraryCard[]> {
+  if (!rows.length) return []
+  const ids = rows.map((r) => r.id)
+  const [details, people] = await Promise.all([
+    cardDetails(db, ids),
+    db
+      .select({
+        expeditionId: collaborators.expeditionId,
+        id: users.id,
+        name: users.name,
+        image: users.image,
+        role: collaborators.role,
+      })
+      .from(collaborators)
+      .innerJoin(users, eq(users.id, collaborators.userId))
+      .where(inArray(collaborators.expeditionId, ids)),
+  ])
+  const peopleOf = group(people, (r) => r.expeditionId)
+
+  return rows.map(({ seenAt, ...row }) => ({
+    ...row,
+    isNew: row.role !== "owner" && seenAt === null,
+    ...details.get(row.id)!,
+    collaborators: (peopleOf.get(row.id) ?? [])
+      .map(({ id, name, image, role }) => ({ id, name, image, role }))
+      .sort(
+        (a, b) =>
+          ROLE_ORDER[a.role] - ROLE_ORDER[b.role] ||
+          a.name.localeCompare(b.name)
+      ),
+  }))
 }

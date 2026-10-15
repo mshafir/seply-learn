@@ -1,7 +1,7 @@
 ---
 import MediaImage from "../../components/MediaImage.astro"
-import { container, eyebrow, h2, monoLabel } from "../../lib/styles"
-import { EXAMPLES } from "../content"
+import { container, eyebrow, h2, monoLabel, textLink } from "../../lib/styles"
+import { EXAMPLES, EXPLORE_URL } from "../content"
 ---
 
 <section id="examples" class="scroll-mt-20 border-t border-border">
@@ -28,5 +28,6 @@ import { EXAMPLES } from "../content"
         ))
       }
     </div>
+    <a href={EXPLORE_URL} class={textLink}>See all public Expeditions</a>
   </div>
 </section>

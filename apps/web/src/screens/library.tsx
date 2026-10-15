@@ -32,11 +32,9 @@ import {
 } from "@seply/ui/components/avatar"
 import { Badge } from "@seply/ui/components/badge"
 import { Wordmark } from "@seply/ui/components/brand"
-import { Button } from "@seply/ui/components/button"
+import { Button, buttonVariants } from "@seply/ui/components/button"
 import {
   Card,
-  CardAction,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -65,6 +63,7 @@ import type { OfflineEntry } from "@seply/sync"
 
 import { ConnectLink } from "@/connect/connect-link.tsx"
 import { AccountMenu } from "@/components/account-menu.tsx"
+import { ExpeditionCard as CardShell } from "@/components/expedition-card.tsx"
 import { GlobalSearch } from "@/components/global-search.tsx"
 import {
   WaitingListBanner,
@@ -83,6 +82,7 @@ import {
   type LibraryCard,
   type TrashedCard,
 } from "@/lib/api.ts"
+import { cardLink, when } from "@/lib/cards.ts"
 import { importedLabel } from "@/lib/export.ts"
 import { formatAsOf, setKeptOffline, useOfflineEntries } from "@/lib/offline.ts"
 import { useUser } from "@/lib/session.ts"
@@ -107,24 +107,12 @@ const STATUS_LABEL: Record<LibraryCard["status"], string> = {
 }
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" })
-const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: "short" })
-
-/** "Today, 9:14 PM" or "Sep 23, 2026". */
-function when(iso: string): string {
-  const d = new Date(iso)
-  return d.toDateString() === new Date().toDateString()
-    ? `Today, ${timeFormat.format(d)}`
-    : dateFormat.format(d)
-}
 
 /** A draft I can edit opens in the create flow; anything else opens to read. */
 const cardHref = (card: LibraryCard) =>
   card.status === "draft" && card.role !== "viewer"
     ? `/new/${card.id}`
     : `/e/${card.id}`
-
-const cardLink =
-  "outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-3 focus-visible:after:ring-ring/50"
 
 /**
  * Continue reading (spec §3.2): the three Expeditions I read most recently,
@@ -262,55 +250,35 @@ function ExpeditionCard({
   onKeep: (keep: boolean) => void
 }) {
   return (
-    <Card
-      data-testid="expedition-card"
-      className="relative h-full pt-0 transition-colors hover:bg-accent/60"
-    >
-      <div className="flex h-32 items-center justify-center border-b bg-sidebar px-6 py-3">
-        <ViewTypeThumbnail
-          viewType={card.bestViewType}
-          className="max-h-full w-auto"
-        />
-      </div>
-      <CardHeader>
-        <CardTitle className="font-reading text-xl font-medium">
-          <Link href={cardHref(card)} className={cardLink}>
-            {card.title || "Untitled Expedition"}
-          </Link>
-        </CardTitle>
-        <CardAction>
-          <PinToggle card={card} kept={kept} onChange={onKeep} />
-        </CardAction>
-        {card.summary && (
-          <CardDescription className="line-clamp-2">
-            {card.summary}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="mt-auto">
-        <Collaborators card={card} meId={meId} />
-      </CardContent>
-      <CardFooter className="flex-wrap gap-x-3 gap-y-1 text-muted-foreground">
-        {card.isNew && (
+    <CardShell
+      card={card}
+      href={cardHref(card)}
+      action={<PinToggle card={card} kept={kept} onChange={onKeep} />}
+      badges={{
+        before: card.isNew && (
           <Badge data-testid="card-new" aria-label="New: shared with you">
             New
           </Badge>
-        )}
-        <span data-testid="card-counts">{countsLabel(card.counts)}</span>
-        {card.status !== "ready" && (
-          <Badge variant="secondary">
-            {card.status === "building" && <Spinner />}
-            {STATUS_LABEL[card.status]}
-          </Badge>
-        )}
-        {card.role !== "owner" && (
-          <Badge variant="outline">
-            {card.role === "editor" ? "Editor" : "Viewer"}
-          </Badge>
-        )}
-        <span className="ml-auto">{when(card.updatedAt)}</span>
-      </CardFooter>
-    </Card>
+        ),
+        after: (
+          <>
+            {card.status !== "ready" && (
+              <Badge variant="secondary">
+                {card.status === "building" && <Spinner />}
+                {STATUS_LABEL[card.status]}
+              </Badge>
+            )}
+            {card.role !== "owner" && (
+              <Badge variant="outline">
+                {card.role === "editor" ? "Editor" : "Viewer"}
+              </Badge>
+            )}
+          </>
+        ),
+      }}
+    >
+      <Collaborators card={card} meId={meId} />
+    </CardShell>
   )
 }
 
@@ -643,6 +611,14 @@ export function LibraryScreen() {
         <div className="flex flex-1 justify-center">
           <GlobalSearch />
         </div>
+        <Link
+          href="/explore"
+          className={buttonVariants({ variant: "ghost" })}
+          data-testid="explore-link"
+        >
+          <CompassIcon />
+          <span className="max-sm:sr-only">Explore</span>
+        </Link>
         {actions}
         <AccountMenu />
         <input

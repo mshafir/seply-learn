@@ -5,6 +5,7 @@ Designed on the Claude Design canvas ([App layout and page flow](../../wayfinder
 ## 3.1 Page flow
 
 ```
+Explore ─── public Expedition (no sign-in) · Fork ──▶ Sign in ──▶ Fork offered
 Sign in ─┐                         ┌─ Shared/public link ──┐
          ▼                         ▼                       │
       Library ──New──▶ Sources ──▶ Choose Views ──▶ Expedition (building → ready)
@@ -151,7 +152,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 ## 3.11 Anonymous and viewer experience
 
-- Viewing public or unlisted Expeditions needs no login, and live updates still arrive.
+- Viewing public or unlisted Expeditions needs no login, and live updates still arrive. Public ones are listed in Explore ([3.13](#313-explore)).
 - Reading status and position stay in the browser until sign-in, then merge into the account.
 - Viewers get no AI, no Suggestions tab and no History. They can Fork and Export.
 
@@ -160,4 +161,21 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), an unapproved account sees the Library as usual, with Expeditions shared with it, and a calm banner: "Your account is on the waiting list. You can read anything shared with you now, and you can create your own Expeditions once you're approved." with **Request access** (an optional note, then "Request sent" with the date).
 - Create, Import and Fork stay visible but open a small dialog with the same explanation and button, instead of failing.
 - **Admin › Access requests** (admins only, from Settings): pending requests first, with name, email, note and date, and **Approve** / **Decline**; a second tab lists approved accounts.
+
+## 3.13 Explore
+
+- **Route:** `/explore`. It needs no sign-in, and neither does opening an Expedition from it.
+- **Lists** every public Expedition, newest Change first. Unlisted, private, Trash and drafts are never listed.
+- **Cards** look like the Library's:
+  - the thumbnail of the best View's View Type
+  - the title and summary
+  - the Expedition Tags
+  - Concept and View counts, and the date
+  - no people: no owner, collaborators, names or avatars.
+- **Search** matches titles and summaries, as global search does. A **Tag filter** lists the most used Expedition Tags.
+- **Paging:** 24 cards at a time, then **Load more**.
+- **Header:** the wordmark, then **Sign in** when signed out, or **Library** and the account menu when signed in. The Library header links to Explore. The sign-in screen offers "Explore public Expeditions".
+- **Opening a card** opens the Expedition read-only at `/e/:id`. Signed out, the Expedition's way back goes to Explore.
+- **Fork when signed out:** a public or unlisted Expedition's header shows **Fork** next to **Sign in**. It goes to sign-in with `next=/e/<id>?fork=1`. Back on the Expedition, signed in, the share dialog opens with Fork one click away, and `fork=1` is removed from the address. Access approval still applies ([3.12](#312-waiting-for-approval-hosted)).
+- **Endpoint:** see [2.8](02-architecture.md#28-search).
 

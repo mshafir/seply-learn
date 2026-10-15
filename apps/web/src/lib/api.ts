@@ -177,6 +177,37 @@ export async function listExpeditions(): Promise<LibraryCard[]> {
     .expeditions
 }
 
+/** One Explore card (the server's `ExploreCard`): no people. */
+export type ExploreCard = {
+  id: string
+  title: string
+  summary: string
+  tags: string[]
+  counts: { concepts: number; views: number }
+  bestViewType: string | null
+  updatedAt: string
+}
+
+/** One page of Explore (the server's `ExplorePage`). */
+export type ExplorePage = {
+  expeditions: ExploreCard[]
+  nextCursor: string | null
+  /** The most used Expedition Tags (first page only). */
+  tags: { tag: string; count: number }[]
+}
+
+/** Public Expeditions, latest Change first; no sign-in needed. */
+export function exploreExpeditions(
+  args: { q?: string; tag?: string | null; cursor?: string | null } = {}
+): Promise<ExplorePage> {
+  const params = new URLSearchParams()
+  if (args.q?.trim()) params.set("q", args.q.trim())
+  if (args.tag) params.set("tag", args.tag)
+  if (args.cursor) params.set("cursor", args.cursor)
+  const qs = params.toString()
+  return call(`/explore${qs ? `?${qs}` : ""}`)
+}
+
 export function createExpedition(title: string): Promise<ExpeditionSummary> {
   return call("/expeditions", {
     method: "POST",
