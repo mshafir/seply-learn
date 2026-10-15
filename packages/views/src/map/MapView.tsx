@@ -116,6 +116,9 @@ export function MapView({ expedition, view, selected, onSelect, matches, covered
       map.setStyle(withCoarseWorld(base, coarseWorld(), coarseColors(frame.current!)), { diff: true });
       // Drawn once the first real style has loaded what it can.
       map.once("idle", () => settled());
+      // A style the diff finds unchanged (only the coarse world, after the
+      // retries) draws nothing new, so ask for a frame to reach "idle".
+      map.triggerRepaint();
     });
     return () => {
       live = false;
@@ -271,14 +274,22 @@ function initialView(bounds: [number, number, number, number] | undefined, top: 
 async function styleFor(config: BasemapConfig, theme: MapTheme): Promise<{ base?: StyleSpecification; failed: boolean }> {
   if (config.tiles) return { base: protomapsStyle({ ...config, tiles: absolute(config.tiles) }, theme), failed: false };
   const url = fallbackStyleUrl(config, theme)!;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`${res.status}`);
-    return { base: (await res.json()) as StyleSpecification, failed: false };
-  } catch {
-    return { failed: true };
+  // The fallback is a free public service that sometimes answers slowly or
+  // not at all, so try a few times before settling for the coarse world.
+  for (let attempt = 0; attempt < STYLE_ATTEMPTS; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 1000 * 2 ** (attempt - 1)));
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error(`${res.status}`);
+      return { base: (await res.json()) as StyleSpecification, failed: false };
+    } catch {
+      // Try again.
+    }
   }
+  return { failed: true };
 }
+
+const STYLE_ATTEMPTS = 3;
 
 /** PMTiles fetches the archive by URL, so a path on the app's origin is made absolute. */
 const absolute = (url: string) => (/^[a-z]+:/i.test(url) ? url : new URL(url, location.href).href);

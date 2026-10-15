@@ -5,7 +5,7 @@ Spec: [02-architecture.md §2.7](../spec/v1/02-architecture.md) (map tiles) and 
 The Map View draws three layers, bottom to top:
 
 1. **The coarse world** (always): Natural Earth 1:50m land and borders, bundled with the Map View's code (`world-atlas`, about 750 KB raw and 200 KB gzipped). Pins always have a frame, offline too.
-2. **The detailed basemap:** our own copy of a Protomaps PMTiles build, styled with `@protomaps/basemaps`' **light** or **dark** flavour to follow the theme. With no tiles configured, the **OpenFreeMap** styles are the fallback (positron and dark).
+2. **The detailed basemap:** our own copy of a Protomaps PMTiles build, styled with `@protomaps/basemaps`' **light** or **dark** flavour to follow the theme. With no tiles configured, the **OpenFreeMap** styles are the fallback (liberty and dark).
 3. **Pins:** HTML markers, one per located Concept.
 
 If the detailed tiles (or the fallback style) can't load, the coarse world shows alone with a quiet "Detailed map unavailable" note.
@@ -18,7 +18,7 @@ The web build reads these (Vite env, so they're fixed at build time: `apps/web/s
 |---|---|---|
 | `VITE_MAP_TILES_URL` | The public URL of our `.pmtiles` archive (or a path on the app's origin). | OpenFreeMap's styles |
 | `VITE_MAP_ASSETS_URL` | Base URL of a copy of Protomaps' fonts and sprites ([basemaps-assets](https://github.com/protomaps/basemaps-assets)). | `https://protomaps.github.io/basemaps-assets` |
-| `VITE_MAP_FALLBACK_STYLE_LIGHT` / `_DARK` | Other fallback style URLs. | OpenFreeMap positron / dark |
+| `VITE_MAP_FALLBACK_STYLE_LIGHT` / `_DARK` | Other fallback style URLs. | OpenFreeMap liberty / dark |
 
 The Deploy workflow passes the repo **variable** `MAP_TILES_URL` as `VITE_MAP_TILES_URL`.
 
