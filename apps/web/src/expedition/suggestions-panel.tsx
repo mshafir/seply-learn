@@ -58,7 +58,6 @@ import {
   EmptyTitle,
 } from "@seply/ui/components/empty"
 import { ScrollArea } from "@seply/ui/components/scroll-area"
-import { SheetDescription } from "@seply/ui/components/sheet"
 import { Skeleton } from "@seply/ui/components/skeleton"
 import {
   Tooltip,
@@ -132,7 +131,6 @@ export function SuggestionsPanel({
   onDismiss,
   nav,
 }: SuggestionsPanelProps & { onClose: () => void; inline: boolean }) {
-  const Description = inline ? "p" : SheetDescription
   const [confirm, setConfirm] = React.useState<AcceptPlan | null>(null)
   const describe = React.useCallback(
     (item: PendingItem["item"]) => describeItem(preview, item),
@@ -159,14 +157,6 @@ export function SuggestionsPanel({
         onClose={onClose}
         inline={inline}
       >
-        <Description className="text-sm text-muted-foreground">
-          What AI asks and agents suggested, shown dashed on the canvas. Each
-          accept is a Change you can undo.{" "}
-          <ConnectLink as="text">
-            Get suggestions from your own agent
-          </ConnectLink>
-          .
-        </Description>
         {nav}
         {groups.length > 1 && (
           <div>

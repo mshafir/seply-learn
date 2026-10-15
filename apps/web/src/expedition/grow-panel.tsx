@@ -6,8 +6,8 @@
 //   Concept action) shows what it asked, where it stands and what it has
 //   suggested so far, as the items stream in (dashed on the canvas too, while
 //   the panel is open). Stop keeps what streamed; at the per-ask cap it
-//   pauses with Continue or Stop. Under the box: whose AI it uses and what an
-//   ask costs (the estimate, and the cap that stops it). The chat itself
+//   pauses with Continue or Stop. Beside Ask, an info icon: whose AI it uses
+//   and what an ask costs (the estimate, and the cap that stops it). The chat itself
 //   isn't kept: reloading leaves only Activity.
 // - **Activity:** every ask, with who asked, when, and what came of it.
 import * as React from "react"
@@ -46,6 +46,7 @@ import {
   keyCopy,
   type SessionAsk,
 } from "@/expedition/asks.ts"
+import { CostInfo } from "@/expedition/cost-info.tsx"
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { describeItem } from "@/expedition/suggestions.ts"
@@ -224,29 +225,30 @@ export function AskPanel({
           }}
         />
         <div className="flex items-start gap-3">
-          <p
-            data-testid="ask-cost"
-            className="flex-1 text-xs text-muted-foreground"
-          >
-            {noKey === "no-key" ? (
-              <>
-                No AI key: <Link href="/settings">add one in Settings</Link>,
-                or get suggestions from the agent you already use.
-              </>
-            ) : noKey === "waiting" ? (
-              "Your account is waiting for approval, so you can't ask yet."
-            ) : noKey ? (
-              "This server has no AI configured. The agent you already use can suggest instead."
-            ) : estimate ? (
-              <>
-                {keyCopy(estimate.keySource)} · {costCopy(estimate)}.
-                Suggestions stay dashed until someone accepts them. Or{" "}
-                <ConnectLink as="text">ask your own agent</ConnectLink>.
-              </>
-            ) : (
-              "Suggestions stay dashed until someone accepts them."
-            )}
-          </p>
+          {noKey ? (
+            <p
+              data-testid="ask-no-ai"
+              className="flex-1 text-xs text-muted-foreground"
+            >
+              {noKey === "no-key" ? (
+                <>
+                  No AI key: <Link href="/settings">add one in Settings</Link>,
+                  or get suggestions from the agent you already use.
+                </>
+              ) : noKey === "waiting" ? (
+                "Your account is waiting for approval, so you can't ask yet."
+              ) : (
+                "This server has no AI configured. The agent you already use can suggest instead."
+              )}
+            </p>
+          ) : (
+            <div className="flex flex-1 items-center">
+              <CostInfo
+                data-testid="ask-cost"
+                text={`${estimate ? `${keyCopy(estimate.keySource)} · ${costCopy(estimate)}. ` : ""}Suggestions stay dashed until someone accepts them.`}
+              />
+            </div>
+          )}
           <Button
             type="submit"
             size="sm"

@@ -42,6 +42,7 @@ import {
 } from "@/expedition/write-article-dialog.tsx"
 import type { ArticleEstimate, GrowAction } from "@/lib/api.ts"
 import { GROW_ACTIONS, type SessionAsk } from "@/expedition/asks.ts"
+import { CostInfo } from "@/expedition/cost-info.tsx"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
 
 /**
@@ -418,7 +419,7 @@ const ACTION_ICON: Record<GrowAction, typeof ListPlusIcon> = {
 /**
  * Grow's Concept actions (spec §3.7): "Add what's missing to understand
  * this", "Add examples", "Write the article" (it asks first, in its dialog)
- * and "Suggest related", with what an ask costs under them.
+ * and "Suggest related", with what an ask costs behind an info icon.
  */
 function ConceptActions({
   actions,
@@ -457,27 +458,32 @@ function ConceptActions({
       aria-label="Grow"
       className="flex flex-col gap-2"
     >
-      <h3 className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
-        Grow
-      </h3>
+      <div className="flex items-center gap-1">
+        <h3 className="font-mono text-xs tracking-wider text-muted-foreground uppercase">
+          Grow
+        </h3>
+        {!noKey && (
+          <CostInfo
+            data-testid="grow-cost"
+            text={`${cost ? `${cost}. ` : ""}Suggested for review before anything is added.`}
+          />
+        )}
+      </div>
       {missing}
       {examples}
       {article}
       {related}
-      <p data-testid="grow-cost" className="text-xs text-muted-foreground">
-        {noKey === "no-key" ? (
-          <>
-            No AI key: <Link href="/settings">add one in Settings</Link>.{" "}
-          </>
-        ) : noKey ? (
-          "This server has no AI configured. "
-        ) : cost ? (
-          `${cost}. `
-        ) : (
-          ""
-        )}
-        Suggested for review before anything is added.
-      </p>
+      {noKey && (
+        <p data-testid="grow-no-ai" className="text-xs text-muted-foreground">
+          {noKey === "no-key" ? (
+            <>
+              No AI key: <Link href="/settings">add one in Settings</Link>.
+            </>
+          ) : (
+            "This server has no AI configured."
+          )}
+        </p>
+      )}
     </section>
   )
 }

@@ -146,8 +146,10 @@ test("Grow: an ask streams dashed suggestions; accept all, then undo", async ({
   await expect(panel.getByTestId("panel-title")).toHaveText(
     "Ask about this Expedition"
   )
-  await expect(panel.getByTestId("ask-cost")).toContainText(
-    "Uses your API key · About $0.12 an ask, at most $0.50 (your cap)"
+  // The cost sits behind an info icon; its label says it in full.
+  await expect(panel.getByTestId("ask-cost")).toHaveAttribute(
+    "aria-label",
+    /^Uses your API key · About \$0\.12 an ask, at most \$0\.50 \(your cap\)/
   )
   await panel.getByLabel("Ask about this Expedition").fill(ASK)
   await panel.getByTestId("ask-submit").click()
@@ -244,8 +246,9 @@ test("Grow: Stop keeps what streamed, and Activity says who asked", async ({
   const actions = panel.getByTestId("grow-actions")
   await expect(actions).toContainText("Add what's missing to understand this")
   await expect(actions).toContainText("Write the article")
-  await expect(actions.getByTestId("grow-cost")).toContainText(
-    "About $0.12 an ask, at most $0.50 (your cap)"
+  await expect(actions.getByTestId("grow-cost")).toHaveAttribute(
+    "aria-label",
+    /^About \$0\.12 an ask, at most \$0\.50 \(your cap\)/
   )
   await actions.scrollIntoViewIfNeeded()
   await screenshot(page, testInfo, "grow-actions")

@@ -18,7 +18,9 @@ describe("settingsFields", () => {
     const f = byKey(settingsFields(spec.shared, spec.refs))
     expect(Object.keys(f)).toEqual([
       "relationshipTypes",
-      "targets",
+      "targets.kinds",
+      "targets.tags",
+      "targets.hasAttribute",
       "minSteps",
       "coreShared",
     ])
@@ -33,15 +35,18 @@ describe("settingsFields", () => {
       min: 0,
     })
     expect(f.coreShared!.control).toMatchObject({ type: "number", min: 1 })
-    const targets = f.targets!.control
-    expect(targets.type).toBe("group")
-    if (targets.type !== "group") return
-    const t = byKey(targets.fields)
-    expect(t["targets.kinds"]!.control).toEqual({ type: "refs", ref: "kinds" })
-    expect(t["targets.tags"]!.control).toEqual({ type: "tags" })
-    expect(t["targets.hasAttribute"]!.control).toEqual({
-      type: "ref",
-      ref: "attributes",
+    // The targets filter is inlined, so the form stays flat.
+    expect(f["targets.kinds"]).toMatchObject({
+      label: "Target Kinds",
+      control: { type: "refs", ref: "kinds" },
+    })
+    expect(f["targets.tags"]).toMatchObject({
+      label: "Target Tags",
+      control: { type: "tags" },
+    })
+    expect(f["targets.hasAttribute"]).toMatchObject({
+      label: "Targets with Attribute",
+      control: { type: "ref", ref: "attributes" },
     })
   })
 

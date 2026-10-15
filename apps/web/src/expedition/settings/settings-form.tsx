@@ -13,8 +13,6 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSet,
 } from "@seply/ui/components/field"
 import { Input } from "@seply/ui/components/input"
 import {
@@ -193,18 +191,6 @@ function SettingControl(props: ControlProps) {
         </Field>
       )
     }
-
-    case "group":
-      return (
-        <FieldSet>
-          <FieldLegend variant="label">{field.label}</FieldLegend>
-          <FieldGroup className="gap-4 border-l pl-4">
-            {control.fields.map((f) => (
-              <SettingControl key={f.path.join(".")} {...props} field={f} />
-            ))}
-          </FieldGroup>
-        </FieldSet>
-      )
 
     case "tags": {
       const selected = Array.isArray(value) ? (value as string[]) : []

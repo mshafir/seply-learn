@@ -8,7 +8,8 @@
 //   Concepts, Attributes) → a multi-select combobox; a single id they name →
 //   a searchable combobox
 // - lists of plain strings (tags) → a multi-select combobox that can add Tags
-// - objects (filters) → a group of the fields above
+// - objects (filters) → their fields, inlined and named after the object
+//   ("Target Kinds"), so the form stays flat
 // - anything else (column lists, lanes, date ranges) → JSON, still checked
 //   against the schema before it is written
 // - the per-View structure overrides (`placement`, `order`, `hide`, `fold`)
@@ -25,7 +26,6 @@ export type FieldControl =
   | { type: "ref"; ref: RefKind }
   | { type: "refs"; ref: RefKind }
   | { type: "tags" }
-  | { type: "group"; fields: SettingsField[] }
   | { type: "json" }
 
 export type SettingsField = {
@@ -108,6 +108,13 @@ const LABELS: Record<string, string> = {
   y: "Y axis",
 }
 
+/** What an object's inlined fields are named after ("targets" → "Target Kinds"). */
+const GROUP_NOUNS: Record<string, string> = {
+  targets: "Target",
+  rows: "Row",
+  levers: "Lever",
+}
+
 function refAt(refs: SettingsRefs | undefined, dotted: string): RefKind | null {
   if (!refs) return null
   for (const kind of ["relTypes", "kinds", "concepts", "attributes"] as const)
@@ -149,8 +156,6 @@ function controlFor(
       if (el.type !== "string") return { type: "json" }
       return ref ? { type: "refs", ref } : { type: "tags" }
     }
-    case "object":
-      return { type: "group", fields: walk(inner, path, refs, false) }
     default:
       return { type: "json" }
   }
@@ -168,6 +173,18 @@ function walk(
     if (top && (OVERRIDE_KEYS as readonly string[]).includes(key)) continue
     const { inner, optional, defaultValue } = unwrap(child)
     const path = [...prefix, key]
+    if (defOf(inner).type === "object") {
+      const noun = GROUP_NOUNS[key] ?? humanize(key)
+      for (const f of walk(inner, path, refs, false))
+        fields.push({
+          ...f,
+          label:
+            f.path.at(-1) === "hasAttribute"
+              ? `${noun}s with Attribute`
+              : `${noun} ${f.label}`,
+        })
+      continue
+    }
     fields.push({
       path,
       label: LABELS[key] ?? humanize(key),
