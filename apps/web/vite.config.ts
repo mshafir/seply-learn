@@ -62,14 +62,23 @@ export default defineConfig({
     react(),
     tailwindcss(),
     pushWorker(),
-    // Installable PWA (spec §2.9). The service worker precaches the app
-    // shell: the built HTML, JS, CSS, the self-hosted fonts and the brand
-    // icons. It caches no API responses: Expeditions for offline reading
-    // live in IndexedDB (src/lib/offline.ts). Client-side routes fall back
-    // to index.html; /api never does.
+    // Installable PWA (spec §2.9). The service worker is ours (sw/sw.ts):
+    // it precaches the app shell (the built HTML, JS, CSS, the self-hosted
+    // fonts and the brand icons) and loads pages from the network first.
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "script-defer",
+      strategies: "injectManifest",
+      srcDir: "sw",
+      filename: "sw.ts",
+      injectManifest: {
+        // A classic worker: it imports push-sw.js with importScripts.
+        rollupFormat: "iife",
+        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Only the Latin subsets of the fonts; other scripts load online.
+        globIgnores: ["**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2"],
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+      },
       includeAssets: ["favicon.svg", "favicon-32.png", "apple-touch-icon.png"],
       manifest: {
         name: "Seply Learn",
@@ -93,24 +102,6 @@ export default defineConfig({
           },
           { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
         ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        // Only the Latin subsets of the fonts; other scripts load online.
-        globIgnores: ["**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2"],
-        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
-        navigateFallback: "/index.html",
-        // The live embed is the server's to answer (Public only, its own
-        // frame-ancestors): never the app shell from the cache.
-        navigateFallbackDenylist: [
-          /^\/api\//,
-          /^\/mcp$/,
-          /^\/\.well-known\//,
-          /^\/e\/[^/]+\/embed\/?$/,
-        ],
-        cleanupOutdatedCaches: true,
-        // Web push: show a job's notification, open its Expedition on click.
-        importScripts: ["push-sw.js"],
       },
     }),
     // After VitePWA: takes the registration script out of embed.html.

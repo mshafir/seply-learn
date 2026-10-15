@@ -10,6 +10,9 @@ import { TooltipProvider } from "@seply/ui/components/tooltip"
 import { App } from "./App.tsx"
 import { ReaderProvider } from "./components/reader-provider.tsx"
 import { SessionProvider } from "./components/session-provider.tsx"
+import { watchForUpdates } from "./lib/app-updates.ts"
+
+watchForUpdates()
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

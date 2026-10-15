@@ -1,5 +1,5 @@
-// Web push in the service worker (spec §2.5). Workbox's generated worker
-// imports this file (vite.config.ts, `workbox.importScripts`). A push is the
+// Web push in the service worker (spec §2.5). The service worker (sw/sw.ts)
+// imports this file with importScripts. A push is the
 // server's JSON: { title, body, url, tag } (packages/server, JobNotification).
 /* global self, clients */
 
