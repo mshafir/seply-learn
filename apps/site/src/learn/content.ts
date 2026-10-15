@@ -13,6 +13,9 @@ export const SHOWCASE = {
 
 export const expeditionUrl = (id: string) => `${APP_URL}/e/${id}`
 
+/** Explore in the app: every public Expedition, no account needed. */
+export const EXPLORE_URL = `${APP_URL}/explore`
+
 export const GITHUB_URL = "https://github.com/mshafir/seply-learn"
 export const MCP_GUIDE_URL = `${GITHUB_URL}/blob/main/docs/spec/v1/06-mcp.md`
 export const RELEASES_URL = `${GITHUB_URL}/releases`

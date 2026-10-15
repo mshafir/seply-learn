@@ -32,6 +32,7 @@ import {
 } from "./config.ts"
 import type { Connect, Db, DbConnection } from "./db.ts"
 import { expeditionRoutes } from "./expeditions.ts"
+import { exploreRoutes } from "./explore.ts"
 import { exportRoutes } from "./export.ts"
 import { forkRoutes } from "./fork.ts"
 import { historyRoutes } from "./history.ts"
@@ -373,6 +374,8 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   app.use("/reader", signedIn)
   app.use("/reader/*", signedIn)
   app.route("/reader", readerRoutes(relay))
+  // Explore lists public Expeditions to anyone, signed in or not (explore.ts).
+  app.route("/explore", exploreRoutes())
   app.use("/search", signedIn)
   app.route("/search", searchRoutes())
   app.route("/sources", sourceRoutes(relay))

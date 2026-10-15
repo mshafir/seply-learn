@@ -209,6 +209,10 @@ const ANONYMOUS_ACTOR = "anonymous"
 const signInHrefFor = (expeditionId: string) =>
   `/sign-in?next=${encodeURIComponent(`/e/${expeditionId}`)}`
 
+/** "Fork" while signed out: sign in, then come back to offer the Fork. */
+const forkHrefFor = (expeditionId: string) =>
+  `/sign-in?next=${encodeURIComponent(`/e/${expeditionId}?fork=1`)}`
+
 export function ExpeditionScreen({
   expeditionId,
   viewId,
@@ -461,9 +465,27 @@ function ExpeditionFrame({
   const [query, setQuery] = React.useState("")
   // The share dialog (WP-5.1): anyone signed in and online. Collaborators
   // manage access there; readers of a link see it and can Fork (WP-5.2).
-  const [shareOpen, setShareOpen] = React.useState(false)
-  const [detailsOpen, setDetailsOpen] = React.useState(false)
   const canShare = signInHref === null && offlineSince === null
+  const [shareOpen, setShareOpen] = React.useState(
+    () =>
+      canShare &&
+      new URLSearchParams(window.location.search).get("fork") === "1"
+  )
+  const [detailsOpen, setDetailsOpen] = React.useState(false)
+  // Fork while signed out (spec §3.13) signs in and comes back with
+  // ?fork=1: the share dialog opens, where Fork is one click, and the
+  // parameter is dropped.
+  React.useEffect(() => {
+    if (!canShare) return
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has("fork")) return
+    url.searchParams.delete("fork")
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`
+    )
+  }, [canShare])
   // Hosted access approval: Fork from History explains instead of failing.
   const approval = useApprovalGate()
   const [settledViewId, setSettledViewId] = React.useState<string | null>(null)
@@ -1142,6 +1164,7 @@ function ExpeditionFrame({
         }
         health={health}
         signInHref={signInHref}
+        forkHref={signInHref ? forkHrefFor(expeditionId) : null}
         menu={
           // Export reads the server's copy: not from the saved one offline.
           offlineSince === null ? (

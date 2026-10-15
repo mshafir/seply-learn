@@ -4,10 +4,10 @@
 // which. The CI-only test credentials have no UI; tests sign up through the
 // API and share the cookie.
 import * as React from "react"
-import { Redirect, useSearchParams } from "wouter"
+import { Link, Redirect, useSearchParams } from "wouter"
 
 import { Wordmark } from "@seply/ui/components/brand"
-import { Button } from "@seply/ui/components/button"
+import { Button, buttonVariants } from "@seply/ui/components/button"
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ import {
   type SignInOptions,
 } from "@/lib/api.ts"
 import { desktopBridge } from "@/lib/desktop.ts"
+import { sameOriginPath } from "@/lib/next-path.ts"
 import { authorizeUrl, signedOAuthQuery } from "@/lib/oauth.ts"
 import { useSession } from "@/lib/session.ts"
 
@@ -43,7 +44,7 @@ export function SignInScreen() {
   // Where to go back to (e.g. the Expedition an anonymous reader was reading).
   const [params] = useSearchParams()
   const raw = params.get("next") ?? "/"
-  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/"
+  const next = sameOriginPath(raw)
   // An MCP client's sign-in (WP-5.4): Better Auth sent the authorization
   // request here as a signed query. Signing in continues to /consent; a
   // reader who is signed in already goes straight back to it.
@@ -103,7 +104,7 @@ export function SignInScreen() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-4">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center gap-3 text-center">
           <Wordmark className="justify-center" />
@@ -159,6 +160,11 @@ export function SignInScreen() {
           )}
         </CardContent>
       </Card>
+      {!oauthQuery && (
+        <Link href="/explore" className={buttonVariants({ variant: "link" })}>
+          Explore public Expeditions
+        </Link>
+      )}
     </main>
   )
 }

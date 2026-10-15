@@ -3,6 +3,7 @@
 //   /invite/:token      an invite link: accept it (WP-5.1)
 //   /consent            an MCP client asks to connect: scopes and Expeditions (WP-5.4)
 //   /                   the Library
+//   /explore            public Expeditions, for anyone (signed out too)
 //   /e/:id(/:viewId)    the Expedition screen, on a View (signed out too:
 //                       public and unlisted Expeditions need no login)
 //   /e/:id/embed        the live embed is its own page (embed.html, served
@@ -30,6 +31,7 @@ import {
 } from "@/screens/desktop-sign-in.tsx"
 import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
+import { ExploreScreen } from "@/screens/explore.tsx"
 import { useSession } from "@/lib/session.ts"
 import { InviteScreen } from "@/screens/invite.tsx"
 import { LibraryScreen } from "@/screens/library.tsx"
@@ -80,6 +82,11 @@ export function App() {
             <InviteScreen token={params.token} />
           </WaitForSession>
         )}
+      </Route>
+      <Route path="/explore">
+        <WaitForSession>
+          <ExploreScreen />
+        </WaitForSession>
       </Route>
       <Route path="/e/:id/embed">
         <div className="flex min-h-svh items-center justify-center p-6 text-sm text-muted-foreground">

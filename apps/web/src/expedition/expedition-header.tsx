@@ -12,10 +12,13 @@
 // AI about the Expedition; it spins while one of their asks runs.
 // Share (anyone signed in: WP-5.1, WP-5.2) opens the share dialog
 // (share-dialog.tsx). The Expedition menu (export-dialog.tsx: Export, for
-// anyone who can view, WP-5.3) sits before the account menu.
+// anyone who can view, WP-5.3) sits before the account menu. Signed out
+// (a public or unlisted link), Fork and Sign in take its place: Fork signs
+// in and comes back with `?fork=1`, which offers the Fork (spec §3.13).
 import * as React from "react"
 import {
   CloudOffIcon,
+  GitForkIcon,
   HistoryIcon,
   LoaderCircleIcon,
   MessageCircleQuestionIcon,
@@ -40,6 +43,7 @@ export function ExpeditionHeader({
   onRename,
   health,
   signInHref,
+  forkHref,
   search,
   activity,
   presence,
@@ -56,6 +60,8 @@ export function ExpeditionHeader({
   health?: SyncHealth
   /** Signed out (reading a public or unlisted link): where "Sign in" goes. */
   signInHref?: string | null
+  /** Signed out: "Fork" signs in first, then offers the Fork. */
+  forkHref?: string | null
   /** Search inside the Expedition, before the sync status. */
   search?: React.ReactNode
   /** The build activity indicator (build-activity.tsx), when building. */
@@ -87,8 +93,9 @@ export function ExpeditionHeader({
   return (
     <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-2 border-b bg-card px-3 sm:px-4">
       <Link
-        href="/"
-        aria-label="Library"
+        // Signed out, the way back is Explore: the Library needs sign-in.
+        href={signInHref ? "/explore" : "/"}
+        aria-label={signInHref ? "Explore" : "Library"}
         className={buttonVariants({ variant: "ghost", size: "icon" })}
       >
         <SeplyGlyph className="size-6" />
@@ -213,6 +220,16 @@ export function ExpeditionHeader({
           <UsersIcon />
           Share
         </Button>
+      )}
+      {forkHref && (
+        <Link
+          href={forkHref}
+          data-testid="fork-sign-in"
+          className={buttonVariants({ variant: "ghost", size: "sm" })}
+        >
+          <GitForkIcon />
+          Fork
+        </Link>
       )}
       {signInHref && (
         <Link
