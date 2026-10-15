@@ -371,6 +371,8 @@ function appOf(browser: Browser, baseURL: string): App {
         password: "capture password, long enough",
         name,
       })
+      // Seen the welcome step, so "/" opens the Library.
+      await call("post", "/api/me/welcomed")
       return {
         context,
         page,

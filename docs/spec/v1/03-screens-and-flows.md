@@ -28,8 +28,9 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 **Welcome** (`/welcome`): where a new account lands, once.
 
-- The sign-in screen sends a new account there. Google does it through Better Auth's new-user callback; email sign-up goes there directly. A later sign-in goes to the Library.
-- It isn't shown when `next` points somewhere specific: an invite, an Expedition, an MCP client's consent.
+- Whether the account has seen it is part of the account (`users.welcomed_at`, [1.2](01-domain-model.md); `welcomed` on `GET /me`). It doesn't depend on how the account signed in: Google, email or the desktop app.
+- An account that hasn't seen it goes there when it opens the Library (`/`). Opening the app on the way somewhere specific (an invite, an Expedition, an MCP client's consent, `/connect`, Settings, Explore, the desktop hand-off) goes straight there; the welcome step shows on the next visit to the Library.
+- Showing it marks the account (`POST /me/welcomed`), so leaving it by any way (Skip for now, Go to my Library, or anywhere else) counts. Later visits to the Library go straight there.
 - "WELCOME, <first name>", **Connect your agent**, and one line on what an agent does here.
 - The agent tabs and numbered steps from `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)): add Seply Learn, sign in when the agent asks, ask it to make an Expedition.
 - A status line ticks when the agent's first call arrives.

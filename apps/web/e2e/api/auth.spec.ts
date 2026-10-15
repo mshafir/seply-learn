@@ -43,7 +43,15 @@ test("sign in with a test account, create and list an Expedition", async ({
   })
   expect(signIn.ok()).toBe(true)
   const me = await api.get("/api/me")
-  expect(await me.json()).toMatchObject({ user: { email } })
+  // A new account hasn't seen the welcome step; marking it is idempotent.
+  expect(await me.json()).toMatchObject({ user: { email }, welcomed: false })
+  for (let i = 0; i < 2; i++)
+    expect(
+      await (await api.post("/api/me/welcomed", { headers })).json()
+    ).toEqual({ welcomed: true })
+  expect(await (await api.get("/api/me")).json()).toMatchObject({
+    welcomed: true,
+  })
 
   // Create an Expedition: the creator is its owner.
   const title = `E2E Expedition ${Date.now()}`

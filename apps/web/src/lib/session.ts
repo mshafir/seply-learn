@@ -15,6 +15,8 @@ export type SessionContextValue = {
   signOut: () => Promise<void>
   /** Replaces the signed-in user's access state (after a request is sent). */
   setAccess: (access: AccessState) => void
+  /** The account has now seen the welcome step (spec §3.1). */
+  setWelcomed: () => void
 }
 
 export const SessionContext = React.createContext<

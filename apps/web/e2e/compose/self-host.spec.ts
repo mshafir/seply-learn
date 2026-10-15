@@ -67,8 +67,11 @@ test("sign up, import a fixture, start a build that reaches the model", async ({
   await page
     .getByLabel("Password", { exact: true })
     .fill("smoke test password, long enough")
+  const welcomed = page.waitForResponse("**/api/me/welcomed")
   await page.getByRole("button", { name: "Create account" }).click()
-  await expect(page).not.toHaveURL(/\/sign-in/)
+  // A new account sees the welcome step first, once.
+  await expect(page).toHaveURL(/\/welcome$/)
+  expect((await welcomed).status()).toBe(200)
   expect((await (await page.request.get("/api/me")).json()).user).toMatchObject(
     { email }
   )
@@ -159,6 +162,8 @@ test("the Map View reads the instance's own PMTiles extract", async ({
     },
   })
   expect(signUp.status()).toBe(200)
+  // Seen the welcome step, so "/" opens the Library.
+  expect((await page.request.post("/api/me/welcomed")).status()).toBe(200)
   const ranges: number[] = []
   page.on("response", (res) => {
     if (res.url().endsWith(map.tiles)) ranges.push(res.status())

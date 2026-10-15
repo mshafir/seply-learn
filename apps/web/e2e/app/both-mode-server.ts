@@ -88,12 +88,19 @@ export async function startBothModeServer(opts: {
   }
 }
 
-/** A fresh page on `base`, signed in as a new account (through the API). */
+/**
+ * A fresh page on `base`, signed in as a new account (through the API). It
+ * has seen the welcome step already unless `welcomed: false`.
+ */
 export async function signedInOn(
   browser: Browser,
   base: string,
   name: string,
-  opts: { email?: string; colorScheme?: "light" | "dark" } = {}
+  opts: {
+    email?: string
+    colorScheme?: "light" | "dark"
+    welcomed?: boolean
+  } = {}
 ) {
   const context = await browser.newContext({
     baseURL: base,
@@ -108,5 +115,7 @@ export async function signedInOn(
     data: { email: address, password: "e2e password, long enough", name },
   })
   expect(res.status()).toBe(200)
+  if (opts.welcomed ?? true)
+    expect((await page.request.post("/api/me/welcomed")).status()).toBe(200)
   return { page, email: address, close: () => context.close() }
 }

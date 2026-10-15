@@ -35,7 +35,8 @@ test("make an account with email and password, then sign in with it", async ({
   await page.getByLabel("Email", { exact: true }).fill(email)
   await page.getByLabel("Password", { exact: true }).fill(password)
   await page.getByRole("button", { name: "Create account" }).click()
-  await expect(page).not.toHaveURL(/\/sign-in/)
+  // A new account goes on to the welcome step (signup-flow.spec.ts).
+  await expect(page).toHaveURL(/\/welcome$/)
   const me = await (await page.request.get("/api/me")).json()
   expect(me.user).toMatchObject({ email, name: "Email Reader" })
 

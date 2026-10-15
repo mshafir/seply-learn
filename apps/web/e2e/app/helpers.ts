@@ -4,14 +4,28 @@ import { expect, type Page, type TestInfo } from "@playwright/test"
  * Signs a fresh test account in (email + password: the CI-only test
  * credentials, on a localhost Worker with AUTH_TEST_CREDENTIALS=1). The page
  * shares the request context's cookies, so it is signed in too.
+ *
+ * The account has seen the welcome step already, so `/` opens the Library
+ * (spec §3.1); `welcomed: false` leaves it new, for the specs about that step.
  */
-export async function signUp(page: Page, name = "E2E Reader") {
+export async function signUp(
+  page: Page,
+  name = "E2E Reader",
+  opts: { welcomed?: boolean } = {}
+) {
   const email = `e2e-app-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`
   const res = await page.request.post("/api/auth/sign-up/email", {
     data: { email, password: "e2e password, long enough", name },
   })
   expect(res.status()).toBe(200)
+  if (opts.welcomed ?? true) await markWelcomed(page)
   return { email, name }
+}
+
+/** Marks the signed-in account as having seen the welcome step. */
+export async function markWelcomed(page: Page) {
+  const res = await page.request.post("/api/me/welcomed")
+  expect(res.status()).toBe(200)
 }
 
 /** Needs the Worker and a migrated Postgres (see playwright.config.ts). */

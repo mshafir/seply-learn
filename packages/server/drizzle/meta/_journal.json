@@ -71,6 +71,13 @@
       "when": 1791813542023,
       "tag": "0009_access_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792094514667,
+      "tag": "0010_welcomed",
+      "breakpoints": true
     }
   ]
 }

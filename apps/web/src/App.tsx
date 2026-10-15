@@ -1,6 +1,7 @@
 // Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
 //   /sign-in            Google sign-in
-//   /welcome            a new account's first stop: connect your agent
+//   /welcome            connect your agent: the Library sends an account
+//                       there once, the first time it opens (spec §3.1)
 //   /invite/:token      an invite link: accept it (WP-5.1)
 //   /consent            an MCP client asks to connect: scopes and Expeditions (WP-5.4)
 //   /                   the Library
@@ -69,6 +70,18 @@ function RequireUser({ children }: { children: React.ReactNode }) {
     )
   if (session.status === "signed-out") return <Redirect to="/sign-in" replace />
   return children
+}
+
+/**
+ * The Library, or the welcome step first for an account that hasn't seen it
+ * (spec §3.1). Only a plain visit to `/` goes there: a link to somewhere
+ * specific opens that, and the welcome step waits for the next visit here.
+ */
+function LibraryOrWelcome() {
+  const { session } = useSession()
+  if (session.status === "signed-in" && session.user.welcomed === false)
+    return <Redirect to="/welcome" replace />
+  return <LibraryScreen />
 }
 
 export function App() {
@@ -145,7 +158,7 @@ export function App() {
       </Route>
       <Route path="/">
         <RequireUser>
-          <LibraryScreen />
+          <LibraryOrWelcome />
         </RequireUser>
       </Route>
       <Route>

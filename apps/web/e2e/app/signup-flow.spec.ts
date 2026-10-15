@@ -12,7 +12,8 @@ import { needsDatabase, screenshot } from "./helpers.ts"
 // The sign-up flow (spec §3.1–§3.3), on a server set up the way the hosted
 // one is (AI_KEY_MODE=both, access approval on, a server key that is never
 // called): sign in or create an account, the welcome step (connect your
-// agent) once for a new account, then the Library's first visit (no AI yet:
+// agent) once per account, the first time it opens the Library (a link to
+// an Expedition goes there first), then the Library's first visit (no AI yet:
 // connect, add a key, or ask to use this server's AI; "Start by reading
 // one") and New Expedition with no AI ("Building needs AI. Choose how.",
 // with the request built from the question). Light and dark.
@@ -97,14 +98,17 @@ test("a new account sees the welcome step once; Skip lands on the Library", asyn
     await screenshot(page, testInfo, "signup-sign-in-phone")
     await page.setViewportSize({ width: 1280, height: 800 })
 
-    // Make an account: the welcome step.
+    // Make an account: it opens the Library, which sends it to the welcome
+    // step first.
     const email = newEmail()
     await page.getByRole("button", { name: "Create an account" }).click()
     await page.getByLabel("Name", { exact: true }).fill("Ada Lovelace")
     await page.getByLabel("Email", { exact: true }).fill(email)
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD)
+    const marked = page.waitForResponse("**/api/me/welcomed")
     await page.getByRole("button", { name: "Create account" }).click()
     await expect(page).toHaveURL(/\/welcome$/)
+    expect((await marked).status()).toBe(200)
     const welcome = page.getByTestId("welcome")
     await expect(welcome.getByText("Welcome, Ada")).toBeVisible()
     await expect(
@@ -131,6 +135,13 @@ test("a new account sees the welcome step once; Skip lands on the Library", asyn
       page.getByRole("heading", { name: "Your Expeditions" })
     ).toBeVisible()
 
+    // A reload stays on the Library.
+    await page.reload()
+    await expect(
+      page.getByRole("heading", { name: "Your Expeditions" })
+    ).toBeVisible()
+    await expect(page).toHaveURL(`${BASE}/`)
+
     // Signing in again goes straight to the Library.
     await context.clearCookies()
     await page.goto("/sign-in")
@@ -142,6 +153,67 @@ test("a new account sees the welcome step once; Skip lands on the Library", asyn
     await expect(page.getByTestId("welcome")).toHaveCount(0)
   } finally {
     await context.close()
+  }
+})
+
+test("a new account that opens an Expedition link goes there; the welcome step waits for the Library", async ({
+  browser,
+}, testInfo) => {
+  const author = await signedInOn(browser, BASE, "Pat Public")
+  const reader = await signedInOn(browser, BASE, "Lin Linked", {
+    colorScheme: testInfo.project.use.colorScheme ?? undefined,
+    welcomed: false,
+  })
+  const res = await author.page.request.post("/api/import", {
+    data: { ...TRIP, title: "A trip someone linked" },
+  })
+  expect(res.status()).toBe(201)
+  const id = ((await res.json()) as { expedition: { id: string } }).expedition
+    .id
+  expect(
+    (
+      await author.page.request.patch(`/api/expeditions/${id}/visibility`, {
+        data: { visibility: "public" },
+      })
+    ).status()
+  ).toBe(200)
+  try {
+    const page = reader.page
+    // The link opens the Expedition, not the welcome step.
+    await page.goto(`/e/${id}`)
+    await expect(page.getByTestId("views-bar")).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`/e/${id}`))
+    expect((await (await page.request.get("/api/me")).json()).welcomed).toBe(
+      false
+    )
+
+    // The next visit to the Library shows it, once.
+    const marked = page.waitForResponse("**/api/me/welcomed")
+    await page.goto("/")
+    await expect(page).toHaveURL(/\/welcome$/)
+    await expect(
+      page.getByTestId("welcome").getByRole("heading", {
+        name: "Connect your agent",
+      })
+    ).toBeVisible()
+    expect((await marked).status()).toBe(200)
+    await page
+      .getByTestId("welcome")
+      .getByRole("link", { name: "Go to my Library" })
+      .click()
+    await expect(page).toHaveURL(`${BASE}/`)
+    await expect(
+      page.getByRole("heading", { name: "Your Expeditions" })
+    ).toBeVisible()
+    await page.goto("/")
+    await expect(
+      page.getByRole("heading", { name: "Your Expeditions" })
+    ).toBeVisible()
+    await expect(page.getByTestId("welcome")).toHaveCount(0)
+  } finally {
+    await author.page.request.delete(`/api/expeditions/${id}`)
+    await author.close()
+    await reader.close()
   }
 })
 

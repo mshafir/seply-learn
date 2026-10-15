@@ -5,10 +5,9 @@
 // API and share the cookie.
 //
 // Beside the card, a brand panel says what Seply Learn is. One card signs
-// in and makes accounts. A new account goes on to the welcome step
-// (/welcome: connect your agent) unless `next` points somewhere specific
-// (an invite, an Expedition, an MCP client's consent): Google sends it there
-// through Better Auth's new-user callback, email sign-up directly.
+// in and makes accounts. Both go on to `next` (default: the Library); the
+// Library sends an account that hasn't seen the welcome step there first
+// (App.tsx), however it signed in.
 import * as React from "react"
 import { CheckIcon } from "lucide-react"
 import { Link, Redirect, useSearchParams } from "wouter"
@@ -57,9 +56,6 @@ export function SignInScreen() {
   // reader who is signed in already goes straight back to it.
   const oauthQuery = signedOAuthQuery(window.location.search)
   const signedIn = session.status === "signed-in"
-  // Where a brand-new account goes: the welcome step, unless it came here
-  // on its way somewhere specific.
-  const newUserPath = !oauthQuery && next === "/" ? WELCOME_PATH : undefined
   const [options, setOptions] = React.useState<SignInOptions | null>(null)
   // On desktop: the sign-in has gone out to the system browser.
   const [inBrowser, setInBrowser] = React.useState(false)
@@ -103,7 +99,7 @@ export function SignInScreen() {
       return
     }
     setStarting(true)
-    signInWithGoogle(next, oauthQuery ?? undefined, newUserPath).catch(() => {
+    signInWithGoogle(next, oauthQuery ?? undefined).catch(() => {
       setStarting(false)
       toast.add({
         title: "Couldn't start sign-in",
@@ -140,7 +136,6 @@ export function SignInScreen() {
                     signUpOpen={options.signUp}
                     oauthQuery={oauthQuery ?? undefined}
                     next={next}
-                    newUserPath={newUserPath}
                   />
                 )}
                 {options.emailPassword && options.google && (
@@ -193,9 +188,6 @@ export function SignInScreen() {
   )
 }
 
-/** Where a brand-new account lands first. */
-const WELCOME_PATH = "/welcome"
-
 const POINTS = [
   "Free to sign up. Read and edit without any AI.",
   "Build with the AI agent you already use, or your own API key.",
@@ -243,13 +235,10 @@ function EmailForm({
   signUpOpen,
   oauthQuery,
   next,
-  newUserPath,
 }: {
   signUpOpen: boolean
   oauthQuery?: string
   next: string
-  /** Where a new account goes instead of `next` (the welcome step). */
-  newUserPath?: string
 }) {
   const [mode, setMode] = React.useState<"sign-in" | "sign-up">("sign-in")
   const [busy, setBusy] = React.useState(false)
@@ -271,7 +260,7 @@ function EmailForm({
         // A full load, so the whole app starts signed in. An MCP client's
         // sign-in stays here, and the screen continues to /consent.
         if (oauthQuery) window.location.reload()
-        else window.location.assign((signUp && newUserPath) || next)
+        else window.location.assign(next)
       },
       (err: unknown) => {
         setBusy(false)

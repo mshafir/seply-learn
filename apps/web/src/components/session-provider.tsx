@@ -80,9 +80,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     )
   }, [])
 
+  const setWelcomed = React.useCallback(() => {
+    setSession((s) =>
+      s.status === "signed-in" && s.user.welcomed === false
+        ? { status: "signed-in", user: { ...s.user, welcomed: true } }
+        : s
+    )
+  }, [])
+
   const value = React.useMemo(
-    () => ({ session, signOut, setAccess }),
-    [session, signOut, setAccess]
+    () => ({ session, signOut, setAccess, setWelcomed }),
+    [session, signOut, setAccess, setWelcomed]
   )
   return <SessionContext value={value}>{children}</SessionContext>
 }
