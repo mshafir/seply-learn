@@ -9,6 +9,12 @@
 // (WP-5.2), for owners: what I moved there, with when it will be deleted for
 // good (30 days on) and Restore. Every signed-in account can create and
 // import (hosted access approval only covers the server's AI; spec §3.12).
+//
+// First visit: while the account has no AI it may use and no agent is
+// connected, a quiet bar says so, with Connect your agent, Add a key
+// (Settings › AI) and, where it applies, Ask to use this server's AI. An
+// empty Library also offers "Start by reading one": up to three public
+// Expeditions from Explore.
 import * as React from "react"
 import {
   BookOpenIcon,
@@ -63,19 +69,24 @@ import { ConnectLink } from "@/connect/connect-link.tsx"
 import { AccountMenu } from "@/components/account-menu.tsx"
 import { ExpeditionCard as CardShell } from "@/components/expedition-card.tsx"
 import { GlobalSearch } from "@/components/global-search.tsx"
+import { AskServerAi } from "@/components/server-ai.tsx"
+import { needsKey, useAiSetup } from "@/lib/ai-setup.ts"
 import {
   ApiError,
   continueReading,
   createExpedition,
+  exploreExpeditions,
   importExpedition,
   listExpeditions,
   listTrash,
   restoreExpedition,
+  type AiOverview,
   type ContinueReadingItem,
+  type ExploreCard,
   type LibraryCard,
   type TrashedCard,
 } from "@/lib/api.ts"
-import { cardLink, when } from "@/lib/cards.ts"
+import { cardGrid, cardLink, when } from "@/lib/cards.ts"
 import { importedLabel } from "@/lib/export.ts"
 import { formatAsOf, setKeptOffline, useOfflineEntries } from "@/lib/offline.ts"
 import { useUser } from "@/lib/session.ts"
@@ -431,6 +442,82 @@ function SavedOffline({ entries }: { entries: OfflineEntry[] }) {
   )
 }
 
+/**
+ * No AI yet (spec §3.2): the account has no AI it may use and no agent is
+ * connected. Reading, editing and importing work without it.
+ */
+function NoAiBar({ ai }: { ai: AiOverview }) {
+  return (
+    <Card
+      role="region"
+      aria-labelledby="no-ai-heading"
+      data-testid="no-ai-bar"
+      className="flex-row flex-wrap items-center gap-x-6 gap-y-4 px-5"
+    >
+      <div className="flex min-w-0 flex-[1_1_22rem] flex-col gap-0.5">
+        <h2 id="no-ai-heading" className="text-sm font-semibold">
+          No AI connected yet
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          You can read, edit and import now. To build Expeditions, connect your
+          agent or add a key.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <ConnectLink>Connect your agent</ConnectLink>
+        <Button variant="outline" render={<Link href="/settings#ai" />}>
+          Add a key
+        </Button>
+        <AskServerAi ai={ai} className="text-sm" />
+      </div>
+    </Card>
+  )
+}
+
+/** An empty Library: up to three public Expeditions to read first. */
+function StartReading() {
+  const [cards, setCards] = React.useState<ExploreCard[]>([])
+  React.useEffect(() => {
+    let live = true
+    exploreExpeditions().then(
+      (page) => live && setCards(page.expeditions.slice(0, 3)),
+      () => {
+        // Nothing to suggest: the section isn't shown.
+      }
+    )
+    return () => {
+      live = false
+    }
+  }, [])
+  if (!cards.length) return null
+  return (
+    <section
+      aria-labelledby="start-reading-heading"
+      data-testid="start-reading"
+      className="flex flex-col gap-3"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2
+          id="start-reading-heading"
+          className="font-reading text-2xl font-medium"
+        >
+          Start by reading one
+        </h2>
+        <Link href="/explore" className={buttonVariants({ variant: "link" })}>
+          See all public Expeditions
+        </Link>
+      </div>
+      <ul aria-label="Public Expeditions to read" className={cardGrid}>
+        {cards.map((card) => (
+          <li key={card.id}>
+            <CardShell card={card} href={`/e/${card.id}`} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export function LibraryScreen() {
   const user = useUser()
   const [, navigate] = useLocation()
@@ -439,6 +526,8 @@ export function LibraryScreen() {
   const [tag, setTag] = React.useState<string | null>(null)
   const fileInput = React.useRef<HTMLInputElement>(null)
   const offline = useOfflineEntries(user.id)
+  const { ai, agentConnected } = useAiSetup()
+  const noAi = needsKey(ai) && agentConnected === false
   const kept = React.useMemo(
     () => new Set(offline.filter((e) => e.pinned).map((e) => e.expeditionId)),
     [offline]
@@ -683,6 +772,7 @@ export function LibraryScreen() {
 
         <main className="flex min-w-0 flex-1 flex-col gap-10">
           <h1 className="sr-only">Library</h1>
+          {noAi && !unreachable && <NoAiBar ai={ai!} />}
           <ContinueReading cards={byId} />
 
           {unreachable && (
@@ -726,7 +816,7 @@ export function LibraryScreen() {
                   </EmptyHeader>
                   <EmptyContent className="flex-row flex-wrap justify-center">
                     {actions}
-                    <ConnectLink>Connect an agent</ConnectLink>
+                    {!noAi && <ConnectLink>Connect an agent</ConnectLink>}
                   </EmptyContent>
                 </Empty>
               )}
@@ -744,6 +834,8 @@ export function LibraryScreen() {
                 ))}
             </Section>
           )}
+
+          {list.status === "ready" && cards.length === 0 && <StartReading />}
 
           {sections.shared.length > 0 && (
             <Section id={SECTION_IDS.shared} title="Shared with you">

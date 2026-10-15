@@ -168,6 +168,19 @@ export type FirstPrompt = {
 const inline = (title: string) =>
   title.replace(/\s+/g, " ").trim().replace(/"/g, "'") || "Untitled"
 
+/** The request that makes an Expedition from the chat it is asked in. */
+export const FROM_CONVERSATION =
+  "Make a Seply Learn Expedition from this conversation."
+
+/**
+ * The request that makes an Expedition about a question (the create screen
+ * builds it from what the reader typed, when there is no AI here).
+ */
+export function requestAbout(question: string): string {
+  const q = question.replace(/\s+/g, " ").trim()
+  return `Make a Seply Learn Expedition about: ${q || "<what you want to understand>"}`
+}
+
 /**
  * What to say to the agent first: about the Expedition the reader came from
  * (one they can suggest on), or else to create one.
@@ -188,7 +201,7 @@ export function firstPrompts(
   return [
     {
       label: "In a chat you want to keep",
-      prompt: "Make a Seply Learn Expedition from this conversation.",
+      prompt: FROM_CONVERSATION,
       then,
     },
     {
@@ -216,4 +229,12 @@ export function newAgent(
   )
   const token = now.tokens.find((t) => t.lastUsedAt && !used.has(t.id))
   return token ? token.name : null
+}
+
+/**
+ * Whether the reader has an agent connected: one signed in over OAuth, or a
+ * token that has been used.
+ */
+export function hasAgent(overview: AgentsOverview): boolean {
+  return overview.grants.length > 0 || overview.tokens.some((t) => t.lastUsedAt)
 }

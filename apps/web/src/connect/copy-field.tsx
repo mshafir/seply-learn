@@ -8,16 +8,8 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@seply/ui/components/input-group"
-import { toast } from "@seply/ui/components/toast"
 
-async function copy(text: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.add({ title: "Copied.", type: "success" })
-  } catch {
-    // No clipboard (an insecure origin): the text is selectable.
-  }
-}
+import { copyText } from "@/lib/clipboard.ts"
 
 export function CopyField({
   id,
@@ -42,7 +34,7 @@ export function CopyField({
         <InputGroupButton
           size="icon-xs"
           aria-label={`Copy ${label}`}
-          onClick={() => void copy(value)}
+          onClick={() => void copyText(value)}
         >
           <CopyIcon />
         </InputGroupButton>

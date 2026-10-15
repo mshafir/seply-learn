@@ -4,7 +4,8 @@
 // Advanced; in every mode, the per-ask spending cap. A key goes to the server
 // once, when saved, and never comes back. In both and instance modes, a line
 // says whether this server's AI is on for the account, with "Ask to use this
-// server's AI" when it isn't. Theme stays in the account menu. WP-5.4 brings
+// server's AI" when it isn't. "Add a key" links here as /settings#ai, which
+// scrolls to the AI section. Theme stays in the account menu. WP-5.4 brings
 // Connected agents (connected-agents.tsx): MCP OAuth grants and API tokens.
 // Notifications come with their work package.
 import * as React from "react"
@@ -316,6 +317,13 @@ function AiSection() {
     }
   }, [])
 
+  // From "Add a key" (the Library, the create screen): /settings#ai.
+  const loaded = !!ai
+  React.useEffect(() => {
+    if (loaded && window.location.hash === "#ai")
+      document.getElementById("ai")?.scrollIntoView({ block: "start" })
+  }, [loaded])
+
   if (error)
     return (
       <Alert variant="destructive">
@@ -329,7 +337,7 @@ function AiSection() {
   const withKeys = ai.providers.filter((p) => stored.has(p.id))
 
   return (
-    <Card data-testid="ai-settings">
+    <Card id="ai" data-testid="ai-settings" className="scroll-mt-20">
       <CardHeader>
         <CardTitle>AI</CardTitle>
         <CardDescription>

@@ -2,8 +2,9 @@
 // create; with hosted access approval on, only accounts an admin has enabled
 // use the server's AI key. The rest bring their own key (AI_KEY_MODE=both) or
 // their own agent over MCP. Here: the request form (an optional note, then
-// "Request sent" with the date), the dialog around it, and the short line
-// shown where AI is needed but there's no key to use.
+// "Request sent" with the date), the dialog around it, the link that opens
+// it (or says it was asked for), and the short line shown where AI is needed
+// but there's no key to use.
 import * as React from "react"
 import { SendIcon } from "lucide-react"
 import { Link } from "wouter"
@@ -23,7 +24,8 @@ import { Textarea } from "@seply/ui/components/textarea"
 import { toast } from "@seply/ui/components/toast"
 
 import { ConnectLink } from "@/connect/connect-link.tsx"
-import { requestAccess, type AccessState } from "@/lib/api.ts"
+import { serverAiAskable } from "@/lib/ai-setup.ts"
+import { requestAccess, type AccessState, type AiOverview } from "@/lib/api.ts"
 import { SERVER_AI_COPY, useServerAiRequest } from "@/lib/approval.ts"
 import { useSession } from "@/lib/session.ts"
 
@@ -138,6 +140,47 @@ export function ServerAiDialog({
 const inline = "underline underline-offset-4 hover:text-foreground"
 
 /**
+ * "Ask to use this server's AI", opening the request dialog; once asked,
+ * "Requested" with the date. Only in both mode, when the server has AI of
+ * its own that isn't on for the account.
+ */
+export function AskServerAi({
+  ai,
+  className,
+}: {
+  ai: AiOverview | null
+  className?: string
+}) {
+  const [open, setOpen] = React.useState(false)
+  const access = useServerAiRequest()
+  if (!access || !serverAiAskable(ai)) return null
+  return (
+    <>
+      {access.request ? (
+        <span
+          data-testid="server-ai-requested"
+          className={`text-muted-foreground ${className ?? ""}`}
+        >
+          You asked to use this server's AI on{" "}
+          {dateFormat.format(new Date(access.request.createdAt))}.
+        </span>
+      ) : (
+        <Button
+          variant="link"
+          className={className}
+          data-testid="ask-server-ai"
+          onClick={() => setOpen(true)}
+        >
+          Ask to use this server's AI
+        </Button>
+      )}
+      {/* Stays mounted once asked, so the dialog can say "Request sent". */}
+      <ServerAiDialog open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
+/**
  * Where AI is needed and the account has no key it may use: one short line.
  * `needs-key`: no key of its own and the server's AI isn't on for it (both
  * mode). `approval`: the server's AI isn't on for it, and it can't add a key
@@ -167,7 +210,7 @@ export function NoServerAi({
         {reason === "needs-key" ? (
           <>
             Add your own AI key in{" "}
-            <Link href="/settings" className={inline}>
+            <Link href="/settings#ai" className={inline}>
               Settings
             </Link>
             , {ask}, or use your own agent over{" "}

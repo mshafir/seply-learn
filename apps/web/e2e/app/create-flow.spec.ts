@@ -2,8 +2,8 @@ import { expect, test, type Route } from "@playwright/test"
 
 import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 
-// WP-3.4: the create flow. New → Sources (paste a chat, upload a file, write
-// a prompt, a goal chip, the estimate, remove a Source) → Choose Views (the
+// WP-3.4: the create flow. New → Sources (A question first, then paste a
+// chat, upload a file, a question, a goal chip, the estimate, remove a Source) → Choose Views (the
 // skim's cards, Suggest more, Ask for a specific View, the Concept counter,
 // the title) → Save draft → the Library's Drafts → reopen → Create (the build
 // job starts on the saved Views and the Expedition opens). The skim is stubbed
@@ -78,8 +78,13 @@ test("Sources → Choose Views → Save draft, then reopen and Create", async ({
   await expect(page.getByRole("list", { name: "Steps" })).toContainText("Sources")
   const next = page.getByRole("button", { name: "Next: choose Views" })
   await expect(next).toBeDisabled()
+  // A question is the first tab, and the default.
+  await expect(page.getByRole("tab").first()).toHaveText("A question")
+  await expect(page.getByRole("tab", { name: "A question" })).toHaveAttribute("aria-selected", "true")
+  await expect(page.getByLabel("What do you want to understand?")).toBeVisible()
 
   // An AI chat, pasted.
+  await page.getByRole("tab", { name: "Paste a chat" }).click()
   await page.getByLabel("Just paste in an AI chat").fill(CHAT)
   await page.getByRole("button", { name: "Add this chat" }).click()
   const list = page.getByTestId("source-list")
@@ -90,10 +95,10 @@ test("Sources → Choose Views → Save draft, then reopen and Create", async ({
   await page.getByLabel("Browse files").setInputFiles({ name: "bake-day.md", mimeType: "text/markdown", buffer: Buffer.from(NOTES) })
   await expect(list).toContainText("Markdown · 2 sections")
 
-  // A prompt, then removed again.
-  await page.getByRole("tab", { name: "Just a prompt" }).click()
+  // A question, then removed again.
+  await page.getByRole("tab", { name: "A question" }).click()
   await page.getByLabel("What do you want to understand?").fill("How do I bake a lighter loaf?")
-  await page.getByRole("button", { name: "Add this prompt" }).click()
+  await page.getByRole("button", { name: "Add this question" }).click()
   await expect(list.getByRole("listitem")).toHaveCount(3)
   await page.getByRole("button", { name: /^Remove How do I bake/ }).click()
   await expect(list.getByRole("listitem")).toHaveCount(2)

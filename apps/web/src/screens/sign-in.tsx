@@ -3,7 +3,14 @@
 // password, with sign-up when it is open. `GET /api/sign-in-options` says
 // which. The CI-only test credentials have no UI; tests sign up through the
 // API and share the cookie.
+//
+// Beside the card, a brand panel says what Seply Learn is. One card signs
+// in and makes accounts. A new account goes on to the welcome step
+// (/welcome: connect your agent) unless `next` points somewhere specific
+// (an invite, an Expedition, an MCP client's consent): Google sends it there
+// through Better Auth's new-user callback, email sign-up directly.
 import * as React from "react"
+import { CheckIcon } from "lucide-react"
 import { Link, Redirect, useSearchParams } from "wouter"
 
 import { Wordmark } from "@seply/ui/components/brand"
@@ -50,6 +57,9 @@ export function SignInScreen() {
   // reader who is signed in already goes straight back to it.
   const oauthQuery = signedOAuthQuery(window.location.search)
   const signedIn = session.status === "signed-in"
+  // Where a brand-new account goes: the welcome step, unless it came here
+  // on its way somewhere specific.
+  const newUserPath = !oauthQuery && next === "/" ? WELCOME_PATH : undefined
   const [options, setOptions] = React.useState<SignInOptions | null>(null)
   // On desktop: the sign-in has gone out to the system browser.
   const [inBrowser, setInBrowser] = React.useState(false)
@@ -93,7 +103,7 @@ export function SignInScreen() {
       return
     }
     setStarting(true)
-    signInWithGoogle(next, oauthQuery ?? undefined).catch(() => {
+    signInWithGoogle(next, oauthQuery ?? undefined, newUserPath).catch(() => {
       setStarting(false)
       toast.add({
         title: "Couldn't start sign-in",
@@ -104,68 +114,127 @@ export function SignInScreen() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="items-center gap-3 text-center">
-          <Wordmark className="justify-center" />
-          <CardTitle className="font-reading text-2xl font-medium">
-            Sign in
-          </CardTitle>
-          <CardDescription>
-            {oauthQuery
-              ? "Sign in to connect an agent to your Expeditions."
-              : "Build Expeditions from your AI chats, and read them your way."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!options ? (
-            <div className="flex justify-center py-2">
-              <Spinner className="size-5 text-muted-foreground" />
-            </div>
-          ) : (
-            <FieldGroup>
-              {options.emailPassword && (
-                <EmailForm
-                  signUpOpen={options.signUp}
-                  oauthQuery={oauthQuery ?? undefined}
-                  next={next}
-                />
-              )}
-              {options.emailPassword && options.google && (
-                <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                  or
-                </FieldSeparator>
-              )}
-              {options.google && (
-                <Button
-                  className="w-full"
-                  variant={options.emailPassword ? "outline" : "default"}
-                  onClick={start}
-                  disabled={starting}
-                >
-                  {starting && <Spinner />}
-                  Continue with Google
-                </Button>
-              )}
-              {inBrowser && (
-                <p
-                  role="status"
-                  className="text-center text-sm text-muted-foreground"
-                >
-                  Finish signing in in your browser. This window signs in when
-                  you come back.
-                </p>
-              )}
-            </FieldGroup>
-          )}
-        </CardContent>
-      </Card>
-      {!oauthQuery && (
-        <Link href="/explore" className={buttonVariants({ variant: "link" })}>
-          Explore public Expeditions
-        </Link>
-      )}
-    </main>
+    <div className="flex min-h-svh flex-col bg-background md:flex-row">
+      <BrandPanel />
+      <main className="flex flex-1 flex-col items-center gap-5 px-4 py-6 md:justify-center md:px-8 md:py-12">
+        <Card className="w-full max-w-sm max-md:bg-transparent max-md:py-0 max-md:ring-0 md:[--card-spacing:--spacing(7)]">
+          <CardHeader className="gap-1.5 max-md:px-0">
+            <CardTitle className="text-lg font-semibold md:text-xl">
+              Sign in or create an account
+            </CardTitle>
+            <CardDescription className="max-md:hidden">
+              {oauthQuery
+                ? "Sign in to connect an agent to your Expeditions."
+                : "One account works for both. It takes a few seconds."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="max-md:px-0">
+            {!options ? (
+              <div className="flex justify-center py-2">
+                <Spinner className="size-5 text-muted-foreground" />
+              </div>
+            ) : (
+              <FieldGroup>
+                {options.emailPassword && (
+                  <EmailForm
+                    signUpOpen={options.signUp}
+                    oauthQuery={oauthQuery ?? undefined}
+                    next={next}
+                    newUserPath={newUserPath}
+                  />
+                )}
+                {options.emailPassword && options.google && (
+                  <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card max-md:*:data-[slot=field-separator-content]:bg-background">
+                    or
+                  </FieldSeparator>
+                )}
+                {options.google && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    variant={options.emailPassword ? "outline" : "default"}
+                    onClick={start}
+                    disabled={starting}
+                  >
+                    {starting && <Spinner />}
+                    Continue with Google
+                  </Button>
+                )}
+                {inBrowser && (
+                  <p
+                    role="status"
+                    className="text-center text-sm text-muted-foreground"
+                  >
+                    Finish signing in in your browser. This window signs in when
+                    you come back.
+                  </p>
+                )}
+                {!oauthQuery && (
+                  <p className="text-xs text-muted-foreground">
+                    <span className="max-md:hidden">New here? </span>
+                    Next you connect the AI agent you already use, or skip it
+                    and read first.
+                  </p>
+                )}
+              </FieldGroup>
+            )}
+          </CardContent>
+        </Card>
+        {!oauthQuery && (
+          <Link href="/explore" className={buttonVariants({ variant: "link" })}>
+            <span>
+              Explore public Expeditions
+              <span className="max-md:hidden"> without signing in</span>
+            </span>
+          </Link>
+        )}
+      </main>
+    </div>
+  )
+}
+
+/** Where a brand-new account lands first. */
+const WELCOME_PATH = "/welcome"
+
+const POINTS = [
+  "Free to sign up. Read and edit without any AI.",
+  "Build with the AI agent you already use, or your own API key.",
+  "Share an Expedition, or make it public for anyone to read.",
+]
+
+/** What Seply Learn is, on the brand's sprout green. */
+function BrandPanel() {
+  return (
+    <section
+      aria-label="About Seply Learn"
+      data-testid="sign-in-brand"
+      className="flex flex-col gap-5 bg-sprout px-4 pt-8 pb-7 text-foreground md:flex-1 md:justify-between md:gap-12 md:px-16 md:py-12"
+    >
+      <Wordmark className="text-2xl md:text-[1.625rem]" />
+      <div className="flex max-w-lg flex-col gap-5">
+        <h1 className="font-reading text-[2rem] leading-tight font-medium tracking-tight md:text-5xl md:leading-[1.125]">
+          Turn questions into something you can read and come back to.
+        </h1>
+        <p className="text-calyx md:text-base">
+          <span className="max-md:hidden">
+            Seply Learn turns your chats, files and questions into Expeditions:
+            Concepts you can read, linked together and shown in Views.
+          </span>
+          <span className="md:hidden">
+            Free to sign up. Build with the AI agent you already use, or your
+            own API key.
+          </span>
+        </p>
+      </div>
+      <ul className="flex max-w-lg flex-col gap-3 max-md:hidden">
+        {POINTS.map((p) => (
+          <li key={p} className="flex items-start gap-2.5">
+            <CheckIcon className="mt-0.5 size-4 shrink-0 text-calyx" />
+            <span>{p}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -174,10 +243,13 @@ function EmailForm({
   signUpOpen,
   oauthQuery,
   next,
+  newUserPath,
 }: {
   signUpOpen: boolean
   oauthQuery?: string
   next: string
+  /** Where a new account goes instead of `next` (the welcome step). */
+  newUserPath?: string
 }) {
   const [mode, setMode] = React.useState<"sign-in" | "sign-up">("sign-in")
   const [busy, setBusy] = React.useState(false)
@@ -199,7 +271,7 @@ function EmailForm({
         // A full load, so the whole app starts signed in. An MCP client's
         // sign-in stays here, and the screen continues to /consent.
         if (oauthQuery) window.location.reload()
-        else window.location.assign(next)
+        else window.location.assign((signUp && newUserPath) || next)
       },
       (err: unknown) => {
         setBusy(false)
