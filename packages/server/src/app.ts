@@ -16,6 +16,7 @@ import {
   ApprovalRequired,
   approvalRoutes,
 } from "./approval.ts"
+import { isWelcomed, markWelcomed } from "./welcome.ts"
 import { agentRoutes } from "./agents.ts"
 import { aiRoutes } from "./ai.ts"
 import { createAuth, type Auth } from "./auth.ts"
@@ -344,11 +345,19 @@ export function createApp<Env extends ServerEnv>(opts: AppOptions<Env>) {
   })
 
   const signedIn = requireUser()
-  // The account, and its standing under hosted access approval (approval.ts).
+  // The account, its standing under hosted access approval (approval.ts),
+  // and whether it has seen the welcome step (welcome.ts).
   app.get("/me", signedIn, async (c) => {
     const db = await c.var.db()
-    const access = await accessState(db, c.var.config(), c.var.user.id)
-    return c.json({ user: c.var.user, access })
+    const [access, welcomed] = await Promise.all([
+      accessState(db, c.var.config(), c.var.user.id),
+      isWelcomed(db, c.var.user.id),
+    ])
+    return c.json({ user: c.var.user, access, welcomed })
+  })
+  app.post("/me/welcomed", signedIn, async (c) => {
+    await markWelcomed(await c.var.db(), c.var.user.id)
+    return c.json({ welcomed: true })
   })
   app.use("/access-requests", signedIn)
   app.use("/admin/*", signedIn)

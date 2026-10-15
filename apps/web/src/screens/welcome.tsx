@@ -1,13 +1,13 @@
-// The welcome step (spec §3.1): where a brand-new account lands after
-// sign-up, once. Connect the agent you already use: its tabs, then numbered
-// steps (add Seply Learn, sign in when the agent asks, ask it for an
-// Expedition) and a status line that ticks when the agent's first call
-// arrives. Skip for now, or Go to my Library. The pieces and the words come
+// The welcome step (spec §3.1): where a new account lands, once. Connect
+// the agent you already use: its tabs, then numbered steps (add Seply
+// Learn, sign in when the agent asks, ask it for an Expedition) and a status
+// line that ticks when the agent's first call arrives. Skip for now, or Go to my Library. The pieces and the words come
 // from the setup page's (connect/agent-setup.tsx, connect/steps.ts).
 //
-// The sign-in screen sends new accounts here: Google through Better Auth's
-// new-user callback, email sign-up directly. Nothing else links here, so a
-// later sign-in never shows it.
+// Whether the account has seen it is part of the account (`welcomed` on
+// GET /me). The Library sends an account that hasn't here (App.tsx), however
+// it signed in: Google, email or the desktop app. Showing it marks the
+// account, so leaving by any way counts and the Library won't send it back.
 import * as React from "react"
 import { Link } from "wouter"
 
@@ -28,7 +28,8 @@ import {
   useNewAgent,
 } from "@/connect/agent-hooks.ts"
 import { installSteps, signInSteps } from "@/connect/steps.ts"
-import { useUser } from "@/lib/session.ts"
+import { markWelcomed } from "@/lib/api.ts"
+import { useSession, useUser } from "@/lib/session.ts"
 
 /** The first word of a name, for the eyebrow. */
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? ""
@@ -60,10 +61,20 @@ function Step({
 
 export function WelcomeScreen() {
   const user = useUser()
+  const { setWelcomed } = useSession()
   const { agent, label, choose } = useAgentChoice()
   const instance = useInstance()
   const { overview, connected } = useNewAgent()
   const name = firstName(user.name)
+
+  // Seen: mark the account, here and on the server. If the call fails, the
+  // next load shows the step again.
+  const unwelcomed = user.welcomed === false
+  React.useEffect(() => {
+    if (!unwelcomed) return
+    setWelcomed()
+    markWelcomed().catch((e) => console.warn("welcome: marking failed", e))
+  }, [unwelcomed, setWelcomed])
 
   return (
     <div className="flex min-h-svh flex-col bg-background">

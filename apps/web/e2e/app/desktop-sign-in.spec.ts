@@ -70,6 +70,41 @@ test("the browser hands a sign-in to the app's window", async ({
   await again.close()
 })
 
+test("a new account's app window opens on the welcome step, once", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  await signUp(page, "New Desktop Reader", { welcomed: false })
+  const { verifier, challenge } = pkce()
+
+  // The browser's hand-off page is on the way somewhere: no welcome step.
+  await page.goto(`/desktop/sign-in?challenge=${challenge}`)
+  const card = page.getByTestId("desktop-sign-in")
+  const answered = page.waitForResponse("**/api/auth/desktop/handoff")
+  await card.getByRole("button", { name: "Open the app" }).click()
+  const { token } = (await (await answered).json()) as { token: string }
+
+  // The app's window opens the Library, which shows the welcome step first.
+  const app = await browser.newContext({ baseURL })
+  const appPage = await app.newPage()
+  const marked = appPage.waitForResponse("**/api/me/welcomed")
+  await appPage.goto(`/desktop/complete#token=${token}&verifier=${verifier}`)
+  await expect(appPage).toHaveURL(/\/welcome$/)
+  await expect(appPage.getByTestId("welcome")).toContainText(
+    "Connect your agent"
+  )
+  expect((await marked).status()).toBe(200)
+
+  // It was the account's once: the browser now opens the Library.
+  await page.goto("/")
+  await expect(
+    page.getByRole("heading", { name: "Your Expeditions" })
+  ).toBeVisible()
+  await expect(page.getByTestId("welcome")).toHaveCount(0)
+  await app.close()
+})
+
 test("signed out, the browser signs in first, then asks", async ({ page }) => {
   const { challenge } = pkce()
   await page.goto(`/desktop/sign-in?challenge=${challenge}`)

@@ -11,6 +11,11 @@ export type User = {
   name: string
   /** Hosted access approval (the server's approval.ts); from GET /me. */
   access?: AccessState
+  /**
+   * Has seen the welcome step (spec §3.1); from GET /me. Missing (a user
+   * cached before this existed) counts as welcomed.
+   */
+  welcomed?: boolean
 }
 
 /** My pending access request. */
@@ -112,13 +117,25 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 /** The signed-in user, or null when signed out. */
 export async function getMe(): Promise<User | null> {
   try {
-    const me = await call<{ user: User; access?: AccessState }>("/me")
-    return { ...me.user, ...(me.access && { access: me.access }) }
+    const me = await call<{
+      user: User
+      access?: AccessState
+      welcomed?: boolean
+    }>("/me")
+    return {
+      ...me.user,
+      ...(me.access && { access: me.access }),
+      ...(me.welcomed !== undefined && { welcomed: me.welcomed }),
+    }
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) return null
     throw e
   }
 }
+
+/** Marks the account as having seen the welcome step (spec §3.1). */
+export const markWelcomed = () =>
+  call<{ welcomed: true }>("/me/welcomed", { method: "POST" })
 
 // --- Hosted access approval (spec §2.6, §3.12; the server's approval.ts) ------
 
@@ -401,23 +418,17 @@ export async function signInWithEmail(args: {
 /**
  * Starts Google sign-in (Better Auth): the browser leaves for Google. With
  * `oauthQuery` (an MCP client's sign-in: the signed query Better Auth sent to
- * /sign-in), the authorization continues after sign-in, to /consent. With
- * `newUserPath`, an account made by this sign-in lands there instead of
- * `callbackPath` (the welcome step); Better Auth decides which.
+ * /sign-in), the authorization continues after sign-in, to /consent.
  */
 export async function signInWithGoogle(
   callbackPath = "/",
-  oauthQuery?: string,
-  newUserPath?: string
+  oauthQuery?: string
 ): Promise<void> {
   const { url } = await call<{ url?: string }>("/auth/sign-in/social", {
     method: "POST",
     body: JSON.stringify({
       provider: "google",
       callbackURL: new URL(callbackPath, window.location.origin).href,
-      ...(newUserPath && {
-        newUserCallbackURL: new URL(newUserPath, window.location.origin).href,
-      }),
       ...(oauthQuery && { oauth_query: oauthQuery }),
     }),
   })

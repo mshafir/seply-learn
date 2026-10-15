@@ -43,6 +43,7 @@ proposals        id, exp, author, origin (ai|mcp), rationale (the ask), status (
 proposal_items   id, proposal_id, ops[], base{}, status (pending|accepted|dismissed|stale)
 collaborators    exp, user_id, role (owner|editor|viewer)              (plain rows, not logged)
 users, sessions, accounts, api_keys                                    (Better Auth tables)
+                 users also: approved_at (§2.6), welcomed_at (saw the welcome step, §3.1)
 jwks, oauth_clients, oauth_consents, oauth_access_tokens, …            (Better Auth's MCP OAuth server, WP-5.4)
 agent_grants     user, client, expedition_ids                           (an OAuth grant's chosen Expeditions)
 ai_keys          user_id, provider, ciphertext, iv, last4, created_at  (byok and both modes)
@@ -65,6 +66,7 @@ push_subscriptions  endpoint, user_id, p256dh, auth, created_at      (per user; 
   - **~18 Relationship Types**, each with a forward and an inverse label, including `corrects` for self-corrections.
 - **Colours** are stored as palette names (blue, teal, green, amber, orange, red, pink, violet, indigo, slate, brown, olive), never hex values, so dark mode works.
 - **Weight** is computed from structure; `weight_pin` is a curator override. Weight describes the **subject** and is the same for every reader. "I already know this" is Reading status, never a pin.
+- **`users.welcomed_at`** is set the first time the account sees the welcome step ([3.1](03-screens-and-flows.md#31-page-flow)); null means not yet. The migration that added it set it to `created_at` for every account that existed then, so only later accounts see the step.
 - **Ordering** uses fractional index keys: article sections and the Views bar. Sibling order inside a View is per View (see §1.6). There is no `outline_key`.
 
 ## 1.3 Operations

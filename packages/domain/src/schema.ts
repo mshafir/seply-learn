@@ -45,6 +45,12 @@ export const users = pgTable("users", {
    * it approved every account that existed then.
    */
   approvedAt: authTs("approved_at"),
+  /**
+   * When the account saw the welcome step (spec §3.1). Null: not yet, so its
+   * next plain visit to the Library goes there first. The migration that
+   * added it marked every account that existed then.
+   */
+  welcomedAt: authTs("welcomed_at"),
 })
 
 export const sessions = pgTable("sessions", {
