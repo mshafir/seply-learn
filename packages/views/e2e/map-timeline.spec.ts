@@ -63,7 +63,7 @@ test("map: with no tiles configured, the OpenFreeMap fallback is tried, and bloc
   const asked: string[] = [];
   page.on("request", (r) => asked.push(r.url()));
   await open(page, "map", { expedition: "trip" });
-  expect(asked.some((u) => u.startsWith("https://tiles.openfreemap.org/styles/positron"))).toBe(true);
+  expect(asked.some((u) => u.startsWith("https://tiles.openfreemap.org/styles/liberty"))).toBe(true);
   await expect(page.getByTestId("map-note")).toBeVisible();
   await expect(page.locator(".seply-pin")).toHaveCount(12);
 });

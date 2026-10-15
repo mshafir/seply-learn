@@ -29,8 +29,11 @@ export type BasemapConfig = {
 };
 
 export const PROTOMAPS_ASSETS = "https://protomaps.github.io/basemaps-assets";
+// Liberty is OpenFreeMap's colourful style (parks, water, roads, railways);
+// positron, its greyscale one, read as little more than borders. It has no
+// dark counterpart, so the dark theme keeps OpenFreeMap's dark style.
 export const OPENFREEMAP_STYLES: Record<MapTheme, string> = {
-  light: "https://tiles.openfreemap.org/styles/positron",
+  light: "https://tiles.openfreemap.org/styles/liberty",
   dark: "https://tiles.openfreemap.org/styles/dark",
 };
 
