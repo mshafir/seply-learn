@@ -367,6 +367,22 @@ export async function signInWithGoogle(
   window.location.assign(url)
 }
 
+// --- Desktop sign-in through the browser (WP-8.2, spec §10.3) -----------------
+
+/** In the browser: a one-time token for the app that made `challenge`. */
+export const startDesktopHandoff = (challenge: string) =>
+  call<{ token: string }>("/auth/desktop/handoff", {
+    method: "POST",
+    body: JSON.stringify({ challenge }),
+  })
+
+/** In the app's window: trades the token and verifier for a session. */
+export const finishDesktopHandoff = (token: string, verifier: string) =>
+  call<{ ok: true }>("/auth/desktop/session", {
+    method: "POST",
+    body: JSON.stringify({ token, verifier }),
+  })
+
 // --- Connected agents (WP-5.4): API tokens and MCP OAuth grants ---------------
 
 export type AgentScope =

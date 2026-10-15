@@ -13,6 +13,8 @@
 //   /settings/access-requests  Admin › Access requests (hosted access approval, WP-7.3)
 //   /connect            Connect an agent, step by step (WP-5.5); ?e=<id>: for
 //                       that Expedition
+//   /desktop/sign-in    in the browser: hand a sign-in to the desktop app (WP-8.2)
+//   /desktop/complete   in the app's window: finish that sign-in
 //   /showcase           the design system (WP-0.3)
 import { Redirect, Route, Switch } from "wouter"
 
@@ -22,6 +24,10 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { AccessRequestsScreen } from "@/screens/access-requests.tsx"
 import { ConnectScreen } from "@/connect/connect-screen.tsx"
 import { ConsentScreen } from "@/screens/consent.tsx"
+import {
+  DesktopCompleteScreen,
+  DesktopSignInScreen,
+} from "@/screens/desktop-sign-in.tsx"
 import { CreateScreen } from "@/create/create-screen.tsx"
 import { ExpeditionScreen } from "@/expedition/expedition-screen.tsx"
 import { useSession } from "@/lib/session.ts"
@@ -66,6 +72,8 @@ export function App() {
     <Switch>
       <Route path="/showcase" component={Showcase} />
       <Route path="/sign-in" component={SignInScreen} />
+      <Route path="/desktop/sign-in" component={DesktopSignInScreen} />
+      <Route path="/desktop/complete" component={DesktopCompleteScreen} />
       <Route path="/invite/:token">
         {(params) => (
           <WaitForSession>

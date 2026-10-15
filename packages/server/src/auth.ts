@@ -21,6 +21,7 @@ import { jwt } from "better-auth/plugins/jwt"
 import { oAuthProxy } from "better-auth/plugins/oauth-proxy"
 import type { ServerConfig } from "./config.ts"
 import type { Db } from "./db.ts"
+import { desktopHandoff } from "./desktop-handoff.ts"
 
 export const AUTH_BASE_PATH = "/api/auth"
 
@@ -127,6 +128,8 @@ export function createAuth(
         // Agents call often; the user's role and our scopes are the limits.
         rateLimit: { enabled: false },
       }),
+      // The desktop app's sign-in through the system browser (spec §10.3).
+      desktopHandoff(),
     ],
     telemetry: { enabled: false },
   })
