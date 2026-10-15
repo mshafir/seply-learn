@@ -401,17 +401,23 @@ export async function signInWithEmail(args: {
 /**
  * Starts Google sign-in (Better Auth): the browser leaves for Google. With
  * `oauthQuery` (an MCP client's sign-in: the signed query Better Auth sent to
- * /sign-in), the authorization continues after sign-in, to /consent.
+ * /sign-in), the authorization continues after sign-in, to /consent. With
+ * `newUserPath`, an account made by this sign-in lands there instead of
+ * `callbackPath` (the welcome step); Better Auth decides which.
  */
 export async function signInWithGoogle(
   callbackPath = "/",
-  oauthQuery?: string
+  oauthQuery?: string,
+  newUserPath?: string
 ): Promise<void> {
   const { url } = await call<{ url?: string }>("/auth/sign-in/social", {
     method: "POST",
     body: JSON.stringify({
       provider: "google",
       callbackURL: new URL(callbackPath, window.location.origin).href,
+      ...(newUserPath && {
+        newUserCallbackURL: new URL(newUserPath, window.location.origin).href,
+      }),
       ...(oauthQuery && { oauth_query: oauthQuery }),
     }),
   })

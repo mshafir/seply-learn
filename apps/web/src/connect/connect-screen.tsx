@@ -10,15 +10,9 @@
 // - If the server can't say what it is, the self-hosted steps show: they
 //   work everywhere.
 import * as React from "react"
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  ExternalLinkIcon,
-  KeyRoundIcon,
-} from "lucide-react"
+import { ArrowLeftIcon, CheckIcon } from "lucide-react"
 import { Link, useSearch } from "wouter"
 
-import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Badge } from "@seply/ui/components/badge"
 import { Wordmark } from "@seply/ui/components/brand"
 import { Button } from "@seply/ui/components/button"
@@ -30,41 +24,21 @@ import {
   CardTitle,
 } from "@seply/ui/components/card"
 import { Spinner } from "@seply/ui/components/spinner"
-import { Tabs, TabsList, TabsTrigger } from "@seply/ui/components/tabs"
-import { toast } from "@seply/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
-import { CopyField } from "@/connect/copy-field.tsx"
 import {
-  AGENTS,
-  firstPrompts,
-  installSteps,
-  newAgent,
-  signInSteps,
-  type AgentId,
-  type InstallItem,
-} from "@/connect/steps.ts"
+  AgentTabs,
+  ConnectStatus,
+  FirstPrompts,
+  Install,
+} from "@/connect/agent-setup.tsx"
 import {
-  createApiToken,
-  getAgents,
-  getInstance,
-  listExpeditions,
-  type AgentsOverview,
-  type Instance,
-} from "@/lib/api.ts"
-
-const AGENT_KEY = "seply-connect-agent"
-const POLL_MS = 3000
-
-function rememberedAgent(): AgentId {
-  try {
-    const saved = localStorage.getItem(AGENT_KEY)
-    if (AGENTS.some((a) => a.id === saved)) return saved as AgentId
-  } catch {
-    // No storage: the first agent.
-  }
-  return "claude-code"
-}
+  useAgentChoice,
+  useInstance,
+  useNewAgent,
+} from "@/connect/agent-hooks.ts"
+import { installSteps, signInSteps } from "@/connect/steps.ts"
+import { listExpeditions } from "@/lib/api.ts"
 
 /** A numbered step. */
 function Step({
@@ -99,149 +73,6 @@ function Step({
   )
 }
 
-/** Makes a token for an agent that can't sign in; its key is shown once. */
-function TokenStep({ overview }: { overview: AgentsOverview | null }) {
-  const [key, setKey] = React.useState<string | null>(null)
-  const [busy, setBusy] = React.useState(false)
-  if (key)
-    return (
-      <Alert data-testid="connect-token">
-        <KeyRoundIcon />
-        <AlertTitle>Copy your token now</AlertTitle>
-        <AlertDescription className="flex min-w-0 flex-col gap-2">
-          <span>
-            You won't see it again. Anyone with it can act as you. Send it as
-            this header:
-          </span>
-          <CopyField
-            id="connect-token-header"
-            value={`Authorization: Bearer ${key}`}
-            label="header"
-          />
-        </AlertDescription>
-      </Alert>
-    )
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <Button
-        variant="outline"
-        disabled={!overview || busy}
-        onClick={() => {
-          if (!overview) return
-          setBusy(true)
-          createApiToken({
-            name: "My agent",
-            scopes: overview.scopes.map((s) => s.id),
-            expeditions: null,
-          })
-            .then(
-              (made) => setKey(made.key),
-              (e: unknown) =>
-                toast.add({
-                  title:
-                    e instanceof Error ? e.message : "Couldn't make a token.",
-                  type: "error",
-                })
-            )
-            .finally(() => setBusy(false))
-        }}
-      >
-        {busy ? <Spinner /> : <KeyRoundIcon />}
-        Create a token
-      </Button>
-      <span className="text-sm text-muted-foreground">
-        It can do everything you can.{" "}
-        <Link href="/settings" className="underline underline-offset-4">
-          Make a narrower one in Settings
-        </Link>
-        .
-      </span>
-    </div>
-  )
-}
-
-function Install({
-  items,
-  overview,
-}: {
-  items: InstallItem[]
-  overview: AgentsOverview | null
-}) {
-  return (
-    <>
-      {items.map((item, i) => {
-        switch (item.kind) {
-          case "text":
-            return (
-              <p key={i} className="text-sm text-muted-foreground">
-                {item.text}
-              </p>
-            )
-          case "command":
-            return (
-              <CopyField
-                key={i}
-                id={`connect-install-${i}`}
-                value={item.value}
-                label={item.label}
-              />
-            )
-          case "link":
-            return (
-              <div key={i}>
-                <Button render={<a href={item.href} />}>
-                  <ExternalLinkIcon />
-                  {item.label}
-                </Button>
-              </div>
-            )
-          case "token":
-            return <TokenStep key={i} overview={overview} />
-        }
-      })}
-    </>
-  )
-}
-
-/**
- * The reader's connected agents, re-read every few seconds while the page is
- * visible, until one connects: the first reading, and the new agent's name.
- */
-function useNewAgent() {
-  const [first, setFirst] = React.useState<AgentsOverview | null>(null)
-  const [connected, setConnected] = React.useState<string | null>(null)
-  const baseline = React.useRef<AgentsOverview | null>(null)
-  React.useEffect(() => {
-    if (connected) return
-    let live = true
-    const read = () => {
-      if (document.visibilityState !== "visible") return
-      getAgents().then(
-        (now) => {
-          if (!live) return
-          if (!baseline.current) {
-            baseline.current = now
-            setFirst(now)
-            return
-          }
-          const name = newAgent(baseline.current, now)
-          if (name) setConnected(name)
-        },
-        () => {
-          // Offline, or a hiccup: the next reading tries again.
-        }
-      )
-    }
-    read()
-    const timer = window.setInterval(read, POLL_MS)
-    return () => {
-      live = false
-      window.clearInterval(timer)
-    }
-  }, [connected])
-  return { overview: first, connected }
-}
-
 type Named = { id: string; title: string }
 
 /**
@@ -269,27 +100,9 @@ function useExpedition(id: string | null): Named | null | undefined {
 
 export function ConnectScreen() {
   const expedition = useExpedition(new URLSearchParams(useSearch()).get("e"))
-  const [agent, setAgent] = React.useState<AgentId>(rememberedAgent)
-  const [instance, setInstance] = React.useState<Instance | null>(null)
+  const { agent, label, choose } = useAgentChoice()
+  const instance = useInstance()
   const { overview, connected } = useNewAgent()
-
-  React.useEffect(() => {
-    let live = true
-    void getInstance().then((i) => live && setInstance(i))
-    return () => {
-      live = false
-    }
-  }, [])
-
-  const choose = (id: AgentId) => {
-    setAgent(id)
-    try {
-      localStorage.setItem(AGENT_KEY, id)
-    } catch {
-      // Not remembered; nothing else changes.
-    }
-  }
-  const label = AGENTS.find((a) => a.id === agent)!.label
   const back = expedition ? `/e/${expedition.id}` : "/"
 
   return (
@@ -327,15 +140,7 @@ export function ConnectScreen() {
         </div>
 
         <Step n={1} title="Choose your agent">
-          <Tabs value={agent} onValueChange={(v) => choose(v as AgentId)}>
-            <TabsList className="h-auto w-full flex-wrap sm:w-fit">
-              {AGENTS.map((a) => (
-                <TabsTrigger key={a.id} value={a.id}>
-                  {a.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <AgentTabs agent={agent} onChange={choose} />
         </Step>
 
         <Step n={2} title={`Add Seply Learn to ${label}`}>
@@ -355,23 +160,7 @@ export function ConnectScreen() {
               <li key={s}>{s}</li>
             ))}
           </ol>
-          <p
-            role="status"
-            data-testid="connect-status"
-            className="flex items-center gap-2 text-sm text-muted-foreground"
-          >
-            {connected ? (
-              <>
-                <CheckIcon className="size-4 text-foreground" />
-                <span className="text-foreground">Connected: {connected}</span>
-              </>
-            ) : (
-              <>
-                <Spinner />
-                Waiting for your agent. This page notices when it connects.
-              </>
-            )}
-          </p>
+          <ConnectStatus connected={connected} />
         </Step>
 
         <Step
@@ -386,18 +175,7 @@ export function ConnectScreen() {
           {expedition === undefined && (
             <Spinner className="text-muted-foreground" />
           )}
-          {expedition !== undefined &&
-            firstPrompts(expedition).map((p, i) => (
-              <div key={p.prompt} className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium">{p.label}</span>
-                <CopyField
-                  id={`connect-prompt-${i}`}
-                  value={p.prompt}
-                  label="prompt"
-                />
-                <span className="text-sm text-muted-foreground">{p.then}</span>
-              </div>
-            ))}
+          {expedition !== undefined && <FirstPrompts expedition={expedition} />}
           <div>
             <Button variant="outline" render={<Link href={back} />}>
               {expedition ? "Back to the Expedition" : "Go to the Library"}

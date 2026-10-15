@@ -6,7 +6,10 @@ Designed on the Claude Design canvas ([App layout and page flow](../../wayfinder
 
 ```
 Explore ─── public Expedition (no sign-in) · Fork ──▶ Sign in ──▶ Fork offered
-Sign in ─┐                         ┌─ Shared/public link ──┐
+Sign in ─┬─ new account ──▶ Welcome: connect your agent ─┐
+         ▼                                               │
+         ┌───────────────────────────────────────────────┘
+         │                         ┌─ Shared/public link ──┐
          ▼                         ▼                       │
       Library ──New──▶ Sources ──▶ Choose Views ──▶ Expedition (building → ready)
          ▲  │                                             │   ├ side panel: Concept / View / Suggestions / History / Share
@@ -14,6 +17,23 @@ Sign in ─┐                         ┌─ Shared/public link ──┐
          └──────────────────────────── back ──────────────┘
 MCP agent ── create_expedition ──▶ new Expedition (first build) · propose_changes ──▶ Suggestions
 ```
+
+**Sign in** (`/sign-in`):
+
+- A brand panel on the sprout green: the wordmark, "Turn questions into something you can read and come back to.", one line on what Seply Learn does, and three short points.
+- Beside it, one card: **Sign in or create an account**, with **Continue with Google** (and email and password where the server offers it). Under it: "New here? Next you connect the AI agent you already use, or skip it and read first."
+- Then the link **Explore public Expeditions without signing in**.
+- At phone width the panel sits above the card, with only the headline and one line.
+- `next`, the desktop hand-off and an MCP client's sign-in (then consent) work as before.
+
+**Welcome** (`/welcome`): where a new account lands, once.
+
+- The sign-in screen sends a new account there. Google does it through Better Auth's new-user callback; email sign-up goes there directly. A later sign-in goes to the Library.
+- It isn't shown when `next` points somewhere specific: an invite, an Expedition, an MCP client's consent.
+- "WELCOME, <first name>", **Connect your agent**, and one line on what an agent does here.
+- The agent tabs and numbered steps from `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)): add Seply Learn, sign in when the agent asks, ask it to make an Expedition.
+- A status line ticks when the agent's first call arrives.
+- **Skip for now** and **Go to my Library** both go to the Library.
 
 ## 3.2 Library (canvas 01)
 
@@ -30,20 +50,31 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
   - live build status while building
 - **Global search:** "Search Concepts, articles and #tags" opens a command dialog, with results grouped by Expedition, Concept and Tag, and an "Include public Expeditions" toggle.
 - **New** starts the create flow. **Import** accepts our JSON and creates a new private Expedition.
+- **No AI yet:** when the account has no AI it may use and no agent is connected, a quiet bar sits at the top.
+  - It says "No AI connected yet" and "You can read, edit and import now. To build Expeditions, connect your agent or add a key."
+  - Its actions: **Connect your agent** (`/connect`), **Add a key** (Settings › AI) and **Ask to use this server's AI** (the request dialog, [3.12](#312-this-servers-ai-hosted)).
+  - Ask shows only in `both` mode, when the server has its own AI and it isn't on for the account. Once asked, the bar says so instead.
+  - The bar goes away once a key is added or an agent connects.
+- **An empty Library** also shows **Start by reading one**: up to three public Expeditions from Explore, and **See all public Expeditions** (`/explore`).
 
 ## 3.3 Create: Sources (canvas 02a)
 
-- **Start from anything, mixed and several at once:**
-  - **paste an AI chat** from any assistant (the copy says "just paste in an AI chat")
-  - **upload files:** chat exports from ChatGPT, Claude or Gemini, PDF, DOCX, Markdown, TXT, HTML; 25 MB each
-  - **write a prompt** alone
+- **Start from anything, mixed and several at once.** The tabs, in order:
+  - **A question** (the default): what the reader wants to understand
+  - **Paste a chat** from any assistant (the copy says "just paste in an AI chat")
+  - **Files:** chat exports from ChatGPT, Claude or Gemini, PDF, DOCX, Markdown, TXT, HTML; 25 MB each
   - optional goal chips ("learn it", "decide", "plan")
 
   Sources stack up in a list. **No link fetching in v1**; share links can't be read without the assistant's login, so the copy says "paste the conversation instead".
 
-- **The prompt alone** produces background knowledge (provenance empty).
+- **A question alone** produces background knowledge (provenance empty).
 - **The cost estimate** (e.g. "~420k tokens, about $1.10") shows before continuing. It uses the reader's key, or the instance key, depending on the instance mode. Over the token cap, the reader picks which Sources or sections to include.
 - **Next** runs the **skim** (≈10–20 s) and starts **extraction in the background** at the same moment.
+- **No AI to build with** (no key of the reader's, and this server's AI isn't on for them): the panel **Building needs AI. Choose how.** replaces the estimate.
+  - **Ask your agent to build it:** a request to copy, built from what the reader typed: "Make a Seply Learn Expedition about: <question>". From a chat or files it is "Make a Seply Learn Expedition from this conversation.", with the tip to ask in that same chat.
+  - It says whether the reader's agent is connected, with **Connect it** when not.
+  - **Or build it here with your key:** **Add an API key** (Settings › AI), and a small **Ask to use this server's AI** (the same rules as the Library's bar).
+  - Choose Views stays off. Sources are still saved to the draft.
 
 ## 3.4 Create: Choose Views (canvas 02b)
 
@@ -147,7 +178,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 
 - **Theme:** System / Light / Dark.
 - **AI** (bring-your-own-key and `both` modes): keys per provider (the last 4 characters, Test, Delete). The model per stage is under Advanced. There's also the per-ask spending cap. In `both` mode the card says the reader's own key is used first, and has a line about this server's AI: on for the account, or off with **Ask to use this server's AI** ([3.12](#312-this-servers-ai-hosted)).
-- **Connected agents:** MCP OAuth grants, and personal API tokens, each optionally restricted to chosen Expeditions. **Connect an agent** opens the step-by-step setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), which is also linked from Create: Sources, the Suggestions tab, Ask and the empty Library.
+- **Connected agents:** MCP OAuth grants, and personal API tokens, each optionally restricted to chosen Expeditions. **Connect an agent** opens the step-by-step setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), which is also linked from Create: Sources, the Suggestions tab, Ask, the Library and the welcome step ([3.1](#31-page-flow)). **Add a key** links to `/settings#ai`, which scrolls to the AI card.
 - **Notifications:** web push on or off.
 
 ## 3.11 Anonymous and viewer experience
@@ -159,8 +190,9 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 ## 3.12 This server's AI (hosted)
 
 - Sign-up is open. Every account can create, import, Fork, edit, share and use MCP, approved or not.
-- With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), only accounts an admin has enabled use this server's AI key. The Library shows no banner.
-- Where the AI is needed and the account has no key it may use (the create flow's estimate and Choose Views, Grow, Write the article), one short line says: "Add your own AI key in Settings, ask to use this server's AI, or use your own agent over MCP." **Settings** and **MCP** (`/connect`) are links; **ask to use this server's AI** opens a small dialog with **Ask to use this server's AI** (an optional note, then "Request sent" with the date). Settings › AI has the same button ([3.10](#310-account-and-settings)).
+- With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), only accounts an admin has enabled use this server's AI key. The Library has no waiting-list banner; its "No AI connected yet" bar ([3.2](#32-library-canvas-01)) offers the request with the other ways to get AI.
+- Create: Sources shows the "Building needs AI" panel ([3.3](#33-create-sources-canvas-02a)).
+- Where the AI is needed later and the account has no key it may use (Choose Views, Grow, Write the article), one short line says: "Add your own AI key in Settings, ask to use this server's AI, or use your own agent over MCP." **Settings** and **MCP** (`/connect`) are links; **ask to use this server's AI** opens a small dialog with **Ask to use this server's AI** (an optional note, then "Request sent" with the date). Settings › AI has the same button ([3.10](#310-account-and-settings)).
 - **Admin › Access requests** (admins only, from Settings): pending requests first, with name, email, note and date, and **Approve** / **Decline**; a second tab lists approved accounts. Approving emails the requester that the server's AI is on for them.
 
 ## 3.13 Explore

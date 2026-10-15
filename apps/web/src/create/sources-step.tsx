@@ -1,10 +1,17 @@
 // Create: Sources (spec §3.3, canvas 02a). Start from anything, mixed and
-// several at once: paste an AI chat, upload files, or write a prompt, with
-// optional goal chips. Sources stack up in a list; the cost estimate shows
-// before continuing; Next runs the skim on Choose Views.
+// several at once: ask a question (the first tab), paste an AI chat or
+// upload files, with optional goal chips. Sources stack up in a list; the
+// cost estimate shows before continuing; Next runs the skim on Choose Views.
+//
+// With no AI to build with (no key of the reader's, and this server's AI
+// isn't on for them), "Building needs AI. Choose how." offers the two ways:
+// a request to paste into their own agent, built from what they typed, and
+// adding an API key. Choose Views stays off; the Sources stay in the draft.
 import * as React from "react"
 import {
   ArrowRightIcon,
+  CheckIcon,
+  CopyIcon,
   FileTextIcon,
   MessageSquareTextIcon,
   SparklesIcon,
@@ -15,12 +22,20 @@ import { Link } from "wouter"
 import { Alert, AlertDescription, AlertTitle } from "@seply/ui/components/alert"
 import { Badge } from "@seply/ui/components/badge"
 import { Button } from "@seply/ui/components/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@seply/ui/components/card"
 import {
   Field,
   FieldDescription,
   FieldLabel,
 } from "@seply/ui/components/field"
 import { FileDropZone } from "@seply/ui/components/file-drop-zone"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@seply/ui/components/input-group"
+import { Separator } from "@seply/ui/components/separator"
 import { Skeleton } from "@seply/ui/components/skeleton"
 import { Spinner } from "@seply/ui/components/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@seply/ui/components/tabs"
@@ -29,6 +44,8 @@ import { toast } from "@seply/ui/components/toast"
 import { ToggleGroup, ToggleGroupItem } from "@seply/ui/components/toggle-group"
 
 import { ConnectLink } from "@/connect/connect-link.tsx"
+import { copyText } from "@/lib/clipboard.ts"
+import { FROM_CONVERSATION, requestAbout } from "@/connect/steps.ts"
 import {
   addTextSource,
   ApiError,
@@ -36,11 +53,13 @@ import {
   noAiReason,
   removeSource,
   uploadSource,
+  type AiOverview,
   type BuildEstimate,
   type Goal,
   type NoAiReason,
 } from "@/lib/api.ts"
-import { NoServerAi } from "@/components/server-ai.tsx"
+import { needsKey, useAiSetup } from "@/lib/ai-setup.ts"
+import { AskServerAi, NoServerAi } from "@/components/server-ai.tsx"
 
 import type { Flow } from "./create-screen.tsx"
 import {
@@ -102,13 +121,18 @@ export function SourcesStep({
   onNext: () => void
 }) {
   const { draft, expeditionId, refresh, cache } = flow
-  const [tab, setTab] = React.useState<"chat" | "files" | "prompt">("chat")
+  const [tab, setTab] = React.useState<"prompt" | "chat" | "files">("prompt")
   const [chat, setChat] = React.useState("")
   const [prompt, setPrompt] = React.useState("")
   const [busy, setBusy] = React.useState<"chat" | "files" | "prompt" | null>(null)
   const [removing, setRemoving] = React.useState<string | null>(null)
   const chars = sourceChars(draft.sources)
   const estimate = useEstimate(chars)
+  const { ai, agentConnected } = useAiSetup()
+  const noAi = needsKey(ai)
+  // The question to ask the agent about: what's typed, else the last one added.
+  const question =
+    prompt.trim() || draft.sources.findLast((s) => s.kind === "prompt")?.title || ""
 
   const addText = async (type: "paste" | "prompt", text: string) => {
     const which = type === "paste" ? "chat" : "prompt"
@@ -174,19 +198,47 @@ export function SourcesStep({
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList className="w-full sm:w-fit">
+          <TabsTrigger value="prompt">
+            <SparklesIcon />
+            A question
+          </TabsTrigger>
           <TabsTrigger value="chat">
             <MessageSquareTextIcon />
-            An AI chat
+            Paste a chat
           </TabsTrigger>
           <TabsTrigger value="files">
             <FileTextIcon />
             Files
           </TabsTrigger>
-          <TabsTrigger value="prompt">
-            <SparklesIcon />
-            Just a prompt
-          </TabsTrigger>
         </TabsList>
+        <TabsContent value="prompt" className="pt-2">
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (prompt.trim()) void addText("prompt", prompt)
+            }}
+          >
+            <Field>
+              <FieldLabel htmlFor="prompt">What do you want to understand?</FieldLabel>
+              <Textarea
+                id="prompt"
+                rows={3}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="How do mixture-of-experts models work, and why are they cheaper to serve?"
+              />
+              <FieldDescription>
+                If this is the only Source, the Expedition is written from general
+                knowledge. Each Concept is marked that way.
+              </FieldDescription>
+            </Field>
+            <Button type="submit" className="self-start" disabled={!prompt.trim() || busy === "prompt"}>
+              {busy === "prompt" && <Spinner />}
+              Add this question
+            </Button>
+          </form>
+        </TabsContent>
         <TabsContent value="chat" className="pt-2">
           <form
             className="flex flex-col gap-3"
@@ -221,35 +273,16 @@ export function SourcesStep({
             hint="Chat exports, PDF, Word, Markdown, text or saved web pages, up to 25 MB each."
           />
         </TabsContent>
-        <TabsContent value="prompt" className="pt-2">
-          <form
-            className="flex flex-col gap-3"
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (prompt.trim()) void addText("prompt", prompt)
-            }}
-          >
-            <Field>
-              <FieldLabel htmlFor="prompt">What do you want to understand?</FieldLabel>
-              <Textarea
-                id="prompt"
-                rows={3}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="How do mixture-of-experts models work, and why are they cheaper to serve?"
-              />
-              <FieldDescription>
-                If this is the only Source, the Expedition is written from general
-                knowledge. Each Concept is marked that way.
-              </FieldDescription>
-            </Field>
-            <Button type="submit" className="self-start" disabled={!prompt.trim() || busy === "prompt"}>
-              {busy === "prompt" && <Spinner />}
-              Add this prompt
-            </Button>
-          </form>
-        </TabsContent>
       </Tabs>
+
+      {noAi && (
+        <NoAiPanel
+          ai={ai!}
+          request={tab === "prompt" ? requestAbout(question) : FROM_CONVERSATION}
+          fromChat={tab !== "prompt"}
+          agentConnected={agentConnected}
+        />
+      )}
 
       <Field>
         <FieldLabel id="goals-label">I want to</FieldLabel>
@@ -275,7 +308,7 @@ export function SourcesStep({
         </h2>
         {n === 0 ? (
           <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-            Nothing yet. Add a chat, a file or a prompt above.
+            Nothing yet. Add a question, a chat or a file above.
           </p>
         ) : (
           <ul className="flex flex-col divide-y rounded-lg border bg-card" data-testid="source-list">
@@ -303,14 +336,18 @@ export function SourcesStep({
         )}
       </section>
 
-      <EstimateLine estimate={estimate} />
+      {!noAi && <EstimateLine estimate={estimate} />}
 
       <div className="flex flex-col-reverse items-stretch gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
+        {noAi && n > 0 && (
+          <span className="text-sm text-muted-foreground">Your Sources are saved as a draft.</span>
+        )}
         <Button
           size="lg"
           disabled={
             n === 0 ||
             !!busy ||
+            noAi ||
             (estimate.status === "ready" && estimate.estimate.overCap)
           }
           onClick={onNext}
@@ -320,6 +357,98 @@ export function SourcesStep({
         </Button>
       </div>
     </main>
+  )
+}
+
+/**
+ * Building needs AI, and the reader has none here: ask their own agent (a
+ * request to paste, built from what they typed), or add an API key.
+ */
+function NoAiPanel({
+  ai,
+  request,
+  fromChat,
+  agentConnected,
+}: {
+  ai: AiOverview
+  request: string
+  /** Started from a chat or files: the request is "from this conversation". */
+  fromChat: boolean
+  agentConnected: boolean | null
+}) {
+  return (
+    <Card data-testid="no-ai-panel" role="region" aria-labelledby="no-ai-heading">
+      <CardHeader>
+        <CardTitle>
+          <h2 id="no-ai-heading" className="text-base font-semibold">
+            Building needs AI. Choose how.
+          </h2>
+        </CardTitle>
+        <CardDescription>
+          {ai.unavailable === "needs-key"
+            ? "You have no API key here and this server's AI isn't on for your account."
+            : "You have no API key here, and this server builds with your own key."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-wrap gap-5">
+        <div className="flex min-w-0 flex-[1_1_18rem] flex-col gap-2.5">
+          <span className="font-semibold">Ask your agent to build it</span>
+          <span className="text-muted-foreground">
+            Paste this into Claude, ChatGPT or the agent you use. It builds the Expedition on
+            its own plan, and it appears in your Library.
+          </span>
+          <InputGroup>
+            <InputGroupTextarea
+              data-testid="agent-request"
+              aria-label="The request for your agent"
+              readOnly
+              rows={3}
+              value={request}
+              className="resize-none font-mono text-xs"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <InputGroupAddon align="inline-end" className="self-start pt-1.5">
+              <InputGroupButton
+                size="icon-xs"
+                aria-label="Copy the request"
+                onClick={() => void copyText(request)}
+              >
+                <CopyIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+          <span className="text-xs text-muted-foreground">
+            {fromChat
+              ? "Ask in the same chat the conversation is in, so your agent can read it."
+              : `Started from a chat? Ask in that same chat: "${FROM_CONVERSATION}"`}
+          </span>
+          <span data-testid="agent-status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {agentConnected ? (
+              <>
+                <CheckIcon className="size-3.5 text-calyx" />
+                Your agent is connected.
+              </>
+            ) : (
+              <span>
+                Your agent isn't connected yet.{" "}
+                <ConnectLink as="text">Connect it</ConnectLink>
+              </span>
+            )}
+          </span>
+        </div>
+        <Separator orientation="vertical" className="max-sm:hidden" />
+        <div className="flex min-w-0 flex-[1_1_14rem] flex-col items-start gap-2.5">
+          <span className="font-semibold">Or build it here with your key</span>
+          <span className="text-muted-foreground">
+            Add an Anthropic, OpenAI or Google API key. You see the cost before anything runs.
+          </span>
+          <Button variant="outline" render={<Link href="/settings#ai" />}>
+            Add an API key
+          </Button>
+          <AskServerAi ai={ai} className="h-auto p-0 text-xs" />
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

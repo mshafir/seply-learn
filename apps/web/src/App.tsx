@@ -1,5 +1,6 @@
 // Routes (spec §3.1). wouter: a few kB, and routes are all the app needs.
 //   /sign-in            Google sign-in
+//   /welcome            a new account's first stop: connect your agent
 //   /invite/:token      an invite link: accept it (WP-5.1)
 //   /consent            an MCP client asks to connect: scopes and Expeditions (WP-5.4)
 //   /                   the Library
@@ -37,6 +38,7 @@ import { InviteScreen } from "@/screens/invite.tsx"
 import { LibraryScreen } from "@/screens/library.tsx"
 import { SettingsScreen } from "@/screens/settings.tsx"
 import { SignInScreen } from "@/screens/sign-in.tsx"
+import { WelcomeScreen } from "@/screens/welcome.tsx"
 import { Showcase } from "@/showcase/Showcase.tsx"
 
 const Loading = () => (
@@ -124,6 +126,11 @@ export function App() {
       <Route path="/settings/access-requests">
         <RequireUser>
           <AccessRequestsScreen />
+        </RequireUser>
+      </Route>
+      <Route path="/welcome">
+        <RequireUser>
+          <WelcomeScreen />
         </RequireUser>
       </Route>
       <Route path="/connect">

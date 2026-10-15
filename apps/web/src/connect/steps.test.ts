@@ -5,8 +5,11 @@ import {
   AGENTS,
   cursorInstallLink,
   firstPrompts,
+  FROM_CONVERSATION,
+  hasAgent,
   installSteps,
   newAgent,
+  requestAbout,
   signInSteps,
   type InstallItem,
 } from "./steps.ts"
@@ -129,31 +132,31 @@ describe("firstPrompts", () => {
   })
 })
 
-describe("newAgent", () => {
-  const grant = (clientId: string, name: string): AgentGrant => ({
-    clientId,
-    name,
-    uri: null,
-    icon: null,
-    scopes: ["expeditions:read"],
-    expeditions: null,
-    createdAt: null,
-  })
-  const token = (id: string, lastUsedAt: string | null): ApiToken => ({
-    id,
-    name: `Token ${id}`,
-    start: "sl_",
-    scopes: ["expeditions:read"],
-    expeditions: null,
-    createdAt: "2026-10-12T00:00:00Z",
-    lastUsedAt,
-    expiresAt: null,
-  })
-  const overview = (
-    grants: AgentGrant[],
-    tokens: ApiToken[] = []
-  ): AgentsOverview => ({ grants, tokens, scopes: [] })
+const grant = (clientId: string, name: string): AgentGrant => ({
+  clientId,
+  name,
+  uri: null,
+  icon: null,
+  scopes: ["expeditions:read"],
+  expeditions: null,
+  createdAt: null,
+})
+const token = (id: string, lastUsedAt: string | null): ApiToken => ({
+  id,
+  name: `Token ${id}`,
+  start: "sl_",
+  scopes: ["expeditions:read"],
+  expeditions: null,
+  createdAt: "2026-10-12T00:00:00Z",
+  lastUsedAt,
+  expiresAt: null,
+})
+const overview = (
+  grants: AgentGrant[],
+  tokens: ApiToken[] = []
+): AgentsOverview => ({ grants, tokens, scopes: [] })
 
+describe("newAgent", () => {
   it("names an agent that signed in since the page opened", () => {
     expect(
       newAgent(
@@ -185,5 +188,29 @@ describe("newAgent", () => {
     expect(
       newAgent(overview([]), overview([], [token("n", "2026-10-12")]))
     ).toBe("Token n")
+  })
+})
+
+describe("hasAgent", () => {
+  it("is true with a signed-in agent or a used token", () => {
+    expect(hasAgent(overview([]))).toBe(false)
+    expect(hasAgent(overview([], [token("t", null)]))).toBe(false)
+    expect(hasAgent(overview([], [token("t", "2026-10-12")]))).toBe(true)
+    expect(hasAgent(overview([grant("a", "Cursor")]))).toBe(true)
+  })
+})
+
+describe("the requests the create screen builds", () => {
+  it("asks about the question, on one line", () => {
+    expect(requestAbout("  How do heat pumps\nwork? ")).toBe(
+      "Make a Seply Learn Expedition about: How do heat pumps work?"
+    )
+    expect(requestAbout("")).toBe(
+      "Make a Seply Learn Expedition about: <what you want to understand>"
+    )
+  })
+
+  it("is the first prompt for a chat", () => {
+    expect(firstPrompts(null)[0]!.prompt).toBe(FROM_CONVERSATION)
   })
 })
