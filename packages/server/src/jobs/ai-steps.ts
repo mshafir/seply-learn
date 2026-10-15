@@ -89,7 +89,9 @@ export async function setupFor(
     throw new Error(
       ai.reason === "no-key"
         ? "No AI key: add one in Settings"
-        : "This server has no AI configured"
+        : ai.reason === "needs-key"
+          ? "No AI key: add your own in Settings, or ask to use this server's AI"
+          : "This server has no AI configured"
     )
   return {
     setup: ai.setup,

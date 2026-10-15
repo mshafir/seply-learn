@@ -15,7 +15,6 @@ import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 import type { AppEnv } from "./app.ts"
-import { requireApprovalFor } from "./approval.ts"
 import type { Db } from "./db.ts"
 import { appendOps, type ChangeInfo } from "./oplog.ts"
 import { publishCommitted, type Relay } from "./relay.ts"
@@ -118,7 +117,6 @@ export function expeditionRoutes(relay: Relay) {
     )
     if (!body.success)
       return c.json({ error: "invalid body", issues: body.error.issues }, 400)
-    await requireApprovalFor(c, "create")
     const user = c.var.user
     const db = await c.var.db()
     const now = Date.now()

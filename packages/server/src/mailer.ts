@@ -117,7 +117,7 @@ export function inviteEmail(args: {
   return { to: args.to, subject, text, html }
 }
 
-/** To each admin when someone asks for access (spec §2.6, WP-7.3). */
+/** To each admin when someone asks to use this server's AI (spec §2.6, WP-7.3). */
 export function accessRequestEmail(args: {
   to: string
   name: string
@@ -126,15 +126,15 @@ export function accessRequestEmail(args: {
   link: string
 }): Email {
   const who = args.name ? `${args.name} (${args.email})` : args.email
-  const subject = `${args.name || args.email} asked for access to Seply Learn`
+  const subject = `${args.name || args.email} asked to use the AI on Seply Learn`
   const text = [
-    `${who} asked for access to Seply Learn.`,
+    `${who} asked to use this server's AI on Seply Learn.`,
     ...(args.note ? ["", `Their note: ${args.note}`] : []),
     "",
     `Approve or decline: ${args.link}`,
   ].join("\n")
   const html = [
-    `<p>${escapeHtml(who)} asked for access to Seply Learn.</p>`,
+    `<p>${escapeHtml(who)} asked to use this server's AI on Seply Learn.</p>`,
     ...(args.note
       ? [`<p>Their note: ${escapeHtml(args.note)}</p>`]
       : []),
@@ -150,9 +150,9 @@ export function accessApprovedEmail(args: {
   link: string
 }): Email {
   const hello = args.name ? `Hi ${args.name},` : "Hi,"
-  const subject = "You can now create Expeditions on Seply Learn"
+  const subject = "You can now use the AI on Seply Learn"
   const lines = [
-    "Your account has been approved. You can now create your own Expeditions, import them and fork others.",
+    "An admin has turned on this server's AI for your account. Builds, Grow and articles can now run on it, without a key of your own.",
   ]
   const text = [hello, "", ...lines, "", `Open your Library: ${args.link}`].join(
     "\n"

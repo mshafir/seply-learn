@@ -146,7 +146,7 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 ## 3.10 Account and settings
 
 - **Theme:** System / Light / Dark.
-- **AI** (bring-your-own-key mode): keys per provider (the last 4 characters, Test, Delete). The model per stage is under Advanced. There's also the per-ask spending cap.
+- **AI** (bring-your-own-key and `both` modes): keys per provider (the last 4 characters, Test, Delete). The model per stage is under Advanced. There's also the per-ask spending cap. In `both` mode the card says the reader's own key is used first, and has a line about this server's AI: on for the account, or off with **Ask to use this server's AI** ([3.12](#312-this-servers-ai-hosted)).
 - **Connected agents:** MCP OAuth grants, and personal API tokens, each optionally restricted to chosen Expeditions. **Connect an agent** opens the step-by-step setup page, `/connect` ([MCP §6.4](06-mcp.md#64-connecting-an-agent)), which is also linked from Create: Sources, the Suggestions tab, Ask and the empty Library.
 - **Notifications:** web push on or off.
 
@@ -156,11 +156,12 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - Reading status and position stay in the browser until sign-in, then merge into the account.
 - Viewers get no AI, no Suggestions tab and no History. They can Fork and Export.
 
-## 3.12 Waiting for approval (hosted)
+## 3.12 This server's AI (hosted)
 
-- With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), an unapproved account sees the Library as usual, with Expeditions shared with it, and a calm banner: "Your account is on the waiting list. You can read anything shared with you now, and you can create your own Expeditions once you're approved." with **Request access** (an optional note, then "Request sent" with the date).
-- Create, Import and Fork stay visible but open a small dialog with the same explanation and button, instead of failing.
-- **Admin › Access requests** (admins only, from Settings): pending requests first, with name, email, note and date, and **Approve** / **Decline**; a second tab lists approved accounts.
+- Sign-up is open. Every account can create, import, Fork, edit, share and use MCP, approved or not.
+- With access approval on ([2.6](02-architecture.md#26-auth-keys-and-tokens)), only accounts an admin has enabled use this server's AI key. The Library shows no banner.
+- Where the AI is needed and the account has no key it may use (the create flow's estimate and Choose Views, Grow, Write the article), one short line says: "Add your own AI key in Settings, ask to use this server's AI, or use your own agent over MCP." **Settings** and **MCP** (`/connect`) are links; **ask to use this server's AI** opens a small dialog with **Ask to use this server's AI** (an optional note, then "Request sent" with the date). Settings › AI has the same button ([3.10](#310-account-and-settings)).
+- **Admin › Access requests** (admins only, from Settings): pending requests first, with name, email, note and date, and **Approve** / **Decline**; a second tab lists approved accounts. Approving emails the requester that the server's AI is on for them.
 
 ## 3.13 Explore
 
@@ -176,6 +177,6 @@ MCP agent ── create_expedition ──▶ new Expedition (first build) · pro
 - **Paging:** 24 cards at a time, then **Load more**.
 - **Header:** the wordmark, then **Sign in** when signed out, or **Library** and the account menu when signed in. The Library header links to Explore. The sign-in screen offers "Explore public Expeditions".
 - **Opening a card** opens the Expedition read-only at `/e/:id`. Signed out, the Expedition's way back goes to Explore.
-- **Fork when signed out:** a public or unlisted Expedition's header shows **Fork** next to **Sign in**. It goes to sign-in with `next=/e/<id>?fork=1`. Back on the Expedition, signed in, the share dialog opens with Fork one click away, and `fork=1` is removed from the address. Access approval still applies ([3.12](#312-waiting-for-approval-hosted)).
+- **Fork when signed out:** a public or unlisted Expedition's header shows **Fork** next to **Sign in**. It goes to sign-in with `next=/e/<id>?fork=1`. Back on the Expedition, signed in, the share dialog opens with Fork one click away, and `fork=1` is removed from the address.
 - **Endpoint:** see [2.8](02-architecture.md#28-search).
 

@@ -40,8 +40,8 @@ import {
   type KeySummary,
 } from "./ai-keys.ts"
 import type { AppEnv } from "./app.ts"
-import { requireApprovalFor } from "./approval.ts"
-import { ConfigError, type ServerEnv } from "./config.ts"
+import { mayUseInstanceKey, requireApprovalFor } from "./approval.ts"
+import { ConfigError, readAccess, type ServerEnv } from "./config.ts"
 import type { BlobStore } from "./blobs.ts"
 import type { Db } from "./db.ts"
 import { expeditionAccess as access } from "./access.ts"
@@ -80,19 +80,62 @@ export async function readAiSettings(db: Db, userId: string): Promise<AiSettings
 
 export type AiUnavailable = {
   ok: false
-  /** no-key: BYOK and the reader has no key; not-configured: no instance key. */
-  reason: "no-key" | "not-configured"
+  /**
+   * no-key: the reader has no key of their own and there is no instance key
+   * to fall back on (byok, or both without one); needs-key: both mode, no
+   * key of their own and not enabled for the instance key (approval.ts);
+   * not-configured: instance mode without an instance key.
+   */
+  reason: "no-key" | "needs-key" | "not-configured"
 }
 
 export type AiResolution =
   | { ok: true; setup: AiSetup; askCapUsd: number }
   | AiUnavailable
 
+/** Whose key `userId` would use: theirs, the instance's, or none and why. */
+type KeyChoice =
+  | { source: "reader"; provider: ByokProvider }
+  | { source: "instance"; credentials: Credentials }
+  | { source: "none"; reason: AiUnavailable["reason"] }
+
 /**
- * Whose key and which models `userId`'s request or job uses. Instance mode:
- * the operator's key and models. BYOK: the reader's preferred provider (else
- * the first they have a key for, in BYOK_PROVIDERS order), their key
- * decrypted for this call only, and their model overrides.
+ * The resolution order. Instance mode: the operator's key. BYOK: the
+ * reader's. Both: the reader's when they have one, else the operator's if
+ * they may use it (ACCESS_APPROVAL off, or approved, or an admin).
+ */
+async function chooseKey(
+  db: Db,
+  env: ServerEnv,
+  config: AiConfig,
+  userId: string,
+  settings: AiSettings
+): Promise<KeyChoice> {
+  if (config.mode !== "instance") {
+    const provider = await byokProvider(db, userId, settings)
+    if (provider) return { source: "reader", provider }
+    if (config.mode === "byok") return { source: "none", reason: "no-key" }
+  }
+  if (!config.instance)
+    return {
+      source: "none",
+      reason: config.mode === "both" ? "no-key" : "not-configured",
+    }
+  // Instance mode is gated at the routes only (requireApproval), as before.
+  if (
+    config.mode === "both" &&
+    !(await mayUseInstanceKey(db, { access: readAccess(env) }, userId))
+  )
+    return { source: "none", reason: "needs-key" }
+  return { source: "instance", credentials: config.instance }
+}
+
+/**
+ * Whose key and which models `userId`'s request or job uses (`chooseKey`).
+ * The operator's key comes with the operator's models; the reader's with
+ * their preferred provider (else the first they have a key for, in
+ * BYOK_PROVIDERS order), the key decrypted for this call only, and their
+ * model overrides.
  *
  * The returned setup holds a secret: keep it inside the request or job.
  */
@@ -104,21 +147,20 @@ export async function resolveAi(
 ): Promise<AiResolution> {
   const config = readAiConfig(env)
   const settings = await readAiSettings(db, userId)
-  if (config.mode === "instance") {
-    if (!config.instance) return { ok: false, reason: "not-configured" }
+  const choice = await chooseKey(db, env, config, userId, settings)
+  if (choice.source === "none") return { ok: false, reason: choice.reason }
+  if (choice.source === "instance")
     return {
       ok: true,
       setup: {
         keySource: "instance",
-        credentials: config.instance,
-        models: stageModels(config.instance.provider, config.instanceModels),
+        credentials: choice.credentials,
+        models: stageModels(choice.credentials.provider, config.instanceModels),
         options,
       },
       askCapUsd: settings.askCapUsd,
     }
-  }
-  const provider = await byokProvider(db, userId, settings)
-  if (!provider) return { ok: false, reason: "no-key" }
+  const { provider } = choice
   const apiKey = await loadKey(db, await masterKey(config), userId, provider)
   if (!apiKey) return { ok: false, reason: "no-key" }
   return {
@@ -145,7 +187,9 @@ async function byokProvider(
 
 async function masterKey(config: AiConfig): Promise<CryptoKey> {
   if (!config.masterKey)
-    throw new ConfigError("AI_KEYS_MASTER_KEY is not set (needed in byok mode)")
+    throw new ConfigError(
+      "AI_KEYS_MASTER_KEY is not set (needed in byok and both modes)"
+    )
   return importMasterKey(config.masterKey)
 }
 
@@ -156,12 +200,28 @@ export type AiOverview = {
   mode: AiKeyMode
   /** A build or ask can run now. */
   ready: boolean
-  /** The provider builds use now, and its models per stage (null when not ready). */
-  active: { provider: ProviderId; label: string; models: StageModels } | null
-  /** BYOK: my stored keys (provider, last 4, when added). Empty in instance mode. */
+  /** Why not (null when ready). */
+  unavailable: AiUnavailable["reason"] | null
+  /**
+   * The key builds use now (mine or this server's), its provider and models
+   * per stage (null when not ready).
+   */
+  active: {
+    keySource: "reader" | "instance"
+    provider: ProviderId
+    label: string
+    models: StageModels
+  } | null
+  /** BYOK and both: my stored keys (provider, last 4, when added). Empty in instance mode. */
   keys: KeySummary[]
-  /** BYOK: the providers I can add a key for. */
+  /** BYOK and both: the providers I can add a key for. */
   providers: { id: ByokProvider; label: string; defaults: StageModels }[]
+  /**
+   * Instance and both modes: this server's AI. `configured`: it has a key;
+   * `enabled`: I may use it (always, unless ACCESS_APPROVAL is on and I'm
+   * not approved). Null in byok mode.
+   */
+  serverAi: { configured: boolean; enabled: boolean } | null
   settings: AiSettings
   defaultAskCapUsd: number
 }
@@ -169,31 +229,46 @@ export type AiOverview = {
 async function overview(db: Db, env: ServerEnv, userId: string): Promise<AiOverview> {
   const config = readAiConfig(env)
   const settings = await readAiSettings(db, userId)
-  const keys = config.mode === "byok" ? await listKeys(db, userId) : []
+  const ownKeys = config.mode !== "instance"
+  const keys = ownKeys ? await listKeys(db, userId) : []
+  const choice = await chooseKey(db, env, config, userId, settings)
   let active: AiOverview["active"] = null
-  if (config.mode === "instance" && config.instance) {
-    const p = config.instance.provider
+  if (choice.source === "instance") {
+    const p = choice.credentials.provider
     active = {
+      keySource: "instance",
       provider: p,
       label: PROVIDER_LABELS[p],
       models: stageModels(p, config.instanceModels),
     }
-  } else if (config.mode === "byok") {
-    const p = await byokProvider(db, userId, settings)
-    if (p)
-      active = {
-        provider: p,
-        label: PROVIDER_LABELS[p],
-        models: stageModels(p, settings.models[p]),
-      }
+  } else if (choice.source === "reader") {
+    const p = choice.provider
+    active = {
+      keySource: "reader",
+      provider: p,
+      label: PROVIDER_LABELS[p],
+      models: stageModels(p, settings.models[p]),
+    }
   }
   return {
     mode: config.mode,
     ready: active !== null,
+    unavailable: choice.source === "none" ? choice.reason : null,
     active,
     keys,
-    providers:
+    serverAi:
       config.mode === "byok"
+        ? null
+        : {
+            configured: !!config.instance,
+            enabled: await mayUseInstanceKey(
+              db,
+              { access: readAccess(env) },
+              userId
+            ),
+          },
+    providers:
+      ownKeys
         ? BYOK_PROVIDERS.map((id) => ({
             id,
             label: PROVIDER_LABELS[id],
@@ -242,7 +317,8 @@ const EstimateBody = z
 
 export function aiRoutes(options?: ProviderOptions) {
   const r = new Hono<AppEnv>()
-  const byokOnly = (mode: AiKeyMode) => mode === "byok"
+  /** Readers may store their own keys (byok and both modes). */
+  const ownKeys = (mode: AiKeyMode) => mode !== "instance"
 
   r.get("/", async (c) => {
     return c.json(await overview(await c.var.db(), c.env ?? {}, c.var.user.id))
@@ -250,7 +326,7 @@ export function aiRoutes(options?: ProviderOptions) {
 
   r.put("/keys/:provider", async (c) => {
     const config = readAiConfig(c.env ?? {})
-    if (!byokOnly(config.mode))
+    if (!ownKeys(config.mode))
       return c.json({ error: "this instance doesn't take your own keys" }, 409)
     const provider = ByokProvider.safeParse(c.req.param("provider"))
     if (!provider.success) return c.json({ error: "unknown provider" }, 404)
@@ -267,7 +343,7 @@ export function aiRoutes(options?: ProviderOptions) {
 
   r.post("/keys/:provider/test", async (c) => {
     const config = readAiConfig(c.env ?? {})
-    if (!byokOnly(config.mode))
+    if (!ownKeys(config.mode))
       return c.json({ error: "this instance doesn't take your own keys" }, 409)
     const provider = ByokProvider.safeParse(c.req.param("provider"))
     if (!provider.success) return c.json({ error: "unknown provider" }, 404)
@@ -312,11 +388,11 @@ export function aiRoutes(options?: ProviderOptions) {
     const body = EstimateBody.safeParse(await c.req.json().catch(() => null))
     if (!body.success)
       return c.json({ error: "invalid body", issues: body.error.issues }, 400)
-    await requireApprovalFor(c, "ai")
+    await requireApprovalFor(c)
     // The provider and models are enough: no key is decrypted for an estimate.
-    const { mode, active } = await overview(await c.var.db(), c.env ?? {}, c.var.user.id)
+    const { active, unavailable } = await overview(await c.var.db(), c.env ?? {}, c.var.user.id)
     if (!active)
-      return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
+      return c.json({ error: unavailable }, 409)
     const estimate = estimateBuild({
       provider: active.provider,
       models: active.models,
@@ -336,10 +412,10 @@ export function aiRoutes(options?: ProviderOptions) {
     const a = await access(db, body.data.expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
-    await requireApprovalFor(c, "ai")
-    const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
+    await requireApprovalFor(c)
+    const { active, unavailable, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
     if (!active)
-      return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
+      return c.json({ error: unavailable }, 409)
     const sourceChars = await expeditionSourceChars(db, c.var.blobs(), body.data.expeditionId)
     const lengths = Object.fromEntries(
       ARTICLE_LENGTH_IDS.map((length) => {
@@ -360,10 +436,10 @@ export function aiRoutes(options?: ProviderOptions) {
     const a = await access(db, body.data.expeditionId, c.var.user.id)
     if (!a) return c.json({ error: "Expedition not found" }, 404)
     if (!a.may("useAi")) return c.json({ error: "not allowed" }, 403)
-    await requireApprovalFor(c, "ai")
-    const { mode, active, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
+    await requireApprovalFor(c)
+    const { active, unavailable, settings, defaultAskCapUsd } = await overview(db, c.env ?? {}, c.var.user.id)
     if (!active)
-      return c.json({ error: mode === "byok" ? "no-key" : "not-configured" }, 409)
+      return c.json({ error: unavailable }, 409)
     const state = await loadState(db, body.data.expeditionId)
     if (!state) return c.json({ error: "Expedition not found" }, 404)
     const sourceChars = await expeditionSourceChars(db, c.var.blobs(), body.data.expeditionId)
@@ -373,7 +449,7 @@ export function aiRoutes(options?: ProviderOptions) {
       model: e.model,
       sourceChars,
       askCapUsd: settings.askCapUsd ?? defaultAskCapUsd,
-      keySource: mode === "byok" ? "reader" : "instance",
+      keySource: active.keySource,
     })
   })
 

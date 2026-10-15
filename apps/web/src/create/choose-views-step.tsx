@@ -34,9 +34,11 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 import { ViewTypeThumbnail } from "@seply/ui/components/view-type-thumbnail"
 
+import { NoServerAi } from "@/components/server-ai.tsx"
 import { viewTypeMeta } from "@/expedition/labels.ts"
 import {
   ApiError,
+  noAiReason,
   runSkim,
   savePlan,
   startBuild,
@@ -74,6 +76,12 @@ type SkimState =
   | { status: "failed"; mode: SkimAsk["mode"]; error: ApiError | Error }
 
 function skimProblem(e: ApiError | Error): { title: string; body: React.ReactNode } {
+  const noAi = noAiReason(e)
+  if (noAi === "needs-key" || noAi === "approval")
+    return {
+      title: "No AI to propose Views with yet",
+      body: <NoServerAi reason={noAi} />,
+    }
   if (e instanceof ApiError && e.body.error === "no-key")
     return {
       title: "Add an AI key to propose Views",

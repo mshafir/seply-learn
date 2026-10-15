@@ -159,11 +159,15 @@ jobs:
           EMBED_FRAME_ANCESTORS: ${{ steps.urls.outputs.embed_frame_ancestors }}
           # The invite sender; empty: the server's default.
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+          # The AI key mode (instance, byok or both); unset: instance.
+          AI_KEY_MODE: ${{ vars.AI_KEY_MODE }}
         run: |
           trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
           # The sender only when the repo variable is set (else the server's default).
           mail=()
           if [ -n "$EMAIL_FROM" ]; then mail=(--var "EMAIL_FROM:$EMAIL_FROM"); fi
+          keys=()
+          if [ -n "$AI_KEY_MODE" ]; then keys=(--var "AI_KEY_MODE:$AI_KEY_MODE"); fi
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --name "$WORKER_PREVIEW" \
             --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
@@ -172,7 +176,7 @@ jobs:
             --var "AUTH_PROXY_URL:$PRODUCTION_URL" \
             --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
             --var "EMBED_FRAME_ANCESTORS:$EMBED_FRAME_ANCESTORS" \
-            "${mail[@]}" | tee deploy.log
+            "${mail[@]}" "${keys[@]}" | tee deploy.log
           deployed=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' deploy.log | head -n1)
           if [ "$deployed" != "$URL" ]; then
             echo "::error::Deployed to '$deployed', expected $URL. Is the workers.dev subdomain set up? (docs/ops/deploy.md)"
@@ -380,6 +384,8 @@ jobs:
           EMAIL_FROM: ${{ vars.EMAIL_FROM }}
           # Hosted access approval (WP-7.3): "1" turns it on; unset, it's off.
           ACCESS_APPROVAL: ${{ vars.ACCESS_APPROVAL }}
+          # The AI key mode (instance, byok or both); unset: instance.
+          AI_KEY_MODE: ${{ vars.AI_KEY_MODE }}
         run: |
           trap 'rm -f "$RUNNER_TEMP/worker-secrets.json"' EXIT
           # The sender only when the repo variable is set (else the server's default).
@@ -387,6 +393,8 @@ jobs:
           if [ -n "$EMAIL_FROM" ]; then mail=(--var "EMAIL_FROM:$EMAIL_FROM"); fi
           approval=()
           if [ -n "$ACCESS_APPROVAL" ]; then approval=(--var "ACCESS_APPROVAL:$ACCESS_APPROVAL"); fi
+          keys=()
+          if [ -n "$AI_KEY_MODE" ]; then keys=(--var "AI_KEY_MODE:$AI_KEY_MODE"); fi
           pnpm exec wrangler deploy --config wrangler.ci.json \
             --secrets-file "$RUNNER_TEMP/worker-secrets.json" \
             --var "DB_BRANCH:$BRANCH" \
@@ -394,7 +402,7 @@ jobs:
             --var "AUTH_PROXY_URL:$URL" \
             --var "AUTH_TRUSTED_ORIGINS:$PREVIEW_ORIGINS" \
             --var "EMBED_FRAME_ANCESTORS:$EMBED_FRAME_ANCESTORS" \
-            "${mail[@]}" "${approval[@]}" | tee deploy.log
+            "${mail[@]}" "${approval[@]}" "${keys[@]}" | tee deploy.log
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Check /api/health

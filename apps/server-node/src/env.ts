@@ -165,9 +165,9 @@ export function readNodeConfig(raw: Env = process.env): NodeConfig {
 
   try {
     const ai = readAiConfig(env)
-    if (ai.mode === "byok" && !ai.masterKey)
+    if (ai.mode !== "instance" && !ai.masterKey)
       problems.push(
-        "AI_KEYS_MASTER_KEY is not set (AI_KEY_MODE=byok needs it: openssl rand -base64 32)"
+        `AI_KEYS_MASTER_KEY is not set (AI_KEY_MODE=${ai.mode} needs it: openssl rand -base64 32)`
       )
     if (ai.masterKey && Buffer.from(ai.masterKey, "base64").length !== 32)
       problems.push("AI_KEYS_MASTER_KEY must be 32 bytes, base64")

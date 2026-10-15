@@ -86,8 +86,6 @@ import {
   type Visibility,
 } from "@/lib/api.ts"
 import { initials } from "@/screens/library-sections.ts"
-import { WaitingListDialog } from "@/components/waiting-list.tsx"
-import { useApprovalGate } from "@/lib/approval.ts"
 
 const ROLE_ITEMS: { value: InviteRole; label: string }[] = [
   { value: "editor", label: "Editor" },
@@ -205,7 +203,6 @@ function ShareBody({
   const [load, setLoad] = React.useState<Load>({ status: "loading" })
   const [error, setError] = React.useState<string | null>(null)
   const [sent, setSent] = React.useState<InviteCreated | null>(null)
-  const approval = useApprovalGate()
 
   const refresh = React.useCallback(async () => {
     try {
@@ -362,12 +359,10 @@ function ShareBody({
             canTrash={may.trashExpedition}
             onFork={async () => {
               setError(null)
-              // Waiting for approval: explain instead of failing (spec 3.12).
-              if (approval.waiting) return approval.explain()
               try {
                 onForked(await forkExpedition(expeditionId))
               } catch (err) {
-                if (!approval.refused(err)) setError(reasonOf(err))
+                setError(reasonOf(err))
               }
             }}
             onTrash={async () => {
@@ -382,7 +377,6 @@ function ShareBody({
           />
         </>
       )}
-      <WaitingListDialog {...approval.dialog} />
     </div>
   )
 }

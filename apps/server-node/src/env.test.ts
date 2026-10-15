@@ -84,7 +84,7 @@ describe("readNodeConfig", () => {
       "JOBS_HEARTBEAT_SECONDS must be a whole number from 10",
       "MIGRATE_ON_START must be 1 or 0",
       "TRASH_PURGE_CRON must be a 5-field cron expression",
-      'AI_KEY_MODE must be "instance" or "byok"',
+      'AI_KEY_MODE must be "instance", "byok" or "both"',
     ])
       expect(msg).toContain(k)
   })
@@ -113,8 +113,11 @@ describe("readNodeConfig", () => {
     )
   })
 
-  it("needs the master key in BYOK mode, 32 bytes", () => {
+  it("needs the master key in BYOK and both modes, 32 bytes", () => {
     expect(problems({ ...valid, AI_KEY_MODE: "byok" })).toContain(
+      "AI_KEYS_MASTER_KEY is not set"
+    )
+    expect(problems({ ...valid, AI_KEY_MODE: "both" })).toContain(
       "AI_KEYS_MASTER_KEY is not set"
     )
     expect(

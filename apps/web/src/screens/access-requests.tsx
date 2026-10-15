@@ -1,6 +1,6 @@
 // Admin › Access requests (spec §3.12; WP-7.3): with hosted access approval
-// on, admins (ADMIN_EMAILS) see the pending requests first, oldest first,
-// with name, email, note and date, and Approve or Decline each; a second tab
+// on, admins (ADMIN_EMAILS) see the requests to use this server's AI, oldest
+// first, with name, email, note and date, and Approve or Decline each; a tab
 // lists the approved accounts. Reached from Settings, for admins only.
 import * as React from "react"
 import { ArrowLeftIcon, CheckIcon, InboxIcon, XIcon } from "lucide-react"
@@ -146,7 +146,7 @@ function AccessRequests() {
           decision === "approve"
             ? {
                 title: `Approved ${who}`,
-                description: "They can create Expeditions now.",
+                description: "They can use this server's AI now.",
                 type: "success",
               }
             : { title: `Declined ${who}'s request` }

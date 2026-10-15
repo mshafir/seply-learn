@@ -50,12 +50,8 @@ import { InfoTip } from "@/components/info-tip.tsx"
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { describeItem } from "@/expedition/suggestions.ts"
-import {
-  ApiError,
-  isApprovalRequired,
-  type AskEstimate,
-  type AskView,
-} from "@/lib/api.ts"
+import { NoServerAi } from "@/components/server-ai.tsx"
+import { noAiReason, type AskEstimate, type AskView } from "@/lib/api.ts"
 
 export type GrowTab = "ask" | "suggestions" | "activity"
 
@@ -127,14 +123,8 @@ export function AskPanel({
   const [sending, setSending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const end = React.useRef<HTMLDivElement | null>(null)
-  // Hosted access approval: an account waiting for approval can't ask yet.
-  const noKey = isApprovalRequired(estimateError)
-    ? "waiting"
-    : estimateError instanceof ApiError && estimateError.status === 409
-      ? estimateError.body.error === "no-key"
-        ? "no-key"
-        : "not-configured"
-      : null
+  // No key to ask with: none of mine, or the server's isn't on for me.
+  const noKey = noAiReason(estimateError)
   const send = async () => {
     const ask = text.trim()
     if (ask.length < 2 || sending || noKey) return
@@ -225,7 +215,13 @@ export function AskPanel({
           }}
         />
         <div className="flex items-start gap-3">
-          {noKey ? (
+          {noKey === "needs-key" || noKey === "approval" ? (
+            <NoServerAi
+              reason={noKey}
+              data-testid="ask-no-ai"
+              className="flex-1 text-xs text-muted-foreground"
+            />
+          ) : noKey ? (
             <p
               data-testid="ask-no-ai"
               className="flex-1 text-xs text-muted-foreground"
@@ -235,8 +231,6 @@ export function AskPanel({
                   No AI key: <Link href="/settings">add one in Settings</Link>,
                   or get suggestions from the agent you already use.
                 </>
-              ) : noKey === "waiting" ? (
-                "Your account is waiting for approval, so you can't ask yet."
               ) : (
                 "This server has no AI configured. The agent you already use can suggest instead."
               )}

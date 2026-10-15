@@ -776,11 +776,12 @@ describe("the permissions matrix against the MCP tools", () => {
 })
 
 // --- Hosted access approval (WP-7.3) ---------------------------------------------
-// With ACCESS_APPROVAL=1, the gated routes (creating Expeditions, starting
-// work on the instance AI key) as an approved and an unapproved account, both
-// editors of the Expedition. Unapproved, each is 403 `approval_required`;
-// everything else an editor does still works. With the flag off (every table
-// above: none of those accounts is approved) nothing is gated.
+// With ACCESS_APPROVAL=1, the gated routes (starting work on the instance AI
+// key) as an approved and an unapproved account, both editors of the
+// Expedition. Unapproved, each is 403 `approval_required`; everything else an
+// editor does still works, creating Expeditions included (sign-up and
+// creating are open). With the flag off (every table above: none of those
+// accounts is approved) nothing is gated.
 type Gated = {
   name: string
   /** [approved, unapproved] */
@@ -792,20 +793,20 @@ type Gated = {
 const APPROVAL_REQUIRED = 403
 
 const GATED: Gated[] = [
-  // --- creating Expeditions ---
+  // --- creating Expeditions: open to every account ---
   {
     name: "POST /expeditions",
-    expect: [201, APPROVAL_REQUIRED],
+    expect: [201, 201],
     request: () => ["/api/expeditions", json("POST", { title: "Mine" })],
   },
   {
     name: "POST /import",
-    expect: [ALLOWED, APPROVAL_REQUIRED],
+    expect: [ALLOWED, ALLOWED],
     request: () => ["/api/import", json("POST", {})],
   },
   {
     name: "POST /expeditions/:id/fork",
-    expect: [201, APPROVAL_REQUIRED],
+    expect: [201, 201],
     request: (x) => [`/api/expeditions/${x.exp}/fork`, json("POST", {})],
   },
   // --- AI work on the instance key ---
@@ -946,7 +947,7 @@ describe("hosted access approval against the API routes", () => {
       if (res.status === 403)
         expect(JSON.parse(text)).toMatchObject({
           code: "approval_required",
-          message: expect.stringMatching(/waiting for approval/),
+          message: expect.stringMatching(/only for accounts an admin has enabled/),
         })
     })
   })
@@ -984,11 +985,56 @@ describe("hosted access approval against the API routes", () => {
       headers: unapproved.headers,
       body: "{}",
     })
-    expect(create.status).toBe(403)
+    expect(create.status).toBe(201)
   })
 
-  // MCP: create_expedition is refused plainly; propose_changes isn't gated
-  // (the agent's own model; a person reviews the Proposal anyway).
+  it("both mode: an unapproved account without a key is 409 needs-key; its own key or approval lets it through", async () => {
+    const both = testApp(
+      {
+        ...HOSTED_ENV,
+        AI_KEY_MODE: "both",
+        AI_KEYS_MASTER_KEY: "ZTJlLW9ubHktbWFzdGVyLWtleS0zMi1ieXRlcy1sb24=",
+        AI_GATEWAY_API_KEY: "vck_instance_not_real_0000",
+      },
+      s.db
+    )
+    const ctx = await shared()
+    const skim = (as: TestUser) =>
+      both.request(`/api/expeditions/${ctx.exp}/skim`, {
+        method: "POST",
+        headers: as.headers,
+        body: "{}",
+      })
+    const refused = await skim(unapproved)
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toMatchObject({ code: "needs-key" })
+    // Approved: past the guard, on the instance key.
+    expect([401, 403, 404, 409]).not.toContain((await skim(approved)).status)
+    // Its own key: past the guard too. Creating never needed either.
+    const keyed = await signUp(both, "kit")
+    await s.db.insert(schema.collaborators).values({
+      expeditionId: ctx.exp,
+      userId: keyed.id,
+      role: "editor",
+      seenAt: new Date().toISOString(),
+    })
+    const put = await both.request("/api/ai/keys/anthropic", {
+      method: "PUT",
+      headers: keyed.headers,
+      body: JSON.stringify({ apiKey: "sk-ant-api03-kits-own-key-5678" }),
+    })
+    expect(put.status).toBe(200)
+    expect([401, 403, 404, 409]).not.toContain((await skim(keyed)).status)
+    const create = await both.request("/api/expeditions", {
+      method: "POST",
+      headers: unapproved.headers,
+      body: "{}",
+    })
+    expect(create.status).toBe(201)
+  })
+
+  // MCP: create_expedition is open to every account; propose_changes isn't
+  // gated either (the agent's own model; a person reviews the Proposal anyway).
   async function mcp(as: TestUser, name: string, args: unknown) {
     const tokenRes = await s.hosted.request("/api/agents/tokens", {
       method: "POST",
@@ -1050,13 +1096,13 @@ describe("hosted access approval against the API routes", () => {
     ],
   }
 
-  it("refuses create_expedition over MCP for an unapproved account, plainly", async () => {
+  it("treats create_expedition over MCP alike for unapproved and approved accounts", async () => {
+    // This test app can't check Views, so both get the same refusal, and
+    // neither is about approval.
     const out = await mcp(unapproved, "create_expedition", createArgs)
-    expect(out.ok).toBe(false)
-    expect(out.text).toMatch(/waiting for approval/)
-    // Approved: past the guard (this test app can't check Views).
     const ok = await mcp(approved, "create_expedition", createArgs)
-    expect(ok.text).not.toMatch(/waiting for approval/)
+    expect(out).toEqual(ok)
+    expect(out.text).not.toMatch(/approv/i)
   })
 
   it("lets an unapproved account's agent propose changes", async () => {

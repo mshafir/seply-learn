@@ -13,7 +13,6 @@ import {
 import { AccessDenied } from "./access.ts"
 import {
   accessState,
-  APPROVAL_REQUIRED,
   ApprovalRequired,
   approvalRoutes,
 } from "./approval.ts"
@@ -235,8 +234,8 @@ const onError: ErrorHandler<AppEnv> = (err, c) => {
     return c.json({ error: err.message }, err.status)
   if (err instanceof ApprovalRequired)
     return c.json(
-      { error: APPROVAL_REQUIRED, code: APPROVAL_REQUIRED, message: err.message },
-      403
+      { error: err.code, code: err.code, message: err.message },
+      err.status
     )
   if (err instanceof NoDatabase)
     return c.json({ error: "no database configured" }, 503)

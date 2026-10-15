@@ -73,12 +73,12 @@ Everything is an env var. Unknown variables are ignored; a bad value stops the s
 | `AUTH_EMAIL_SIGNUP` | open | `0` closes sign-up: existing accounts still sign in. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | | Google sign-in (redirect URI `<BETTER_AUTH_URL>/api/auth/callback/google`). |
 | `AUTH_TRUSTED_ORIGINS` | | Extra trusted origins, comma-separated. |
-| `AI_KEY_MODE` | `instance` | `instance` (the operator's key serves everyone) or `byok` (each reader adds their own). |
+| `AI_KEY_MODE` | `instance` | `instance` (the operator's key serves everyone), `byok` (each reader adds their own) or `both` (a reader's own key first, else the operator's, for approved accounts when `ACCESS_APPROVAL=1`). |
 | `AI_GATEWAY_API_KEY` | | The instance key: a Vercel AI Gateway key, or one of the next. First found wins. |
 | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY` | | A direct provider key as the instance key. |
 | `OPENAI_COMPATIBLE_BASE_URL`, `OPENAI_COMPATIBLE_API_KEY` | | An OpenAI-compatible endpoint (Ollama, LM Studio…) as the instance key. |
 | `AI_MODEL_SKIM`, `AI_MODEL_CURATOR`, `AI_MODEL_WRITER` | the provider's defaults | Instance mode: the model per stage. |
-| `AI_KEYS_MASTER_KEY` | required for `byok` | 32 random bytes, base64. Readers' keys are encrypted under it; changing it makes them unreadable. |
+| `AI_KEYS_MASTER_KEY` | required for `byok` and `both` | 32 random bytes, base64. Readers' keys are encrypted under it; changing it makes them unreadable. |
 | `SMTP_HOST` | | Invite emails through SMTP. Without it (and without `RESEND_API_KEY`) invites are only logged; the link and the inbox still work. |
 | `SMTP_PORT` | `587` (`465` with `SMTP_SECURE=1`) | |
 | `SMTP_SECURE` | `0` | `1`: TLS from the start. Otherwise STARTTLS when the server offers it. |
@@ -90,8 +90,8 @@ Everything is an env var. Unknown variables are ignored; a bad value stops the s
 | `MAP_ASSETS_URL` | Protomaps' | A copy of Protomaps' fonts and sprites ([basemaps-assets](https://github.com/protomaps/basemaps-assets)). |
 | `EMBED_FRAME_ANCESTORS` | `https://seply.app` | Who may frame the live embed (`/e/:id/embed`, Public Expeditions only): CSP `frame-ancestors` sources, comma- or space-separated (`https://site.example.com`, `https://*.example.com`, `'self'`). Only that route sends it. |
 | `DB_BRANCH` | | A label `/api/health` reports. |
-| `ACCESS_APPROVAL` | off | `1`: only approved accounts create Expeditions or start AI work on the instance key; others read what is shared with them and can ask for access (hosted access approval). Leave it off on a private instance. |
-| `ADMIN_EMAILS` | | With `ACCESS_APPROVAL=1`: who approves requests, comma-separated. Admins get an email for each request and count as approved. |
+| `ACCESS_APPROVAL` | off | `1`: only approved accounts and admins use the instance AI key; everyone can still sign up, create and use MCP, and others can ask to use the server's AI (hosted access approval). Leave it off on a private instance. |
+| `ADMIN_EMAILS` | | With `ACCESS_APPROVAL=1`: who approves requests to use the server's AI, comma-separated. Admins get an email for each request and count as approved. |
 | `AUTH_TEST_CREDENTIALS` | | Tests only; honoured only on a localhost `BETTER_AUTH_URL`. |
 
 ## Tests

@@ -33,11 +33,14 @@ import {
   addTextSource,
   ApiError,
   estimateBuild,
+  noAiReason,
   removeSource,
   uploadSource,
   type BuildEstimate,
   type Goal,
+  type NoAiReason,
 } from "@/lib/api.ts"
+import { NoServerAi } from "@/components/server-ai.tsx"
 
 import type { Flow } from "./create-screen.tsx"
 import {
@@ -55,7 +58,7 @@ type Estimate =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "ready"; estimate: BuildEstimate }
-  | { status: "unavailable"; reason: "no-key" | "not-configured" | "error" }
+  | { status: "unavailable"; reason: NoAiReason | "error" }
 
 function useEstimate(chars: number): Estimate {
   const [state, setState] = React.useState<Estimate>({ status: "idle" })
@@ -68,10 +71,7 @@ function useEstimate(chars: number): Estimate {
         (estimate) => live && setState({ status: "ready", estimate }),
         (e: unknown) => {
           if (!live) return
-          const reason =
-            e instanceof ApiError && (e.body.error === "no-key" || e.body.error === "not-configured")
-              ? e.body.error
-              : "error"
+          const reason = noAiReason(e) ?? "error"
           setState({ status: "unavailable", reason })
         }
       )
@@ -329,16 +329,20 @@ function EstimateLine({ estimate }: { estimate: Estimate }) {
     return <Skeleton className="h-5 w-64" aria-label="Estimating the cost" />
   if (estimate.status === "unavailable")
     return (
-      <Alert>
+      <Alert data-testid="estimate-unavailable">
         <AlertTitle>
           {estimate.reason === "no-key"
             ? "Add an AI key to build"
-            : estimate.reason === "not-configured"
-              ? "AI isn't set up on this server"
-              : "Couldn't estimate the cost"}
+            : estimate.reason === "needs-key" || estimate.reason === "approval"
+              ? "No AI to build with yet"
+              : estimate.reason === "not-configured"
+                ? "AI isn't set up on this server"
+                : "Couldn't estimate the cost"}
         </AlertTitle>
         <AlertDescription>
-          {estimate.reason === "no-key" ? (
+          {estimate.reason === "needs-key" || estimate.reason === "approval" ? (
+            <NoServerAi reason={estimate.reason} />
+          ) : estimate.reason === "no-key" ? (
             <>
               This server uses your own key. Add one in{" "}
               <Link href="/settings" className="underline underline-offset-4">
