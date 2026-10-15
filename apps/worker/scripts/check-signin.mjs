@@ -13,12 +13,21 @@ if (!url || !production) {
 }
 
 const expected = `${new URL(production).origin}/api/auth/callback/google`
-const res = await fetch(`${url}/api/auth/sign-in/social`, {
-  method: "POST",
-  headers: { "content-type": "application/json", origin: new URL(url).origin },
-  body: JSON.stringify({ provider: "google", callbackURL: "/" }),
-})
-const body = await res.json().catch(() => ({}))
+// A new preview can answer 404 for a moment after its deploy: try again.
+const TRIES = 6
+let res
+let body = {}
+for (let i = 1; i <= TRIES; i++) {
+  res = await fetch(`${url}/api/auth/sign-in/social`, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: new URL(url).origin },
+    body: JSON.stringify({ provider: "google", callbackURL: "/" }),
+  })
+  body = await res.json().catch(() => ({}))
+  if (res.ok && typeof body.url === "string") break
+  console.log(`sign-in/social answered ${res.status} (try ${i}/${TRIES})`)
+  if (i < TRIES) await new Promise((r) => setTimeout(r, 10_000))
+}
 if (!res.ok || typeof body.url !== "string") {
   console.error(
     `::error::sign-in/social answered ${res.status}: ${JSON.stringify(body)}`
