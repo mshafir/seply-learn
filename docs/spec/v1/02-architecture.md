@@ -129,6 +129,7 @@ Relay {
 ## 2.9 PWA and offline reading
 
 - **The service worker** caches the app shell, the self-hosted fonts, and map tiles already viewed.
+- **A deploy shows on the next load.** Pages load from the network first; the cached shell answers only offline, or when the server takes more than 3 seconds. A tab that is open when a new version takes over offers **Reload** in a toast, and never reloads by itself. An open tab checks for a new version when it comes back into view, and every hour.
 - **IndexedDB** keeps the **last ~10 opened Expeditions**, plus any marked "Keep available offline". It stores the state as of the last visit (overviews and articles included, Source files not).
 - Opening one offline shows it **read-only**, with an "offline, as of …" chip. There are no offline edits in v1.
 
