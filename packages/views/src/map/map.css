@@ -49,6 +49,12 @@
   font-size: 0.75rem;
 }
 
+/* Under the app's floating controls (overlayTop): the zoom buttons sit just
+   below them, so a long View name on a narrow window never runs over them. */
+.seply-map--overlay .maplibregl-ctrl-top-right {
+  top: calc(var(--seply-overlay-top) - 10px);
+}
+
 /* MapLibre's own controls, on tokens. */
 .seply-map .maplibregl-ctrl-group,
 .seply-map .maplibregl-ctrl-attrib {

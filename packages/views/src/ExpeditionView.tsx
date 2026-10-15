@@ -45,10 +45,11 @@ export type ViewInteraction = {
   /** View-specific status for the app's floating chip ("Path to MLA · 7 of 11 read"); null when there is none. */
   onStatus?: (status: ViewStatusChip | null) => void;
   /**
-   * Pixels at the top of a canvas View (Evidence, Cause & Effect, Lineage,
-   * Learning path) that the app covers with floating controls. The canvas
-   * draws under them and fits its Concepts below them; the Learning path's
-   * toolbar floats just under them. Other Views ignore it.
+   * Pixels at the top of a full-bleed View (Evidence, Cause & Effect,
+   * Lineage, Learning path, Map) that the app covers with floating controls.
+   * The canvas draws under them and fits its Concepts below them; the
+   * Learning path's toolbar floats just under them; the Map opens its pins
+   * below them and moves its zoom buttons under them. Other Views ignore it.
    */
   overlayTop?: number;
   /** The Map View's tiles, from the app's config. Unset: the fallback style (OpenFreeMap). */

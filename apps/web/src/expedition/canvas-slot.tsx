@@ -6,10 +6,12 @@
 //   way ExpeditionView does: the URL's, else the best, else the first).
 // - Clicking a Concept calls `onSelectConcept(id)`, which opens the side
 //   panel; `null` clears the selection.
-// - The View button floats over the top-left corner. Canvas Views (Evidence,
-//   Cause & Effect, Lineage, Learning path) draw under it and fit their
-//   Concepts below it (`overlayTop`); the others start below it (pt-19), so
-//   it never covers a table header or a timeline axis.
+// - The View button floats over the top-left corner. Full-bleed Views draw
+//   under it: canvas Views (Evidence, Cause & Effect, Lineage, Learning path)
+//   fit their Concepts below it, and the Map opens its pins and keeps its
+//   zoom buttons below it (`overlayTop`). The others (Outline, the tables,
+//   Timeline, Quadrant, Rates, Anatomy) scroll, so they start below it
+//   (pt-19) and it never covers a table header or a timeline axis.
 // - `personal` is the reader's personal settings for the View; a View's own
 //   control changing one calls `onPersonalChange`. `onStatus` receives the
 //   View's status for the floating chip.
@@ -34,10 +36,13 @@ import { useBasemap } from "@/lib/basemap"
 /** The height the View button covers (top-4 + the button + a gap: pt-19). */
 const VIEW_BUTTON_AREA = 76
 
+/** Views that draw under the View button: canvases and the Map. */
+const fullBleed: readonly string[] = [...canvasViewTypes, "map"]
+
 export type CanvasSlotProps = {
   collections: EngineCollections
   viewId: string
-  /** The View's type: canvas Views draw under the View button. */
+  /** The View's type: full-bleed Views draw under the View button. */
   viewType: string
   selectedConceptId: string | null
   onSelectConcept: (conceptId: string | null) => void
@@ -67,7 +72,7 @@ export function CanvasSlot({
   suggested,
 }: CanvasSlotProps) {
   const basemap = useBasemap()
-  const underButton = (canvasViewTypes as readonly string[]).includes(viewType)
+  const underButton = fullBleed.includes(viewType)
   return (
     <div
       data-testid="canvas-view"
