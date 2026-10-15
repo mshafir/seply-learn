@@ -10,7 +10,6 @@ import { Button } from "@seply/ui/components/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -48,10 +47,6 @@ export function ExpeditionDetailsDialog({
       <DialogContent className="sm:max-w-lg" data-testid="details-dialog">
         <DialogHeader>
           <DialogTitle>Expedition details</DialogTitle>
-          <DialogDescription>
-            The title, the summary readers see in the Library, and the Tags that
-            file it there.
-          </DialogDescription>
         </DialogHeader>
         {/* Mounted fresh on each open, so it starts from the latest details. */}
         {open && (

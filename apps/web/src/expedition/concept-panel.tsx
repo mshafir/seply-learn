@@ -42,7 +42,7 @@ import {
 } from "@/expedition/write-article-dialog.tsx"
 import type { ArticleEstimate, GrowAction } from "@/lib/api.ts"
 import { GROW_ACTIONS, type SessionAsk } from "@/expedition/asks.ts"
-import { CostInfo } from "@/expedition/cost-info.tsx"
+import { InfoTip } from "@/components/info-tip.tsx"
 import type { ExpeditionData } from "@/expedition/use-expedition-data.ts"
 
 /**
@@ -463,7 +463,7 @@ function ConceptActions({
           Grow
         </h3>
         {!noKey && (
-          <CostInfo
+          <InfoTip
             data-testid="grow-cost"
             text={`${cost ? `${cost}. ` : ""}Suggested for review before anything is added.`}
           />

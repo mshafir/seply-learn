@@ -22,7 +22,6 @@ import { Button } from "@seply/ui/components/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@seply/ui/components/dialog"
@@ -114,10 +113,6 @@ function VocabularyDialog({
       <DialogContent className="sm:max-w-2xl" data-testid="vocabulary-dialog">
         <DialogHeader>
           <DialogTitle>Kinds, Relationship Types and Attributes</DialogTitle>
-          <DialogDescription>
-            This Expedition's vocabulary. Removing one in use first moves what
-            uses it to another, or deletes it, in one Change.
-          </DialogDescription>
         </DialogHeader>
         <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
           <TabsList>

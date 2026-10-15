@@ -51,6 +51,7 @@ import { Spinner } from "@seply/ui/components/spinner"
 import { toast } from "@seply/ui/components/toast"
 
 import { AccountMenu } from "@/components/account-menu.tsx"
+import { InfoTip } from "@/components/info-tip.tsx"
 import { ConnectedAgentsSection } from "@/screens/connected-agents.tsx"
 import { useUser } from "@/lib/session.ts"
 import {
@@ -187,7 +188,13 @@ function AskCap({ ai, onSaved }: { ai: AiOverview; onSaved: (o: AiOverview) => v
   const changed = valid && Math.abs(parsed - ai.settings.askCapUsd) >= 0.005
   return (
     <Field>
-      <FieldLabel htmlFor="ask-cap">Spending cap per ask</FieldLabel>
+      <div className="flex items-center gap-1">
+        <FieldLabel htmlFor="ask-cap">Spending cap per ask</FieldLabel>
+        <InfoTip
+          data-testid="ask-cap-info"
+          text={`An ask stops when it reaches this cap and keeps what it already wrote. The default is $${ai.defaultAskCapUsd.toFixed(2)} and the most is $50.`}
+        />
+      </div>
       <form
         className="flex gap-2"
         onSubmit={(e) => {
@@ -219,10 +226,6 @@ function AskCap({ ai, onSaved }: { ai: AiOverview; onSaved: (o: AiOverview) => v
           Save
         </Button>
       </form>
-      <FieldDescription>
-        An ask stops when it reaches this, and keeps what it already wrote. Default $
-        {ai.defaultAskCapUsd.toFixed(2)}, at most $50.
-      </FieldDescription>
     </Field>
   )
 }
@@ -327,7 +330,7 @@ function AiSection() {
         <CardTitle>AI</CardTitle>
         <CardDescription>
           {ai.mode === "byok"
-            ? "This instance uses your own API keys. They're encrypted on the server and never shown again; only their last 4 characters are."
+            ? "This instance uses your own API keys. They are encrypted on the server. After you save a key, only its last 4 characters are shown."
             : ai.ready
               ? `This instance's key pays for AI here (${ai.active!.label}). Viewing and editing never need a key.`
               : "This instance has no AI key set up yet. Viewing and editing still work."}

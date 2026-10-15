@@ -31,7 +31,6 @@ import {
   EmptyTitle,
 } from "@seply/ui/components/empty"
 import { ScrollArea } from "@seply/ui/components/scroll-area"
-import { SheetDescription } from "@seply/ui/components/sheet"
 import { Skeleton } from "@seply/ui/components/skeleton"
 import { cn } from "@seply/ui/lib/utils"
 
@@ -67,7 +66,6 @@ export function HistoryPanel({
   onRestore,
   onFork,
 }: HistoryPanelProps & { onClose: () => void; inline: boolean }) {
-  const Description = inline ? "p" : SheetDescription
   const { changes, loading, error, more, loadOlder } = history
   return (
     <>
@@ -76,12 +74,7 @@ export function HistoryPanel({
         title="Changes"
         onClose={onClose}
         inline={inline}
-      >
-        <Description className="text-sm text-muted-foreground">
-          Undo any Change, or see the Expedition as it was. Restoring adds a new
-          Change, so nothing is lost.
-        </Description>
-      </PanelHeader>
+      ></PanelHeader>
       <ScrollArea className="min-h-0 flex-1">
         {loading && !changes.length ? (
           <div className="flex flex-col gap-3 px-6 py-5">

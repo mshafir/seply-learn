@@ -46,7 +46,7 @@ import {
   keyCopy,
   type SessionAsk,
 } from "@/expedition/asks.ts"
-import { CostInfo } from "@/expedition/cost-info.tsx"
+import { InfoTip } from "@/components/info-tip.tsx"
 import { relativeTime } from "@/expedition/history.ts"
 import { PanelHeader } from "@/expedition/panel-header.tsx"
 import { describeItem } from "@/expedition/suggestions.ts"
@@ -194,8 +194,8 @@ export function AskPanel({
               </EmptyMedia>
               <EmptyTitle>Grow this Expedition</EmptyTitle>
               <EmptyDescription>
-                Ask for what's missing, examples or what to read next. What
-                comes back is suggested, dashed, until someone accepts it.
+                Ask for missing pieces, examples or what to read next. The
+                answers show as dashed suggestions until someone accepts them.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -243,7 +243,7 @@ export function AskPanel({
             </p>
           ) : (
             <div className="flex flex-1 items-center">
-              <CostInfo
+              <InfoTip
                 data-testid="ask-cost"
                 text={`${estimate ? `${keyCopy(estimate.keySource)} · ${costCopy(estimate)}. ` : ""}Suggestions stay dashed until someone accepts them.`}
               />

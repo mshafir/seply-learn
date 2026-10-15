@@ -1,5 +1,5 @@
-// What an ask costs, behind an info icon: the figures matter before asking,
-// but don't need a line of their own under every button.
+// A detail behind an info icon (what an ask costs, what a setting does):
+// useful when someone looks for it, but not worth a line of its own.
 import { InfoIcon } from "lucide-react"
 
 import {
@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from "@seply/ui/components/tooltip"
 
-export function CostInfo({
+export function InfoTip({
   text,
   "data-testid": testId,
 }: {

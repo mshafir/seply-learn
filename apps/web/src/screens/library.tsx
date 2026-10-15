@@ -45,7 +45,6 @@ import {
 import {
   Empty,
   EmptyContent,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -760,10 +759,6 @@ export function LibraryScreen() {
                       <CompassIcon />
                     </EmptyMedia>
                     <EmptyTitle>No Expeditions yet</EmptyTitle>
-                    <EmptyDescription>
-                      Start a new one, import one exported as JSON, or have
-                      the agent you already use make one from a chat.
-                    </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent className="flex-row flex-wrap justify-center">
                     {actions}
@@ -801,8 +796,7 @@ export function LibraryScreen() {
           {!unreachable && trash.length > 0 && (
             <Section id={SECTION_IDS.trash} title="Trash">
               <p className="text-muted-foreground">
-                Expeditions you deleted. Each is deleted for good, Sources
-                included, 30 days after it was moved here.
+                Deleted for good after 30 days.
               </p>
               <Trash cards={trash} onRestore={onRestore} />
             </Section>
