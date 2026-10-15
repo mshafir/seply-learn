@@ -5,20 +5,20 @@ import { expect, test, type Browser, type Page } from "@playwright/test"
 import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 
 // Explore (spec §3.13): public Expeditions for anyone, signed out too. Ada
-// imports four copies of the compute sample, each titled with a word made up
-// for this run: two public, one unlisted, one private. Signed out, Explore
+// imports four copies of the small synthetic trip fixture, each titled with a
+// word made up for this run: two public, one unlisted, one private. (Not the
+// compute sample: its Concepts, made public, would turn up in search.spec's
+// stranger check, since every spec shares one database; the public ones go to
+// Trash at the end.) Signed out, Explore
 // lists the public ones and never the others; search narrows to one, and it
 // opens read-only. Fork while signed out goes through sign-in and comes back
 // with the share dialog open, where Fork is one click.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
-const COMPUTE = JSON.parse(
+const TRIP = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL(
-        "../../../../packages/domain/fixtures/compute.json",
-        import.meta.url
-      )
+      new URL("../../../../packages/domain/fixtures/trip.json", import.meta.url)
     ),
     "utf8"
   )
@@ -36,7 +36,7 @@ async function importAs(
   visibility: "private" | "unlisted" | "public"
 ) {
   const res = await page.request.post("/api/import", {
-    data: { ...COMPUTE, title },
+    data: { ...TRIP, title },
   })
   expect(res.status()).toBe(201)
   const id = ((await res.json()) as { expedition: { id: string } }).expedition
@@ -48,6 +48,14 @@ async function importAs(
     expect(set.status()).toBe(200)
   }
   return id
+}
+
+/** Out of everyone's way (the e2e database is shared): to Trash. */
+async function toTrash(page: Page, ids: string[]) {
+  for (const id of ids)
+    expect((await page.request.delete(`/api/expeditions/${id}`)).status()).toBe(
+      200
+    )
 }
 
 async function signedOutPage(browser: Browser) {
@@ -67,7 +75,7 @@ test("signed out, Explore lists public Expeditions only, searches and opens one"
   const tide = word()
   const kelp = word()
   const tideId = await importAs(page, `Tide pools ${tide} ${run}`, "public")
-  await importAs(page, `Kelp forests ${kelp} ${run}`, "public")
+  const kelpId = await importAs(page, `Kelp forests ${kelp} ${run}`, "public")
   await importAs(page, `Unlisted notes ${run}`, "unlisted")
   await importAs(page, `Private notes ${run}`, "private")
 
@@ -118,6 +126,7 @@ test("signed out, Explore lists public Expeditions only, searches and opens one"
     await expect(p.getByTestId("fork-sign-in")).toBeVisible()
   } finally {
     await anon.context.close()
+    await toTrash(page, [tideId, kelpId])
   }
 })
 
@@ -155,6 +164,7 @@ test("Fork while signed out signs in, then offers the Fork", async ({
     await expect(p.getByRole("heading", { level: 1 })).toHaveText(title)
   } finally {
     await anon.context.close()
+    await toTrash(page, [id])
   }
 })
 
