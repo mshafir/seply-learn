@@ -112,12 +112,25 @@ jobs:
           BUILDS: ${{ matrix.builds }}
           # No signing identity is looked up or used (WP-8.6 brings them).
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          # electron-builder skips signing on pull requests; the ad-hoc
+          # signature (no secrets) must happen there too, or the dry run
+          # wouldn't build what a release builds.
+          CSC_FOR_PULL_REQUEST: "true"
         run: |
           IFS=';' read -ra runs <<< "$BUILDS"
           for run in "${runs[@]}"; do
             # shellcheck disable=SC2086 # each run is a list of flags
             pnpm --filter desktop run dist $run
           done
+
+      # Apple silicon refuses an app whose signature is missing or broken.
+      - name: Check the macOS app's ad-hoc signature
+        if: runner.os == 'macOS'
+        run: |
+          app="apps/desktop/release/mac-universal/Seply Learn.app"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | tee /dev/stderr | grep -q 'Signature=adhoc'
+          lipo -archs "$app/Contents/MacOS/Seply Learn"
 
       - name: The packages
         shell: bash
