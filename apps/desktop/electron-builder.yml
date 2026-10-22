@@ -1,0 +1,73 @@
+# The desktop packages (spec §10.6; README.md, "Packaging and releases").
+# `pnpm --filter desktop dist -- --linux` (or --mac, --win) builds them into
+# release/. The release workflow (.github/workflows/desktop-release.yml) runs
+# one OS per job and attaches the files to a GitHub Release.
+appId: app.seply.learn
+productName: Seply Learn
+copyright: Copyright © Seply Learn contributors (MIT licence)
+
+directories:
+  output: release
+
+# Everything is bundled into dist/ (esbuild for main and the preloads, Vite for
+# the shell page), so the app ships no node_modules: package.json has no
+# dependencies, only devDependencies, and nothing else from the folder goes in.
+files:
+  - dist/**/*
+  - "!dist/**/*.map"
+  - package.json
+npmRebuild: false
+nodeGypRebuild: false
+asar: true
+
+# seply:// links (spec §10.4): Info.plist on macOS, the registry on Windows
+# (NSIS), MimeType=x-scheme-handler/seply in the .desktop file on Linux.
+protocols:
+  - name: Seply Learn link
+    schemes: [seply]
+
+# The same icon as the web app's (spec §7.5).
+icon: ../../packages/ui/brand/icon-512.png
+
+mac:
+  category: public.app-category.education
+  target:
+    - target: dmg
+      arch: [universal]
+  # Unsigned for now (WP-8.6 brings a Developer ID and notarisation). An Apple
+  # silicon Mac won't start an app with no signature at all, so it is signed
+  # ad hoc. Gatekeeper still asks (the install steps say how to open it).
+  identity: "-"
+  hardenedRuntime: false
+  artifactName: Seply-Learn-${version}-mac-${arch}.${ext}
+dmg:
+  artifactName: Seply-Learn-${version}-mac-${arch}.${ext}
+
+win:
+  target:
+    - target: nsis
+  artifactName: Seply-Learn-${version}-win-${arch}.${ext}
+nsis:
+  oneClick: true
+  perMachine: false
+  artifactName: Seply-Learn-${version}-win-${arch}.${ext}
+
+linux:
+  category: Education
+  # A lower-case command (/opt/Seply Learn/seply-learn); macOS and Windows
+  # keep the product name ("Seply Learn.app", "Seply Learn.exe").
+  executableName: seply-learn
+  synopsis: Read and build Expeditions on a Seply Learn server
+  maintainer: Seply Learn <mshafir@users.noreply.github.com>
+  # seply-learn.desktop (package.json's desktopName): the window's WM_CLASS,
+  # and the name xdg-settings registers for seply:// links.
+  syncDesktopName: true
+  target:
+    - target: AppImage
+    - target: deb
+  artifactName: Seply-Learn-${version}-linux-${arch}.${ext}
+deb:
+  packageName: seply-learn
+
+# No auto-update feed yet (WP-8.6); the workflow uploads the files itself.
+publish: null

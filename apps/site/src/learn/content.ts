@@ -135,7 +135,7 @@ export const EXAMPLES: {
   },
   {
     title: "E-bike for the commute",
-    summary: "Choosing an e-bike for a hilly 14 km commute: three bikes compared on climbing, upkeep, weight, theft protection and price, with three years of running costs.",
+    summary: "Choosing an e-bike for a hilly 14 km commute: seven bikes compared on climbing, upkeep, weight, theft protection and price, with three years of running costs.",
     counts: countsLabel(ebikeCounts),
     shot: "example-ebike",
     href: expeditionUrl(SHOWCASE.ebike),

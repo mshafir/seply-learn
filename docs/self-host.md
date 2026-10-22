@@ -11,6 +11,7 @@ Spec: [02-architecture.md §2.10](spec/v1/02-architecture.md#210-deployment). Ev
 - [Source files: volume, S3 or MinIO](#source-files-volume-s3-or-minio)
 - [Map tiles](#map-tiles)
 - [Running it on a server](#running-it-on-a-server)
+- [Using the desktop app with your server](#using-the-desktop-app-with-your-server)
 - [Backups](#backups)
 - [Upgrades and migrations](#upgrades-and-migrations)
 - [Troubleshooting](#troubleshooting)
@@ -160,6 +161,23 @@ and `docker compose up -d`. The app serves the file at `/tiles/basemap.pmtiles` 
 - **Several app instances** can share one database behind one origin; they pass live edits to each other through Postgres. No sticky sessions needed.
 - **An external Postgres** (16 or 17, a direct connection, not PgBouncer in transaction mode, with the `pg_trgm` extension available): remove the `db` service and set `DATABASE_URL` in the `app` service's `environment` in `docker-compose.yml`.
 - The image runs as an unprivileged user, and `docker compose stop` gives running builds 25 seconds to reach a checkpoint; a build cut off is picked up again from its last finished step when the app is back.
+
+## Using the desktop app with your server
+
+The desktop app (spec [§10](spec/v1/10-desktop.md)) opens your server's web app in a window of its own. Download it from [seply.app/desktop](https://seply.app/desktop/) or the [desktop releases](https://github.com/mshafir/seply-learn/releases?q=desktop-v&expanded=true). Then choose **Server…** in its menu (the **Seply Learn** menu on macOS, **File** on Windows and Linux), enter your server's address and click **Connect**.
+
+- **The address** must be `https`, as set in `BETTER_AUTH_URL`. Plain `http` works only for a server on the same machine or on a private network (such as `192.168.x.x` or `10.x.x.x`).
+- **The check:** the app asks `GET /api/instance` and switches only if your server answers as Seply Learn. Any version with that route works; there is nothing to turn on.
+- **Sign-in:** email and password work in the window. **Continue with Google** opens the system browser at `<your server>/desktop/sign-in` and comes back to the app through a `seply://` link, so Google sign-in must already work in a browser (see [Sign-in](#sign-in)).
+- **Nothing to keep in step:** the app ships no copy of the web app. It always shows the version your server serves.
+
+**The builds aren't signed yet,** so each system warns the first time the app is opened:
+
+- **macOS:** open the app once, click **Done**, then **System Settings → Privacy & Security → Open Anyway**. On macOS 14 or earlier, right-click the app and choose **Open** instead. Or, in the Terminal: `xattr -dr com.apple.quarantine "/Applications/Seply Learn.app"`.
+- **Windows:** on **Windows protected your PC**, click **More info**, then **Run anyway**.
+- **Linux:** no warning. On Ubuntu 24.04 or later, use the `.deb` rather than the AppImage.
+
+The full steps, per system, are in [the desktop app guide](desktop.md).
 
 ## Backups
 

@@ -21,13 +21,18 @@ const allowed = {
   "@seply/worker": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
   "@seply/server-node": ["@seply/server", "@seply/ai", "@seply/domain", "@seply/views"],
 };
+// Apps that bundle all their code and ship no node_modules (the packaged
+// desktop app): their workspace packages are devDependencies, and count too.
+// @seply/config is build tooling, allowed everywhere.
+const bundled = new Set(["desktop"]);
 let bad = 0;
 for (const root of ["apps", "packages"]) {
   for (const dir of readdirSync(root)) {
     const file = `${root}/${dir}/package.json`;
     if (!existsSync(file)) continue;
     const pkg = JSON.parse(readFileSync(file, "utf8"));
-    const deps = Object.keys(pkg.dependencies ?? {}).filter((d) => d.startsWith("@seply/"));
+    const declared = { ...pkg.dependencies, ...(bundled.has(pkg.name) ? pkg.devDependencies : {}) };
+    const deps = Object.keys(declared).filter((d) => d.startsWith("@seply/") && !(bundled.has(pkg.name) && d === "@seply/config"));
     const ok = allowed[pkg.name];
     if (!ok) {
       console.error(`${pkg.name}: not in the dependency rule; add it to scripts/check-deps.mjs`);

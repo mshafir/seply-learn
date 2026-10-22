@@ -22,10 +22,22 @@ function walk(node: Node, visit: (n: Node) => void) {
   for (const child of node.children ?? []) walk(child, visit)
 }
 
-/** `href` resolved against the doc at `docPath` (repo-relative), as a GitHub URL. */
+/** Docs the site renders as its own pages: a link to one stays on the site. */
+const SITE_PAGES: Record<string, string> = {
+  "docs/self-host.md": "/self-host/",
+  "docs/desktop.md": "/desktop/",
+}
+
+/**
+ * `href` resolved against the doc at `docPath` (repo-relative): the site's
+ * page for a doc it renders, else a GitHub URL.
+ */
 export function githubHref(href: string, docPath: string): string {
   if (/^([a-z][a-z0-9+.-]*:|#|\/\/)/i.test(href)) return href
-  return new URL(href, GITHUB_BLOB + docPath).href
+  const url = new URL(href, GITHUB_BLOB + docPath)
+  const page =
+    SITE_PAGES[url.pathname.replace(/^\/[^/]+\/[^/]+\/blob\/main\//, "")]
+  return page ? page + url.hash : url.href
 }
 
 export function rehypeRepoDocs() {

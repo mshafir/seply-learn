@@ -1,0 +1,27 @@
+---
+// The desktop app (spec §10): what it is, a download button per system, and
+// the note that the builds aren't signed yet, linking to the install steps.
+import DesktopDownloads from "../../components/DesktopDownloads.astro"
+import { container, eyebrow, h2, link } from "../../lib/styles"
+import { DESKTOP_GUIDE_URL } from "../desktop"
+---
+
+<section id="desktop" class="scroll-mt-20 border-t border-border">
+  <div class:list={[container, "flex flex-col gap-6 py-20"]}>
+    <div class="flex max-w-[40em] flex-col gap-4">
+      <span class={eyebrow}>Desktop app</span>
+      <h2 class={h2}>Use it in its own window</h2>
+      <p class="m-0 text-muted-foreground">
+        The desktop app opens learn.seply.app, or your own server, in a window of its own. It works on macOS, Windows
+        and Linux.
+      </p>
+    </div>
+    <DesktopDownloads />
+    <p class="m-0 max-w-[40em] text-sm text-muted-foreground">
+      The builds aren't signed yet, so your system will warn you the first time you open the app. The <a
+        href={DESKTOP_GUIDE_URL}
+        class={link}>install steps</a
+      > say what to do.
+    </p>
+  </div>
+</section>
