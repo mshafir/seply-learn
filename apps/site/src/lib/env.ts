@@ -19,5 +19,5 @@ export const analyticsToken = isPreview
   ? undefined
   : process.env.CF_ANALYTICS_TOKEN?.trim() || undefined
 
-/** Where "Request access" and other app links go. */
+/** Where "Sign in" and other app links go. */
 export const APP_URL = "https://learn.seply.app"

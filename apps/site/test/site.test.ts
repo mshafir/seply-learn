@@ -24,7 +24,7 @@ const read = (build: string, file: string) =>
 const prod = (file: string) => read("production", file)
 
 describe("production build", () => {
-  it("serves the home page with the headline, wordmark and Request access", () => {
+  it("serves the home page with the headline, wordmark and Sign in", () => {
     const html = prod("index.html")
     expect(html).toMatch(/<html lang="en" class="theme-system">/)
     expect(html).toMatch(
@@ -35,7 +35,7 @@ describe("production build", () => {
     )
     expect(html).toMatch(/aria-label="Seply Learn home"/)
     expect(html).toMatch(
-      /<a href="https:\/\/learn\.seply\.app"[^>]*>Request access<\/a>/
+      /<a href="https:\/\/learn\.seply\.app"[^>]*>Sign in<\/a>/
     )
   })
 
@@ -56,7 +56,7 @@ describe("production build", () => {
       at('id="examples"'),
       at('id="self-host"'),
       at('id="desktop"'),
-      at("Coming soon."),
+      at("Start with a question."),
       at("Seply Learn is part of Seply"),
     ]
     expect(order).toEqual([...order].sort((a, b) => a - b))

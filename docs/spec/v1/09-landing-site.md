@@ -10,7 +10,7 @@
 
 ## 9.2 Pages
 
-- **`/`:** the landing page: header (wordmark, links, Request access; a menu button below the phone breakpoint), hero, How it works, the explainer video, the Views gallery (the five strongest View Types as tabs, then the other six named), working with agents, reading with other people, live embed, public Examples, self-host, the desktop app (a download button per system, [§10.6](10-desktop.md#106-packaging-updates-and-tests)), closing call, footer.
+- **`/`:** the landing page: header (wordmark, links, Sign in; a menu button below the phone breakpoint), hero, How it works, the explainer video, the Views gallery (the five strongest View Types as tabs, then the other six named), working with agents, reading with other people, live embed, public Examples, self-host, the desktop app (a download button per system, [§10.6](10-desktop.md#106-packaging-updates-and-tests)), closing call, footer.
 - **`/self-host`:** rendered at build time from [`docs/self-host.md`](../../self-host.md), so the repo stays its one source. Relative links become GitHub links, except to a doc the site renders itself.
 - **`/desktop`:** the desktop app's download buttons, then its install steps, rendered at build time from [`docs/desktop.md`](../../desktop.md).
 - **404.** Light and dark follow the system, from the app's tokens.
