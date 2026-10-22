@@ -19,10 +19,9 @@ import { needsDatabase, screenshot } from "./helpers.ts"
 // ACCESS_APPROVAL=1, an admin, AI_KEY_MODE=both (readers' own keys, else the
 // server's for approved accounts) and a server key that is never called. An
 // account that isn't approved creates an Expedition like anyone, finds
-// "Building needs AI. Choose how." on the Sources step and "add your own
-// key, ask, or use MCP" where the AI is needed after that, and asks with a
-// note; the admin approves it from Settings › Access requests; Settings then
-// says the server's AI is on for it. Light and dark.
+// "add your own key, ask, or use MCP" where the AI is needed after the
+// Sources step, and asks with a note; the admin approves it from Settings › Access requests; Settings then
+// says the server's AI is on for it.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 test.describe.configure({ mode: "serial" })
 
@@ -88,21 +87,12 @@ test("an unapproved account creates, asks to use the server's AI, and is approve
     await expect(page).toHaveURL(/\/new\/[0-9A-Z]{26}$/)
     const id = /\/new\/([0-9A-Z]{26})/.exec(page.url())![1]!
 
-    // A Source goes in; building needs AI, and the panel says how to get it.
+    // A Source goes in. (The Sources step's no-AI panel is checked in
+    // signup-flow.spec.ts, on a server set up the same way.)
     await page.getByRole("tab", { name: "Paste a chat" }).click()
     await page.getByLabel("Just paste in an AI chat").fill(CHAT)
     await page.getByRole("button", { name: "Add this chat" }).click()
     await expect(page.getByTestId("source-list")).toContainText("Pasted chat")
-    const panel = page.getByTestId("no-ai-panel")
-    await expect(panel).toContainText("Building needs AI. Choose how.")
-    await expect(panel.getByTestId("agent-request")).toHaveValue(
-      "Make a Seply Learn Expedition from this conversation."
-    )
-    await expect(
-      page.getByRole("button", { name: "Next: choose Views" })
-    ).toBeDisabled()
-    await expect(page.getByText("Your Sources are saved as a draft.")).toBeVisible()
-    await screenshot(page, testInfo, "create-no-server-ai")
 
     // Choosing Views needs the AI too: the same line, not a failure.
     await page.goto(`/new/${id}/views`)

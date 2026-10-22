@@ -17,8 +17,8 @@ import { needsDatabase, openView, screenshot, signUp } from "./helpers.ts"
 // evicts an idle object after about 10 s while its sockets stay open); then
 // Ada's cursor on a Concept shows on the same Concept for Ed, her rename
 // reaches Ed's tab without a single pull, and Ed's presence clears when his
-// context closes. An anonymous reader of an unlisted link gets edits as
-// `ops` and never sends or hears presence.
+// context closes. (An anonymous reader of a link, who gets edits as `ops`
+// and never sends or hears presence, is visibility.spec.ts.)
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(
@@ -220,57 +220,5 @@ test("live edits, cursors and presence between two collaborators, across hiberna
   } finally {
     await ada.context.close()
     if (edOpen) await ed.context.close()
-  }
-})
-
-test("an anonymous reader of a link gets edits as ops, and no presence", async ({
-  browser,
-}) => {
-  test.setTimeout(90_000)
-  const ada = await person(browser, "Ada Lovelace")
-  const anon = await person(browser, null)
-  try {
-    const exp = await importCompute(ada.page)
-    // Unlisted, not public, so it never shows in other tests' searches.
-    await sql("update expeditions set visibility = 'unlisted' where id = $1", [
-      exp,
-    ])
-    await openLearningPath(ada.page, exp)
-    await openLearningPath(anon.page, exp)
-    await expect(anon.page.getByRole("link", { name: "Sign in" })).toBeVisible()
-    await expect.poll(() => types(anon.frames.received)).toContain("hello")
-    anon.resetPulls()
-
-    // Ada's pointer and rename: the anonymous tab gets the rename, no pull.
-    await pointAt(
-      ada.page,
-      ada.page.getByTestId("canvas-pane").locator("[data-concept]").first()
-    )
-    await rename(ada.page, "Compute, for everyone")
-    await expect(anon.page.getByRole("heading", { level: 1 })).toHaveText(
-      "Compute, for everyone",
-      { timeout: 5_000 }
-    )
-    expect(anon.pulls()).toBe(0)
-
-    // It never sent a frame, heard nobody's presence, and nobody sees it.
-    const hello = JSON.parse(anon.frames.received[0]!) as {
-      t: string
-      you?: string
-      presence: unknown[]
-    }
-    expect(hello).toMatchObject({ t: "hello", presence: [] })
-    expect(hello.you).toBeUndefined()
-    expect(anon.frames.sent).toEqual([])
-    expect(types(anon.frames.received)).toContain("ops")
-    expect(types(anon.frames.received)).not.toContain("presence")
-    await expect(anon.page.getByTestId("live-cursor")).toHaveCount(0)
-    await expect(ada.page.getByTestId("presence")).toHaveCount(0)
-
-    expect(ada.errors).toEqual([])
-    expect(anon.errors).toEqual([])
-  } finally {
-    await ada.context.close()
-    await anon.context.close()
   }
 })

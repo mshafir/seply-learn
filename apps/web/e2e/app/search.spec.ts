@@ -9,7 +9,6 @@ import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 // opens it in the side panel, and filters by #tag through the Tags group. A
 // stranger never finds the private Expedition, public toggle or not. Inside
 // the Expedition, the search box dims every Concept that doesn't match.
-// Runs in light and dark (app-light, app-dark).
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(

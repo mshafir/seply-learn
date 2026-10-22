@@ -15,7 +15,8 @@ import {
 // under the header (tabs that fit, the rest under "more", a card on hover),
 // the canvas full width, the side panel sliding open at 520 px, resizable
 // by its edge (kept over a reload), wider for the full article and back
-// again (a Sheet on narrow windows). Runs in light and dark (app-light, app-dark).
+// again (a Sheet on narrow windows). Runs in light and dark
+// (app-light, app-dark): the one app spec that does (playwright.config.ts).
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(

@@ -5,7 +5,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // WP-3.3: Settings → AI in bring-your-own-key mode (the e2e Worker runs with
 // AI_KEY_MODE=byok and a test-only master key; playwright.config.ts). A key
 // is saved, shown only by its last 4 characters (never sent back by the API),
-// tested, and deleted; the per-ask spending cap is kept. Light and dark.
+// tested, and deleted; the per-ask spending cap is kept.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 // Not a real key: the provider refuses it when tested.

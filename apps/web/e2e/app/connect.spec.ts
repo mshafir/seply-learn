@@ -6,7 +6,6 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // install commands with this server's address, and a first prompt. With a
 // token (an agent that can't sign in), the sign-in step ticks itself when the
 // agent makes its first call. From an Expedition, the prompt is about it.
-// Light and dark.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 test("the steps for each agent, with this server's address", async ({

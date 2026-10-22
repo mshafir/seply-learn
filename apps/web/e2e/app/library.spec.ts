@@ -8,7 +8,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // WP-2.7: the complete Library (spec §3.2). Your Expeditions, Shared with
 // you and Drafts; cards with the best View's View Type thumbnail, the
 // collaborators, counts and date; the Tag filter; and "Keep available
-// offline". Runs in light and dark (app-light, app-dark) for the screenshots.
+// offline".
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = JSON.parse(

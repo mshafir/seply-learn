@@ -6,7 +6,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // an API token in Settings (its key shown once); an agent uses it on /mcp to
 // create an Expedition from a chat (a first build: no model on the server)
 // and to suggest a Concept, which shows up in the Suggestions tab as "Your
-// agent (via MCP)". Deleting the token locks the agent out. Light and dark.
+// agent (via MCP)". Deleting the token locks the agent out.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 /** One stateless MCP tools/call with a Bearer token; the tool's text, or the HTTP status. */
