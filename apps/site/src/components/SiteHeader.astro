@@ -1,6 +1,5 @@
 ---
-// The header on every page: the wordmark, the section links and Request
-// access. Below the md breakpoint the links fold into a menu button that opens
+// The header on every page: the wordmark, the section links and Sign in. Below the md breakpoint the links fold into a menu button that opens
 // a panel (src/scripts/menu.ts). The wordmark is @seply/ui's React component,
 // rendered to HTML at build time.
 import { Wordmark } from "@seply/ui/components/brand"
@@ -29,7 +28,7 @@ const links = [
     <nav aria-label="Main" class="hidden flex-1 flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground md:flex">
       {links.map((l) => <a href={l.href} class="rounded-sm hover:text-foreground">{l.label}</a>)}
     </nav>
-    <a href={APP_URL} class={cn(primaryButton, "hidden min-h-10 px-4 text-sm md:inline-flex")}>Request access</a>
+    <a href={APP_URL} class={cn(primaryButton, "hidden min-h-10 px-4 text-sm md:inline-flex")}>Sign in</a>
     <div class="flex-1 md:hidden"></div>
     <button
       type="button"
@@ -54,7 +53,7 @@ const links = [
         </a>
       ))
     }
-    <a href={APP_URL} class={cn(primaryButton, "mt-4 w-full")}>Request access</a>
+    <a href={APP_URL} class={cn(primaryButton, "mt-4 w-full")}>Sign in</a>
   </nav>
 </header>
 
