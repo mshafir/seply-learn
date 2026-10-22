@@ -1,0 +1,19 @@
+---
+// /desktop: the download buttons, then docs/desktop.md (the install steps)
+// rendered at build time (src/components/RepoDoc.astro).
+// Mounted at /desktop/ by src/pages/desktop.astro.
+import DesktopDownloads from "../components/DesktopDownloads.astro"
+import RepoDoc from "../components/RepoDoc.astro"
+import { eyebrow } from "../lib/styles"
+---
+
+<RepoDoc
+  doc="desktop"
+  title="Desktop app"
+  description="Download the Seply Learn desktop app for macOS, Windows or Linux, and how to open it while the builds aren't signed yet."
+>
+  <section aria-label="Download" class="mb-10 flex max-w-[46rem] flex-col gap-3 rounded-xl border border-border bg-card p-5">
+    <span class={eyebrow}>Download</span>
+    <DesktopDownloads />
+  </section>
+</RepoDoc>

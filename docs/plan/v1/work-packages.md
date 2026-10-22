@@ -481,6 +481,7 @@ Spec: [9. Landing site](../../spec/v1/09-landing-site.md). The three showcase Ex
   - The Playwright Electron run in CI on Linux.
   - `apps/desktop/README.md`, and "Using the desktop app with your server" in the self-host guide, with the unsigned-install steps.
 - **Done when:** a tag produces installable packages for all three platforms, the Electron e2e run passes in CI, and the owner has installed one on each OS they can reach.
+- *As built, in part, ahead of 8.3 and 8.4 (the owner's choice, so seply.app can offer the app now):* the electron-builder targets, the `desktop-v*` release workflow (with a dry-run dispatch), the Electron e2e job on Linux (`.github/workflows/desktop.yml`), the READMEs and both guides (`docs/desktop.md`, and the self-host guide's section), plus downloads on seply.app (a home page section and `/desktop/`, linked from the footer). The first desktop Releases ship the shell of 8.1 and 8.2; deep links, opened files, notifications and the tray arrive in later releases. Still open here: the e2e run's full flow against a real server (a `seply://` link, a file, a notification) once 8.3 and 8.4 land, and the owner installing a package on each OS. This package stays open until then.
 
 ### WP-8.6: Signing and automatic updates
 - lane: B

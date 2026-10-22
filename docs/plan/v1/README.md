@@ -83,4 +83,5 @@ M5: 5.1 (B) → 5.2 (B/D) ‖ 5.3 (A) ‖ 5.4 (B/E)
 M6: 6.1 (B) → 6.2 (B)
 M7: 7.1 (B) → 7.2 (D);  7.3 (B/D) ‖ 7.4 (C) ‖ 7.5 (D);  7.1 + 7.5 + public showcases → 7.6 (D)
 M8: 5.5 (D) ‖ 8.1 (B) → 8.2 (B) → 8.3 (D);  8.4 (B) after 8.1;  8.3 + 8.4 → 8.5 (B) → 8.6 (B)
+    (8.5's packaging and release workflow came early, after 8.2; its e2e flow waits for 8.3 + 8.4)
 ```

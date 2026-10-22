@@ -1,0 +1,189 @@
+# The desktop packages (spec §10.6; WP-8.5; apps/desktop/README.md).
+#
+# - A `desktop-v*` tag (desktop-v0.1.0): build on macOS, Windows and Linux,
+#   then publish the unsigned packages to a GitHub Release named
+#   "Seply Learn desktop 0.1.0", and redeploy seply.app so its download
+#   buttons point at the new files. A tag with a "-" (desktop-v0.2.0-rc.1) is a
+#   prerelease, which the site skips.
+# - workflow_dispatch: the same three builds as a dry run. The packages are
+#   uploaded as workflow artifacts; no Release is made and nothing is deployed.
+#
+# The server's tags are `v*` (image.yml); a filter matches from the start of
+# the tag name, so `desktop-v*` never starts the image workflow, and `v*`
+# never starts this one. The desktop Release is never marked "latest": that
+# stays the server's, which the self-host guide's links rely on.
+name: Desktop release
+
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: apps/desktop/package.json
+          sparse-checkout-cone-mode: false
+
+      # The tag says the version; apps/desktop/package.json must say the same,
+      # so the app's About box and the file names agree with the Release.
+      - id: v
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          pkg=$(node -p 'require("./apps/desktop/package.json").version')
+          if [ "$REF_TYPE" = "tag" ]; then
+            version=${TAG#desktop-v}
+            if [ "$version" != "$pkg" ]; then
+              echo "::error::The tag says $version but apps/desktop/package.json says $pkg. Bump the package (in a PR), then tag that commit."
+              exit 1
+            fi
+          else
+            version=$pkg
+          fi
+          case "$version" in *-*) prerelease=true ;; *) prerelease=false ;; esac
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+          echo "Seply Learn desktop $version (prerelease: $prerelease)"
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: version
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # A universal .dmg (x64 and arm64 in one app), ad-hoc signed.
+          - name: macOS
+            os: macos-latest
+            builds: "--mac --universal"
+          # One NSIS installer per architecture.
+          - name: Windows
+            os: windows-latest
+            builds: "--win --x64;--win --arm64"
+          # AppImage and .deb, x64 and arm64.
+          - name: Linux
+            os: ubuntu-latest
+            builds: "--linux --x64 --arm64"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Cache Electron and the packaging tools
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
+            ~/Library/Caches/electron
+            ~/Library/Caches/electron-builder
+            ~/AppData/Local/electron/Cache
+            ~/AppData/Local/electron-builder/Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: electron-${{ runner.os }}-
+
+      - name: Build the packages
+        shell: bash
+        env:
+          BUILDS: ${{ matrix.builds }}
+          # No signing identity is looked up or used (WP-8.6 brings them).
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          IFS=';' read -ra runs <<< "$BUILDS"
+          for run in "${runs[@]}"; do
+            # shellcheck disable=SC2086 # each run is a list of flags
+            pnpm --filter desktop run dist $run
+          done
+
+      - name: The packages
+        shell: bash
+        run: |
+          cd apps/desktop/release
+          {
+            echo "### ${{ matrix.name }}"
+            echo
+            for f in Seply-Learn-*; do
+              case "$f" in *.blockmap) continue ;; esac
+              echo "- \`$f\`: $(du -h "$f" | cut -f1)"
+            done
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: desktop-${{ matrix.name }}
+          path: |
+            apps/desktop/release/Seply-Learn-*.dmg
+            apps/desktop/release/Seply-Learn-*.exe
+            apps/desktop/release/Seply-Learn-*.AppImage
+            apps/desktop/release/Seply-Learn-*.deb
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish the Release
+    if: github.ref_type == 'tag'
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      # To start the site's redeploy (preview.yml, workflow_dispatch).
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+      VERSION: ${{ needs.version.outputs.version }}
+      PRERELEASE: ${{ needs.version.outputs.prerelease }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: desktop-*
+          path: packages
+          merge-multiple: true
+
+      - name: Create the Release
+        run: |
+          ls -l packages
+          cat > notes.md <<EOF
+          The Seply Learn desktop app, version $VERSION. It opens learn.seply.app, or your own server, in its own window.
+
+          These builds are **not signed** yet, so your system will warn you the first time you open the app. The install steps are at https://seply.app/desktop/.
+
+          | System | File |
+          |---|---|
+          | macOS (Apple silicon and Intel) | \`Seply-Learn-$VERSION-mac-universal.dmg\` |
+          | Windows | \`Seply-Learn-$VERSION-win-x64.exe\` (Arm: \`-win-arm64.exe\`) |
+          | Ubuntu, Debian | \`Seply-Learn-$VERSION-linux-amd64.deb\` (Arm: \`-linux-arm64.deb\`) |
+          | Other Linux | \`Seply-Learn-$VERSION-linux-x86_64.AppImage\` (Arm: \`-linux-arm64.AppImage\`) |
+          EOF
+          flags=(--latest=false)
+          if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+          gh release create "$TAG" packages/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Seply Learn desktop $VERSION" \
+            --notes-file notes.md \
+            "${flags[@]}"
+
+      # seply.app reads the newest desktop Release when it is built
+      # (apps/site/src/learn/desktop.ts). A prerelease doesn't change it.
+      - name: Redeploy seply.app
+        if: needs.version.outputs.prerelease == 'false'
+        run: gh workflow run preview.yml --repo "$GITHUB_REPOSITORY" --ref main

@@ -1,0 +1,104 @@
+---
+// A page rendered at build time from a doc in the repo's docs/ folder (the
+// repo stays its one source): /self-host from docs/self-host.md and /desktop
+// from docs/desktop.md. It has a table of contents from the doc's sections and
+// copy buttons on its code blocks. Relative links become GitHub links, or the
+// site's own page for a doc it renders (src/lib/rehype-repo-docs.ts).
+// Anything in the default slot goes above the doc.
+import { getEntry, render } from "astro:content"
+
+import Base from "../layouts/Base.astro"
+import { container } from "../lib/styles"
+import { GITHUB_BLOB } from "../lib/rehype-repo-docs"
+import SiteFooter from "./SiteFooter.astro"
+import SiteHeader from "./SiteHeader.astro"
+
+interface Props {
+  /** The doc's name in docs/, without .md. */
+  doc: string
+  /** The page's title; its h1 comes from the doc. */
+  title: string
+  description: string
+}
+
+const { doc, title: pageTitle, description } = Astro.props
+const entry = await getEntry("docs", doc)
+if (!entry) throw new Error(`docs/${doc}.md is missing`)
+const { Content, headings } = await render(entry)
+const title = headings.find((h) => h.depth === 1)?.text ?? pageTitle
+const sections = headings.filter((h) => h.depth === 2)
+---
+
+<Base title={pageTitle} description={description}>
+  <SiteHeader />
+  <div class:list={[container, "grid grid-cols-1 gap-12 pt-14 pb-24 lg:grid-cols-[220px_minmax(0,1fr)]"]}>
+    <aside class="hidden lg:block">
+      <nav aria-label="On this page" class="sticky top-24 flex flex-col gap-2 text-sm">
+        <span class="font-mono text-xs font-medium tracking-[0.06em] text-muted-foreground uppercase">On this page</span>
+        <ol class="m-0 flex list-none flex-col gap-1.5 p-0">
+          {
+            sections.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} class="rounded-sm text-muted-foreground hover:text-foreground">
+                  {h.text}
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+    </aside>
+    <main id="top" class="min-w-0">
+      <slot />
+      <article class="typeset max-w-[46rem]" aria-label={title}>
+        <Content />
+      </article>
+      <p class="mt-12 text-sm text-muted-foreground">
+        This page is built from <a
+          class="text-primary underline underline-offset-4 hover:no-underline"
+          href={`${GITHUB_BLOB}docs/${doc}.md`}>docs/{doc}.md</a
+        > in the repository.
+      </p>
+    </main>
+  </div>
+  <SiteFooter />
+</Base>
+
+<style is:global>
+  /* Code blocks on the ink colour, like the landing page's snippets. */
+  .typeset pre {
+    background: var(--foreground);
+    color: var(--background);
+    border: 0;
+    border-radius: 0.75rem;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  /* Long lines and wide tables scroll inside themselves, never the page. */
+  .typeset pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .typeset table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .typeset .copy-wrap > pre {
+    padding-right: 5.5rem;
+  }
+  .typeset h1 {
+    font-size: clamp(32px, 4vw, 44px);
+    line-height: 1.1;
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
+  }
+  .typeset h2 {
+    font-weight: 500;
+    font-variation-settings: "opsz" 72;
+  }
+  .typeset pre code {
+    color: inherit;
+    background: none;
+  }
+</style>

@@ -5,5 +5,7 @@ packages:
 allowBuilds:
   # apps/desktop fetches the binary when it needs it (scripts/ensure-electron.mjs).
   electron: false
+  # electron-builder's Squirrel.Windows helper; the app ships NSIS installers.
+  electron-winstaller: false
   esbuild: true
   msw: false

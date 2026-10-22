@@ -16,7 +16,8 @@ on:
     branches: [main]
   # The site again (only the site), weekly and on demand: its screenshots of
   # the public showcases and the Examples' counts go stale as they grow
-  # (WP-7.6). The week is in the screenshot cache's key.
+  # (WP-7.6). The week is in the screenshot cache's key. The desktop release
+  # workflow dispatches it too, for the new download links.
   schedule:
     - cron: "23 5 * * 1"
   workflow_dispatch:
@@ -485,6 +486,8 @@ jobs:
           SITE_ENV: preview
           # A public showcase View for the Read together section (spec 9.3); unset shows the screenshot.
           SITE_EMBED_URL: ${{ vars.SITE_EMBED_URL }}
+          # The desktop downloads read the newest desktop Release (apps/site/src/learn/desktop.ts).
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @seply/site build
 
       - name: Work out the Worker URL
@@ -631,6 +634,8 @@ jobs:
           # The Web Analytics site token. It is public (the page carries it), so a
           # repo variable; a secret of the same name works too. Unset: no beacon.
           CF_ANALYTICS_TOKEN: ${{ vars.CF_ANALYTICS_TOKEN || secrets.CF_ANALYTICS_TOKEN }}
+          # The desktop downloads read the newest desktop Release (apps/site/src/learn/desktop.ts).
+          GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @seply/site build
 
       # --domain attaches the custom domain (and its DNS record) to this Worker

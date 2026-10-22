@@ -3,14 +3,26 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/self-host.md"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/self-host.md",
+        "$TURBO_ROOT$/docs/desktop.md"
+      ],
       "outputs": ["dist/**"]
     },
     "test": {
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/self-host.md"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/self-host.md",
+        "$TURBO_ROOT$/docs/desktop.md"
+      ]
     },
     "typecheck": {
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/self-host.md"]
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/self-host.md",
+        "$TURBO_ROOT$/docs/desktop.md"
+      ]
     }
   }
 }

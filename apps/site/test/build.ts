@@ -13,6 +13,8 @@ export const outDir = (name: string) => testDir(name)
 const NO_MEDIA = testDir("media-none")
 /** A few media files (empty: the build only checks they exist). */
 const SOME_MEDIA = testDir("media-some")
+/** The GitHub API's answer for the Releases, as the media build reads it. */
+const RELEASES = testDir("releases") + "releases.json"
 
 const builds: Record<string, Record<string, string>> = {
   // Local and CI checks: no analytics token.
@@ -27,12 +29,48 @@ const builds: Record<string, Record<string, string>> = {
     SITE_ENV: "preview",
     CF_ANALYTICS_TOKEN: "test-token",
   },
-  // The media manifest picks up files and the embed URL.
+  // The media manifest picks up files and the embed URL; the desktop
+  // buttons link to the files of a desktop Release.
   media: {
     MEDIA_DIR: SOME_MEDIA,
     SITE_EMBED_URL: "https://learn.seply.app/e/test/embed?view=v",
+    SITE_RELEASES_FILE: RELEASES,
   },
 }
+
+const DOWNLOAD = "https://github.com/mshafir/seply-learn/releases/download"
+const TAG = "https://github.com/mshafir/seply-learn/releases/tag"
+const asset = (tag: string, name: string) => ({
+  name,
+  browser_download_url: `${DOWNLOAD}/${tag}/${name}`,
+})
+const release = (tag: string, prerelease: boolean, assets: string[]) => ({
+  tag_name: tag,
+  html_url: `${TAG}/${tag}`,
+  draft: false,
+  prerelease,
+  assets: assets.map((name) => asset(tag, name)),
+})
+
+/**
+ * Releases, newest first, as the API lists them: a desktop prerelease and the
+ * server's Release come before the newest desktop one, which the site picks.
+ */
+export const RELEASES_FIXTURE = [
+  release("desktop-v0.3.0-rc.1", true, [
+    "Seply-Learn-0.3.0-rc.1-mac-universal.dmg",
+  ]),
+  release("v1.0.0", false, []),
+  release("desktop-v0.2.0", false, [
+    "Seply-Learn-0.2.0-mac-universal.dmg",
+    "Seply-Learn-0.2.0-win-x64.exe",
+    "Seply-Learn-0.2.0-win-arm64.exe",
+    "Seply-Learn-0.2.0-linux-amd64.deb",
+    "Seply-Learn-0.2.0-linux-arm64.deb",
+    "Seply-Learn-0.2.0-linux-x86_64.AppImage",
+  ]),
+  release("desktop-v0.1.0", false, ["Seply-Learn-0.1.0-mac-universal.dmg"]),
+]
 
 export default function setup() {
   rmSync(NO_MEDIA, { recursive: true, force: true })
@@ -64,6 +102,9 @@ export default function setup() {
     })
   )
 
+  mkdirSync(testDir("releases"), { recursive: true })
+  writeFileSync(RELEASES, JSON.stringify(RELEASES_FIXTURE))
+
   for (const [name, env] of Object.entries(builds)) {
     rmSync(outDir(name), { recursive: true, force: true })
     const clean = { ...process.env }
@@ -72,6 +113,7 @@ export default function setup() {
       "CF_ANALYTICS_TOKEN",
       "MEDIA_DIR",
       "SITE_EMBED_URL",
+      "SITE_RELEASES_FILE",
     ])
       delete clean[k]
     execFileSync("astro", ["build", "--outDir", outDir(name)], {
@@ -81,6 +123,8 @@ export default function setup() {
         ...clean,
         ...env,
         SITE_COUNTS: "offline",
+        // No GitHub API: the desktop buttons' fallback, or the media build's file.
+        SITE_RELEASES: "offline",
         ASTRO_TELEMETRY_DISABLED: "1",
       },
       stdio: "pipe",

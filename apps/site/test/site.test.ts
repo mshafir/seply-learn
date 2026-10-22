@@ -10,9 +10,14 @@ import { describe, expect, it } from "vitest"
 import { EXAMPLES, GALLERY, SHOWCASE } from "../src/learn/content"
 import { countOps, countsLabel } from "../src/learn/counts"
 import { HEADLINE } from "../src/learn/copy"
+import {
+  DESKTOP_RELEASES_URL,
+  desktopDownloads,
+  type GithubRelease,
+} from "../src/learn/desktop"
 import { lightTokens } from "../src/lib/og"
 import { IMAGE_SLOTS } from "../src/media"
-import { outDir } from "./build"
+import { outDir, RELEASES_FIXTURE } from "./build"
 
 const read = (build: string, file: string) =>
   readFileSync(join(outDir(build), file), "utf8")
@@ -50,6 +55,7 @@ describe("production build", () => {
       at("Read and edit with other people"),
       at('id="examples"'),
       at('id="self-host"'),
+      at('id="desktop"'),
       at("Coming soon."),
       at("Seply Learn is part of Seply"),
     ]
@@ -104,7 +110,12 @@ describe("production build", () => {
 
   it("ships under 60 KB of JavaScript, and no React", () => {
     const dir = outDir("production")
-    for (const page of ["index.html", "self-host/index.html", "404.html"]) {
+    for (const page of [
+      "index.html",
+      "self-host/index.html",
+      "desktop/index.html",
+      "404.html",
+    ]) {
       const html = prod(page)
       const external = [...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map(
         (m) => m[1]
@@ -152,6 +163,7 @@ describe("production build", () => {
     const xml = prod("sitemap.xml")
     expect([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([
       "https://seply.app/",
+      "https://seply.app/desktop/",
       "https://seply.app/self-host/",
     ])
     expect(prod("robots.txt")).toContain(
@@ -200,6 +212,124 @@ describe("/self-host", () => {
       expect(pre).toContain("data-copy=")
       expect(pre).toContain('tabindex="0"')
     }
+  })
+})
+
+describe("desktop downloads", () => {
+  const releasesPage = DESKTOP_RELEASES_URL.replaceAll("&", "&amp;")
+  const download = (tag: string, file: string) =>
+    `https://github.com/mshafir/seply-learn/releases/download/${tag}/${file}`
+
+  it("has a Desktop app section with a button per system and the install steps link", () => {
+    const html = prod("index.html")
+    expect(html).toContain('id="desktop"')
+    expect(html).toContain("in a window of its own")
+    for (const os of ["macOS", "Windows", "Linux"])
+      expect(html).toMatch(
+        new RegExp(
+          `data-download="${os}"[^>]*>\\s*<span>Download for ${os}</span>`
+        )
+      )
+    expect(html).toMatch(/<a href="\/desktop\/"[^>]*>install steps<\/a>/)
+  })
+
+  it("links every button to the desktop releases before there is a Release", () => {
+    for (const page of ["index.html", "desktop/index.html"]) {
+      const html = prod(page)
+      expect(html, page).toContain('data-version="none"')
+      const buttons = [
+        ...html.matchAll(/<a href="([^"]+)"[^>]*data-download=/g),
+      ]
+      expect(
+        buttons.map((m) => m[1]),
+        page
+      ).toEqual([releasesPage, releasesPage, releasesPage])
+    }
+  })
+
+  it("links each button to its file in the newest desktop Release", () => {
+    const html = read("media", "index.html")
+    expect(html).toContain('data-version="0.2.0"')
+    const buttons = [
+      ...html.matchAll(/<a href="([^"]+)"[^>]*data-download="([^"]+)"/g),
+    ]
+    expect(buttons.map((m) => [m[2], m[1]])).toEqual([
+      [
+        "macOS",
+        download("desktop-v0.2.0", "Seply-Learn-0.2.0-mac-universal.dmg"),
+      ],
+      ["Windows", download("desktop-v0.2.0", "Seply-Learn-0.2.0-win-x64.exe")],
+      [
+        "Linux",
+        download("desktop-v0.2.0", "Seply-Learn-0.2.0-linux-amd64.deb"),
+      ],
+    ])
+    expect(html).toContain(
+      download("desktop-v0.2.0", "Seply-Learn-0.2.0-win-arm64.exe")
+    )
+    expect(html).toContain(
+      download("desktop-v0.2.0", "Seply-Learn-0.2.0-linux-x86_64.AppImage")
+    )
+    expect(html).toContain("Version 0.2.0.")
+  })
+
+  it("picks the newest desktop Release, skipping the server's, prereleases and drafts", () => {
+    const releases = RELEASES_FIXTURE as GithubRelease[]
+    const d = desktopDownloads(releases)
+    expect(d.version).toBe("0.2.0")
+    expect(d.releaseUrl).toBe(
+      "https://github.com/mshafir/seply-learn/releases/tag/desktop-v0.2.0"
+    )
+    // A file the Release doesn't have: that button opens the Release.
+    expect(d.more.map((m) => `${m.label} (${m.file})`)).toEqual([
+      "Windows on Arm (.exe)",
+      "Linux AppImage (x86-64)",
+      "Linux .deb (Arm)",
+    ])
+    const draft = { ...releases[2], draft: true }
+    expect(desktopDownloads([draft, releases[3]]).version).toBe("0.1.0")
+    const onlyOne = desktopDownloads([releases[3]])
+    expect(onlyOne.main.windows.href).toBe(releases[3].html_url)
+    expect(onlyOne.more).toEqual([])
+  })
+
+  it("falls back to the desktop releases with no Release at all", () => {
+    const d = desktopDownloads([])
+    expect(d.version).toBeNull()
+    expect(Object.values(d.main).map((m) => m.href)).toEqual([
+      DESKTOP_RELEASES_URL,
+      DESKTOP_RELEASES_URL,
+      DESKTOP_RELEASES_URL,
+    ])
+  })
+})
+
+describe("/desktop", () => {
+  const html = () => prod("desktop/index.html")
+
+  it("renders docs/desktop.md under the download buttons", () => {
+    expect(html()).toMatch(/The Seply Learn desktop app<\/h1>/)
+    expect(html().indexOf("data-desktop-downloads")).toBeLessThan(
+      html().indexOf("<h1")
+    )
+    for (const slug of ["macos", "windows", "linux", "choosing-a-server"])
+      expect(html()).toContain(`href="#${slug}"`)
+    expect(html()).toContain("More info")
+    expect(html()).toContain("xattr -dr com.apple.quarantine")
+    expect(html()).toContain(
+      '<link rel="canonical" href="https://seply.app/desktop/">'
+    )
+  })
+
+  it("links the self-host guide on the site, not on GitHub", () => {
+    expect(html()).toContain('href="/self-host/"')
+    expect(prod("self-host/index.html")).toContain('href="/desktop/"')
+  })
+
+  it("is linked from the footer", () => {
+    expect(prod("index.html")).toMatch(
+      /<a href="\/desktop\/"[^>]*>Desktop app<\/a>/
+    )
   })
 })
 

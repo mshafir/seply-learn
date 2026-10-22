@@ -1,0 +1,69 @@
+---
+// The desktop app's download buttons, one per system, and the other files as
+// small links. The links come from the newest desktop Release at build time
+// (src/learn/desktop.ts); before there is one, every button opens the
+// Releases page.
+import { buttonVariants } from "@seply/ui/components/button"
+import { cn } from "@seply/ui/lib/utils"
+
+import { DESKTOP } from "../learn/desktop"
+import { link } from "../lib/styles"
+
+interface Props {
+  class?: string
+}
+
+const { class: className } = Astro.props
+const { version, releaseUrl, main, more } = DESKTOP
+const buttons = [main.mac, main.windows, main.linux]
+const button = cn(
+  buttonVariants({ variant: "outline" }),
+  "h-auto min-h-14 flex-col items-start gap-0 rounded-lg bg-background px-[18px] py-2 text-base dark:bg-background"
+)
+---
+
+<div class:list={["flex flex-col gap-3", className]} data-desktop-downloads data-version={version ?? "none"}>
+  <div class="flex flex-wrap gap-3">
+    {
+      buttons.map((d) => (
+        <a href={d.href} class={button} data-download={d.label}>
+          <span>Download for {d.label}</span>
+          <span class="text-xs font-normal text-muted-foreground">{d.file}</span>
+        </a>
+      ))
+    }
+  </div>
+  <p class="m-0 text-sm text-muted-foreground">
+    {
+      version ? (
+        <>
+          Version {version}.{" "}
+          {more.length > 0 && (
+            <>
+              Also:{" "}
+              {more.map((d, i) => (
+                <>
+                  <a href={d.href} class={link}>
+                    {d.label} ({d.file})
+                  </a>
+                  {i < more.length - 1 ? ", " : ". "}
+                </>
+              ))}
+            </>
+          )}
+          <a href={releaseUrl} class={link}>
+            Release notes
+          </a>
+        </>
+      ) : (
+        <>
+          The buttons open the{" "}
+          <a href={releaseUrl} class={link}>
+            desktop releases
+          </a>{" "}
+          on GitHub.
+        </>
+      )
+    }
+  </p>
+</div>

@@ -84,10 +84,11 @@ A self-hosted server's code runs in the window, so the shell treats the page as 
 
 ## 10.6 Packaging, updates and tests
 
-- **Packages** (electron-builder): a universal `.dmg`, an NSIS `.exe` (x64 and arm64), and `.AppImage` and `.deb` (x64 and arm64).
-- **Releases:** a `desktop-v*` tag runs a GitHub Actions matrix (macOS, Windows, Linux) and attaches the packages to a GitHub Release. The desktop version is its own; it doesn't follow the server image's tags.
-- **Unsigned first.** The first releases are for testing and aren't signed: macOS needs right-click → Open, and Windows shows SmartScreen. The download page says so.
-- **Signing comes next** (an Apple Developer ID with notarisation, and a Windows certificate). With it come **automatic updates** on macOS and Windows (electron-updater from GitHub Releases), which need signed builds, and verified `https` links. The Linux AppImage updates itself from the first release.
+- **Packages** (electron-builder): a universal `.dmg`, an NSIS `.exe` per architecture (x64 and arm64), and `.AppImage` and `.deb` (x64 and arm64). The app is bundled, so the packages carry no `node_modules`.
+- **Releases:** a `desktop-v*` tag runs a GitHub Actions matrix (macOS, Windows, Linux) and attaches the packages to a GitHub Release, "Seply Learn desktop <version>". The desktop version is its own; it doesn't follow the server image's tags. The tag must match `apps/desktop/package.json`. A desktop Release is never marked "latest", which stays the server's.
+- **Downloads on seply.app:** a Desktop app section on the home page and `/desktop/` (the install steps, from `docs/desktop.md`). The site reads the newest desktop Release from the GitHub API when it is built, and the release workflow redeploys it; when there is no desktop Release, or the API can't be read, the buttons open the desktop Releases on GitHub.
+- **Unsigned first.** The first releases are for testing and aren't signed: macOS needs **Open Anyway** in Privacy & Security (right-click → Open before macOS 15), and Windows shows SmartScreen. The macOS app is signed ad hoc, without which Apple silicon won't start it. The download page says so.
+- **Signing comes next** (an Apple Developer ID with notarisation, and a Windows certificate). With it come **automatic updates** on macOS and Windows (electron-updater from GitHub Releases), which need signed builds, and verified `https` links. The Linux AppImage's self-update comes with the same work: the first releases don't update themselves on any system.
 - **The app's name and icons** come from `packages/ui/brand`, as the web's do (§7.5).
 - **Tests:**
   - Unit (Vitest): origin reduction and the `https` rule, `/api/instance` validation, `seply://` parsing and host checks, bridge origin gating, navigation rules.

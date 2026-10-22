@@ -1,0 +1,57 @@
+# The desktop app's Playwright Electron run (spec §10.6; apps/desktop/e2e),
+# on Linux, for changes to the app or the components its shell page uses.
+# Its unit tests run with everything else in ci.yml (pnpm check).
+name: Desktop
+
+on:
+  pull_request:
+    paths:
+      - apps/desktop/**
+      - packages/ui/**
+      - pnpm-lock.yaml
+      - .github/workflows/desktop.yml
+  push:
+    branches: [main]
+    paths:
+      - apps/desktop/**
+      - packages/ui/**
+      - pnpm-lock.yaml
+      - .github/workflows/desktop.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Electron e2e (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Cache Electron
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/electron
+          key: electron-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: electron-e2e-${{ runner.os }}-
+
+      # Electron needs a display even with --headless; xvfb gives it one.
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb
+
+      - name: Run the Electron e2e
+        run: xvfb-run --auto-servernum pnpm --filter desktop test:e2e
+
+      - name: Upload the Playwright output
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-desktop
+          path: apps/desktop/test-results/
+          retention-days: 14
