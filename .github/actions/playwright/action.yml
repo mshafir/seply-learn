@@ -1,0 +1,28 @@
+name: Playwright Chromium
+description: >-
+  Playwright's Chromium for one package's Playwright version, cached under
+  that version. No system packages: the runner image already has the
+  libraries Chromium needs, and `--with-deps` only adds fonts (CJK, Thai,
+  unifont) from the Ubuntu mirror, which once took 8 minutes and timed the
+  e2e job out (run 39820352353).
+inputs:
+  package:
+    description: The pnpm filter of the package whose Playwright to use.
+    default: web
+runs:
+  using: composite
+  steps:
+    - name: Playwright version
+      id: pw
+      shell: bash
+      run: echo "version=$(pnpm --filter "${{ inputs.package }}" exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+    - name: Install Chromium
+      shell: bash
+      run: pnpm --filter "${{ inputs.package }}" exec playwright install chromium

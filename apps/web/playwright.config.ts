@@ -57,11 +57,20 @@ const nodeServer = () => ({
   },
 })
 
-// UI tests run against the production build (`vite build` + `vite preview`),
-// in light and dark. API tests run against the Worker (or, with
-// E2E_SERVER=node, the Node entry) with a real database, and so do the app
-// tests (e2e/app): the server serves the same build and the API on one
-// origin, in light and dark.
+// UI tests run against the production build (`vite build` + `vite preview`).
+// API tests run against the Worker (or, with E2E_SERVER=node, the Node entry)
+// with a real database, and so do the app tests (e2e/app): the server serves
+// the same build and the API on one origin.
+//
+// Themes: every app spec runs in light. Dark re-runs only what is about the
+// theme: the system theme on the bare build (smoke.spec.ts) and the tour of
+// the main screens (shell.spec.ts, whose screenshots are attached to the
+// report). The rest would only run the same behaviour again; the Views
+// harness (packages/views/e2e) compares real dark screenshots. Set
+// E2E_ALL_THEMES=1 to run every app spec in dark too (for UI work).
+const ALL_THEMES = !!process.env.E2E_ALL_THEMES
+const DARK_APP_SPECS = /app\/shell\.spec\.ts/
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -69,7 +78,9 @@ export default defineConfig({
   retries: CI ? 1 : 0,
   // One browser at a time locally: builders share a laptop (see CLAUDE.md, "Resources").
   workers: CI ? undefined : 1,
-  reporter: CI ? [["list"], ["html", { open: "never" }]] : "list",
+  // CI runs the suite in shards (.github/workflows/ci.yml); each writes a
+  // blob report, and the Playwright job merges them into one HTML report.
+  reporter: CI ? [["list"], ["blob"]] : "list",
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: "retain-on-failure",
@@ -82,7 +93,7 @@ export default defineConfig({
     },
     {
       name: "chromium-dark",
-      testIgnore: /(api|app|compose)\//,
+      testMatch: /smoke\.spec\.ts/,
       use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
     },
     {
@@ -96,7 +107,7 @@ export default defineConfig({
     },
     {
       name: "app-dark",
-      testMatch: /app\/.*\.spec\.ts/,
+      testMatch: ALL_THEMES ? /app\/.*\.spec\.ts/ : DARK_APP_SPECS,
       use: {
         ...devices["Desktop Chrome"],
         colorScheme: "dark",

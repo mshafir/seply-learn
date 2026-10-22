@@ -42,8 +42,7 @@ async function serverTitle(page: Page, id: string): Promise<string> {
 
 test("an edit made offline survives a reload and is pushed when the network is back", async ({
   page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== "app-light", "one theme is enough")
+}) => {
   await signUp(page)
   const created = await page.request.post("/api/expeditions", {
     data: { title: "Before" },

@@ -1,6 +1,6 @@
 // Screenshot tests of the dev harness. Not part of `pnpm check`: run with
 // `pnpm --filter @seply/views test:e2e` (needs Playwright's Chromium). CI
-// runs it in the Playwright job (.github/workflows/ci.yml).
+// runs it in its own job (.github/workflows/ci.yml, "Playwright · Views harness").
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({

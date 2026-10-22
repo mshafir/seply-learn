@@ -11,7 +11,7 @@ import { needsDatabase, screenshot, signUp, openView } from "./helpers.ts"
 // through /api/push, then open GQA: the badge reads "From the chat, turn 5",
 // and clicking it opens the viewer with turn 5 cited and in view. Closing
 // returns to the panel. A link opened in a new tab (?source=&segment=) lands
-// in the viewer too; an uploaded PDF reads as pages. Light and dark.
+// in the viewer too; an uploaded PDF reads as pages.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const fixture = (path: string) =>

@@ -105,7 +105,7 @@ Everything is an env var. Unknown variables are ignored; a bad value stops the s
 - `jobs.test.ts` (database): a job run to the end with each step recorded once, a retried step, progress to the room; cancel stopping at the next step; Retry as attempt 2 from the first step; an instance dying mid-job (its pg-boss stopped without grace, its run halted) while a second instance picks the attempt up and finishes it with every Change logged once.
 - `instances.test.ts` (database; WP-6.1's "done when"): two server-node processes on one database. An edit pushed to one reaches a WebSocket client of the other as `ops`, both ways; a batch too large for NOTIFY arrives as a `poke`; collaborators on different instances see each other's presence, a newcomer's `hello` lists the other instance's collaborator, and closing a socket sends `leave` across; a job's progress on one reaches the room on the other.
 
-The e2e suite runs against this entry with `E2E_SERVER=node` (`apps/web` README; CI's `e2e-node` job).
+The e2e suite runs against this entry with `E2E_SERVER=node` (`apps/web` README; CI's `e2e-node` jobs, in two shards).
 
 ## Allowed dependencies
 

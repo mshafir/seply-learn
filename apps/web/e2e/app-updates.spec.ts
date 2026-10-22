@@ -3,10 +3,11 @@ import { fileURLToPath } from "node:url"
 import { expect, test, type Page } from "@playwright/test"
 
 // The web client after a deploy (spec §2.9). Pages load from the network
-// first, so a new build shows on the next load; offline, the service worker
-// still opens the app; a tab that is open when a new version takes over
-// offers a reload. A "deploy" here is a change to the built index.html that
-// `vite preview` serves. No database needed.
+// first, so a new build shows on the next load; a tab that is open when a
+// new version takes over offers a reload. A "deploy" here is a change to the
+// built index.html that `vite preview` serves. No database needed. (Offline,
+// the service worker opening the app and the Expedition is
+// app/offline-reading.spec.ts.)
 
 const INDEX = fileURLToPath(new URL("../dist/index.html", import.meta.url))
 
@@ -52,20 +53,6 @@ test("a new build shows on the next load", async ({ page }, testInfo) => {
     expect(await marker(page)).toBe("next")
   } finally {
     deploy(original)
-  }
-})
-
-test("offline, the service worker still opens the app", async ({
-  page,
-  context,
-}) => {
-  await openControlled(page, "/showcase")
-  await context.setOffline(true)
-  try {
-    await page.reload()
-    await expect(page.locator("#root")).not.toBeEmpty()
-  } finally {
-    await context.setOffline(false)
   }
 })
 

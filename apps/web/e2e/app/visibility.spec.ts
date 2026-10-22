@@ -14,9 +14,10 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // WP-5.2: Visibility, public links, Fork and Trash (spec §1.4, §1.8, §3.9).
 // Ada imports the compute fixture and shares it by link from the share
 // dialog (the Sources warning first). Someone signed out opens the link and
-// reads it live: Ada's rename reaches their tab, which stays read-only, and
-// the server refuses their push. Made private again, their tab is kicked to
-// "not found". Bob, signed in, forks it from the link: his copy has its own
+// reads it live: Ada's rename reaches their tab as ops (no pull), which
+// stays read-only, and the server refuses their push. They never send or
+// hear presence, and Ada never sees them. Made private again, their tab is
+// kicked to "not found". Bob, signed in, forks it from the link: his copy has its own
 // one-Change History and its own Sources. Ada moves the original to Trash
 // (Bob's Fork is untouched) and restores it from the Library.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
@@ -30,6 +31,11 @@ type Person = {
   page: Page
   /** Room frames this page received, by type. */
   heard: string[]
+  /** The room frames this page received and sent, whole. */
+  frames: { received: string[]; sent: string[] }
+  /** `/api/pull` requests since the last `resetPulls()`. */
+  pulls: () => number
+  resetPulls: () => void
 }
 
 async function person(browser: Browser, name: string | null): Promise<Person> {
@@ -38,14 +44,30 @@ async function person(browser: Browser, name: string | null): Promise<Person> {
   })
   const page = await context.newPage()
   const heard: string[] = []
+  const frames = { received: [] as string[], sent: [] as string[] }
   page.on("websocket", (ws) => {
     if (!ws.url().endsWith("/live")) return
-    ws.on("framereceived", (f) =>
+    ws.on("framereceived", (f) => {
+      frames.received.push(String(f.payload))
       heard.push((JSON.parse(String(f.payload)) as { t: string }).t)
-    )
+    })
+    ws.on("framesent", (f) => frames.sent.push(String(f.payload)))
+  })
+  let pulls = 0
+  page.on("request", (req) => {
+    if (new URL(req.url()).pathname === "/api/pull") pulls += 1
   })
   if (name) await signUp(page, name)
-  return { context, page, heard }
+  return {
+    context,
+    page,
+    heard,
+    frames,
+    pulls: () => pulls,
+    resetPulls: () => {
+      pulls = 0
+    },
+  }
 }
 
 async function importCompute(page: Page): Promise<string> {
@@ -107,23 +129,48 @@ test("an anonymous reader opens an unlisted link, sees a live edit, and can't wr
     await expect.poll(() => anon.heard.includes("hello")).toBe(true)
     await screenshot(anon.page, testInfo, "anonymous-reader")
 
-    // Ada renames it; the reader's tab follows live, with no reload.
+    // Ada points at a Concept and renames it; the reader's tab follows live,
+    // as ops, with no reload and no pull.
     await anon.page.evaluate(() => {
       ;(window as unknown as { stillHere: boolean }).stillHere = true
     })
+    anon.resetPulls()
+    const concept = ada.page
+      .getByTestId("canvas-pane")
+      .locator("[data-concept]")
+      .first()
+    const box = (await concept.boundingBox())!
+    await ada.page.mouse.move(
+      box.x + box.width * 0.3,
+      box.y + box.height * 0.5,
+      { steps: 5 }
+    )
     await renameButton(ada.page).click()
     const renamed = `${title} (shared)`
     const input = ada.page.getByLabel("Expedition title")
     await input.fill(renamed)
     await input.press("Enter")
     await expect(heading(ada.page)).toHaveText(renamed)
-    await expect(heading(anon.page)).toHaveText(renamed)
+    await expect(heading(anon.page)).toHaveText(renamed, { timeout: 5_000 })
     expect(anon.heard).toContain("ops")
+    expect(anon.pulls()).toBe(0)
     expect(
       await anon.page.evaluate(
         () => (window as unknown as { stillHere?: boolean }).stillHere
       )
     ).toBe(true)
+
+    // No presence either way: its hello names no one (not even itself), it
+    // sends nothing, hears no presence, and Ada sees no avatar for it.
+    const hello = anon.frames.received
+      .map((f) => JSON.parse(f) as { t: string; you?: string })
+      .find((m) => m.t === "hello")
+    expect(hello).toMatchObject({ t: "hello", presence: [] })
+    expect(hello!.you).toBeUndefined()
+    expect(anon.frames.sent).toEqual([])
+    expect(anon.heard).not.toContain("presence")
+    await expect(anon.page.getByTestId("live-cursor")).toHaveCount(0)
+    await expect(ada.page.getByTestId("presence")).toHaveCount(0)
 
     // The server refuses their writes.
     const push = await anon.page.request.post("/api/push", {

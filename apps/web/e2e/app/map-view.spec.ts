@@ -6,7 +6,7 @@ import { needsDatabase, openView, screenshot, signUp } from "./helpers.ts"
 // Issue #140: on a Map View the View button floats over the map, as it does
 // over a canvas View; there is no band above the map. The map fills the
 // canvas pane and its zoom buttons sit clear of the button, on desktop and
-// phone widths. Runs in light and dark (app-light, app-dark).
+// phone widths.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const TRIP = fileURLToPath(

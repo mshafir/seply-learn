@@ -8,7 +8,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // the title) → Save draft → the Library's Drafts → reopen → Create (the build
 // job starts on the saved Views and the Expedition opens). The skim is stubbed
 // in the browser; the build's model calls fail on the fake key, which is fine:
-// only the hand-off is under test here. Light and dark.
+// only the hand-off is under test here.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 // A synthetic chat (never a real one).

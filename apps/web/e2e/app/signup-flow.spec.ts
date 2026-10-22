@@ -11,12 +11,13 @@ import { needsDatabase, screenshot } from "./helpers.ts"
 
 // The sign-up flow (spec §3.1–§3.3), on a server set up the way the hosted
 // one is (AI_KEY_MODE=both, access approval on, a server key that is never
-// called): sign in or create an account, the welcome step (connect your
-// agent) once per account, the first time it opens the Library (a link to
+// called): sign in or create an account (email and password through the
+// form; a wrong password is refused), the welcome step (connect your agent)
+// once per account, the first time it opens the Library (a link to
 // an Expedition goes there first), then the Library's first visit (no AI yet:
 // connect, add a key, or ask to use this server's AI; "Start by reading
 // one") and New Expedition with no AI ("Building needs AI. Choose how.",
-// with the request built from the question). Light and dark.
+// with the request built from the question).
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 test.describe.configure({ mode: "serial" })
 
@@ -142,9 +143,19 @@ test("a new account sees the welcome step once; Skip lands on the Library", asyn
     ).toBeVisible()
     await expect(page).toHaveURL(`${BASE}/`)
 
-    // Signing in again goes straight to the Library.
+    // Signed out, a wrong password is refused; the right one goes straight
+    // to the Library.
     await context.clearCookies()
     await page.goto("/sign-in")
+    await page.getByLabel("Email", { exact: true }).fill(email)
+    await page
+      .getByLabel("Password", { exact: true })
+      .fill("not the password at all")
+    await page.getByRole("button", { name: "Sign in", exact: true }).click()
+    await expect(page.getByRole("alert")).toHaveText(
+      "That email and password don't match an account."
+    )
+    await expect(page).toHaveURL(/\/sign-in$/)
     await signInWithEmail(page, email)
     await expect(
       page.getByRole("heading", { name: "Your Expeditions" })

@@ -14,7 +14,7 @@ import {
 // in-text `#c/` link (the panel navigates, not the page), go back, and see
 // the provenance badges on the overview and on every article section. The
 // fixture's content has no Source segments, so every badge reads
-// "Background knowledge". Runs in light and dark (app-light, app-dark).
+// "Background knowledge".
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 const COMPUTE = fileURLToPath(

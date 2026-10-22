@@ -8,7 +8,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // skeleton with streamed Concepts, the first ready View opening by itself,
 // toasts, the failed-View card and Retry; Cancel and what it leaves behind;
 // the spending-cap pause (Continue, Stop); "Leave it building"; and the
-// header activity indicator throughout. Light and dark (app-light, app-dark).
+// header activity indicator throughout.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 /** A fresh reader with an empty Expedition, open on its screen. */

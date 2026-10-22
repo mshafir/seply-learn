@@ -8,7 +8,7 @@ import { needsDatabase, screenshot, signUp } from "./helpers.ts"
 // one-time token; the app's window trades the token and the app's verifier
 // for a session of its own. Here a second browser context plays the app's
 // window, and the shell's part (the verifier, the link) is covered by the
-// desktop app's own tests. Light and dark.
+// desktop app's own tests.
 test.skip(needsDatabase(), "set E2E_DATABASE_URL to a migrated Postgres")
 
 /** What the shell makes: a verifier it keeps, and the challenge it sends. */

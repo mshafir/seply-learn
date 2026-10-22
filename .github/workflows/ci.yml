@@ -33,11 +33,19 @@ jobs:
       - name: Bundle the Worker (dry run, no Cloudflare account needed)
         run: pnpm --filter @seply/worker bundle
 
+  # The web e2e suite (apps/web/e2e) against the Worker (`wrangler dev`), in
+  # three shards. Each shard starts its own servers through Playwright's
+  # webServer (which builds the web app before the Worker starts, and serves
+  # it), and writes a blob report; the Playwright job below merges them.
   e2e:
-    name: Playwright
+    name: Playwright · Worker (${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # The API tests (apps/web/e2e/api) run the Worker (`wrangler dev`) against this.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    # The API and app tests run the Worker against this.
     services:
       postgres:
         # The official image through Google's mirror: Docker Hub rate-limits
@@ -62,45 +70,18 @@ jobs:
           DATABASE_URL: ${{ env.E2E_DATABASE_URL }}
         run: pnpm --filter @seply/server db:migrate
 
-      # The Worker serves apps/web/dist; build it before Playwright starts servers.
-      - name: Build web
-        run: pnpm --filter web build
+      - uses: ./.github/actions/playwright
 
-      - name: Playwright version
-        id: pw
-        run: echo "version=$(pnpm --filter web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Run e2e tests (shard ${{ matrix.shard }} of 3)
+        run: pnpm --filter web test:e2e --shard=${{ matrix.shard }}/3
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
-
-      - name: Install Chromium and its system dependencies
-        run: pnpm --filter web exec playwright install --with-deps chromium
-
-      - name: Run e2e tests
-        run: pnpm --filter web test:e2e
-
-      # The Views harness screenshots (packages/views/e2e). Its Playwright
-      # version can differ from web's, so it installs its own Chromium.
-      - name: Run Views harness e2e
+      - name: Upload the blob report
         if: ${{ !cancelled() }}
-        run: |
-          pnpm --filter @seply/views exec playwright install chromium
-          pnpm --filter @seply/views test:e2e
-
-      - name: Upload Playwright report
-        if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
-          path: |
-            apps/web/playwright-report/
-            apps/web/test-results/
-            packages/views/playwright-report/
-            packages/views/test-results/
-          retention-days: 14
+          name: blob-report-worker-${{ matrix.shard }}
+          path: apps/web/blob-report/
+          retention-days: 1
 
   # WP-7.4: the explainer video (apps/video). It re-renders only when its
   # inputs change (.github/actions/explainer-video caches the render under a
@@ -132,18 +113,15 @@ jobs:
             apps/video/out/manifest.json
           retention-days: 30
 
-  # WP-6.1: the Node entry (apps/server-node). Its database tests (the pg-boss
-  # runner, two instances sharing live edits through LISTEN/NOTIFY), the S3
-  # blob store against a real S3-compatible server (moto), then the API and
-  # app e2e projects against server-node instead of the Worker.
-  e2e-node:
-    name: Node entry (tests and Playwright)
+  # WP-6.1: the Node entry (apps/server-node). Its database tests: the
+  # pg-boss runner, two instances sharing live edits through LISTEN/NOTIFY,
+  # and the S3 blob store against a real S3-compatible server (moto).
+  node:
+    name: Node entry tests (Postgres, two instances, S3)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     services:
       postgres:
-        # The official image through Google's mirror: Docker Hub rate-limits
-        # unauthenticated pulls per runner IP.
         image: mirror.gcr.io/library/postgres:17
         env:
           POSTGRES_USER: seply
@@ -155,7 +133,6 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       E2E_DATABASE_URL: postgres://seply:seply@localhost:5432/seply_e2e
-      E2E_SERVER: node
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
@@ -177,33 +154,133 @@ jobs:
           S3_TEST_ENDPOINT: http://127.0.0.1:5055
         run: pnpm --filter @seply/server-node test
 
-      # server-node serves apps/web/dist; build it before Playwright starts servers.
-      - name: Build web
-        run: pnpm --filter web build
+  # The API and app e2e projects again, against server-node instead of the
+  # Worker, in two shards. (The UI-only projects don't touch the server; the
+  # Worker shards run them.)
+  e2e-node:
+    name: Playwright · Node entry (${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    services:
+      postgres:
+        image: mirror.gcr.io/library/postgres:17
+        env:
+          POSTGRES_USER: seply
+          POSTGRES_PASSWORD: seply
+          POSTGRES_DB: seply_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U seply"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://seply:seply@localhost:5432/seply_e2e
+      E2E_SERVER: node
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
 
-      - name: Playwright version
-        id: pw
-        run: echo "version=$(pnpm --filter web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Apply database migrations (server-node migrate)
+        env:
+          DATABASE_URL: ${{ env.E2E_DATABASE_URL }}
+        run: pnpm --filter @seply/server-node migrate
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v6
+      - uses: ./.github/actions/playwright
+
+      - name: Run e2e tests against server-node (shard ${{ matrix.shard }} of 2)
+        run: pnpm --filter web test:e2e --project=api --project=app-light --project=app-dark --shard=${{ matrix.shard }}/2
+
+      - name: Upload the blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
         with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+          name: blob-report-node-${{ matrix.shard }}
+          path: apps/web/blob-report/
+          retention-days: 1
 
-      - name: Install Chromium and its system dependencies
-        run: pnpm --filter web exec playwright install --with-deps chromium
+  # The Views harness screenshots (packages/views/e2e): no database, no
+  # server but its own Vite. Its Playwright version can differ from web's.
+  views-e2e:
+    name: Playwright · Views harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - uses: ./.github/actions/playwright
+        with:
+          package: "@seply/views"
 
-      # The UI-only projects don't touch the server; the Playwright job runs them.
-      - name: Run e2e tests against server-node
-        run: pnpm --filter web test:e2e --project=api --project=app-light --project=app-dark
+      - name: Run Views harness e2e
+        run: pnpm --filter @seply/views test:e2e
 
-      - name: Upload Playwright report
+      - name: Upload the screenshot diffs
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report-node
+          name: playwright-report-views
           path: |
-            apps/web/playwright-report/
-            apps/web/test-results/
+            packages/views/playwright-report/
+            packages/views/test-results/
           retention-days: 14
+
+  # One check for the whole e2e suite, under the name the single job had,
+  # and one HTML report per server from the shards' blob reports:
+  # `playwright-report` (the Worker) and `playwright-report-node`.
+  e2e-report:
+    name: Playwright
+    needs: [e2e, e2e-node, views-e2e]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Download the Worker shards' blob reports
+        uses: actions/download-artifact@v7
+        with:
+          pattern: blob-report-worker-*
+          path: blob-reports/worker
+          merge-multiple: true
+
+      - name: Download the Node entry shards' blob reports
+        uses: actions/download-artifact@v7
+        with:
+          pattern: blob-report-node-*
+          path: blob-reports/node
+          merge-multiple: true
+
+      - name: Merge into HTML reports
+        run: |
+          for server in worker node; do
+            dir="$PWD/blob-reports/$server"
+            [ -d "$dir" ] || continue
+            PLAYWRIGHT_HTML_OUTPUT_DIR="$PWD/playwright-report-$server" \
+              pnpm --filter web exec playwright merge-reports --reporter html "$dir"
+          done
+
+      - name: Upload the Worker report
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report-worker/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload the Node entry report
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-node
+          path: playwright-report-node/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Every e2e job passed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "e2e: ${{ needs.e2e.result }}, e2e-node: ${{ needs.e2e-node.result }}, views-e2e: ${{ needs.views-e2e.result }}"
+          exit 1
