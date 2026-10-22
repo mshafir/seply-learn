@@ -4,7 +4,6 @@
 # one OS per job and attaches the files to a GitHub Release.
 appId: app.seply.learn
 productName: Seply Learn
-executableName: seply-learn
 copyright: Copyright © Seply Learn contributors (MIT licence)
 
 directories:
@@ -55,6 +54,9 @@ nsis:
 
 linux:
   category: Education
+  # A lower-case command (/opt/Seply Learn/seply-learn); macOS and Windows
+  # keep the product name ("Seply Learn.app", "Seply Learn.exe").
+  executableName: seply-learn
   synopsis: Read and build Expeditions on a Seply Learn server
   maintainer: Seply Learn <mshafir@users.noreply.github.com>
   # seply-learn.desktop (package.json's desktopName): the window's WM_CLASS,
