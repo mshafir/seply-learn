@@ -86,7 +86,9 @@ runs:
     - name: Install Chromium
       if: steps.cache.outputs.cache-matched-key == ''
       shell: bash
-      run: pnpm --filter @seply/site exec playwright install --with-deps chromium
+      # No --with-deps: the runner already has Chromium's libraries (see
+      # .github/actions/playwright).
+      run: pnpm --filter @seply/site exec playwright install chromium
 
     # A shot that fails (not one whose Expedition is private: that is skipped)
     # fails this step; the site still builds with what was captured, but the
