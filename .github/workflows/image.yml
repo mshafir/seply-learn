@@ -57,8 +57,11 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
 
-      - name: Install Chromium and its system dependencies
-        run: pnpm --filter web exec playwright install --with-deps chromium
+      # No --with-deps: the runner already has Chromium's libraries, and the
+      # extra fonts from the Ubuntu mirror once took 8 minutes (see
+      # .github/actions/playwright).
+      - name: Install Chromium
+        run: pnpm --filter web exec playwright install chromium
 
       # Docker Hub rate-limits unauthenticated pulls per runner IP. Pull its
       # images through Google's mirror and tag them with their usual names

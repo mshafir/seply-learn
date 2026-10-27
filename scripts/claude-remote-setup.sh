@@ -32,5 +32,15 @@ log "node $(node --version), pnpm $(pnpm --version)"
 pnpm install --frozen-lockfile >&2
 
 # Chromium for the e2e suite. Best effort: the environment's network policy may block the download.
-pnpm --filter web exec playwright install --with-deps chromium >&2 \
-  || log "Playwright browser install failed; e2e tests won't run in this session"
+# System packages only when Chromium is missing a library: --with-deps also
+# pulls fonts from the Ubuntu mirror, which can take minutes.
+if pnpm --filter web exec playwright install chromium >&2; then
+  shell=$(ls -d "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-*/chrome-headless-shell 2>/dev/null | tail -1)
+  if [ -z "$shell" ] || ldd "$shell" | grep -q "not found"; then
+    log "Installing Chromium's system libraries"
+    pnpm --filter web exec playwright install-deps chromium >&2 \
+      || log "Chromium's system libraries failed to install; e2e tests may not run"
+  fi
+else
+  log "Playwright browser install failed; e2e tests won't run in this session"
+fi
