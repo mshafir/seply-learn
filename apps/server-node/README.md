@@ -20,7 +20,7 @@ Also here: `scripts/real-build.ts` (WP-3.5b), which runs a real `build` job on a
 
 ## Running it
 
-Node 24 (`mise.toml`; 22.12+ works) runs the TypeScript sources directly (`--experimental-transform-types`). The Docker image runs a bundle instead (below).
+Node 24.22.1 or later (`mise.toml`; 22.23.4+ also works. Earlier releases have the Node2Shell Brotli bug, CVE-2026-111497) runs the TypeScript sources directly (`--experimental-transform-types`). The Docker image runs a bundle instead (below).
 
 ```sh
 pnpm install --frozen-lockfile

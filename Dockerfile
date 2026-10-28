@@ -9,7 +9,7 @@
 # image is Node, that file, the migrations and the SPA: no node_modules.
 
 # The base for both stages (hadolint's DL3006 can't see the tag through the ARG).
-ARG NODE_IMAGE=node:24-alpine
+ARG NODE_IMAGE=node:24.22.1-alpine
 
 # The bundle and the SPA are plain JS, CSS and HTML, so this stage runs on the
 # builder's platform even for another target (no emulated install for arm64).
