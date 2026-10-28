@@ -86,6 +86,16 @@ jobs:
       - name: docker compose up, then the smoke test (MinIO and tiles too)
         run: scripts/compose-smoke.sh --s3 --tiles
 
+      # Node2Shell (CVE-2026-111497): Node 22.23.4, 24.22.1 and 26.12.1
+      # cherry-picked the Brotli fix without changing process.versions.brotli,
+      # but added this error constant with it.
+      - name: Node has the Brotli fix
+        run: |
+          docker run --rm --entrypoint node seply-learn:smoke -e '
+            const c = require("zlib").constants.BROTLI_DECODER_ERROR_FORMAT_BLOCK_SWITCH;
+            console.log("Node", process.versions.node);
+            if (c === undefined) { console.error("This Node has the Node2Shell Brotli bug (CVE-2026-111497)"); process.exit(1); }'
+
       - name: Image size
         if: ${{ !cancelled() }}
         run: |
