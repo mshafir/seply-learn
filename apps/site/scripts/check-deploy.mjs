@@ -10,7 +10,9 @@
 // first (every 10 s, default 18 tries), since a new workers.dev hostname or
 // custom domain takes a moment to answer, then runs the other checks up to
 // 4 rounds, 10 s apart, while any fails. Writes the home page's status line
-// to $GITHUB_OUTPUT as `summary=` when that is set.
+// to $GITHUB_OUTPUT as `summary=` when that is set. Every request times out
+// after 20 s, and a network error fails the round rather than the script, so
+// a stalled connection is retried instead of hanging the job.
 import { appendFileSync } from "node:fs"
 
 const [url, kind, triesArg] = process.argv.slice(2)
@@ -21,8 +23,10 @@ if (!url || !["preview", "production"].includes(kind)) {
 const base = url.replace(/\/$/, "")
 const tries = Number(triesArg ?? 18)
 
-async function get(path) {
-  return fetch(base + path, { redirect: "manual" })
+const TIMEOUT_MS = 20_000
+
+async function get(path, init = {}) {
+  return fetch(base + path, { redirect: "manual", signal: AbortSignal.timeout(TIMEOUT_MS), ...init })
 }
 
 let home
@@ -72,17 +76,17 @@ async function checkAll() {
 
   // The video answers byte ranges (worker/index.ts), when the build has it.
   const VIDEO = "/media/video/explainer.mp4"
-  const whole = await fetch(base + VIDEO, { method: "HEAD" })
+  const whole = await get(VIDEO, { method: "HEAD" })
   if (whole.status === 200) {
     const size = Number(whole.headers.get("content-length"))
     check(whole.headers.get("accept-ranges") === "bytes", `${VIDEO} sends Accept-Ranges: bytes`)
-    const part = await fetch(base + VIDEO, { headers: { Range: "bytes=0-99" } })
+    const part = await get(VIDEO, { headers: { Range: "bytes=0-99" } })
     const body = await part.arrayBuffer()
     check(
       part.status === 206 && part.headers.get("content-range") === `bytes 0-99/${size}` && body.byteLength === 100,
       `${VIDEO} answers a Range with 206 (got ${part.status} ${part.headers.get("content-range")})`
     )
-    const past = await fetch(base + VIDEO, { headers: { Range: `bytes=${size}-` } })
+    const past = await get(VIDEO, { headers: { Range: `bytes=${size}-` } })
     await past.arrayBuffer()
     check(past.status === 416, `${VIDEO} answers a Range past the end with 416 (got ${past.status})`)
   } else {
@@ -93,7 +97,11 @@ async function checkAll() {
 const ROUNDS = 4
 for (let round = 1; round <= ROUNDS; round++) {
   failures = []
-  await checkAll()
+  try {
+    await checkAll()
+  } catch (err) {
+    check(false, `a request failed: ${err.cause?.code ?? err.name ?? err.message}`)
+  }
   if (!failures.length || round === ROUNDS) break
   console.log(`retrying in 10 s (round ${round}/${ROUNDS})`)
   await new Promise((r) => setTimeout(r, 10_000))
