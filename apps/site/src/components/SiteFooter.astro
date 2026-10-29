@@ -2,6 +2,7 @@
 import { SeplyGlyph } from "@seply/ui/components/brand"
 
 import { GITHUB_URL, MCP_GUIDE_URL, RELEASES_URL } from "../learn/content"
+import GitHubIcon from "./GitHubIcon.astro"
 
 const links = [
   { href: GITHUB_URL, label: "GitHub" },
@@ -19,7 +20,14 @@ const links = [
       Seply Learn is part of Seply
     </span>
     <nav aria-label="Footer" class="flex flex-auto flex-wrap justify-end gap-x-5 gap-y-2">
-      {links.map((l) => <a href={l.href} class="rounded-sm hover:text-foreground">{l.label}</a>)}
+      {
+        links.map((l) => (
+          <a href={l.href} class="inline-flex items-center gap-1.5 rounded-sm hover:text-foreground">
+            {l.href === GITHUB_URL && <GitHubIcon />}
+            {l.label}
+          </a>
+        ))
+      }
       <span>MIT licence</span>
     </nav>
   </div>
