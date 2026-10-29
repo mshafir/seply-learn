@@ -159,6 +159,34 @@ describe("production build", () => {
     expect(html).not.toContain('rel="canonical"')
   })
 
+  it("links GitHub, with its mark, from the header, menu and footer of every page", () => {
+    const github = (html: string, landmark: RegExp) => {
+      const part = html.match(landmark)?.[0] ?? ""
+      return /<a href="https:\/\/github\.com\/mshafir\/seply-learn"[^>]*>\s*<svg[^>]*data-github-icon[\s\S]*?<\/svg>\s*GitHub\s*<\/a>/.test(
+        part
+      )
+    }
+    for (const page of [
+      "index.html",
+      "self-host/index.html",
+      "desktop/index.html",
+      "404.html",
+    ]) {
+      const html = prod(page)
+      const navs = [
+        ...html.matchAll(/<nav[^>]*aria-label="Main"[\s\S]*?<\/nav>/g),
+      ]
+      // The inline links (from md) and the phone menu.
+      expect(navs, page).toHaveLength(2)
+      for (const nav of navs) expect(github(nav[0], /[\s\S]*/), page).toBe(true)
+      expect(github(html, /<footer[\s\S]*?<\/footer>/), page).toBe(true)
+    }
+    // And beside the Self-host guide on the home page.
+    expect(
+      github(prod("index.html"), /<section id="self-host"[\s\S]*?<\/section>/)
+    ).toBe(true)
+  })
+
   it("lists every page but the 404 in sitemap.xml, and robots.txt points at it", () => {
     const xml = prod("sitemap.xml")
     expect([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([

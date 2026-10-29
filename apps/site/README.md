@@ -41,7 +41,7 @@ Read from the environment at `astro build` (`src/lib/env.ts`):
 
 ## The landing page
 
-- **Sections** (`src/learn/sections/`), in order: Hero (the E-bike learning-path sketch under its question), How it works, Video, Views gallery, Agents, Read together, Examples, Self-host, Desktop, Closing; then `SiteFooter` (which links `/desktop/`). `SiteHeader` has the inline links from the `md` breakpoint (768 px) and a menu button opening a panel below it.
+- **Sections** (`src/learn/sections/`), in order: Hero (the E-bike learning-path sketch under its question), How it works, Video, Views gallery, Agents, Read together, Examples, Self-host, Desktop, Closing; then `SiteFooter` (which links GitHub and `/desktop/`). The header, its phone menu, the footer and the Self-host section show the GitHub link with its mark (`src/components/GitHubIcon.astro`). `SiteHeader` has the inline links from the `md` breakpoint (768 px) and a menu button opening a panel below it.
 - **Copy** is the mockup's, word for word. The showcase ids are `SHOWCASE` in `src/learn/content.ts`.
 - **The Examples' counts** ("206 CONCEPTS · 12 VIEWS") are read at build time from the public API (`src/learn/counts.ts`: `GET /api/pull` on learn.seply.app, anonymously, folded into live Concepts and Views), so each redeploy has them right. A showcase that can't be read (offline, private) keeps its last known counts (`LAST_KNOWN` in `content.ts`). `SITE_COUNTS=offline` skips the network; the tests set it.
 - **Layout:** the mockup's sizes and token use, as Tailwind utilities (`src/lib/styles.ts` holds the shared ones). The hero sketch's boxes are placed in % of the figure and sized in container query units, so it holds down to 320 px.
